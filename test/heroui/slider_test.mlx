@@ -217,21 +217,21 @@ let both ~default_value ?min_value ?max_value ?step ?orientation ?is_disabled
   let told = ref "" in
   T.render (fun () ->
       <Slider
-        default_value=(fun () -> default_value)
-        ?min_value=(fun () -> min_value)
-        ?max_value=(fun () -> max_value)
-        ?step=(fun () -> step)
-        ?orientation=(fun () -> orientation)
-        ?is_disabled=(fun () -> is_disabled)
-        ?format_options=(fun () -> format_options)
+        default_value
+        ?min_value
+        ?max_value
+        ?step
+        ?orientation
+        ?is_disabled
+        ?format_options
         on_change=(fun values -> told := told_of values)
         class_="w-64">
         <Label>"Volume"</Label>
         <Slider.Output />
         <Slider.Track>
           <Slider.Fill />
-          <For each=(fun () -> Array.mapi (fun index _ -> index) default_value)>
-            (fun index _ -> <Slider.Thumb index=(fun () -> index) />)
+          <For each=(Array.mapi (fun index _ -> index) default_value)>
+            (fun index _ -> <Slider.Thumb index />)
           </For>
         </Slider.Track>
       </Slider>);
@@ -265,8 +265,8 @@ let same (solidtype, react) =
    state, as words, beside React's. *)
 let of_state ~disabled =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   let vertical o =
@@ -276,10 +276,7 @@ let of_state ~disabled =
         | `horizontal -> false)
   in
   T.render (fun () ->
-      <Slider
-        aria_label="Volume"
-        default_value=(fun () -> [| 30. |])
-        is_disabled=(fun () -> disabled)>
+      <Slider aria_label="Volume" default_value=[| 30. |] is_disabled=disabled>
         (fun r ->
           Solidtype.Jsx.fragment
             [|
@@ -391,7 +388,7 @@ let () =
           let solidtype =
             T.blurs ~root:"[data-slot=slider]" (fun on_blur ->
                 T.render (fun () ->
-                    <Slider default_value=(fun () -> [| 20.; 60. |]) on_blur>
+                    <Slider default_value=[| 20.; 60. |] on_blur>
                       <Label>"Volume"</Label>
                       <Slider.Track>
                         <Slider.Fill />
@@ -425,10 +422,10 @@ let () =
           T.render (fun () ->
               <Form
                 on_submit=prevent_default
-                validation_errors=(fun () -> [ ("volume", "Too loud.") ])>
+                validation_errors=[ ("volume", "Too loud.") ]>
                 <Slider
                   name="volume"
-                  default_value=(fun () -> [| 40. |])
+                  default_value=[| 40. |]
                   title="Volume"
                   style="--x: 1"
                   ref=(fun _ -> tell "slider ref")
@@ -495,7 +492,7 @@ let () =
       Jest.afterEach T.cleanup;
       Jest.test "keeps the id its output names" (fun () ->
           T.render (fun () ->
-              <Slider default_value=(fun () -> [| 40. |])>
+              <Slider default_value=[| 40. |]>
                 <Label>"Volume"</Label>
                 <Slider.Output />
                 <Slider.Track><Slider.Thumb id="mine" /></Slider.Track>
@@ -514,7 +511,7 @@ let () =
           T.render (fun () ->
               <Slider
                 aria_label="Volume"
-                default_value=(fun () -> [| 10. |])
+                default_value=[| 10. |]
                 on_change=(fun values -> told := values)>
                 <Slider.Track><Slider.Thumb /></Slider.Track>
               </Slider>);

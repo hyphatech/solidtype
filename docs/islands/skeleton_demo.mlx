@@ -11,14 +11,14 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="animation type"
-        choices=(fun () -> animations)
-        picked=(fun () -> S.get animation)
+        choices=animations
+        picked=(S.get animation)
         on_pick=(Controls.choose animations set_animation)
       />
     </div>
     <Side_by_side
       solidtype=(<Skeleton
-                   animation_type=(fun () -> fst (S.get animation))
+                   animation_type=(fst (S.get animation))
                    class_="h-24 w-[200px] rounded-xl"
                  />)
       react=(fun host ->

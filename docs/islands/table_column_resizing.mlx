@@ -64,40 +64,36 @@ let make () =
         <Table.Header>
           <Table.Column
             is_row_header=true
-            default_width=(fun () -> Table.Fraction 1.)
+            default_width=(Table.Fraction 1.)
             id="name"
             min_width=160.>
             "Name" <Table.Column_resizer />
           </Table.Column>
           <Table.Column
-            default_width=(fun () -> Table.Fraction 1.) id="role" min_width=220.>
+            default_width=(Table.Fraction 1.) id="role" min_width=220.>
             "Role" <Table.Column_resizer />
           </Table.Column>
           <Table.Column
-            default_width=(fun () -> Table.Fraction 1.)
-            id="status"
-            min_width=100.>
+            default_width=(Table.Fraction 1.) id="status" min_width=100.>
             "Status" <Table.Column_resizer />
           </Table.Column>
           <Table.Column
-            default_width=(fun () -> Table.Fraction 1.)
-            id="email"
-            min_width=200.>
+            default_width=(Table.Fraction 1.) id="email" min_width=200.>
             "Email"
           </Table.Column>
         </Table.Header>
         <Table.Body>
-          <For each=(fun () -> users)>
+          <For each=users>
             (fun user _ ->
-              <Table.Row id=(fun () -> user.id)>
-                <Table.Cell>(fun () -> Jsx.string user.name)</Table.Cell>
-                <Table.Cell>(fun () -> Jsx.string user.role)</Table.Cell>
+              <Table.Row id=user.id>
+                <Table.Cell>(Jsx.string user.name)</Table.Cell>
+                <Table.Cell>(Jsx.string user.role)</Table.Cell>
                 <Table.Cell>
-                  <Chip color=(fun () -> user.color) size=`sm variant=`soft>
-                    (fun () -> Jsx.string user.status)
+                  <Chip color=user.color size=`sm variant=`soft>
+                    (Jsx.string user.status)
                   </Chip>
                 </Table.Cell>
-                <Table.Cell>(fun () -> Jsx.string user.email)</Table.Cell>
+                <Table.Cell>(Jsx.string user.email)</Table.Cell>
               </Table.Row>)
           </For>
         </Table.Body>

@@ -29,34 +29,27 @@ let make () =
       aria_label="Team members"
       class_="w-full max-w-md border-collapse text-left text-sm"
       selection_mode=`multiple
-      selected_keys=(fun () -> S.get selected)
+      selected_keys=(S.get selected)
       on_selection_change=(S.set set_selected)>
       <Table.Header class_="text-gray-500">
-        <Table.Column is_row_header=true class_=(fun () -> cell_class)>
-          "Name"
-        </Table.Column>
-        <Table.Column class_=(fun () -> cell_class)>"Role"</Table.Column>
+        <Table.Column is_row_header=true class_=cell_class>"Name"</Table.Column>
+        <Table.Column class_=cell_class>"Role"</Table.Column>
       </Table.Header>
       <Table.Body>
-        <For each=(fun () -> members)>
+        <For each=members>
           (fun m _ ->
-            <Table.Row id=(fun () -> m.id) class_=(fun () -> row_class)>
-              <Table.Cell class_=(fun () -> cell_class)>
-                (fun () -> Jsx.string m.name)
-              </Table.Cell>
-              <Table.Cell class_=(fun () -> cell_class)>
-                (fun () -> Jsx.string m.role)
-              </Table.Cell>
+            <Table.Row id=m.id class_=row_class>
+              <Table.Cell class_=cell_class>(Jsx.string m.name)</Table.Cell>
+              <Table.Cell class_=cell_class>(Jsx.string m.role)</Table.Cell>
             </Table.Row>)
         </For>
       </Table.Body>
     </Table.Root>
     <p class_="text-sm">
       "Selected: "
-      (fun () ->
-        Jsx.string
-          (match S.get selected with
-          | [||] -> "none"
-          | keys -> String.concat ", " (Array.to_list keys)))
+      (Jsx.string
+         (match S.get selected with
+         | [||] -> "none"
+         | keys -> String.concat ", " (Array.to_list keys)))
     </p>
   </div>

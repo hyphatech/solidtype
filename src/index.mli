@@ -1,5 +1,5 @@
 (** Solid's [Index]: a list, each index rendered once, the item at it tracked:
-    [<Index each=(fun () -> items ())>(fun item i -> ...)</Index>]. *)
+    [<Index each=(items ())>(fun item i -> ...)</Index>]. *)
 
 module Props : sig
   val check :

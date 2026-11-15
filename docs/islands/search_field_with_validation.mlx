@@ -14,9 +14,9 @@ let make () =
   <div class_="flex flex-col gap-4">
     <Search_field
       is_required=true
-      is_invalid=(fun () -> is_invalid ())
+      is_invalid=(is_invalid ())
       name="search"
-      value=(fun () -> S.get value)
+      value=(S.get value)
       on_change=(S.set set_value)>
       <Label>"Search"</Label>
       <Search_field.Group>
@@ -25,7 +25,7 @@ let make () =
         <Search_field.Clear_button />
       </Search_field.Group>
       <Show
-        when_=(fun () -> is_invalid ())
+        when_=(is_invalid ())
         fallback=(<Description>
                     "Enter at least 3 characters to search"
                   </Description>)>

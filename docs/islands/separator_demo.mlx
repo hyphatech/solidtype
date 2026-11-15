@@ -23,22 +23,22 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="orientation"
-        choices=(fun () -> orientations)
-        picked=(fun () -> S.get orientation)
+        choices=orientations
+        picked=(S.get orientation)
         on_pick=(Controls.choose orientations set_orientation)
       />
       <Select
         label="variant"
-        choices=(fun () -> variants)
-        picked=(fun () -> S.get variant)
+        choices=variants
+        picked=(S.get variant)
         on_pick=(Controls.choose variants set_variant)
       />
     </div>
     <Side_by_side
       solidtype=(<Separator
-                   orientation=(fun () -> fst (S.get orientation))
-                   variant=(fun () -> fst (S.get variant))
-                   class_=(fun () -> length (fst (S.get orientation)))
+                   orientation=(fst (S.get orientation))
+                   variant=(fst (S.get variant))
+                   class_=(length (fst (S.get orientation)))
                  />)
       react=(fun host ->
               Heroui_react.separator host

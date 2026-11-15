@@ -5,11 +5,11 @@
 
     {[
       let o = Overlay.create ~is_open () in
-      <Show when_=(fun () -> Overlay.present o)>
+      <Show when_=(Overlay.present o)>
         <div
           ref=(fun e -> Overlay.watch o e)
-          data_entering=(fun () -> Jsx.flag (Overlay.entering o))
-          data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))>
+          data_entering=(Jsx.flag (Overlay.entering o))
+          data_exiting=(Jsx.flag (Overlay.exiting o))>
           ...
         </div>
       </Show>

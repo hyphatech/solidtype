@@ -33,7 +33,7 @@ let shown host =
 
 let both (status : status option) =
   T.render (fun () ->
-      <Alert ?status=(fun () -> status) class_="max-w-md">
+      <Alert ?status class_="max-w-md">
         <Alert.Indicator />
         <Alert.Content>
           <Alert.Title>"New features"</Alert.Title>

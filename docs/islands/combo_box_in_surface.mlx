@@ -27,7 +27,7 @@ let make () =
                     alert "Form submitted successfully!")>
       <Combo_box
         is_required=true
-        is_invalid=(fun () -> missing ())
+        is_invalid=(missing ())
         class_="w-full"
         name="animal"
         variant=`secondary

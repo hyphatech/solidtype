@@ -9,9 +9,8 @@ let make () =
       default_value=99.
       min_value=0.
       name="currency-eur"
-      format_options=(fun () ->
-                       Format.make ~currency:"EUR" ~currency_sign:`accounting
-                         ~style:`currency ())>
+      format_options=(Format.make ~currency:"EUR" ~currency_sign:`accounting
+                        ~style:`currency ())>
       <Label>"Currency (EUR - Accounting)"</Label>
       <Number_field.Group>
         <Number_field.Decrement_button />
@@ -24,7 +23,7 @@ let make () =
       default_value=99.99
       min_value=0.
       name="currency-usd"
-      format_options=(fun () -> Format.make ~currency:"USD" ~style:`currency ())>
+      format_options=(Format.make ~currency:"USD" ~style:`currency ())>
       <Label>"Currency (USD)"</Label>
       <Number_field.Group>
         <Number_field.Decrement_button />
@@ -35,7 +34,7 @@ let make () =
     </Number_field>
     <Number_field
       default_value=0.5
-      format_options=(fun () -> Format.make ~style:`percent ())
+      format_options=(Format.make ~style:`percent ())
       max_value=1.
       min_value=0.
       name="percentage"
@@ -52,9 +51,8 @@ let make () =
       default_value=1234.56
       min_value=0.
       name="decimal"
-      format_options=(fun () ->
-                       Format.make ~maximum_fraction_digits:2.
-                         ~minimum_fraction_digits:2. ~style:`decimal ())>
+      format_options=(Format.make ~maximum_fraction_digits:2.
+                        ~minimum_fraction_digits:2. ~style:`decimal ())>
       <Label>"Decimal (2 decimal places)"</Label>
       <Number_field.Group>
         <Number_field.Decrement_button />
@@ -67,9 +65,8 @@ let make () =
       default_value=1000.
       min_value=0.
       name="unit"
-      format_options=(fun () ->
-                       Format.make ~style:`unit ~unit:"kilogram"
-                         ~unit_display:`short ())>
+      format_options=(Format.make ~style:`unit ~unit:"kilogram"
+                        ~unit_display:`short ())>
       <Label>"Unit (Kilograms)"</Label>
       <Number_field.Group>
         <Number_field.Decrement_button />

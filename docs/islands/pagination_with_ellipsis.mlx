@@ -23,29 +23,28 @@ let make () =
       <Pagination.Content>
         <Pagination.Item>
           <Pagination.Previous
-            is_disabled=(fun () -> S.get page = 1)
+            is_disabled=(S.get page = 1)
             on_press=(fun () -> S.update set_page pred)>
             <Pagination.Previous_icon /> <span>"Previous"</span>
           </Pagination.Previous>
         </Pagination.Item>
-        <Index each=(fun () -> Array.of_list (page_numbers (S.get page)))>
+        <Index each=(Array.of_list (page_numbers (S.get page)))>
           (fun shown _ ->
             <Pagination.Item>
-              (fun () ->
-                match S.get shown with
-                | Ellipsis -> Jsx.element <Pagination.Ellipsis />
-                | Page p ->
-                    Jsx.element
-                      <Pagination.Link
-                        is_active=(fun () -> p = S.get page)
-                        on_press=(fun () -> S.set set_page p)>
-                        (fun () -> Jsx.int p)
-                      </Pagination.Link>)
+              (match S.get shown with
+              | Ellipsis -> Jsx.element <Pagination.Ellipsis />
+              | Page p ->
+                  Jsx.element
+                    <Pagination.Link
+                      is_active=(p = S.get page)
+                      on_press=(fun () -> S.set set_page p)>
+                      (Jsx.int p)
+                    </Pagination.Link>)
             </Pagination.Item>)
         </Index>
         <Pagination.Item>
           <Pagination.Next
-            is_disabled=(fun () -> S.get page = total_pages)
+            is_disabled=(S.get page = total_pages)
             on_press=(fun () -> S.update set_page succ)>
             <span>"Next"</span> <Pagination.Next_icon />
           </Pagination.Next>

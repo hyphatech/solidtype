@@ -37,7 +37,7 @@ A slat's argument is a `'row Row.t`, rhp's row for a plot whose rows are
 | `Row.position` | `'row Row.t -> int option` | Its place on screen, `None` while hidden |
 
 `Row.data` costs nothing: `let f = Row.data d in f.sold` is `d.sold`, the
-read rhp tracks, so a thunk that reads it follows the row.
+read rhp tracks, so JSX that reads it follows the row.
 
 ## The root's style
 

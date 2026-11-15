@@ -9,18 +9,14 @@ let make () =
   let icon, set_icon = S.create_signal true in
   <section class_="flex flex-col gap-4">
     <div class_="flex flex-wrap items-end gap-4">
-      <Toggle label="icon" on=(fun () -> S.get icon) on_toggle=(S.set set_icon)
-      />
+      <Toggle label="icon" on=(S.get icon) on_toggle=(S.set set_icon) />
       <Toggle
-        label="disabled"
-        on=(fun () -> S.get disabled)
-        on_toggle=(S.set set_disabled)
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
       />
     </div>
     <Side_by_side
-      solidtype=(<Link href="#parity" is_disabled=(fun () -> S.get disabled)>
-                   "Read the docs"
-                   <Show when_=(fun () -> S.get icon)><Link.Icon /></Show>
+      solidtype=(<Link href="#parity" is_disabled=(S.get disabled)>
+                   "Read the docs" <Show when_=(S.get icon)><Link.Icon /></Show>
                  </Link>)
       react=(fun host ->
               Heroui_react.link host

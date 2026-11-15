@@ -4,10 +4,10 @@
     list is made of Kobalte's list hooks, as Kobalte makes its own.
 
     {[
-      <Color_swatch_picker default_value=(fun () -> Colors.parse_color "#8B5CF6")>
-        <For each=(fun () -> colors)>
+      <Color_swatch_picker default_value=(Colors.parse_color "#8B5CF6")>
+        <For each=colors>
           (fun c _ ->
-            <Color_swatch_picker.Item color=(fun () -> Colors.parse_color c)>
+            <Color_swatch_picker.Item color=(Colors.parse_color c)>
               <Color_swatch_picker.Swatch />
               <Color_swatch_picker.Indicator />
             </Color_swatch_picker.Item>)

@@ -33,24 +33,22 @@ let items =
 
 let make () =
   <Accordion class_="w-full max-w-md" variant=`surface>
-    <Solidtype.For each=(fun () -> items)>
+    <Solidtype.For each=items>
       (fun (icon, title, content) _ ->
         <Accordion.Item>
           <Accordion.Heading>
             <Accordion.Trigger>
               <span class_="me-3 size-4 shrink-0 text-muted">
-                (fun () -> Solidtype.Jsx.element (icon ()))
+                (Solidtype.Jsx.element (icon ()))
               </span>
-              (fun () -> Solidtype.Jsx.string title)
+              (Solidtype.Jsx.string title)
               <Accordion.Indicator>
                 <Gravity.Chevron_down />
               </Accordion.Indicator>
             </Accordion.Trigger>
           </Accordion.Heading>
           <Accordion.Panel>
-            <Accordion.Body>
-              (fun () -> Solidtype.Jsx.string content)
-            </Accordion.Body>
+            <Accordion.Body>(Solidtype.Jsx.string content)</Accordion.Body>
           </Accordion.Panel>
         </Accordion.Item>)
     </Solidtype.For>

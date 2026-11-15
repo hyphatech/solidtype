@@ -24,29 +24,29 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="size"
-        choices=(fun () -> sizes)
-        picked=(fun () -> S.get size)
+        choices=sizes
+        picked=(S.get size)
         on_pick=(Controls.choose sizes set_size)
       />
       <Select
         label="color"
-        choices=(fun () -> colors)
-        picked=(fun () -> S.get color)
+        choices=colors
+        picked=(S.get color)
         on_pick=(Controls.choose colors set_color)
       />
       <Select
         label="variant"
-        choices=(fun () -> variants)
-        picked=(fun () -> S.get variant)
+        choices=variants
+        picked=(S.get variant)
         on_pick=(Controls.choose variants set_variant)
       />
     </div>
     <Side_by_side
       compared=".avatar"
       solidtype=(<Avatar
-                   size=(fun () -> fst (S.get size))
-                   color=(fun () -> fst (S.get color))
-                   variant=(fun () -> fst (S.get variant))>
+                   size=(fst (S.get size))
+                   color=(fst (S.get color))
+                   variant=(fst (S.get variant))>
                    <Avatar.Fallback>"AL"</Avatar.Fallback>
                  </Avatar>)
       react=(fun host ->

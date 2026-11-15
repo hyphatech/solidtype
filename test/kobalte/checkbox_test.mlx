@@ -16,8 +16,7 @@ let island () =
           <Checkbox.Description>"Once a week"</Checkbox.Description>
           <Checkbox.Control>
             <Checkbox.Indicator>
-              (fun () ->
-                Jsx.string (if S.get (State.checked state) then "on" else "off"))
+              (Jsx.string (if S.get (State.checked state) then "on" else "off"))
             </Checkbox.Indicator>
           </Checkbox.Control>
         </div>)

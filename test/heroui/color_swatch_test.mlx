@@ -59,11 +59,7 @@ let shown () =
 let both ~color ?color_name ?aria_label ?shape ?size () =
   T.render (fun () ->
       <Color_swatch
-        color=(fun () -> Colors.parse_color color)
-        ?color_name=(fun () -> color_name)
-        ?aria_label=(fun () -> aria_label)
-        ?shape=(fun () -> shape)
-        ?size=(fun () -> size)
+        color=(Colors.parse_color color) ?color_name ?aria_label ?shape ?size
       />);
   let solidtype = shown () in
   T.cleanup ();

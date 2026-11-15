@@ -78,30 +78,29 @@ let animations =
 
 let make () =
   <div class_="flex flex-wrap gap-4">
-    <For each=(fun () -> animations)>
+    <For each=animations>
       (fun (a : animation) _ ->
         <Alert_dialog>
-          <Button variant=`secondary>(fun () -> Jsx.string a.name)</Button>
-          <Alert_dialog.Backdrop class_=(fun () -> a.backdrop)>
-            <Alert_dialog.Container class_=(fun () -> a.container)>
+          <Button variant=`secondary>(Jsx.string a.name)</Button>
+          <Alert_dialog.Backdrop class_=a.backdrop>
+            <Alert_dialog.Container class_=a.container>
               <Alert_dialog.Dialog class_="sm:max-w-[400px]">
                 <Alert_dialog.Close_trigger />
                 <Alert_dialog.Header>
                   <Alert_dialog.Icon status=`accent>
-                    (fun () ->
-                      match a.icon with
-                      | `sparkles ->
-                          Jsx.element <Gravity.Sparkles class_="size-5" />
-                      | `arrow_up_from_line ->
-                          Jsx.element
-                            <Gravity.Arrow_up_from_line class_="size-5" />)
+                    (match a.icon with
+                    | `sparkles ->
+                        Jsx.element <Gravity.Sparkles class_="size-5" />
+                    | `arrow_up_from_line ->
+                        Jsx.element
+                          <Gravity.Arrow_up_from_line class_="size-5" />)
                   </Alert_dialog.Icon>
                   <Alert_dialog.Heading>
-                    (fun () -> Jsx.string a.name) " Animation"
+                    (Jsx.string a.name) " Animation"
                   </Alert_dialog.Heading>
                 </Alert_dialog.Header>
                 <Alert_dialog.Body>
-                  <p class_="mt-1">(fun () -> Jsx.string a.description)</p>
+                  <p class_="mt-1">(Jsx.string a.description)</p>
                 </Alert_dialog.Body>
                 <Alert_dialog.Footer>
                   <Button slot=`close variant=`tertiary>"Close"</Button>

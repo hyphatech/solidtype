@@ -66,31 +66,28 @@ module Item = struct
       }
     in
     <Headless.Item
-      color=(fun () -> S.get color)
-      is_disabled=(fun () -> disabled ())
+      color=(S.get color)
+      is_disabled=(disabled ())
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e)
-      class_=(fun () ->
-               after
-                 (Styles.ColorSwatchPicker.item (S.get slots))
-                 (S.get class_))
-      style=(fun () ->
-              "--color-swatch-current: "
-              ^ Color.to_string (S.get color) ~format:`rgba ()
-              ^ match S.get style with Some s -> "; " ^ s | None -> "")
+      class_=(after
+                (Styles.ColorSwatchPicker.item (S.get slots))
+                (S.get class_))
+      style=("--color-swatch-current: "
+            ^ Color.to_string (S.get color) ~format:`rgba ()
+            ^ match S.get style with Some s -> "; " ^ s | None -> "")
       data_slot="color-swatch-picker-item"
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      data_selected=(fun () ->
-                      Jsx.flag
-                        (S.get (Headless.Item.Context.use ()).is_selected))
-      data_disabled=(fun () -> Jsx.flag (disabled ()))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_pressed=(Jsx.flag (Interaction.pressed i))
+      data_focused=(Jsx.flag (Interaction.focused i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      data_selected=(Jsx.flag
+                       (S.get (Headless.Item.Context.use ()).is_selected))
+      data_disabled=(Jsx.flag (disabled ()))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (S.get children) (state ()))
+      (Jsx.draw (S.get children) (state ()))
     </Headless.Item>
   [@@element div]
 end
@@ -100,11 +97,10 @@ module Swatch = struct
       =
     let slots = within "Color_swatch_picker.Swatch" in
     <Headless.Swatch
-      ?color_name=(fun () -> S.get color_name)
-      class_=(fun () ->
-               after
-                 (Styles.ColorSwatchPicker.swatch (S.get slots))
-                 (S.get class_))
+      ?color_name=(S.get color_name)
+      class_=(after
+                (Styles.ColorSwatchPicker.swatch (S.get slots))
+                (S.get class_))
       data_slot="color-swatch-picker-swatch"
       props=(Props.others props)
     />
@@ -118,30 +114,28 @@ module Indicator = struct
     let item = Headless.Item.Context.use () in
     <span
       aria_hidden=true
-      class_=(fun () ->
-               after
-                 (Styles.ColorSwatchPicker.indicator (S.get slots))
-                 (S.get class_))
-      data_light_color=(fun () -> Jsx.flag (luminance (S.get item.color) > 0.5))
+      class_=(after
+                (Styles.ColorSwatchPicker.indicator (S.get slots))
+                (S.get class_))
+      data_light_color=(Jsx.flag (luminance (S.get item.color) > 0.5))
       data_slot="color-swatch-picker-indicator"
       props=(Props.others props)>
-      (fun () ->
-        match S.get children with
-        | Some given -> given
-        | None ->
-            Jsx.element
-              <svg
-                aria_hidden=true
-                data_slot="color-swatch-picker-checkmark"
-                fill="none"
-                role=`presentation
-                stroke="currentColor"
-                stroke_linecap="round"
-                stroke_linejoin="round"
-                stroke_width="1.5"
-                view_box="0 0 12 12">
-                <polyline points="2.5 6 5 8.5 9.5 3" />
-              </svg>)
+      (match S.get children with
+      | Some given -> given
+      | None ->
+          Jsx.element
+            <svg
+              aria_hidden=true
+              data_slot="color-swatch-picker-checkmark"
+              fill="none"
+              role=`presentation
+              stroke="currentColor"
+              stroke_linecap="round"
+              stroke_linejoin="round"
+              stroke_width="1.5"
+              view_box="0 0 12 12">
+              <polyline points="2.5 6 5 8.5 9.5 3" />
+            </svg>)
     </span>
   [@@element span]
 end
@@ -159,21 +153,20 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
           (Styles.ColorSwatchPicker.options ?layout:(S.get layout)
              ?size:(S.get size) ?variant:(S.get variant) ()))
   in
-  <Context.Provider value=(fun () -> slots)>
+  <Context.Provider value=slots>
     <Headless.Root
-      ?value=(fun () -> S.get value)
-      ?default_value=(fun () -> S.get default_value)
+      ?value=(S.get value)
+      ?default_value=(S.get default_value)
       on_change=(fun c -> ignore (on_change c : unit option))
-      ?layout=(fun () -> S.get layout)
-      ?aria_label=(fun () -> S.get aria_label)
-      ?aria_labelledby=(fun () -> S.get aria_labelledby)
-      class_=(fun () ->
-               after
-                 (Styles.ColorSwatchPicker.base (S.get slots))
-                 (S.get class_))
+      ?layout=(S.get layout)
+      ?aria_label=(S.get aria_label)
+      ?aria_labelledby=(S.get aria_labelledby)
+      class_=(after
+                (Styles.ColorSwatchPicker.base (S.get slots))
+                (S.get class_))
       data_slot="color-swatch-picker"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </Headless.Root>
   </Context.Provider>
 [@@element div]

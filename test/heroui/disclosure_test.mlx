@@ -144,21 +144,17 @@ let walk ~step host told =
 let render ?is_expanded ?default_expanded ?is_disabled ~button tell =
   T.render (fun () ->
       <Disclosure
-        ?is_expanded=(fun () -> is_expanded)
-        ?default_expanded=(fun () -> default_expanded)
-        ?is_disabled=(fun () -> is_disabled)
-        on_expanded_change=tell>
+        ?is_expanded ?default_expanded ?is_disabled on_expanded_change=tell>
         <Disclosure.Heading>
-          (fun () ->
-            Solidtype.Jsx.element
-              (if button then
-                 <Button slot=`trigger variant=`secondary>
-                   "Shipping" <Disclosure.Indicator />
-                 </Button>
-               else
-                 <Disclosure.Trigger>
-                   "Shipping" <Disclosure.Indicator />
-                 </Disclosure.Trigger>))
+          (Solidtype.Jsx.element
+             (if button then
+                <Button slot=`trigger variant=`secondary>
+                  "Shipping" <Disclosure.Indicator />
+                </Button>
+              else
+                <Disclosure.Trigger>
+                  "Shipping" <Disclosure.Indicator />
+                </Disclosure.Trigger>))
         </Disclosure.Heading>
         <Disclosure.Content>
           <Disclosure.Body>
@@ -190,12 +186,12 @@ let same (solidtype, react) =
    its focus and the trigger's interaction, beside React's. *)
 let of_state ~disabled =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   T.render (fun () ->
-      <Disclosure is_disabled=(fun () -> disabled)>
+      <Disclosure is_disabled=disabled>
         (fun d ->
           Solidtype.Jsx.fragment
             [|
@@ -251,9 +247,8 @@ let () =
                   Solidtype.Jsx.fragment
                     [|
                       <span data_words="disclosure">
-                        (fun () ->
-                          Solidtype.Jsx.string
-                            (T.words [ ("expanded", d.is_expanded) ]))
+                        (Solidtype.Jsx.string
+                           (T.words [ ("expanded", d.is_expanded) ]))
                       </span>;
                       <Disclosure.Heading>
                         <Disclosure.Trigger>"Shipping"</Disclosure.Trigger>
@@ -294,13 +289,12 @@ let () =
                     Solidtype.Jsx.fragment
                       [|
                         <span data_words="content">
-                          (fun () ->
-                            Solidtype.Jsx.string
-                              (T.words
-                                 [
-                                   ( "focus-visible-within",
-                                     c.is_focus_visible_within );
-                                 ]))
+                          (Solidtype.Jsx.string
+                             (T.words
+                                [
+                                  ( "focus-visible-within",
+                                    c.is_focus_visible_within );
+                                ]))
                         </span>;
                         <button>"Track"</button>;
                       |])
@@ -409,8 +403,7 @@ let () =
                 <Disclosure.Heading>
                   <Disclosure.Trigger>"Shipping"</Disclosure.Trigger>
                 </Disclosure.Heading>
-                <Disclosure.Content
-                  style=(fun () -> "--y: " ^ Solidtype.Solid.get shade)>
+                <Disclosure.Content style=("--y: " ^ Solidtype.Solid.get shade)>
                   "Soon."
                 </Disclosure.Content>
               </Disclosure>);

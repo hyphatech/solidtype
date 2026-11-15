@@ -38,19 +38,19 @@ let make () =
         "Everything you need to know about licensing and usage."
       </p>
     </div>
-    <Solidtype.For each=(fun () -> categories)>
+    <Solidtype.For each=categories>
       (fun (category, items) _ ->
         <div>
           <p class_="text-md mb-2 font-medium text-muted">
-            (fun () -> Solidtype.Jsx.string category)
+            (Solidtype.Jsx.string category)
           </p>
           <Accordion class_="w-full" variant=`surface>
-            <Solidtype.For each=(fun () -> items)>
+            <Solidtype.For each=items>
               (fun (title, content) _ ->
                 <Accordion.Item>
                   <Accordion.Heading>
                     <Accordion.Trigger>
-                      (fun () -> Solidtype.Jsx.string title)
+                      (Solidtype.Jsx.string title)
                       <Accordion.Indicator>
                         <Gravity.Chevron_down />
                       </Accordion.Indicator>
@@ -58,7 +58,7 @@ let make () =
                   </Accordion.Heading>
                   <Accordion.Panel>
                     <Accordion.Body>
-                      (fun () -> Solidtype.Jsx.string content)
+                      (Solidtype.Jsx.string content)
                     </Accordion.Body>
                   </Accordion.Panel>
                 </Accordion.Item>)

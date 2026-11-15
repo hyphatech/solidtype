@@ -25,11 +25,11 @@ let%component make ?(id : string option) ?(class_ : string option)
       render classes (Props.others props) (fun () -> S.get children)
   | None ->
       <span
-        ?id=(fun () -> S.get id)
-        class_=(fun () -> classes ())
+        ?id=(S.get id)
+        class_=(classes ())
         slot="description"
         data_slot="description"
         props=(Props.others props)>
-        (fun () -> S.get children)
+        (S.get children)
       </span>
 [@@element span]

@@ -135,22 +135,20 @@ let walk ~step host =
 
 let both ?variant ?full_width ~in_field ~multiline () =
   let group () =
-    <Input_group
-      ?variant=(fun () -> variant) ?full_width=(fun () -> full_width)>
+    <Input_group ?variant ?full_width>
       <Input_group.Prefix>"https://"</Input_group.Prefix>
-      (fun () ->
-        if multiline then
-          Solidtype.Jsx.element
-            <Input_group.Text_area
-              ?aria_label=(fun () -> if in_field then None else Some "Note")
-              placeholder="note"
-            />
-        else
-          Solidtype.Jsx.element
-            <Input_group.Input
-              ?aria_label=(fun () -> if in_field then None else Some "Site")
-              placeholder="heroui"
-            />)
+      (if multiline then
+         Solidtype.Jsx.element
+           <Input_group.Text_area
+             ?aria_label=(if in_field then None else Some "Note")
+             placeholder="note"
+           />
+       else
+         Solidtype.Jsx.element
+           <Input_group.Input
+             ?aria_label=(if in_field then None else Some "Site")
+             placeholder="heroui"
+           />)
       <Input_group.Suffix>".com"</Input_group.Suffix>
     </Input_group>
   in
@@ -158,7 +156,7 @@ let both ?variant ?full_width ~in_field ~multiline () =
       if in_field then
         <Text_field name="site">
           <Label>"Site"</Label>
-          (fun () -> Solidtype.Jsx.element (group ()))
+          (Solidtype.Jsx.element (group ()))
           <Description>"Your site."</Description>
         </Text_field>
       else group ());
@@ -189,17 +187,17 @@ let same (solidtype, react) =
    words. *)
 let draw_of_state ~disabled ~read_only ~invalid ~required =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   T.render (fun () ->
       <Text_field
         aria_label="Field"
-        is_disabled=(fun () -> disabled)
-        is_read_only=(fun () -> read_only)
-        is_invalid=(fun () -> invalid)
-        is_required=(fun () -> required)>
+        is_disabled=disabled
+        is_read_only=read_only
+        is_invalid=invalid
+        is_required=required>
         (fun r ->
           Solidtype.Jsx.fragment
             [|

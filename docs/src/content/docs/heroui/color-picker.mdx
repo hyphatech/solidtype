@@ -48,7 +48,7 @@ what the trigger opens, where React Aria's trigger says nothing.
 components:
 
 ```ocaml
-<Color_picker default_value=(fun () -> Colors.parse_color "#0485F7")>
+<Color_picker default_value=(Colors.parse_color "#0485F7")>
   <Color_picker.Trigger>
     <Color_swatch /> <Label>"Pick a color"</Label>
   </Color_picker.Trigger>

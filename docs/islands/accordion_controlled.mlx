@@ -35,16 +35,15 @@ let make () =
       <p class_="text-sm text-muted">
         "Expanded: "
         <strong>
-          (fun () ->
-            match S.get expanded with
-            | [||] -> Solidtype.Jsx.string "none"
-            | keys -> Solidtype.Jsx.string (Js.Array.join ~sep:", " keys))
+          (match S.get expanded with
+          | [||] -> Solidtype.Jsx.string "none"
+          | keys -> Solidtype.Jsx.string (Js.Array.join ~sep:", " keys))
         </strong>
       </p>
       <div class_="flex gap-2">
         <Button
           aria_label="Previous item"
-          is_disabled=(fun () -> S.get n.is_prev_disabled)
+          is_disabled=(S.get n.is_prev_disabled)
           size=`sm
           variant=`secondary
           on_click=(fun _ -> n.on_previous ())>
@@ -52,7 +51,7 @@ let make () =
         </Button>
         <Button
           aria_label="Next item"
-          is_disabled=(fun () -> S.get n.is_next_disabled)
+          is_disabled=(S.get n.is_next_disabled)
           size=`sm
           variant=`secondary
           on_click=(fun _ -> n.on_next ())>
@@ -61,20 +60,17 @@ let make () =
       </div>
     </div>
     <Accordion
-      expanded_keys=(fun () -> S.get expanded)
-      on_expanded_change=(S.set set_expanded)>
-      <Solidtype.For each=(fun () -> items)>
+      expanded_keys=(S.get expanded) on_expanded_change=(S.set set_expanded)>
+      <Solidtype.For each=items>
         (fun (id, title, content) _ ->
-          <Accordion.Item id=(fun () -> id)>
+          <Accordion.Item id>
             <Accordion.Heading>
               <Accordion.Trigger>
-                (fun () -> Solidtype.Jsx.string title) <Accordion.Indicator />
+                (Solidtype.Jsx.string title) <Accordion.Indicator />
               </Accordion.Trigger>
             </Accordion.Heading>
             <Accordion.Panel>
-              <Accordion.Body>
-                (fun () -> Solidtype.Jsx.string content)
-              </Accordion.Body>
+              <Accordion.Body>(Solidtype.Jsx.string content)</Accordion.Body>
             </Accordion.Panel>
           </Accordion.Item>)
       </Solidtype.For>

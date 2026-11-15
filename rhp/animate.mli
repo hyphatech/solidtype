@@ -3,8 +3,7 @@
     and the timing.
 
     Name the fields that change, as rhp advises for data that changes all the
-    time, a live feed or a race:
-    [animate=(fun () -> Animate.groups [| "points" |])].
+    time, a live feed or a race: [animate=(Animate.groups [| "points" |])].
 
     Ported by hand: rhp declares a plot's [animate] as a union of three
     JavaScript kinds, [true], a list of names and an object of timing and names,

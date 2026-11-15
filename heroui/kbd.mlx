@@ -84,10 +84,10 @@ let after base = function Some c -> base ^ " " ^ c | None -> base
 module Abbr = struct
   let%component make ~(key_value : key) ?(class_ : string option) () =
     <abbr
-      class_=(fun () -> after (Styles.Kbd.abbr (slots ())) (S.get class_))
-      title=(fun () -> name (S.get key_value))
+      class_=(after (Styles.Kbd.abbr (slots ())) (S.get class_))
+      title=(name (S.get key_value))
       props=(Props.others props)>
-      (fun () -> Jsx.string (symbol (S.get key_value)))
+      (Jsx.string (symbol (S.get key_value)))
     </abbr>
   [@@element abbr]
 end
@@ -95,9 +95,9 @@ end
 module Content = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <span
-      class_=(fun () -> after (Styles.Kbd.content (slots ())) (S.get class_))
+      class_=(after (Styles.Kbd.content (slots ())) (S.get class_))
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </span>
   [@@element span]
 end
@@ -105,13 +105,12 @@ end
 let%component make ?(variant : [ `default | `light ] option)
     ?(class_ : string option) ~(children : Jsx.content) () =
   <kbd
-    class_=(fun () ->
-             after
-               (Styles.Kbd.base
-                  (Styles.Kbd.slots
-                     (Styles.Kbd.options ?variant:(S.get variant) ())))
-               (S.get class_))
+    class_=(after
+              (Styles.Kbd.base
+                 (Styles.Kbd.slots
+                    (Styles.Kbd.options ?variant:(S.get variant) ())))
+              (S.get class_))
     props=(Props.others props)>
-    (fun () -> S.get children)
+    (S.get children)
   </kbd>
 [@@element kbd]

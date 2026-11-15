@@ -39,7 +39,7 @@ module Loaded = struct
     let data, _ =
       S.create_resource (fun _ -> Js.Promise.resolve (S.get text))
     in
-    <p>(fun () -> Jsx.string (Option.value (S.read data) ~default:""))</p>
+    <p>(Jsx.string (Option.value (S.read data) ~default:""))</p>
 end
 
 let page () =

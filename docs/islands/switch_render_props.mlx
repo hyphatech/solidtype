@@ -8,8 +8,7 @@ let make () =
       <Switch.Content>
         <Switch.Control><Switch.Thumb /></Switch.Control>
         <Label>
-          (fun () ->
-            Solidtype.Jsx.string (if S.get s.is_selected then "On" else "Off"))
+          (Solidtype.Jsx.string (if S.get s.is_selected then "On" else "Off"))
         </Label>
       </Switch.Content>)
   </Switch>

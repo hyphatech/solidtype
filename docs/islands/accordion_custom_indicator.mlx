@@ -6,7 +6,7 @@ let make () =
   let expanded, set_expanded = S.create_signal [| "" |] in
   <Accordion
     class_="w-full max-w-md"
-    expanded_keys=(fun () -> S.get expanded)
+    expanded_keys=(S.get expanded)
     variant=`surface
     on_expanded_change=(S.set set_expanded)>
     <Accordion.Item id="1">
@@ -14,10 +14,9 @@ let make () =
         <Accordion.Trigger>
           "Using Plus/Minus Icon"
           <Accordion.Indicator>
-            (fun () ->
-              if Array.exists (String.equal "1") (S.get expanded) then
-                Solidtype.Jsx.element <Gravity.Minus />
-              else Solidtype.Jsx.element <Gravity.Plus />)
+            (if Array.exists (String.equal "1") (S.get expanded) then
+               Solidtype.Jsx.element <Gravity.Minus />
+             else Solidtype.Jsx.element <Gravity.Plus />)
           </Accordion.Indicator>
         </Accordion.Trigger>
       </Accordion.Heading>

@@ -63,7 +63,7 @@ end)
 let indicator s =
   let i = Selection_indicator.indicator s.indicators in
   <div
-    class_=(fun () -> indicator_classes (S.get s.variant))
+    class_=(indicator_classes (S.get s.variant))
     ref=(fun e -> i.ref e)
     data_slot="segment-indicator"
   />
@@ -98,23 +98,20 @@ module Item = struct
             ~keys:`element ();
       }
     in
-    <Item_context.Provider value=(fun () -> { selected })>
+    <Item_context.Provider value={ selected }>
       <Kobalte.Item
-        value=(fun () -> S.get id)
-        disabled=(fun () -> S.get is_disabled)
+        value=(S.get id)
+        disabled=(S.get is_disabled)
         class_="segment__item-control">
         <Field_content
-          field=(fun () -> field)
+          field
           slot="segment-item"
-          class_=(fun () ->
-                   after
-                     (item_classes (S.get s.variant) (S.get s.size))
-                     (S.get class_))
+          class_=(after
+                    (item_classes (S.get s.variant) (S.get s.size))
+                    (S.get class_))
           props=(Props.others props)>
-          <Show when_=(fun () -> S.get selected)>
-            (fun () -> Jsx.element (indicator s))
-          </Show>
-          (fun () -> S.get children)
+          <Show when_=(S.get selected)>(Jsx.element (indicator s))</Show>
+          (S.get children)
         </Field_content>
       </Kobalte.Item>
     </Item_context.Provider>
@@ -132,7 +129,7 @@ module Separator = struct
     let (_ : segment) = within "Segment.Separator" in
     <span
       aria_hidden=true
-      class_=(fun () -> after "segment__separator" (S.get class_))
+      class_=(after "segment__separator" (S.get class_))
       data_slot="segment-separator"
       props=(Props.others props)
     />
@@ -161,20 +158,19 @@ let%component make ?(variant : variant = `default) ?(size : size = `md)
       indicators = Selection_indicator.create ();
     }
   in
-  <Context.Provider value=(fun () -> s)>
+  <Context.Provider value=s>
     <Kobalte.Root
-      value=(fun () -> Option.value (S.get chosen) ~default:"")
-      disabled=(fun () -> S.get is_disabled)
-      ?name=(fun () -> S.get name)
-      ?aria_label=(fun () -> S.get aria_label)
-      ?aria_labelledby=(fun () -> S.get aria_labelledby)
-      class_=(fun () ->
-               after (root_classes (S.get variant) (S.get size)) (S.get class_))
+      value=(Option.value (S.get chosen) ~default:"")
+      disabled=(S.get is_disabled)
+      ?name=(S.get name)
+      ?aria_label=(S.get aria_label)
+      ?aria_labelledby=(S.get aria_labelledby)
+      class_=(after (root_classes (S.get variant) (S.get size)) (S.get class_))
       data_slot="segment"
-      data_disabled=(fun () -> Jsx.flag (S.get is_disabled))
+      data_disabled=(Jsx.flag (S.get is_disabled))
       props=(Props.others props)
       on_change=(fun key -> choose (Some key))>
-      (fun () -> S.get children)
+      (S.get children)
     </Kobalte.Root>
   </Context.Provider>
 [@@element div]

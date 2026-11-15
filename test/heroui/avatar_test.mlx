@@ -57,20 +57,12 @@ let color_name = function
 
 let both ?size ?color ?variant ?fallback_color ?src () =
   T.render (fun () ->
-      <Avatar
-        ?size=(fun () -> size)
-        ?color=(fun () -> color)
-        ?variant=(fun () -> variant)
-        class_="ms-1">
-        (fun () ->
-          match src with
-          | Some src ->
-              Solidtype.Jsx.element
-                <Avatar.Image alt="Ada Lovelace" src=(fun () -> src) />
-          | None -> Solidtype.Jsx.string "")
-        <Avatar.Fallback ?color=(fun () -> fallback_color)>
-          "AL"
-        </Avatar.Fallback>
+      <Avatar ?size ?color ?variant class_="ms-1">
+        (match src with
+        | Some src ->
+            Solidtype.Jsx.element <Avatar.Image alt="Ada Lovelace" src />
+        | None -> Solidtype.Jsx.string "")
+        <Avatar.Fallback ?color=fallback_color>"AL"</Avatar.Fallback>
       </Avatar>);
   let* () = Twin.settle () in
   let solidtype = shown T.body in

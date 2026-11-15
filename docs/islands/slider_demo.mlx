@@ -16,23 +16,21 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="orientation"
-        choices=(fun () -> orientations)
-        picked=(fun () -> S.get orientation)
+        choices=orientations
+        picked=(S.get orientation)
         on_pick=(Controls.choose orientations set_orientation)
       />
       <Toggle
-        label="disabled"
-        on=(fun () -> S.get disabled)
-        on_toggle=(S.set set_disabled)
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
       />
     </div>
     <Side_by_side
       compared="[data-slot=slider-thumb]"
       solidtype=(<Slider
                    class_="h-40 w-56"
-                   default_value=(fun () -> [| 30. |])
-                   orientation=(fun () -> fst (S.get orientation))
-                   is_disabled=(fun () -> S.get disabled)>
+                   default_value=[| 30. |]
+                   orientation=(fst (S.get orientation))
+                   is_disabled=(S.get disabled)>
                    <Label>"Volume"</Label>
                    <Slider.Output />
                    <Slider.Track><Slider.Fill /> <Slider.Thumb /></Slider.Track>

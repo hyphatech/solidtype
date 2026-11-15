@@ -8,18 +8,15 @@ module Gravity = Solidtype_gravity_icons
 let make () =
   let selected, set_selected = S.create_signal false in
   <div class_="flex flex-col gap-4">
-    <Toggle_button
-      is_selected=(fun () -> S.get selected) on_change=(S.set set_selected)>
-      (fun () ->
-        if S.get selected then Jsx.element <Gravity.Heart_fill />
-        else Jsx.element <Gravity.Heart />)
-      (fun () -> Jsx.string (if S.get selected then "Liked" else "Like"))
+    <Toggle_button is_selected=(S.get selected) on_change=(S.set set_selected)>
+      (if S.get selected then Jsx.element <Gravity.Heart_fill />
+       else Jsx.element <Gravity.Heart />)
+      (Jsx.string (if S.get selected then "Liked" else "Like"))
     </Toggle_button>
     <p class_="text-sm text-muted">
       "Status: "
       <span class_="font-medium">
-        (fun () ->
-          Jsx.string (if S.get selected then "Selected" else "Not selected"))
+        (Jsx.string (if S.get selected then "Selected" else "Not selected"))
       </span>
     </p>
   </div>

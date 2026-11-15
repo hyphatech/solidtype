@@ -7,7 +7,7 @@ module Slider = Solidtype_kobalte.Slider
    Before a thumb registers, Kobalte places it at [calc(NaN%)], which a browser
    drops and jsdom's CSS parser throws on; the thumb's own [left] replaces it. *)
 let island () =
-  <Slider.Root default_value=(fun () -> [| 40. |])>
+  <Slider.Root default_value=[| 40. |]>
     <Slider.Label>"Volume"</Slider.Label>
     <Slider.ValueLabel />
     <Slider.Track>

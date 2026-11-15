@@ -19,7 +19,7 @@
 
     {[
       <Color_field.Root
-        default_value=(fun () -> Colors.parse_color "#0485F7")
+        default_value=(Colors.parse_color "#0485F7")
         on_change=(fun c -> ...)>
         <Color_field.Label>"Colour"</Color_field.Label>
         <Color_field.Input />

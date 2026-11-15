@@ -170,35 +170,28 @@ let both ~channel ~value ?label ?(is_disabled = false) ?orientation () =
   let told = ref "" in
   T.render (fun () ->
       <Color_slider
-        ?aria_label=(fun () ->
-                      match label with
-                      | Some _ -> None
-                      | None -> Some (Option.value channel ~default:""))
-        channel=(fun () ->
-                  match channel with
-                  | Some "saturation" -> `saturation
-                  | Some "lightness" -> `lightness
-                  | Some "alpha" -> `alpha
-                  | Some "red" -> `red
-                  | Some _ | None -> `hue)
+        ?aria_label=(match label with
+                    | Some _ -> None
+                    | None -> Some (Option.value channel ~default:""))
+        channel=(match channel with
+                | Some "saturation" -> `saturation
+                | Some "lightness" -> `lightness
+                | Some "alpha" -> `alpha
+                | Some "red" -> `red
+                | Some _ | None -> `hue)
         class_="w-full max-w-xs"
-        default_value=(fun () -> Colors.parse_color value)
-        is_disabled=(fun () -> is_disabled)
-        ?orientation=(fun () ->
-                       Option.map
-                         (function "vertical" -> `vertical | _ -> `horizontal)
-                         orientation)
+        default_value=(Colors.parse_color value)
+        is_disabled
+        ?orientation=(Option.map
+                        (function "vertical" -> `vertical | _ -> `horizontal)
+                        orientation)
         on_change=(fun c -> told := Color.to_string c ~format:`css ())>
-        (fun () ->
-          match label with
-          | Some l ->
-              Jsx.element
-                (Jsx.fragment
-                   [|
-                     <Label>(fun () -> Jsx.string l)</Label>;
-                     <Color_slider.Output />;
-                   |])
-          | None -> Jsx.string "")
+        (match label with
+        | Some l ->
+            Jsx.element
+              (Jsx.fragment
+                 [| <Label>(Jsx.string l)</Label>; <Color_slider.Output /> |])
+        | None -> Jsx.string "")
         <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
       </Color_slider>);
   let* solidtype = walk ~step:(fun action -> action ()) T.body told in
@@ -219,8 +212,8 @@ let both ~channel ~value ?label ?(is_disabled = false) ?orientation () =
    their state, as words, beside React's. *)
 let of_state ~disabled =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   let vertical o =
@@ -233,8 +226,8 @@ let of_state ~disabled =
       <Color_slider
         aria_label="Hue"
         channel=`hue
-        default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")
-        is_disabled=(fun () -> disabled)>
+        default_value=(Colors.parse_color "hsl(0, 100%, 50%)")
+        is_disabled=disabled>
         (fun r ->
           Solidtype.Jsx.fragment
             [|
@@ -264,20 +257,19 @@ let of_state ~disabled =
                       <Color_slider.Thumb>
                         (fun h ->
                           <span data_words="thumb">
-                            (fun () ->
-                              Solidtype.Jsx.string
-                                (T.words
-                                   [
-                                     ("dragging", h.is_dragging);
-                                     ("hovered", h.is_hovered);
-                                     ("focused", h.is_focused);
-                                     ("focus-visible", h.is_focus_visible);
-                                     ("disabled", h.is_disabled);
-                                   ]
-                                ^ " "
-                                ^ Color.to_string
-                                    (Solidtype.Solid.get h.color)
-                                    ~format:`hex ()))
+                            (Solidtype.Jsx.string
+                               (T.words
+                                  [
+                                    ("dragging", h.is_dragging);
+                                    ("hovered", h.is_hovered);
+                                    ("focused", h.is_focused);
+                                    ("focus-visible", h.is_focus_visible);
+                                    ("disabled", h.is_disabled);
+                                  ]
+                               ^ " "
+                               ^ Color.to_string
+                                   (Solidtype.Solid.get h.color)
+                                   ~format:`hex ()))
                           </span>)
                       </Color_slider.Thumb>;
                     |])
@@ -336,13 +328,12 @@ let () =
           T.render (fun () ->
               <Form
                 on_submit=prevent_default
-                validation_errors=(fun () -> [ ("hue", "Too red.") ])>
+                validation_errors=[ ("hue", "Too red.") ]>
                 <Color_slider
                   name="hue"
                   channel=`hue
                   aria_label="Hue"
-                  default_value=(fun () ->
-                                  Colors.parse_color "hsl(0, 100%, 50%)")
+                  default_value=(Colors.parse_color "hsl(0, 100%, 50%)")
                   title="Hue"
                   style="--x: 1"
                   ref=(fun _ -> tell "slider ref")
@@ -396,7 +387,7 @@ let () =
           T.render (fun () ->
               <Color_slider
                 channel=`hue
-                default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")>
+                default_value=(Colors.parse_color "hsl(0, 100%, 50%)")>
                 <Label>"Hue"</Label>
                 <Color_slider.Output />
                 <Color_slider.Track>
@@ -417,7 +408,7 @@ let () =
           T.render (fun () ->
               <Color_slider
                 channel=`hue
-                default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")
+                default_value=(Colors.parse_color "hsl(0, 100%, 50%)")
                 on_change=(fun c -> told := Color.format_channel_value c `hue)>
                 <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
               </Color_slider>);

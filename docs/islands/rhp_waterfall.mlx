@@ -30,17 +30,15 @@ let step =
     (fun d ->
       let s = Row.data d in
       <div>
-        <Label edge="start">(fun () -> Jsx.string s.name)</Label>
+        <Label edge="start">(Jsx.string s.name)</Label>
         <Bar
-          ?from=(fun () -> s.from)
-          ?to_=(fun () -> s.to_)
-          color=(fun () ->
-                  if s.change < 0. then Color.negative else Color.positive)
+          ?from=s.from
+          ?to_=s.to_
+          color=(if s.change < 0. then Color.negative else Color.positive)
         />
       </div>)
 
 let make () =
-  <Chart
-    scale=(fun () -> (0., 60.)) label="The month's profit, change by change">
-    <Plot rows=(fun () -> steps) render=step />
+  <Chart scale=(0., 60.) label="The month's profit, change by change">
+    <Plot rows=steps render=step />
   </Chart>

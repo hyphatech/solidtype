@@ -7,7 +7,7 @@
     {[
       <Color_slider
         channel=`hue
-        default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")>
+        default_value=(Colors.parse_color "hsl(0, 100%, 50%)")>
         <Label>"Hue"</Label>
         <Color_slider.Output />
         <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>

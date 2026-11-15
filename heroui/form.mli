@@ -7,9 +7,9 @@
 
     {[
       <Form on_submit=save
-        validation_errors=(fun () -> S.get from_server)>
+        validation_errors=(S.get from_server)>
         <Text_field name="email"
-          is_invalid=(fun () -> not (is_email (S.get email)))
+          is_invalid=(not (is_email (S.get email)))
           on_change=(S.set set_email)>
           <Label>"Email"</Label> <Input />
           <Field_error>"Enter an email."</Field_error>

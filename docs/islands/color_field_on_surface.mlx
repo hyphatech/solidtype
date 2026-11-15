@@ -11,8 +11,7 @@ module Surface = Solidtype_heroui.Surface
 
 let make () =
   <Surface class_="w-[320px] p-4">
-    <Color_field
-      default_value=(fun () -> Colors.parse_color "#3B82F6") name="color">
+    <Color_field default_value=(Colors.parse_color "#3B82F6") name="color">
       <Label>"Theme Color"</Label>
       <Color_field.Group variant=`secondary>
         <Color_field.Input />

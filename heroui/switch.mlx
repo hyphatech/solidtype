@@ -59,13 +59,12 @@ module Content = struct
     let s = within "Switch.Content" in
     let state () = state_of s.field in
     <Field_content
-      field=(fun () -> s.field)
+      field=s.field
       slot="switch-content"
-      class_=(fun () ->
-               after (Styles.Switch.content (S.get s.slots)) (S.get class_))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      class_=(after (Styles.Switch.content (S.get s.slots)) (S.get class_))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (S.get children) (state_of s.field))
+      (Jsx.draw (S.get children) (state_of s.field))
     </Field_content>
   [@@element label]
 end
@@ -74,11 +73,10 @@ module Control = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let s = within "Switch.Control" in
     <span
-      class_=(fun () ->
-               after (Styles.Switch.control (S.get s.slots)) (S.get class_))
+      class_=(after (Styles.Switch.control (S.get s.slots)) (S.get class_))
       data_slot="switch-control"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </span>
   [@@element span]
 end
@@ -87,8 +85,7 @@ module Thumb = struct
   let%component make ?(class_ : string option) () =
     let s = within "Switch.Thumb" in
     <span
-      class_=(fun () ->
-               after (Styles.Switch.thumb (S.get s.slots)) (S.get class_))
+      class_=(after (Styles.Switch.thumb (S.get s.slots)) (S.get class_))
       data_slot="switch-thumb"
       props=(Props.others props)
     />
@@ -169,18 +166,17 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
     }
   in
   let state () = state_of s.field in
-  <Context.Provider value=(fun () -> s)>
+  <Context.Provider value=s>
     <Kobalte.Root
-      checked=(fun () -> S.get on)
+      checked=(S.get on)
       on_change=change
-      disabled=(fun () -> S.get is_disabled)
-      read_only=(fun () -> S.get is_read_only)
-      required=(fun () -> S.get is_required)
-      validation_state=(fun () -> if S.get invalid then `invalid else `valid)
-      ?name=(fun () -> S.get name)
-      ?value=(fun () -> S.get value)
-      class_=(fun () ->
-               after (Styles.Switch.base (S.get s.slots)) (S.get class_))
+      disabled=(S.get is_disabled)
+      read_only=(S.get is_read_only)
+      required=(S.get is_required)
+      validation_state=(if S.get invalid then `invalid else `valid)
+      ?name=(S.get name)
+      ?value=(S.get value)
+      class_=(after (Styles.Switch.base (S.get s.slots)) (S.get class_))
       ref=(fun e ->
             ignore (given_ref e : unit option);
             in_form.root e)
@@ -192,14 +188,14 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
                          on_blur e)
                        e)
       data_slot="switch"
-      data_selected=(fun () -> Jsx.flag (S.get on))
-      data_disabled=(fun () -> Jsx.flag (S.get is_disabled))
-      data_invalid=(fun () -> Jsx.flag (S.get invalid))
-      data_readonly=(fun () -> Jsx.flag (S.get is_read_only))
-      data_required=(fun () -> Jsx.flag (S.get is_required))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_selected=(Jsx.flag (S.get on))
+      data_disabled=(Jsx.flag (S.get is_disabled))
+      data_invalid=(Jsx.flag (S.get invalid))
+      data_readonly=(Jsx.flag (S.get is_read_only))
+      data_required=(Jsx.flag (S.get is_required))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (S.get children) (state_of s.field))
+      (Jsx.draw (S.get children) (state_of s.field))
     </Kobalte.Root>
   </Context.Provider>
 [@@element div]

@@ -21,27 +21,23 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="visibility"
-        choices=(fun () -> visibilities)
-        picked=(fun () -> S.get visibility)
+        choices=visibilities
+        picked=(S.get visibility)
         on_pick=(Controls.choose visibilities set_visibility)
       />
-      <Toggle
-        label="hide scroll bar"
-        on=(fun () -> S.get hide)
-        on_toggle=(S.set set_hide)
+      <Toggle label="hide scroll bar" on=(S.get hide) on_toggle=(S.set set_hide)
       />
     </div>
     <Side_by_side
       compared="[data-slot=scroll-shadow]"
       solidtype=(<Scroll_shadow
-                   visibility=(fun () -> fst (S.get visibility))
-                   hide_scroll_bar=(fun () -> S.get hide)
+                   visibility=(fst (S.get visibility))
+                   hide_scroll_bar=(S.get hide)
                    class_="max-h-[120px] p-4">
-                   <For each=(fun () -> Array.init 8 (fun i -> i + 1))>
+                   <For each=(Array.init 8 (fun i -> i + 1))>
                      (fun line _ ->
                        <p>
-                         (fun () ->
-                           Solidtype.Jsx.string ("Line " ^ string_of_int line))
+                         (Solidtype.Jsx.string ("Line " ^ string_of_int line))
                        </p>)
                    </For>
                  </Scroll_shadow>)

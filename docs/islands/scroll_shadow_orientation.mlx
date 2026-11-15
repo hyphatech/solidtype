@@ -9,8 +9,8 @@ let lorem =
 
 let paragraphs () =
   <div class_="space-y-4">
-    <For each=(fun () -> Array.make 10 lorem)>
-      (fun text _ -> <p>(fun () -> Solidtype.Jsx.string text)</p>)
+    <For each=(Array.make 10 lorem)>
+      (fun text _ -> <p>(Solidtype.Jsx.string text)</p>)
     </For>
   </div>
 
@@ -23,7 +23,7 @@ let images =
 
 let cards () =
   <div class_="flex flex-row gap-4">
-    <For each=(fun () -> Array.init 10 (fun i -> images.(i mod 3)))>
+    <For each=(Array.init 10 (fun i -> images.(i mod 3)))>
       (fun image _ ->
         <Card
           class_="flex min-w-[200px] flex-row gap-3 p-1" variant=`transparent>
@@ -32,7 +32,7 @@ let cards () =
             class_="aspect-square h-16 w-16 shrink-0 rounded-xl object-cover \
                     select-none sm:h-20 sm:w-20"
             loading="lazy"
-            src=(fun () -> image)
+            src=image
           />
           <div class_="flex flex-1 flex-col justify-center gap-1">
             <Card.Title class_="text-sm">"Bridging the Future"</Card.Title>
@@ -50,7 +50,7 @@ let make () =
       <h4 class_="mb-2 text-sm font-semibold">"Vertical"</h4>
       <Card class_="w-full p-0">
         <Scroll_shadow class_="max-h-[240px] p-4" orientation=`vertical>
-          (fun () -> Solidtype.Jsx.element (paragraphs ()))
+          (Solidtype.Jsx.element (paragraphs ()))
         </Scroll_shadow>
       </Card>
     </div>
@@ -58,7 +58,7 @@ let make () =
       <h4 class_="mb-2 text-sm font-semibold">"Horizontal"</h4>
       <Card class_="w-full p-0">
         <Scroll_shadow class_="p-4" orientation=`horizontal>
-          (fun () -> Solidtype.Jsx.element (cards ()))
+          (Solidtype.Jsx.element (cards ()))
         </Scroll_shadow>
       </Card>
     </div>

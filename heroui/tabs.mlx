@@ -120,51 +120,45 @@ module List_container = struct
     in
     let slots () = Solid.get t.slots in
     <div
-      class_=(fun () ->
-               after
-                 (Styles.Tabs.tab_list_container (slots ()))
-                 (Solid.get class_))
+      class_=(after
+                (Styles.Tabs.tab_list_container (slots ()))
+                (Solid.get class_))
       ref=(fun e -> container := Some e)
       data_slot="tabs-list-container"
       props=(Props.others props)>
       <Scroll_shadow
-        class_=(fun () -> Styles.Tabs.scroller (slots ()))
+        class_=(Styles.Tabs.scroller (slots ()))
         hide_scroll_bar=true
-        orientation=(fun () -> Solid.get t.orientation)
+        orientation=(Solid.get t.orientation)
         size=64>
-        (fun () -> Solid.get children)
+        (Solid.get children)
       </Scroll_shadow>
       <button
-        aria_label=(fun () ->
-                     if vertical () then "Scroll tabs up"
-                     else "Scroll tabs left")
-        class_=(fun () -> Styles.Tabs.scroll_prev (slots ()))
+        aria_label=(if vertical () then "Scroll tabs up" else "Scroll tabs left")
+        class_=(Styles.Tabs.scroll_prev (slots ()))
         tab_index="-1"
         type_=`button
         on_click=(fun _ -> scroll_by (-1.))>
-        (fun () ->
-          if vertical () then
-            Jsx.element
-              <Gravity.Chevron_up aria_hidden=true role=`presentation />
-          else
-            Jsx.element
-              <Gravity.Chevron_left aria_hidden=true role=`presentation />)
+        (if vertical () then
+           Jsx.element
+             <Gravity.Chevron_up aria_hidden=true role=`presentation />
+         else
+           Jsx.element
+             <Gravity.Chevron_left aria_hidden=true role=`presentation />)
       </button>
       <button
-        aria_label=(fun () ->
-                     if vertical () then "Scroll tabs down"
-                     else "Scroll tabs right")
-        class_=(fun () -> Styles.Tabs.scroll_next (slots ()))
+        aria_label=(if vertical () then "Scroll tabs down"
+                    else "Scroll tabs right")
+        class_=(Styles.Tabs.scroll_next (slots ()))
         tab_index="-1"
         type_=`button
         on_click=(fun _ -> scroll_by 1.)>
-        (fun () ->
-          if vertical () then
-            Jsx.element
-              <Gravity.Chevron_down aria_hidden=true role=`presentation />
-          else
-            Jsx.element
-              <Gravity.Chevron_right aria_hidden=true role=`presentation />)
+        (if vertical () then
+           Jsx.element
+             <Gravity.Chevron_down aria_hidden=true role=`presentation />
+         else
+           Jsx.element
+             <Gravity.Chevron_right aria_hidden=true role=`presentation />)
       </button>
     </div>
   [@@element div]
@@ -245,35 +239,32 @@ module Tab = struct
       }
     in
     <As_tab
-      as_=(fun () ->
-            Jsx.drawn_as
-              (Option.map (fun f p -> f p (state ())) (Solid.get as_))
-              (match link () with Some _ -> "a" | None -> "button"))
-      ?href=(fun () -> link ())
-      id=(fun () -> t.tab_id (Solid.get id))
-      value=(fun () -> Solid.get id)
-      disabled=(fun () -> Solid.get is_disabled)
-      class_=(fun () ->
-               after (Styles.Tabs.tab (Solid.get t.slots)) (Solid.get class_))
+      as_=(Jsx.drawn_as
+             (Option.map (fun f p -> f p (state ())) (Solid.get as_))
+             (match link () with Some _ -> "a" | None -> "button"))
+      ?href=(link ())
+      id=(t.tab_id (Solid.get id))
+      value=(Solid.get id)
+      disabled=(Solid.get is_disabled)
+      class_=(after (Styles.Tabs.tab (Solid.get t.slots)) (Solid.get class_))
       ref=(fun b ->
             ignore (given_ref (as_html b) : unit option);
             Interaction.watch n b)
       data_slot="tabs-tab"
-      data_selected=(fun () -> Jsx.flag (Solid.get selected))
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered n))
-      data_pressed=(fun () -> Jsx.flag (Interaction.pressed n))
-      data_focused=(fun () -> Jsx.flag (Interaction.focused n))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible n))
-      data_disabled=(fun () -> Jsx.flag (Interaction.disabled n))
+      data_selected=(Jsx.flag (Solid.get selected))
+      data_hovered=(Jsx.flag (Interaction.hovered n))
+      data_pressed=(Jsx.flag (Interaction.pressed n))
+      data_focused=(Jsx.flag (Interaction.focused n))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible n))
+      data_disabled=(Jsx.flag (Interaction.disabled n))
       props=(Props.others props)
             (* The panel a selected tab names is the tabs', which an attribute in
          the rest must not replace. *)
-      ?aria_controls=(fun () ->
-                       if Solid.get selected then
-                         Some (t.tab_id (Solid.get id) ^ "-panel")
-                       else None)>
-      <Tab_context.Provider value=(fun () -> { selected })>
-        (fun () -> Jsx.draw (Solid.get children) (state ()))
+      ?aria_controls=(if Solid.get selected then
+                        Some (t.tab_id (Solid.get id) ^ "-panel")
+                      else None)>
+      <Tab_context.Provider value={ selected }>
+        (Jsx.draw (Solid.get children) (state ()))
       </Tab_context.Provider>
     </As_tab>
   [@@element a]
@@ -286,19 +277,16 @@ module Indicator = struct
     let indicator () =
       let i = Selection_indicator.indicator t.indicators in
       <div
-        class_=(fun () ->
-                 after
-                   (Styles.Tabs.tab_indicator (Solid.get t.slots))
-                   (Solid.get class_))
+        class_=(after
+                  (Styles.Tabs.tab_indicator (Solid.get t.slots))
+                  (Solid.get class_))
         ref=(fun e -> i.ref e)
         data_slot="tabs-indicator"
-        data_entering=(fun () -> Jsx.flag (Solid.get i.entering))
+        data_entering=(Jsx.flag (Solid.get i.entering))
         props=(Props.others props)
       />
     in
-    <Show when_=(fun () -> Solid.get tab.selected)>
-      (fun () -> Jsx.element (indicator ()))
-    </Show>
+    <Show when_=(Solid.get tab.selected)>(Jsx.element (indicator ()))</Show>
   [@@element div]
 end
 
@@ -307,10 +295,9 @@ module Separator = struct
     let t, (_ : tab) = within_tab "Tabs.Separator" in
     <span
       aria_hidden=true
-      class_=(fun () ->
-               after
-                 (Styles.Tabs.separator (Solid.get t.slots))
-                 (Solid.get class_))
+      class_=(after
+                (Styles.Tabs.separator (Solid.get t.slots))
+                (Solid.get class_))
       data_slot="tabs-separator"
       props=(Props.others props)
     />
@@ -328,25 +315,23 @@ module Panel = struct
        names no orientation, so HeroUI's spacing by it never reaches the page;
        Kobalte's names one, which an empty one overrides. *)
     <Show
-      when_=(fun () ->
-              Option.equal String.equal
-                (Solid.get
-                   (Types.SingleSelectListState.selected_key
-                      (Solid.get (Types.TabsContextValue.list_state k))))
-                (Some (Solid.get id)))>
+      when_=(Option.equal String.equal
+               (Solid.get
+                  (Types.SingleSelectListState.selected_key
+                     (Solid.get (Types.TabsContextValue.list_state k))))
+               (Some (Solid.get id)))>
       <Kobalte.Content
-        value=(fun () -> Solid.get id)
+        value=(Solid.get id)
         force_mount=true
-        id=(fun () -> t.tab_id (Solid.get id) ^ "-panel")
-        aria_labelledby=(fun () -> t.tab_id (Solid.get id))
-        class_=(fun () ->
-                 after
-                   (Styles.Tabs.tab_panel (Solid.get t.slots))
-                   (Solid.get class_))
+        id=(t.tab_id (Solid.get id) ^ "-panel")
+        aria_labelledby=(t.tab_id (Solid.get id))
+        class_=(after
+                  (Styles.Tabs.tab_panel (Solid.get t.slots))
+                  (Solid.get class_))
         data_slot="tabs-panel"
-        data_orientation=(fun () -> Jsx.data "")
+        data_orientation=(Jsx.data "")
         props=(Props.others props)>
-        (fun () -> Solid.get children)
+        (Solid.get children)
       </Kobalte.Content>
     </Show>
   [@@element div]
@@ -358,14 +343,13 @@ module List = struct
       ~(children : Jsx.content) () =
     let t = within "Tabs.List" in
     <Kobalte.List
-      ?aria_label=(fun () -> Solid.get aria_label)
-      class_=(fun () ->
-               after
-                 (Styles.Tabs.tab_list (Solid.get t.slots))
-                 (Solid.get class_))
+      ?aria_label=(Solid.get aria_label)
+      class_=(after
+                (Styles.Tabs.tab_list (Solid.get t.slots))
+                (Solid.get class_))
       data_slot="tabs-list"
       props=(Props.others props)>
-      (fun () -> Solid.get children)
+      (Solid.get children)
     </Kobalte.List>
   [@@element div]
 end
@@ -429,18 +413,15 @@ let%component make ?(selected_key : string option)
         tell key
   in
   <Kobalte.Root
-    ?value=(fun () -> Solid.get selected)
-    orientation=(fun () -> Solid.get orientation)
-    activation_mode=(fun () -> Solid.get keyboard_activation)
-    disabled=(fun () -> Solid.get is_disabled)
-    class_=(fun () ->
-             after (Styles.Tabs.base (Solid.get t.slots)) (Solid.get class_))
+    ?value=(Solid.get selected)
+    orientation=(Solid.get orientation)
+    activation_mode=(Solid.get keyboard_activation)
+    disabled=(Solid.get is_disabled)
+    class_=(after (Styles.Tabs.base (Solid.get t.slots)) (Solid.get class_))
     data_slot="tabs"
-    data_disabled=(fun () -> Jsx.flag (Solid.get is_disabled))
+    data_disabled=(Jsx.flag (Solid.get is_disabled))
     props=(Props.others props)
     on_change=change>
-    <Context.Provider value=(fun () -> t)>
-      (fun () -> Solid.get children)
-    </Context.Provider>
+    <Context.Provider value=t>(Solid.get children)</Context.Provider>
   </Kobalte.Root>
 [@@element div]

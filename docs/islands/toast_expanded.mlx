@@ -8,7 +8,7 @@ let make () =
   in
   let later ms f = ignore (Js.Global.setTimeout ~f ms : Js.Global.timeoutId) in
   <div class_="flex h-full max-w-xl flex-col items-center justify-center">
-    <Toast.Provider is_expanded=true placement=`bottom queue=(fun () -> q) />
+    <Toast.Provider is_expanded=true placement=`bottom queue=q />
     <Button
       size=`sm
       variant=`secondary

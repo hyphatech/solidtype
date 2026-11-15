@@ -10,7 +10,7 @@ let make () =
   <Checkbox_group
     class_="min-w-[320px]"
     name="skills"
-    value=(fun () -> S.get selected)
+    value=(S.get selected)
     on_change=(S.set set_selected)>
     <Label>"Your skills"</Label>
     <Checkbox value="coding">
@@ -29,12 +29,11 @@ let make () =
       </Checkbox.Content>
     </Checkbox>
     <Label class_="my-4 text-sm text-muted">
-      (fun () ->
-        Jsx.string
-          ("Selected: "
-          ^
-          match S.get selected with
-          | [] -> "None"
-          | values -> String.concat ", " values))
+      (Jsx.string
+         ("Selected: "
+         ^
+         match S.get selected with
+         | [] -> "None"
+         | values -> String.concat ", " values))
     </Label>
   </Checkbox_group>

@@ -23,8 +23,7 @@ let team =
     (fun d ->
       let t = Row.data d in
       <div>
-        <Label edge="start">(fun () -> Jsx.string t.team)</Label>
-        <Bar to_=(fun () -> t.points) />
+        <Label edge="start">(Jsx.string t.team)</Label> <Bar to_=t.points />
       </div>)
 
 let make () =
@@ -37,11 +36,11 @@ let make () =
          (S.get teams))
   in
   <div>
-    <Chart scale=(fun () -> (0., 40.)) label="Points">
+    <Chart scale=(0., 40.) label="Points">
       <Plot
-        rows=(fun () -> S.get teams)
+        rows=(S.get teams)
         keyboard=true
-        animate=(fun () -> Animate.groups [| "points" |])
+        animate=(Animate.groups [| "points" |])
         render=team
       />
     </Chart>

@@ -10,7 +10,7 @@ let make () =
   <Color_slider
     channel=`hue
     class_="w-full max-w-sm"
-    default_value=(fun () -> Colors.parse_color "hsl(220, 70%, 50%)")>
+    default_value=(Colors.parse_color "hsl(220, 70%, 50%)")>
     <Label class_="font-medium text-foreground">"Hue"</Label>
     <Color_slider.Output class_="text-muted tabular-nums" />
     <Color_slider.Track

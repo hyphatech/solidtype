@@ -66,19 +66,16 @@ let make () =
     </Combo_box.Input_group>
     <Combo_box.Popover>
       <List_box>
-        <Solidtype.For each=(fun () -> users)>
+        <Solidtype.For each=users>
           (fun (user : user) _ ->
-            <List_box.Item
-              id=(fun () -> user.id) text_value=(fun () -> user.name)>
+            <List_box.Item id=user.id text_value=user.name>
               <Avatar size=`sm>
-                <Avatar.Image src=(fun () -> user.avatar_url) />
-                <Avatar.Fallback>
-                  (fun () -> Jsx.string user.fallback)
-                </Avatar.Fallback>
+                <Avatar.Image src=user.avatar_url />
+                <Avatar.Fallback>(Jsx.string user.fallback)</Avatar.Fallback>
               </Avatar>
               <div class_="flex flex-col">
-                <Label>(fun () -> Jsx.string user.name)</Label>
-                <Description>(fun () -> Jsx.string user.email)</Description>
+                <Label>(Jsx.string user.name)</Label>
+                <Description>(Jsx.string user.email)</Description>
               </div>
               <List_box.Item_indicator />
             </List_box.Item>)

@@ -22,14 +22,12 @@ let language =
     ~room:Slat.auto_room ~css (fun d ->
       let l = Row.data d in
       <div>
-        <Label edge="start">(fun () -> Jsx.string l.name)</Label>
-        <Bar to_=(fun () -> l.share) class_="bar" />
+        <Label edge="start">(Jsx.string l.name)</Label>
+        <Bar to_=l.share class_="bar" />
         <Label edge="end" class_="value">
-          (fun () -> Jsx.string (Js.Float.toString l.share ^ "%"))
+          (Jsx.string (Js.Float.toString l.share ^ "%"))
         </Label>
       </div>)
 
 let make () =
-  <Chart scale=(fun () -> (0., 100.))>
-    <Plot rows=(fun () -> languages) render=language />
-  </Chart>
+  <Chart scale=(0., 100.)><Plot rows=languages render=language /></Chart>

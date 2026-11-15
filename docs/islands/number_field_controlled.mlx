@@ -9,10 +9,7 @@ let make () =
   let value, set_value = S.create_signal 1024. in
   <div class_="flex w-full max-w-64 flex-col gap-4">
     <Number_field
-      min_value=0.
-      name="width"
-      value=(fun () -> S.get value)
-      on_change=(S.set set_value)>
+      min_value=0. name="width" value=(S.get value) on_change=(S.set set_value)>
       <Label>"Width"</Label>
       <Number_field.Group>
         <Number_field.Decrement_button />
@@ -20,8 +17,7 @@ let make () =
         <Number_field.Increment_button />
       </Number_field.Group>
       <Description>
-        (fun () ->
-          Jsx.string ("Current value: " ^ Js.Float.toString (S.get value)))
+        (Jsx.string ("Current value: " ^ Js.Float.toString (S.get value)))
       </Description>
     </Number_field>
     <div class_="flex gap-2">

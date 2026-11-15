@@ -26,15 +26,14 @@ let make () =
           </Drawer.Header>
           <Drawer.Body>
             <nav class_="flex flex-col gap-1">
-              <For each=(fun () -> nav_items)>
+              <For each=nav_items>
                 (fun (icon, label) _ ->
                   <button
                     class_="flex items-center gap-3 rounded-xl px-3 py-2.5 \
                             text-sm text-foreground transition-colors \
                             hover:bg-default"
                     type_=`button>
-                    (fun () -> Jsx.element (icon ()))
-                    (fun () -> Jsx.string label)
+                    (Jsx.element (icon ())) (Jsx.string label)
                   </button>)
               </For>
             </nav>

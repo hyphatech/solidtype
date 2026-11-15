@@ -17,9 +17,9 @@ let make () =
   <div class_="flex w-full max-w-64 flex-col gap-4">
     <Text_field
       is_required=true
-      is_invalid=(fun () -> short username 3)
+      is_invalid=(short username 3)
       name="username"
-      value=(fun () -> S.get username)
+      value=(S.get username)
       on_change=(S.set set_username)>
       <Label>"Username"</Label>
       <Input placeholder="jane_doe" />
@@ -28,19 +28,18 @@ let make () =
     </Text_field>
     <Text_field
       is_required=true
-      is_invalid=(fun () -> short bio 20)
+      is_invalid=(short bio 20)
       name="bio"
-      value=(fun () -> S.get bio)
+      value=(S.get bio)
       on_change=(S.set set_bio)>
       <Label>"Bio"</Label>
       <Text_area placeholder="Tell us about yourself..." />
       <Field_error>"Bio must contain at least 20 characters."</Field_error>
       <Description>
-        (fun () ->
-          Jsx.string
-            ("Minimum 20 characters ("
-            ^ string_of_int (String.length (S.get bio))
-            ^ "/20)."))
+        (Jsx.string
+           ("Minimum 20 characters ("
+           ^ string_of_int (String.length (S.get bio))
+           ^ "/20)."))
       </Description>
     </Text_field>
   </div>

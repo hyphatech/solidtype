@@ -65,12 +65,7 @@ let orientation_name = function
    buttons, the last of its own variant and enabled. *)
 let both ?variant ?size ?orientation ?full_width ?is_disabled () =
   T.render (fun () ->
-      <Button_group
-        ?variant=(fun () -> variant)
-        ?size=(fun () -> size)
-        ?orientation=(fun () -> orientation)
-        ?full_width=(fun () -> full_width)
-        ?is_disabled=(fun () -> is_disabled)>
+      <Button_group ?variant ?size ?orientation ?full_width ?is_disabled>
         <Button>"One"</Button>
         <Button><Button_group.Separator /> "Two"</Button>
         <Button variant=`outline is_disabled=false>

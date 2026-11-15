@@ -7,4 +7,4 @@ let make () =
      hydrated: the server, rendering at build time, has none. *)
   S.on_mount (fun () ->
       S.set set_opened (Js.Date.toLocaleTimeString (Js.Date.make ())));
-  <p>"You opened this page at " (fun () -> Jsx.string (S.get opened))</p>
+  <p>"You opened this page at " (Jsx.string (S.get opened))</p>

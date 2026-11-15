@@ -13,21 +13,18 @@ let island () =
   <Rating.Root default_value=3.>
     <Rating.Label>"Score"</Rating.Label>
     <Rating.Control>
-      <For
-        each=(fun () ->
-               [| "1 star"; "2 stars"; "3 stars"; "4 stars"; "5 stars" |])>
+      <For each=[| "1 star"; "2 stars"; "3 stars"; "4 stars"; "5 stars" |]>
         (fun label _ ->
           <Rating.Item>
             <Rating.ItemControl>
               (fun state ->
                 <span>
-                  (fun () ->
-                    Jsx.string
-                      (if S.get (Item_state.highlighted state) then {js|★|js}
-                       else {js|☆|js}))
+                  (Jsx.string
+                     (if S.get (Item_state.highlighted state) then {js|★|js}
+                      else {js|☆|js}))
                 </span>)
             </Rating.ItemControl>
-            <Rating.ItemLabel>(fun () -> Jsx.string label)</Rating.ItemLabel>
+            <Rating.ItemLabel>(Jsx.string label)</Rating.ItemLabel>
           </Rating.Item>)
       </For>
     </Rating.Control>

@@ -4,9 +4,7 @@ module Select = Solidtype_heroui.Select
 
 let make () =
   <Select
-    class_="w-[256px]"
-    default_value=(fun () -> [| "california" |])
-    placeholder="Select one">
+    class_="w-[256px]" default_value=[| "california" |] placeholder="Select one">
     <Label>"State"</Label>
     <Select.Trigger>
       <Select.Value /> <Select.Clear_button /> <Select.Indicator />

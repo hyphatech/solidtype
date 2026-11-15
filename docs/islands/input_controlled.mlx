@@ -10,10 +10,10 @@ let make () =
   <div class_="flex w-64 flex-col gap-2">
     <Input
       aria_label="Domain"
-      value=(fun () -> S.get value)
+      value=(S.get value)
       on_input=(fun e -> S.set set_value (value_of (target e)))
     />
     <span class_="px-1 text-sm text-muted">
-      (fun () -> Jsx.string ("https://" ^ S.get value))
+      (Jsx.string ("https://" ^ S.get value))
     </span>
   </div>

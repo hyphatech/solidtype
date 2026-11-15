@@ -46,9 +46,8 @@ module Some = struct
       ~(children : 'a Solid.accessor -> Jsx.element) () =
     let box = boxed some in
     <Raw
-      when_=(fun () -> Solid.get box)
-      fallback=(fun () ->
-                 Option.value (Solid.get fallback) ~default:Jsx.nothing)>
+      when_=(Solid.get box)
+      fallback=(Option.value (Solid.get fallback) ~default:Jsx.nothing)>
       (fun b ->
         children
           (Solid.accessor (fun () ->
@@ -63,10 +62,9 @@ module Keyed = struct
       ~(children : 'a -> Jsx.element) () =
     let box = boxed some in
     <Raw
-      when_=(fun () -> Solid.get box)
+      when_=(Solid.get box)
       keyed=true
-      fallback=(fun () ->
-                 Option.value (Solid.get fallback) ~default:Jsx.nothing)>
+      fallback=(Option.value (Solid.get fallback) ~default:Jsx.nothing)>
       (fun b ->
         match b with
         | Option.Some (box : _ box) -> children box.value

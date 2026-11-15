@@ -7,7 +7,7 @@
         let default = light
       end)
 
-      <Theme.Provider value=(fun () -> dark)>...</Theme.Provider>
+      <Theme.Provider value=dark>...</Theme.Provider>
       let theme = Theme.use ()
     ]}
 

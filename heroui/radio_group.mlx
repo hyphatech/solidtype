@@ -84,8 +84,8 @@ end)
    label, which names it. *)
 let label : Label.slot =
  fun classes others children ->
-  <Kobalte.Label class_=(fun () -> classes ()) data_slot="label" props=others>
-    (fun () -> children ())
+  <Kobalte.Label class_=(classes ()) data_slot="label" props=others>
+    (children ())
   </Kobalte.Label>
 
 (* A description in a group, but outside a radio, is the group's: Kobalte's
@@ -93,11 +93,8 @@ let label : Label.slot =
 let description : Description.slot =
  fun classes others children ->
   <Kobalte.Description
-    class_=(fun () -> classes ())
-    slot="description"
-    data_slot="description"
-    props=others>
-    (fun () -> children ())
+    class_=(classes ()) slot="description" data_slot="description" props=others>
+    (children ())
   </Kobalte.Description>
 
 (* What its children are drawn of: React Aria's render props for a radio
@@ -168,26 +165,25 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
       is_invalid = invalid;
     }
   in
-  <Context.Provider value=(fun () -> g)>
+  <Context.Provider value=g>
     <Kobalte.Root
-      value=(fun () -> Option.value (S.get chosen) ~default:"")
+      value=(Option.value (S.get chosen) ~default:"")
       on_change=(fun v -> choose (Some v))
-      orientation=(fun () -> S.get orientation)
-      disabled=(fun () -> is_disabled ())
-      read_only=(fun () -> S.get is_read_only)
-      required=(fun () -> S.get is_required)
-      ?name=(fun () -> S.get name)
+      orientation=(S.get orientation)
+      disabled=(is_disabled ())
+      read_only=(S.get is_read_only)
+      required=(S.get is_required)
+      ?name=(S.get name)
       on_key_down=(fun e ->
                     ignore (on_key_down e : unit option);
                     if S.get is_read_only then move_focus e)
       on_click=(fun e ->
                  ignore (on_click e : unit option);
                  if S.get is_read_only then keep_choice e)
-      validation_state=(fun () -> if S.get invalid then `invalid else `valid)
-      class_=(fun () ->
-               Styles.RadioGroup.classes
-                 (Styles.RadioGroup.options ~variant:(S.get variant)
-                    ?class_:(S.get class_) ()))
+      validation_state=(if S.get invalid then `invalid else `valid)
+      class_=(Styles.RadioGroup.classes
+                (Styles.RadioGroup.options ~variant:(S.get variant)
+                   ?class_:(S.get class_) ()))
       ref=(fun e ->
             ignore (given_ref e : unit option);
             in_form.root e)
@@ -199,20 +195,19 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
                          on_blur e)
                        e)
       data_slot="radio-group"
-      data_orientation=(fun () ->
-                         Jsx.data
-                           (match S.get orientation with
-                           | `horizontal -> "horizontal"
-                           | `vertical -> "vertical"))
-      data_disabled=(fun () -> Jsx.flag (is_disabled ()))
-      data_invalid=(fun () -> Jsx.flag (S.get invalid))
-      data_readonly=(fun () -> Jsx.flag (S.get is_read_only))
-      data_required=(fun () -> Jsx.flag (S.get is_required))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_orientation=(Jsx.data
+                          (match S.get orientation with
+                          | `horizontal -> "horizontal"
+                          | `vertical -> "vertical"))
+      data_disabled=(Jsx.flag (is_disabled ()))
+      data_invalid=(Jsx.flag (S.get invalid))
+      data_readonly=(Jsx.flag (S.get is_read_only))
+      data_required=(Jsx.flag (S.get is_required))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      <Label.Slot.Provider value=(fun () -> label)>
-        <Description.Slot.Provider value=(fun () -> description)>
-          (fun () -> Jsx.draw (S.get children) (state ()))
+      <Label.Slot.Provider value=label>
+        <Description.Slot.Provider value=description>
+          (Jsx.draw (S.get children) (state ()))
         </Description.Slot.Provider>
       </Label.Slot.Provider>
     </Kobalte.Root>

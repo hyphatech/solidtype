@@ -19,7 +19,7 @@ let rooted f =
 module Counted = struct
   let%component make ~(children : Jsx.content) () =
     let resolved = S.children (fun () -> S.get children) in
-    <p>(fun () -> Jsx.int (Array.length (S.to_array (S.get resolved))))</p>
+    <p>(Jsx.int (Array.length (S.to_array (S.get resolved))))</p>
 end
 
 (* Words that stand among a component's children, and numbers that stand
@@ -44,16 +44,15 @@ module Sentence = struct
   let%component make ~(children : Jsx.content) () =
     let resolved = S.children (fun () -> S.get children) in
     <p>
-      (fun () ->
-        Jsx.string
-          (String.concat " "
-             (Array.to_list (Word.read (S.to_array (S.get resolved))))))
+      (Jsx.string
+         (String.concat " "
+            (Array.to_list (Word.read (S.to_array (S.get resolved))))))
     </p>
 end
 
 module Greeting = struct
   let%component make ~(name : string) () =
-    <p>(fun () -> Jsx.string ("Hello, " ^ S.get name))</p>
+    <p>(Jsx.string ("Hello, " ^ S.get name))</p>
 end
 
 (* Greeting, loaded when it is first rendered. *)
@@ -189,8 +188,8 @@ let () =
                 <Say word="a" />
                 <i />
                 <Count n=1 />
-                <Solidtype.For each=(fun () -> S.get middle)>
-                  (fun word _ -> <Say word=(fun () -> word) />)
+                <Solidtype.For each=(S.get middle)>
+                  (fun word _ -> <Say word />)
                 </Solidtype.For>
                 <Say word="d" />
               </Sentence>);

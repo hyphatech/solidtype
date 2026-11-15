@@ -49,7 +49,7 @@ The marked row is Kobalte's: its slider is a `group` its label names, where Reac
 ## Anatomy
 
 ```ocaml
-<Color_slider channel=`hue default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")>
+<Color_slider channel=`hue default_value=(Colors.parse_color "hsl(0, 100%, 50%)")>
   <Label>"Hue"</Label>
   <Color_slider.Output />
   <Color_slider.Track>

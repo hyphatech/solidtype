@@ -5,7 +5,7 @@
     {!Output} shows its values, and its {!Fill} is drawn between them.
 
     {[
-      <Slider default_value=(fun () -> [| 30. |])>
+      <Slider default_value=([| 30. |])>
         <Label>"Volume"</Label>
         <Slider.Output />
         <Slider.Track><Slider.Fill /><Slider.Thumb /></Slider.Track>

@@ -20,7 +20,7 @@ let make () =
         <div class_="flex gap-2">
           <Button
             aria_label="Previous disclosure"
-            is_disabled=(fun () -> S.get n.is_prev_disabled)
+            is_disabled=(S.get n.is_prev_disabled)
             size=`sm
             variant=`secondary
             on_click=(fun _ -> n.on_previous ())>
@@ -28,7 +28,7 @@ let make () =
           </Button>
           <Button
             aria_label="Next disclosure"
-            is_disabled=(fun () -> S.get n.is_next_disabled)
+            is_disabled=(S.get n.is_next_disabled)
             size=`sm
             variant=`secondary
             on_click=(fun _ -> n.on_next ())>
@@ -37,19 +37,16 @@ let make () =
         </div>
       </div>
       <Disclosure_group
-        expanded_keys=(fun () -> S.get expanded)
-        on_expanded_change=(S.set set_expanded)>
-        (fun () ->
-          Solidtype.Jsx.element
-          @@ Usage.item ~expanded ~id:"preview"
-               ~icon:(fun () -> <Gravity.Qr_code />)
-               ~title:"Preview HeroUI Native" ~body:Usage.preview)
+        expanded_keys=(S.get expanded) on_expanded_change=(S.set set_expanded)>
+        (Solidtype.Jsx.element
+        @@ Usage.item ~expanded ~id:"preview"
+             ~icon:(fun () -> <Gravity.Qr_code />)
+             ~title:"Preview HeroUI Native" ~body:Usage.preview)
         <Separator class_="my-2" />
-        (fun () ->
-          Solidtype.Jsx.element
-          @@ Usage.item ~expanded ~id:"download"
-               ~icon:(fun () -> <Iconify.Tabler_brand_apple_filled />)
-               ~title:"Download App" ~body:Usage.download)
+        (Solidtype.Jsx.element
+        @@ Usage.item ~expanded ~id:"download"
+             ~icon:(fun () -> <Iconify.Tabler_brand_apple_filled />)
+             ~title:"Download App" ~body:Usage.download)
       </Disclosure_group>
     </div>
   </div>

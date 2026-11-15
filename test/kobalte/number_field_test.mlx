@@ -9,7 +9,7 @@ let island () =
   let raw, set_raw = S.create_signal 5. in
   <div>
     <NumberField.Root
-      default_value=(fun () -> K.Types.Either.right 5.)
+      default_value=(K.Types.Either.right 5.)
       on_raw_value_change=(S.set set_raw)
       min_value=0.
       max_value=10.
@@ -26,7 +26,7 @@ let island () =
       </NumberField.IncrementTrigger>
       <NumberField.Description>"How many to order"</NumberField.Description>
     </NumberField.Root>
-    <output>(fun () -> Jsx.string (Js.Float.toString (S.get raw)))</output>
+    <output>(Jsx.string (Js.Float.toString (S.get raw)))</output>
   </div>
 
 external twin : unit -> Jsx.element = "make"

@@ -77,8 +77,7 @@ module Trigger = struct
       }
     in
     <Kobalte.Trigger
-      class_=(fun () ->
-               after (Styles.Select.trigger (S.get s.slots)) (S.get class_))
+      class_=(after (Styles.Select.trigger (S.get s.slots)) (S.get class_))
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e)
@@ -96,14 +95,14 @@ module Trigger = struct
                         s.clear ()
                     | _ -> ())
       data_slot="select-trigger"
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      data_disabled=(fun () -> Jsx.flag (S.get s.disabled))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_pressed=(Jsx.flag (Interaction.pressed i))
+      data_focused=(Jsx.flag (Interaction.focused i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(Jsx.flag (S.get s.disabled))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (S.get children) (state ()))
+      (Jsx.draw (S.get children) (state ()))
     </Kobalte.Trigger>
   [@@element button]
 end
@@ -134,16 +133,14 @@ module Value = struct
       }
     in
     <Kobalte.Value
-      class_=(fun () ->
-               after (Styles.Select.value (S.get s.slots)) (S.get class_))
+      class_=(after (Styles.Select.value (S.get s.slots)) (S.get class_))
       data_slot="select-value"
-      data_placeholder=(fun () -> Jsx.flag (S.get s.is_empty))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_placeholder=(Jsx.flag (S.get s.is_empty))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () ->
-        match S.get children with
-        | Some c -> Jsx.draw c (state ())
-        | None -> Jsx.element (List_box.shown (S.get s.selected)))
+      (match S.get children with
+      | Some c -> Jsx.draw c (state ())
+      | None -> Jsx.element (List_box.shown (S.get s.selected)))
     </Kobalte.Value>
   [@@element span]
 end
@@ -162,19 +159,18 @@ module Indicator = struct
            around it takes them. *)
         <span
           aria_hidden=true
-          class_=(fun () -> classes ())
+          class_=(classes ())
           data_slot="select-indicator"
-          data_open=(fun () -> Jsx.flag (S.get s.is_open))
+          data_open=(Jsx.flag (S.get s.is_open))
           props=(Props.others props)>
-          (fun () ->
-            Option.value (S.get children) ~default:(Jsx.element Jsx.nothing))
+          (Option.value (S.get children) ~default:(Jsx.element Jsx.nothing))
         </span>
     | None ->
         <Gravity.Chevron_down
           aria_hidden=true
-          class_=(fun () -> classes ())
+          class_=(classes ())
           role=`presentation
-          data_open=(fun () -> Jsx.flag (S.get s.is_open))
+          data_open=(Jsx.flag (S.get s.is_open))
           data_slot="select-default-indicator"
           props=(Props.others props)
         />
@@ -190,8 +186,7 @@ module Clear_button = struct
     S.on_cleanup (fun () -> s.clearable <- s.clearable - 1);
     <span
       aria_hidden=true
-      class_=(fun () ->
-               after (Styles.Select.clear_button (S.get s.slots)) (S.get class_))
+      class_=(after (Styles.Select.clear_button (S.get s.slots)) (S.get class_))
       on_pointer_down=(fun e ->
                         ignore (on_pointer_down e : unit option);
                         (* A span in the trigger, as a button in a button is
@@ -203,19 +198,18 @@ module Clear_button = struct
                  stop_click e;
                  if not (S.get s.disabled || S.get s.is_empty) then s.clear ();
                  ignore (on_click e : unit option))
-      data_empty=(fun () -> Jsx.flag (S.get s.is_empty))
+      data_empty=(Jsx.flag (S.get s.is_empty))
       data_slot="select-clear-button"
       props=(Props.others props)>
-      (fun () ->
-        match S.get children with
-        | Some c -> c
-        | None ->
-            Jsx.element
-              <Gravity.Xmark
-                aria_hidden=true
-                role=`presentation
-                data_slot="select-clear-button-icon"
-              />)
+      (match S.get children with
+      | Some c -> c
+      | None ->
+          Jsx.element
+            <Gravity.Xmark
+              aria_hidden=true
+              role=`presentation
+              data_slot="select-clear-button-icon"
+            />)
     </span>
   [@@element span]
 end
@@ -256,50 +250,45 @@ module Popover = struct
       [|
         (* Its list box joins the select whether it is open or not, as the
            select's value is drawn from it. *)
-        <Context.Provider value=(fun () -> s)>
-          (fun () -> S.get children)
-        </Context.Provider>;
-        <Show when_=(fun () -> Overlay.present o)>
+        <Context.Provider value=s>(S.get children)</Context.Provider>;
+        <Show when_=(Overlay.present o)>
           <Kobalte.Portal>
             <Kobalte.Content
-              class_=(fun () ->
-                       after
-                         (Styles.Select.popover (S.get s.slots))
-                         (S.get class_))
-              style=(fun () ->
-                      styled
-                        "--trigger-width: var(--kb-popper-anchor-width); \
-                         --trigger-anchor-point: \
-                         var(--kb-select-content-transform-origin);"
-                        (S.get style))
+              class_=(after
+                        (Styles.Select.popover (S.get s.slots))
+                        (S.get class_))
+              style=(styled
+                       "--trigger-width: var(--kb-popper-anchor-width); \
+                        --trigger-anchor-point: \
+                        var(--kb-select-content-transform-origin);"
+                       (S.get style))
               ref=(fun e ->
                     ignore (given_ref e : unit option);
                     Overlay.watch o e;
                     watch_side e)
               data_slot="select-popover"
-              data_placement=(fun () -> Jsx.data (S.get side))
-              data_entering=(fun () -> Jsx.flag (Overlay.entering o))
-              data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
+              data_placement=(Jsx.data (S.get side))
+              data_entering=(Jsx.flag (Overlay.entering o))
+              data_exiting=(Jsx.flag (Overlay.exiting o))
               props=(Props.others props)>
-              (fun () ->
-                match S.get s.hosted with
-                | Some (h : List_box.hosted) ->
-                    Jsx.element
-                      <As_list
-                        as_="div"
-                        ref=(fun e -> h.list_ref e)
-                        scroll_to_item=(fun key -> h.scroll_to_item key)
-                        ?aria_label=(fun () -> S.get h.aria_label)
-                        aria_orientation=`vertical
-                        class_=(fun () -> S.get h.classes)
-                        data_slot="list-box"
-                        data_layout="stack"
-                        data_orientation="vertical"
-                        data_empty=(fun () -> Jsx.flag (S.get h.empty))
-                        props=h.others>
-                        (fun collection -> h.draw collection)
-                      </As_list>
-                | None -> Jsx.element Jsx.nothing)
+              (match S.get s.hosted with
+              | Some (h : List_box.hosted) ->
+                  Jsx.element
+                    <As_list
+                      as_="div"
+                      ref=(fun e -> h.list_ref e)
+                      scroll_to_item=(fun key -> h.scroll_to_item key)
+                      ?aria_label=(S.get h.aria_label)
+                      aria_orientation=`vertical
+                      class_=(S.get h.classes)
+                      data_slot="list-box"
+                      data_layout="stack"
+                      data_orientation="vertical"
+                      data_empty=(Jsx.flag (S.get h.empty))
+                      props=h.others>
+                      (fun collection -> h.draw collection)
+                    </As_list>
+              | None -> Jsx.element Jsx.nothing)
             </Kobalte.Content>
           </Kobalte.Portal>
         </Show>;
@@ -453,13 +442,12 @@ let%component make ?(placeholder : string = "Select an item")
     Jsx.nothing
   in
   let parts () =
-    <Context.Provider value=(fun () -> s)>
-      <List_box.Host.Provider value=(fun () -> host)>
-        <List_box.Listing.Provider value=(fun () -> listing)>
-          <Field_error.Message.Provider value=(fun () -> in_form.error)>
+    <Context.Provider value=s>
+      <List_box.Host.Provider value=host>
+        <List_box.Listing.Provider value=listing>
+          <Field_error.Message.Provider value=in_form.error>
             <Parts>
-              (fun () -> Jsx.draw (S.get children) state)
-              <Kobalte.HiddenSelect />
+              (Jsx.draw (S.get children) state) <Kobalte.HiddenSelect />
             </Parts>
           </Field_error.Message.Provider>
         </List_box.Listing.Provider>
@@ -469,8 +457,8 @@ let%component make ?(placeholder : string = "Select an item")
   (* Its placeholder as the text React Aria's value shows, as Kobalte takes an
      element: a provider draws only its children. *)
   let placeholder_text () =
-    <Context.Provider value=(fun () -> s)>
-      (fun () -> Jsx.string (S.get placeholder))
+    <Context.Provider value=s>
+      (Jsx.string (S.get placeholder))
     </Context.Provider>
   in
   let root_classes () =
@@ -490,86 +478,81 @@ let%component make ?(placeholder : string = "Select an item")
   match mode with
   | `single ->
       <Kobalte.Root
-        options=(fun () ->
-                  Array.of_list (List.map Types.Either.left (options ())))
+        options=(Array.of_list (List.map Types.Either.left (options ())))
         option_value=(fun o -> Types.Either.left (List_box.key o))
         option_text_value=List_box.text
         option_disabled=(fun o -> disabled_key (List_box.key o))
-        value=(fun () ->
-                (* [null], an empty selection Kobalte keeps: [undefined]
+        value=(* [null], an empty selection Kobalte keeps: [undefined]
                    would be no value given. *)
-                match S.get selected with
-                | o :: _ -> Js.Nullable.return o
-                | [] -> Js.Nullable.null)
+              (match S.get selected with
+              | o :: _ -> Js.Nullable.return o
+              | [] -> Js.Nullable.null)
         on_change=(fun o ->
                     change
                       (match Js.Nullable.toOption o with
                       | Some o -> [| List_box.key o |]
                       | None -> [||]))
-        open_=(fun () -> S.get opened)
+        open_=(S.get opened)
         on_open_change=open_change
-        placement=(fun () -> S.get s.placement)
+        placement=(S.get s.placement)
         gutter=8.
         same_width=false
         virtualized=true
         force_mount=true
         modal=true
-        disabled=(fun () -> S.get is_disabled)
-        required=(fun () -> S.get is_required)
-        validation_state=(fun () -> if invalid () then `invalid else `valid)
-        ?name=(fun () -> S.get name)
-        placeholder=(fun () -> placeholder_text ())
-        class_=(fun () -> root_classes ())
+        disabled=(S.get is_disabled)
+        required=(S.get is_required)
+        validation_state=(if invalid () then `invalid else `valid)
+        ?name=(S.get name)
+        placeholder=(placeholder_text ())
+        class_=(root_classes ())
         ref=root
         on_focus_out=focus_out
         data_slot="select"
-        data_open=(fun () -> Jsx.flag (S.get opened))
-        data_focused=(fun () ->
-                       Jsx.flag (Interaction.focused i || S.get opened))
-        data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-        data_invalid=(fun () -> Jsx.flag (invalid ()))
-        data_disabled=(fun () -> Jsx.flag (S.get is_disabled))
-        data_required=(fun () -> Jsx.flag (S.get is_required))
-        ?as_=(fun () -> Option.map (fun f p -> f p state) (S.get as_))
+        data_open=(Jsx.flag (S.get opened))
+        data_focused=(Jsx.flag (Interaction.focused i || S.get opened))
+        data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+        data_invalid=(Jsx.flag (invalid ()))
+        data_disabled=(Jsx.flag (S.get is_disabled))
+        data_required=(Jsx.flag (S.get is_required))
+        ?as_=(Option.map (fun f p -> f p state) (S.get as_))
         props=others>
-        (fun () -> Jsx.element (parts ()))
+        (Jsx.element (parts ()))
       </Kobalte.Root>
   | `multiple ->
       <Kobalte.Root_multiple
         multiple=true
-        options=(fun () ->
-                  Array.of_list (List.map Types.Either.left (options ())))
+        options=(Array.of_list (List.map Types.Either.left (options ())))
         option_value=(fun o -> Types.Either.left (List_box.key o))
         option_text_value=List_box.text
         option_disabled=(fun o -> disabled_key (List_box.key o))
-        value=(fun () -> Array.of_list (S.get selected))
+        value=(Array.of_list (S.get selected))
         on_change=(fun os -> change (Array.map List_box.key os))
-        open_=(fun () -> S.get opened)
+        open_=(S.get opened)
         on_open_change=open_change
-        placement=(fun () -> S.get s.placement)
+        placement=(S.get s.placement)
         gutter=8.
         same_width=false
         virtualized=true
         force_mount=true
         modal=true
-        disabled=(fun () -> S.get is_disabled)
-        required=(fun () -> S.get is_required)
-        validation_state=(fun () -> if invalid () then `invalid else `valid)
-        ?name=(fun () -> S.get name)
-        placeholder=(fun () -> placeholder_text ())
-        class_=(fun () -> root_classes ())
+        disabled=(S.get is_disabled)
+        required=(S.get is_required)
+        validation_state=(if invalid () then `invalid else `valid)
+        ?name=(S.get name)
+        placeholder=(placeholder_text ())
+        class_=(root_classes ())
         ref=root
         on_focus_out=focus_out
         data_slot="select"
-        data_open=(fun () -> Jsx.flag (S.get opened))
-        data_focused=(fun () ->
-                       Jsx.flag (Interaction.focused i || S.get opened))
-        data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-        data_invalid=(fun () -> Jsx.flag (invalid ()))
-        data_disabled=(fun () -> Jsx.flag (S.get is_disabled))
-        data_required=(fun () -> Jsx.flag (S.get is_required))
-        ?as_=(fun () -> Option.map (fun f p -> f p state) (S.get as_))
+        data_open=(Jsx.flag (S.get opened))
+        data_focused=(Jsx.flag (Interaction.focused i || S.get opened))
+        data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+        data_invalid=(Jsx.flag (invalid ()))
+        data_disabled=(Jsx.flag (S.get is_disabled))
+        data_required=(Jsx.flag (S.get is_required))
+        ?as_=(Option.map (fun f p -> f p state) (S.get as_))
         props=others>
-        (fun () -> Jsx.element (parts ()))
+        (Jsx.element (parts ()))
       </Kobalte.Root_multiple>
 [@@element div]

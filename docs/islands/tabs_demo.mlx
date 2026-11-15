@@ -21,55 +21,52 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="orientation"
-        choices=(fun () -> orientations)
-        picked=(fun () -> S.get orientation)
+        choices=orientations
+        picked=(S.get orientation)
         on_pick=(Controls.choose orientations set_orientation)
       />
       <Select
         label="variant"
-        choices=(fun () -> variants)
-        picked=(fun () -> S.get variant)
+        choices=variants
+        picked=(S.get variant)
         on_pick=(Controls.choose variants set_variant)
       />
       <Select
         label="align"
-        choices=(fun () -> aligns)
-        picked=(fun () -> S.get align)
+        choices=aligns
+        picked=(S.get align)
         on_pick=(Controls.choose aligns set_align)
       />
       <Toggle
-        label="disabled"
-        on=(fun () -> S.get disabled)
-        on_toggle=(S.set set_disabled)
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
       />
     </div>
     <Side_by_side
       compared="[data-slot=tabs]"
       solidtype=(<Tabs
                    default_selected_key="overview"
-                   orientation=(fun () -> fst (S.get orientation))
-                   variant=(fun () -> fst (S.get variant))
-                   align=(fun () -> fst (S.get align))
-                   is_disabled=(fun () -> S.get disabled)>
+                   orientation=(fst (S.get orientation))
+                   variant=(fst (S.get variant))
+                   align=(fst (S.get align))
+                   is_disabled=(S.get disabled)>
                    <Tabs.List_container>
                      <Tabs.List aria_label="Options">
-                       <Solidtype.For each=(fun () -> keys)>
+                       <Solidtype.For each=keys>
                          (fun key _ ->
-                           <Tabs.Tab id=(fun () -> key)>
-                             (fun () ->
-                               if String.equal key keys.(0) then
-                                 Solidtype.Jsx.string ""
-                               else Solidtype.Jsx.element <Tabs.Separator />)
-                             (fun () -> Solidtype.Jsx.string key)
+                           <Tabs.Tab id=key>
+                             (if String.equal key keys.(0) then
+                                Solidtype.Jsx.string ""
+                              else Solidtype.Jsx.element <Tabs.Separator />)
+                             (Solidtype.Jsx.string key)
                              <Tabs.Indicator />
                            </Tabs.Tab>)
                        </Solidtype.For>
                      </Tabs.List>
                    </Tabs.List_container>
-                   <Solidtype.For each=(fun () -> keys)>
+                   <Solidtype.For each=keys>
                      (fun key _ ->
-                       <Tabs.Panel id=(fun () -> key)>
-                         (fun () -> Solidtype.Jsx.string ("About " ^ key ^ "."))
+                       <Tabs.Panel id=key>
+                         (Solidtype.Jsx.string ("About " ^ key ^ "."))
                        </Tabs.Panel>)
                    </Solidtype.For>
                  </Tabs>)

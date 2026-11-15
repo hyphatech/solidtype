@@ -9,7 +9,7 @@ module T = Testing
 (* A note a component may be given, passed to its element's title by name. *)
 module Noted = struct
   let%component make ?(note : string option) () =
-    <span ?title=(fun () -> S.get note)>"noted"</span>
+    <span ?title=(S.get note)>"noted"</span>
 end
 
 (* A button that picks while it is given what to call, and says whether its
@@ -23,7 +23,7 @@ module Picker = struct
                    (match on_pick "x" with
                    | Some () -> "taken"
                    | None -> "not taken"))>
-      (fun () -> Solidtype.Jsx.string (S.get taken))
+      (Solidtype.Jsx.string (S.get taken))
     </button>
 end
 
@@ -34,7 +34,7 @@ module Defaulted = struct
       ?(on_pick : string -> string = fun v -> "picked " ^ v) () =
     let said, set_said = S.create_signal "none" in
     <button on_click=(fun _ -> S.set set_said (label () ^ ", " ^ on_pick "x"))>
-      (fun () -> Solidtype.Jsx.string (S.get said))
+      (Solidtype.Jsx.string (S.get said))
     </button>
 end
 
@@ -49,7 +49,7 @@ let () =
       Jest.test "an element's attribute is there while its option is Some"
         (fun () ->
           let link, set_link = S.create_signal None in
-          T.render (fun () -> <a ?title=(fun () -> S.get link)>"home"</a>);
+          T.render (fun () -> <a ?title=(S.get link)>"home"</a>);
           let before = title "a" in
           S.set set_link (Some "/");
           let some = title "a" in
@@ -57,11 +57,20 @@ let () =
           E.(
             expect [| before; some; title "a" |]
             |> toEqual [| None; Some "/"; None |]));
+      Jest.test "a name is a value, given as it is, a child's too" (fun () ->
+          let fixed = Some "fixed" and absent = None in
+          let mark = Solidtype.Jsx.element <b>"marked"</b> in
+          T.render (fun () ->
+              <div>
+                <span ?title=fixed>"a"</span> <i ?title=absent>"b"</i> mark
+              </div>);
+          E.(
+            expect [| title "span"; title "i"; Some (T.text (T.query "b")) |]
+            |> toEqual [| Some "fixed"; None; Some "marked" |]));
       Jest.test "a component passes on an optional prop it may leave out"
         (fun () ->
           let note, set_note = S.create_signal (Some "first") in
-          T.render (fun () ->
-              <div><Noted ?note=(fun () -> S.get note) /> <Noted /></div>);
+          T.render (fun () -> <div><Noted ?note=(S.get note) /> <Noted /></div>);
           let first = title "span" in
           S.set set_note None;
           let none = title "span" in
@@ -76,10 +85,9 @@ let () =
           let given, set_given = S.create_signal true in
           T.render (fun () ->
               <Picker
-                ?on_pick=(fun () ->
-                             if S.get given then
-                               Some (fun v -> picked := v :: !picked)
-                             else None)
+                ?on_pick=(if S.get given then
+                            Some (fun v -> picked := v :: !picked)
+                          else None)
               />);
           let button = T.query "button" in
           T.click button;

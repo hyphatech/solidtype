@@ -8,7 +8,7 @@ let make () =
   let errors = Toast.Queue.create ~max_visible_toasts:3 () in
   let successes = Toast.Queue.create ~max_visible_toasts:1 () in
   <div class_="flex h-full max-w-4xl items-center justify-center gap-4">
-    <Toast.Provider placement=`bottom queue=(fun () -> notifications) />
+    <Toast.Provider placement=`bottom queue=notifications />
     <div class_="flex justify-center gap-2">
       <Button
         size=`sm
@@ -22,7 +22,7 @@ let make () =
         "Add notification (max 2)"
       </Button>
     </div>
-    <Toast.Provider placement=`bottom_start queue=(fun () -> errors) />
+    <Toast.Provider placement=`bottom_start queue=errors />
     <div class_="flex justify-center gap-2">
       <Button
         size=`sm
@@ -35,7 +35,7 @@ let make () =
         "Add error (max 3)"
       </Button>
     </div>
-    <Toast.Provider placement=`bottom_end queue=(fun () -> successes) />
+    <Toast.Provider placement=`bottom_end queue=successes />
     <div class_="flex justify-center gap-2">
       <Button
         class_="text-success-soft-foreground"

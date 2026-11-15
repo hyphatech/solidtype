@@ -20,18 +20,16 @@ let items =
 
 let make () =
   <Accordion allows_multiple_expanded=true class_="w-full max-w-md">
-    <Solidtype.For each=(fun () -> items)>
+    <Solidtype.For each=items>
       (fun (title, content) _ ->
         <Accordion.Item>
           <Accordion.Heading>
             <Accordion.Trigger>
-              (fun () -> Solidtype.Jsx.string title) <Accordion.Indicator />
+              (Solidtype.Jsx.string title) <Accordion.Indicator />
             </Accordion.Trigger>
           </Accordion.Heading>
           <Accordion.Panel>
-            <Accordion.Body>
-              (fun () -> Solidtype.Jsx.string content)
-            </Accordion.Body>
+            <Accordion.Body>(Solidtype.Jsx.string content)</Accordion.Body>
           </Accordion.Panel>
         </Accordion.Item>)
     </Solidtype.For>

@@ -217,19 +217,16 @@ let both ?variant ?is_dismissable ?placement ?(custom = false) () =
       <div>
         <p data_testid="outside">"Outside"</p>
         <Drawer>
-          (fun () ->
-            if custom then
-              Solidtype.Jsx.element
-                <Drawer.Trigger aria_label="Open">
-                  <span>"Card"</span>
-                </Drawer.Trigger>
-            else
-              Solidtype.Jsx.element
-                <Button variant=`secondary>"Open Drawer"</Button>)
-          <Drawer.Backdrop
-            ?variant=(fun () -> variant)
-            ?is_dismissable=(fun () -> is_dismissable)>
-            <Drawer.Content ?placement=(fun () -> placement)>
+          (if custom then
+             Solidtype.Jsx.element
+               <Drawer.Trigger aria_label="Open">
+                 <span>"Card"</span>
+               </Drawer.Trigger>
+           else
+             Solidtype.Jsx.element
+               <Button variant=`secondary>"Open Drawer"</Button>)
+          <Drawer.Backdrop ?variant ?is_dismissable>
+            <Drawer.Content ?placement>
               <Drawer.Dialog>
                 <Drawer.Handle />
                 <Drawer.Close_trigger />
@@ -283,15 +280,14 @@ let () =
                 <Drawer.Trigger aria_label="Open">
                   (fun s ->
                     <span data_words="trigger">
-                      (fun () ->
-                        Solidtype.Jsx.string
-                          (T.words
-                             [
-                               ("hovered", s.is_hovered);
-                               ("pressed", s.is_pressed);
-                               ("focused", s.is_focused);
-                               ("focus-visible", s.is_focus_visible);
-                             ]))
+                      (Solidtype.Jsx.string
+                         (T.words
+                            [
+                              ("hovered", s.is_hovered);
+                              ("pressed", s.is_pressed);
+                              ("focused", s.is_focused);
+                              ("focus-visible", s.is_focus_visible);
+                            ]))
                     </span>)
                 </Drawer.Trigger>
                 <Drawer.Backdrop>

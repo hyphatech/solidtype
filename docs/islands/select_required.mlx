@@ -22,7 +22,7 @@ let make () =
                 S.set set_tried true)>
     <Select
       is_required=true
-      is_invalid=(fun () -> missing state)
+      is_invalid=(missing state)
       class_="w-full"
       name="state"
       placeholder="Select one"
@@ -55,7 +55,7 @@ let make () =
     </Select>
     <Select
       is_required=true
-      is_invalid=(fun () -> missing country)
+      is_invalid=(missing country)
       class_="w-full"
       name="country"
       placeholder="Select a country"

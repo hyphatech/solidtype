@@ -61,22 +61,21 @@ let%component make ?(variant : [ `primary | `secondary ] option)
   let state () =
     { is_disabled; is_invalid = invalid; is_read_only; is_required }
   in
-  <Context.Provider value=(fun () -> f)>
+  <Context.Provider value=f>
     <Kobalte.Root
-      ?value=(fun () -> S.get value)
-      ?default_value=(fun () -> S.get default_value)
+      ?value=(S.get value)
+      ?default_value=(S.get default_value)
       on_change=(fun v ->
                   in_form.changed ();
                   ignore (on_change v : unit option))
-      validation_state=(fun () -> if S.get invalid then `invalid else `valid)
-      required=(fun () -> S.get is_required)
-      disabled=(fun () -> S.get is_disabled)
-      read_only=(fun () -> S.get is_read_only)
-      ?name=(fun () -> S.get name)
-      class_=(fun () ->
-               Styles.TextField.classes
-                 (Styles.TextField.options ?full_width:(S.get full_width)
-                    ?class_:(S.get class_) ()))
+      validation_state=(if S.get invalid then `invalid else `valid)
+      required=(S.get is_required)
+      disabled=(S.get is_disabled)
+      read_only=(S.get is_read_only)
+      ?name=(S.get name)
+      class_=(Styles.TextField.classes
+                (Styles.TextField.options ?full_width:(S.get full_width)
+                   ?class_:(S.get class_) ()))
       ref=(fun e ->
             ignore (given_ref e : unit option);
             in_form.root e)
@@ -88,14 +87,14 @@ let%component make ?(variant : [ `primary | `secondary ] option)
                          on_blur e)
                        e)
       data_slot="textfield"
-      data_disabled=(fun () -> Jsx.flag (S.get is_disabled))
-      data_invalid=(fun () -> Jsx.flag (S.get invalid))
-      data_readonly=(fun () -> Jsx.flag (S.get is_read_only))
-      data_required=(fun () -> Jsx.flag (S.get is_required))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_disabled=(Jsx.flag (S.get is_disabled))
+      data_invalid=(Jsx.flag (S.get invalid))
+      data_readonly=(Jsx.flag (S.get is_read_only))
+      data_required=(Jsx.flag (S.get is_required))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      <Field_error.Message.Provider value=(fun () -> in_form.error)>
-        <Parts>(fun () -> Jsx.draw (S.get children) (state ()))</Parts>
+      <Field_error.Message.Provider value=in_form.error>
+        <Parts>(Jsx.draw (S.get children) (state ()))</Parts>
       </Field_error.Message.Provider>
     </Kobalte.Root>
   </Context.Provider>

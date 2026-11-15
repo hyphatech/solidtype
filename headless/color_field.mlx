@@ -146,9 +146,9 @@ module Root = struct
           && S.get editable)
     in
     let field = { commit; step; go_to; editable; wheel } in
-    <Context.Provider value=(fun () -> field)>
+    <Context.Provider value=field>
       <Kobalte.Root
-        value=(fun () -> S.get text)
+        value=(S.get text)
         on_change=(S.set set_text)
         props=(S.omit props
                  [| "value"; "defaultValue"; "onChange"; "changeOnWheel" |])

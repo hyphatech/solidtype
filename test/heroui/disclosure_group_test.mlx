@@ -150,33 +150,30 @@ let both ?default_expanded_keys ?allows_multiple_expanded ?is_disabled ?disabled
   let told = ref [] in
   T.render (fun () ->
       <Disclosure_group
-        ?default_expanded_keys=(fun () -> default_expanded_keys)
-        ?allows_multiple_expanded=(fun () -> allows_multiple_expanded)
-        ?is_disabled=(fun () -> is_disabled)
+        ?default_expanded_keys
+        ?allows_multiple_expanded
+        ?is_disabled
         on_expanded_change=(fun k -> told := Js.Array.join ~sep:"," k :: !told)>
-        (fun () ->
-          Solidtype.Jsx.element
-            <Solidtype.For each=(fun () -> keys)>
-              (fun key _ ->
-                <Disclosure
-                  id=(fun () -> key)
-                  ?is_disabled=(fun () ->
-                                 match disabled with
-                                 | Some d when String.equal d key -> Some true
-                                 | _ -> None)>
-                  <Disclosure.Heading>
-                    <Disclosure.Trigger>
-                      (fun () -> Solidtype.Jsx.string key)
-                      <Disclosure.Indicator />
-                    </Disclosure.Trigger>
-                  </Disclosure.Heading>
-                  <Disclosure.Content>
-                    <Disclosure.Body>
-                      (fun () -> Solidtype.Jsx.string ("About " ^ key ^ "."))
-                    </Disclosure.Body>
-                  </Disclosure.Content>
-                </Disclosure>)
-            </Solidtype.For>)
+        (Solidtype.Jsx.element
+           <Solidtype.For each=keys>
+             (fun key _ ->
+               <Disclosure
+                 id=key
+                 ?is_disabled=(match disabled with
+                              | Some d when String.equal d key -> Some true
+                              | _ -> None)>
+                 <Disclosure.Heading>
+                   <Disclosure.Trigger>
+                     (Solidtype.Jsx.string key) <Disclosure.Indicator />
+                   </Disclosure.Trigger>
+                 </Disclosure.Heading>
+                 <Disclosure.Content>
+                   <Disclosure.Body>
+                     (Solidtype.Jsx.string ("About " ^ key ^ "."))
+                   </Disclosure.Body>
+                 </Disclosure.Content>
+               </Disclosure>)
+           </Solidtype.For>)
       </Disclosure_group>);
   let* solidtype = walk ~step:(fun action -> action ()) T.body told in
   T.cleanup ();
@@ -224,12 +221,12 @@ let navigated ?allows_multiple_expanded start presses =
    children of its state, as words, beside React's. *)
 let of_state ~disabled =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   T.render (fun () ->
-      <Disclosure_group is_disabled=(fun () -> disabled)>
+      <Disclosure_group is_disabled=disabled>
         (fun g ->
           Solidtype.Jsx.fragment
             [|

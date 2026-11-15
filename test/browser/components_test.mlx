@@ -18,22 +18,20 @@ exception Broken
 
 module Greeting = struct
   let%component make ~(name : string) () =
-    <p>(fun () -> Jsx.string ("Hello, " ^ S.get name))</p>
+    <p>(Jsx.string ("Hello, " ^ S.get name))</p>
 end
 
 (* Raises while [broken] says so, and renders once it does not. *)
 module Fragile = struct
   let%component make ~(broken : bool) () =
-    <p>
-      (fun () -> if S.get broken then raise Broken else Jsx.string "mended")
-    </p>
+    <p>(if S.get broken then raise Broken else Jsx.string "mended")</p>
 end
 
 (* A card whose callback takes nothing, as a close or a remove does. *)
 module Removable = struct
   let%component make ~(title : string) ~(on_remove : unit -> unit) () =
     <button on_click=(fun _ -> on_remove ())>
-      (fun () -> Solidtype.Jsx.string (S.get title))
+      (Solidtype.Jsx.string (S.get title))
     </button>
 end
 
@@ -58,7 +56,7 @@ module Loaded = struct
     let data, _ =
       S.create_resource (fun _ -> Js.Promise.resolve (S.get text))
     in
-    <p>(fun () -> Jsx.string (Option.value (S.read data) ~default:""))</p>
+    <p>(Jsx.string (Option.value (S.read data) ~default:""))</p>
 end
 
 (* A button that takes every attribute of its <button>: its class after its
@@ -68,13 +66,12 @@ module Save = struct
       ?(on_click : (Dom.mouseEvent -> unit) option) ~(saved : unit -> unit)
       ~(children : Jsx.content) () =
     <button
-      class_=(fun () ->
-               match S.get class_ with Some c -> "save " ^ c | None -> "save")
+      class_=(match S.get class_ with Some c -> "save " ^ c | None -> "save")
       on_click=(fun e ->
                  saved ();
                  ignore (on_click e : unit option))
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </button>
   [@@element button]
 end
@@ -85,7 +82,7 @@ module Badge = struct
   type state = { count : int; label : string }
 
   let%component make ~(children : state -> Jsx.element) () =
-    <span>(fun () -> Jsx.element (children { count = 3; label = "new" }))</span>
+    <span>(Jsx.element (children { count = 3; label = "new" }))</span>
 end
 
 (* A toggle whose children are elements, or a function of its state. *)
@@ -95,7 +92,7 @@ module Toggle_tag = struct
   let%component make ~(children : state Jsx.children) () =
     let on, set_on = S.create_signal false in
     <button on_click=(fun _ -> S.update set_on not)>
-      (fun () -> Jsx.draw (S.get children) { is_on = on })
+      (Jsx.draw (S.get children) { is_on = on })
     </button>
 end
 
@@ -113,8 +110,8 @@ let () =
           let value, set_value = S.create_signal None in
           T.render (fun () ->
               <Switch fallback=(<p>"none"</p>)>
-                <Match.Some some=(fun () -> S.get value)>
-                  (fun v -> <p>(fun () -> Jsx.int (S.get v))</p>)
+                <Match.Some some=(S.get value)>
+                  (fun v -> <p>(Jsx.int (S.get v))</p>)
                 </Match.Some>
               </Switch>);
           let before = T.page () in
@@ -130,7 +127,7 @@ let () =
           let saved = ref 0 and clicked = ref 0 in
           T.render (fun () ->
               <Save
-                saved=(fun _ -> incr saved)
+                saved=(fun () -> incr saved)
                 class_="wide"
                 on_click=(fun _ -> incr clicked)
                 style="color: red"
@@ -151,8 +148,8 @@ let () =
           let value, set_value = S.create_signal (Some "a") in
           T.render (fun () ->
               <Switch fallback=(<p>"none"</p>)>
-                <Match.Keyed some=(fun () -> S.get value)>
-                  (fun v -> <p>(fun () -> Jsx.string v)</p>)
+                <Match.Keyed some=(S.get value)>
+                  (fun v -> <p>(Jsx.string v)</p>)
                 </Match.Keyed>
               </Switch>);
           let before = T.page () in
@@ -164,7 +161,7 @@ let () =
               <ErrorBoundary
                 fallback=(fun _ reset ->
                            <button on_click=(fun _ -> reset ())>"retry"</button>)>
-                <Fragile broken=(fun () -> S.get broken) />
+                <Fragile broken=(S.get broken) />
               </ErrorBoundary>);
           let before = T.page () in
           S.set set_broken false;
@@ -179,8 +176,8 @@ let () =
                            let said =
                              match e with Broken -> "broken" | _ -> "other"
                            in
-                           fun _reset -> <p>(fun () -> Jsx.string said)</p>)>
-                <Fragile broken=(fun () -> true) />
+                           fun _reset -> <p>(Jsx.string said)</p>)>
+                <Fragile broken=true />
               </ErrorBoundary>);
           E.(expect (T.page ()) |> toBe "broken"));
       Jest.test "a callback prop that takes nothing is called" (fun () ->
@@ -195,7 +192,7 @@ let () =
           let remove id (_ : Dom.mouseEvent) = removed := id in
           let task, set_task = S.create_signal None in
           T.render (fun () ->
-              <Show when_=(fun () -> Option.is_some (S.get task))>
+              <Show when_=(Option.is_some (S.get task))>
                 <button on_click=(remove (id_of (S.get task)))>"remove"</button>
               </Show>);
           S.set set_task (Some 7);
@@ -207,7 +204,7 @@ let () =
           let remove id (_ : Dom.mouseEvent) = removed := id in
           let task, set_task = S.create_signal None in
           T.render (fun () ->
-              <Show when_=(fun () -> Option.is_some (S.get task))>
+              <Show when_=(Option.is_some (S.get task))>
                 <Remove on_click=(remove (id_of (S.get task))) />
               </Show>);
           S.set set_task (Some 7);
@@ -223,7 +220,7 @@ let () =
           in
           let task, set_task = S.create_signal None in
           T.render (fun () ->
-              <Show when_=(fun () -> Option.is_some (S.get task))>
+              <Show when_=(Option.is_some (S.get task))>
                 <Remove
                   on_click=(fun _ -> ()) props=(rest_of (id_of (S.get task)))
                 />
@@ -254,10 +251,7 @@ let () =
         (fun () ->
           T.render (fun () ->
               <Badge>
-                (fun s ->
-                  <b>
-                    (fun () -> Jsx.string (s.label ^ string_of_int s.count))
-                  </b>)
+                (fun s -> <b>(Jsx.string (s.label ^ string_of_int s.count))</b>)
               </Badge>);
           E.(expect (T.page ()) |> toBe "new3"));
       Jest.test "children of either kind are drawn as elements" (fun () ->
@@ -268,10 +262,7 @@ let () =
           T.render (fun () ->
               <Toggle_tag>
                 (fun s ->
-                  <b>
-                    (fun () ->
-                      Jsx.string (if S.get s.is_on then "on" else "off"))
-                  </b>)
+                  <b>(Jsx.string (if S.get s.is_on then "on" else "off"))</b>)
               </Toggle_tag>);
           let before = T.page () in
           T.click (T.by_role "button");

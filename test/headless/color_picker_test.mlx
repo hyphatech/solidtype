@@ -34,14 +34,14 @@ let () =
           let told = ref [] and own = ref [] in
           H.render (fun () ->
               <Picker
-                default_value=(fun () -> Colors.parse_color "#ff0000")
+                default_value=(Colors.parse_color "#ff0000")
                 on_change=(fun c -> told := hex c :: !told)>
                 <Swatch data_testid="swatch" />
                 <Field.Root
                   on_change=(fun c -> own := Option.map hex c :: !own)>
                   <Field.Input aria_label="Hex" data_testid="hex" />
                 </Field.Root>
-                <Channel.Root channel=(fun () -> `green)>
+                <Channel.Root channel=`green>
                   <Channel.Input aria_label="Green" data_testid="green" />
                 </Channel.Root>
               </Picker>);
@@ -67,10 +67,9 @@ let () =
                      [ None; Some "#00FF00" ] )));
       Jest.test "lets a part's own value win" (fun () ->
           H.render (fun () ->
-              <Picker default_value=(fun () -> Colors.parse_color "#ff0000")>
+              <Picker default_value=(Colors.parse_color "#ff0000")>
                 <Field.Root
-                  value=(fun () ->
-                          Js.Nullable.return (Colors.parse_color "#0000ff"))>
+                  value=(Js.Nullable.return (Colors.parse_color "#0000ff"))>
                   <Field.Input aria_label="Hex" data_testid="hex" />
                 </Field.Root>
               </Picker>);

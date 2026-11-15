@@ -247,26 +247,25 @@ let picker ?value ?default_value ?(fixed = false) ?placement ?own_value
   <div>
     <p data_testid="outside">"Outside"</p>
     <Color_picker
-      ?default_value=(fun () -> Option.map parse default_value)
-      ?value=(fun () -> S.get held)
+      ?default_value=(Option.map parse default_value)
+      ?value=(S.get held)
       on_change=(fun c ->
                   told := Array.append !told [| hex c |];
                   if (not fixed) && Option.is_some value then
                     S.set set_held (Some c))>
-      (fun () ->
-        if button then Solidtype.Jsx.element <Button>"Pick"</Button>
-        else
-          Solidtype.Jsx.element
-            <Color_picker.Trigger>
-              <Color_swatch size=`lg /> <Label>"Pick a color"</Label>
-            </Color_picker.Trigger>)
-      <Color_picker.Popover ?placement=(fun () -> placement) should_flip=false>
+      (if button then Solidtype.Jsx.element <Button>"Pick"</Button>
+       else
+         Solidtype.Jsx.element
+           <Color_picker.Trigger>
+             <Color_swatch size=`lg /> <Label>"Pick a color"</Label>
+           </Color_picker.Trigger>)
+      <Color_picker.Popover ?placement should_flip=false>
         <Color_area
           aria_label="Color area"
           color_space=`hsb
           x_channel=`saturation
           y_channel=`brightness
-          ?value=(fun () -> Option.map parse own_value)
+          ?value=(Option.map parse own_value)
           on_change=(fun c -> told_own := Array.append !told_own [| hex c |])>
           <Color_area.Thumb />
         </Color_area>
@@ -276,9 +275,9 @@ let picker ?value ?default_value ?(fixed = false) ?placement ?own_value
           <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
         </Color_slider>
         <Color_swatch_picker aria_label="Presets" size=`xs>
-          <For each=(fun () -> [| "#ef4444"; "#22c55e"; "#3b82f6" |])>
+          <For each=[| "#ef4444"; "#22c55e"; "#3b82f6" |]>
             (fun preset _ ->
-              <Color_swatch_picker.Item color=(fun () -> parse preset)>
+              <Color_swatch_picker.Item color=(parse preset)>
                 <Color_swatch_picker.Swatch />
               </Color_swatch_picker.Item>)
           </For>
@@ -360,10 +359,10 @@ let () =
               <Color_picker>
                 <Color_picker.Trigger>"Pick"</Color_picker.Trigger>
                 <Color_picker.Popover
-                  is_open=(fun () -> S.get opened)
+                  is_open=(S.get opened)
                   on_open_change=(fun o ->
-                                   told := Array.append !told [| o |];
-                                   S.set set_opened o)>
+                                     told := Array.append !told [| o |];
+                                     S.set set_opened o)>
                   "Inside"
                 </Color_picker.Popover>
               </Color_picker>);

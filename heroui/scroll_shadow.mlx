@@ -214,39 +214,35 @@ let%component make ?(orientation : [ `vertical | `horizontal ] = `vertical)
   in
   <div
     ref=(fun e -> element := Some e)
-    class_=(fun () ->
-             let base =
-               Styles.ScrollShadow.base
-                 (Styles.ScrollShadow.slots
-                    (Styles.ScrollShadow.options
-                       ~hide_scroll_bar:(S.get hide_scroll_bar)
-                       ~orientation:(S.get orientation) ~variant:(S.get variant)
-                       ()))
-             in
-             match S.get class_ with Some c -> base ^ " " ^ c | None -> base)
-    style=(fun () ->
-            "--scroll-shadow-size: "
-            ^ string_of_int (S.get size)
-            ^ "px; --scroll-shadow-offset: "
-            ^ string_of_int (S.get offset)
-            ^ "px;")
-    data_orientation=(fun () ->
-                       Jsx.data
-                         (match S.get orientation with
-                         | `vertical -> "vertical"
-                         | `horizontal -> "horizontal"))
-    data_scroll_shadow_mode=(fun () ->
-                              Jsx.data
-                                (if measuring () then "auto" else "manual"))
-    data_scroll_shadow_size=(fun () -> Jsx.data (string_of_int (S.get size)))
+    class_=(let base =
+              Styles.ScrollShadow.base
+                (Styles.ScrollShadow.slots
+                   (Styles.ScrollShadow.options
+                      ~hide_scroll_bar:(S.get hide_scroll_bar)
+                      ~orientation:(S.get orientation) ~variant:(S.get variant)
+                      ()))
+            in
+            match S.get class_ with Some c -> base ^ " " ^ c | None -> base)
+    style=("--scroll-shadow-size: "
+          ^ string_of_int (S.get size)
+          ^ "px; --scroll-shadow-offset: "
+          ^ string_of_int (S.get offset)
+          ^ "px;")
+    data_orientation=(Jsx.data
+                        (match S.get orientation with
+                        | `vertical -> "vertical"
+                        | `horizontal -> "horizontal"))
+    data_scroll_shadow_mode=(Jsx.data
+                               (if measuring () then "auto" else "manual"))
+    data_scroll_shadow_size=(Jsx.data (string_of_int (S.get size)))
     data_slot="scroll-shadow"
-    data_top_scroll=(fun () -> (marks ()).top)
-    data_bottom_scroll=(fun () -> (marks ()).bottom)
-    data_top_bottom_scroll=(fun () -> (marks ()).top_bottom)
-    data_left_scroll=(fun () -> (marks ()).left)
-    data_right_scroll=(fun () -> (marks ()).right)
-    data_left_right_scroll=(fun () -> (marks ()).left_right)
+    data_top_scroll=(marks ()).top
+    data_bottom_scroll=(marks ()).bottom
+    data_top_bottom_scroll=(marks ()).top_bottom
+    data_left_scroll=(marks ()).left
+    data_right_scroll=(marks ()).right
+    data_left_right_scroll=(marks ()).left_right
     props=(Props.others props)>
-    (fun () -> S.get children)
+    (S.get children)
   </div>
 [@@element div]

@@ -12,7 +12,7 @@ let make () =
   <div class_="flex flex-col gap-4">
     <Color_field
       class_="w-[280px]"
-      default_value=(fun () -> Colors.parse_color "#0485F7")
+      default_value=(Colors.parse_color "#0485F7")
       name="color"
       is_disabled=true>
       <Label>"Color"</Label>

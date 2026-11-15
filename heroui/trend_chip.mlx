@@ -28,17 +28,17 @@ let own_arrow ?class_ ?(others = S.others (Js.Obj.empty ()) [||]) trend =
   | `up ->
       <Gravity.Arrow_up
         aria_hidden=true
-        class_=(fun () -> after "trend-chip__indicator" class_)
+        class_=(after "trend-chip__indicator" class_)
         data_slot="trend-chip-indicator"
-        ?as_=(fun () -> S.drawn_as others)
+        ?as_=(S.drawn_as others)
         props=(S.undrawn others)
       />
   | `down ->
       <Gravity.Arrow_down
         aria_hidden=true
-        class_=(fun () -> after "trend-chip__indicator" class_)
+        class_=(after "trend-chip__indicator" class_)
         data_slot="trend-chip-indicator"
-        ?as_=(fun () -> S.drawn_as others)
+        ?as_=(S.drawn_as others)
         props=(S.undrawn others)
       />
   | `neutral -> Jsx.nothing
@@ -49,10 +49,10 @@ module Prefix = struct
       (Prefix
          (fun () ->
            <span
-             class_=(fun () -> after "trend-chip__prefix" (S.get class_))
+             class_=(after "trend-chip__prefix" (S.get class_))
              data_slot="trend-chip-prefix"
              props=(Props.others props)>
-             (fun () -> S.get children)
+             (S.get children)
            </span>))
   [@@element span]
 end
@@ -63,10 +63,10 @@ module Suffix = struct
       (Suffix
          (fun () ->
            <span
-             class_=(fun () -> after "trend-chip__suffix" (S.get class_))
+             class_=(after "trend-chip__suffix" (S.get class_))
              data_slot="trend-chip-suffix"
              props=(Props.others props)>
-             (fun () -> S.get children)
+             (S.get children)
            </span>))
   [@@element span]
 end
@@ -81,13 +81,12 @@ module Indicator = struct
            | Some icon ->
                <span
                  aria_hidden=true
-                 class_=(fun () ->
-                          after
-                            "trend-chip__indicator trend-chip__indicator--icon"
-                            (S.get class_))
+                 class_=(after
+                           "trend-chip__indicator trend-chip__indicator--icon"
+                           (S.get class_))
                  data_slot="trend-chip-indicator"
                  props=(Props.others props)>
-                 (fun () -> icon)
+                 icon
                </span>
            | None ->
                own_arrow ?class_:(S.get class_) ~others:(Props.others props)
@@ -114,42 +113,37 @@ let%component make ?(trend : trend = `up) ?(size : size = `sm)
     | None -> own_arrow (S.get trend)
   in
   <Chip
-    color=(fun () ->
-            match S.get trend with
-            | `up -> `success
-            | `down -> `danger
-            | `neutral -> `default)
-    size=(fun () -> S.get size)
-    variant=(fun () -> S.get variant)
-    class_=(fun () ->
-             after
-               (match S.get size with
-               | `sm -> "trend-chip trend-chip--sm"
-               | `md -> "trend-chip trend-chip--md"
-               | `lg -> "trend-chip trend-chip--lg")
-               (S.get class_))
-    data_trend=(fun () ->
-                 Jsx.data
-                   (match S.get trend with
-                   | `up -> "up"
-                   | `down -> "down"
-                   | `neutral -> "neutral"))
+    color=(match S.get trend with
+          | `up -> `success
+          | `down -> `danger
+          | `neutral -> `default)
+    size=(S.get size)
+    variant=(S.get variant)
+    class_=(after
+              (match S.get size with
+              | `sm -> "trend-chip trend-chip--sm"
+              | `md -> "trend-chip trend-chip--md"
+              | `lg -> "trend-chip trend-chip--lg")
+              (S.get class_))
+    data_trend=(Jsx.data
+                  (match S.get trend with
+                  | `up -> "up"
+                  | `down -> "down"
+                  | `neutral -> "neutral"))
     props=(Props.others props)>
-    (fun () -> Jsx.element (indicator ()))
+    (Jsx.element (indicator ()))
     <Chip.Label>
-      (fun () ->
-        drawn (function
-          | Prefix p -> Some (p ())
-          | Suffix _ | Indicator _ -> None))
+      (drawn (function
+        | Prefix p -> Some (p ())
+        | Suffix _ | Indicator _ -> None))
       " "
       <span class_="trend-chip__value" data_slot="trend-chip-value">
-        (fun () -> Jsx.element (Jsx.fragment (Part.others (all ()))))
+        (Jsx.element (Jsx.fragment (Part.others (all ()))))
       </span>
       " "
-      (fun () ->
-        drawn (function
-          | Suffix s -> Some (s ())
-          | Prefix _ | Indicator _ -> None))
+      (drawn (function
+        | Suffix s -> Some (s ())
+        | Prefix _ | Indicator _ -> None))
     </Chip.Label>
   </Chip>
 [@@element span]

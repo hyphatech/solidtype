@@ -25,29 +25,25 @@ let make () =
   in
   <div class_="space-y-2">
     <Combo_box
-      class_="w-[256px]"
-      value=(fun () -> S.get selected)
-      on_change=(S.set set_selected)>
+      class_="w-[256px]" value=(S.get selected) on_change=(S.set set_selected)>
       <Label>"Animal (controlled)"</Label>
       <Combo_box.Input_group>
         <Input placeholder="Search animals..." /> <Combo_box.Trigger />
       </Combo_box.Input_group>
       <Combo_box.Popover>
         <List_box>
-          <Solidtype.For each=(fun () -> animals)>
+          <Solidtype.For each=animals>
             (fun animal _ ->
-              <List_box.Item
-                id=(fun () -> animal.id) text_value=(fun () -> animal.name)>
-                (fun () -> Jsx.string animal.name) <List_box.Item_indicator />
+              <List_box.Item id=animal.id text_value=animal.name>
+                (Jsx.string animal.name) <List_box.Item_indicator />
               </List_box.Item>)
           </Solidtype.For>
         </List_box>
       </Combo_box.Popover>
     </Combo_box>
     <p class_="text-sm text-muted">
-      (fun () ->
-        Jsx.string
-          ("Selected: "
-          ^ match selected_animal () with Some a -> a.name | None -> "None"))
+      (Jsx.string
+         ("Selected: "
+         ^ match selected_animal () with Some a -> a.name | None -> "None"))
     </p>
   </div>

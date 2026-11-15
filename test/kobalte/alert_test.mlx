@@ -10,7 +10,7 @@ let island () =
     <button type_=`button on_click=(fun _ -> S.set set_saved true)>
       "Save"
     </button>
-    <Show when_=(fun () -> S.get saved)>
+    <Show when_=(S.get saved)>
       <Alert.Root>"Your changes are saved."</Alert.Root>
     </Show>
   </div>

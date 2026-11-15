@@ -84,18 +84,15 @@ let make () =
         let orientation = Solidtype_rhp.use_orientation () in
         <div
           on_pointer_enter=(fun _ -> pick h) on_pointer_down=(fun _ -> pick h)>
-          <Cell
-            value=(fun () -> h.visitors)
-            class_=(fun () -> if lit h then "cell" else "cell faded")
+          <Cell value=h.visitors class_=(if lit h then "cell" else "cell faded")
           />
-          <Show when_=(fun () -> h.day = 0 && h.hour mod 3 = 0)>
+          <Show when_=(h.day = 0 && h.hour mod 3 = 0)>
             <Label
-              edge=(fun () ->
-                     match orientation () with
-                     | `vertical -> "end"
-                     | `horizontal -> "start")
+              edge=(match orientation () with
+                   | `vertical -> "end"
+                   | `horizontal -> "start")
               class_="hour">
-              (fun () -> Jsx.string (string_of_int h.hour))
+              (Jsx.string (string_of_int h.hour))
             </Label>
           </Show>
         </div>)
@@ -111,26 +108,20 @@ let make () =
       (fun d ->
         let w = Row.data d in
         <div>
-          <Label edge="start">(fun () -> Jsx.string w.name)</Label>
-          <Plot
-            orientation=(fun () -> `across) rows=(fun () -> w.hours) render=hour
-          />
+          <Label edge="start">(Jsx.string w.name)</Label>
+          <Plot orientation=`across rows=w.hours render=hour />
         </div>)
   in
   <Poster
     look="heat"
     kicker=(<span>{js|An online shop · visitors per hour|js}</span>)
     title=(<span>"Lunch break is rush hour"</span>)
-    dek=(<span>(fun () -> Jsx.string (reading (S.get picked)))</span>)
+    dek=(<span>(Jsx.string (reading (S.get picked)))</span>)
     note=(<span>"Point at an hour to read it. Illustrative data."</span>)
     on_pointer_leave=(fun e ->
                        if not (String.equal (pointer_type e) "touch") then
                          S.set set_picked None)>
-    <Chart
-      scale=(fun () -> (0., 100.))
-      ticks=(fun () -> Ticks.none)
-      height=320.
-      theme=(fun () -> heat)>
-      <Plot rows=(fun () -> days) render=day />
+    <Chart scale=(0., 100.) ticks=Ticks.none height=320. theme=heat>
+      <Plot rows=days render=day />
     </Chart>
   </Poster>

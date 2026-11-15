@@ -26,13 +26,12 @@ let%component make ?(animation_type : [ `shimmer | `pulse | `none ] option)
     match S.get animation_type with Some a -> Some a | None -> S.get page
   in
   <div
-    class_=(fun () ->
-             let base =
-               Styles.Skeleton.base
-                 (Styles.Skeleton.slots
-                    (Styles.Skeleton.options ?animation_type:(animation ()) ()))
-             in
-             match S.get class_ with Some c -> base ^ " " ^ c | None -> base)
+    class_=(let base =
+              Styles.Skeleton.base
+                (Styles.Skeleton.slots
+                   (Styles.Skeleton.options ?animation_type:(animation ()) ()))
+            in
+            match S.get class_ with Some c -> base ^ " " ^ c | None -> base)
     props=(Props.others props)
   />
 [@@element div]

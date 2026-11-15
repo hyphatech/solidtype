@@ -203,12 +203,12 @@ module Root = struct
         wheel = change_on_wheel;
       }
     in
-    <Context.Provider value=(fun () -> field)>
+    <Context.Provider value=field>
       <Kobalte.Root
-        channel=(fun () -> Props.channel props)
-        ?value=(fun () -> current ())
+        channel=(Props.channel props)
+        ?value=(current ())
         on_change=changed
-        change_on_wheel=(fun () -> false)
+        change_on_wheel=false
         props=(S.omit props
                  [|
                    "channel";
@@ -303,10 +303,9 @@ module Input = struct
                  f.typing false;
                  Number_field.wheel ~change_on_wheel:(S.get f.wheel) number e;
                  Jsx.call (Props.on_wheel props) e)
-      ?aria_valuenow=(fun () ->
-                       let v = S.get (Field_context.raw_value number) in
-                       if Float.is_nan v then None
-                       else Some (Js.Float.toString v))
+      ?aria_valuenow=(let v = S.get (Field_context.raw_value number) in
+                      if Float.is_nan v then None
+                      else Some (Js.Float.toString v))
       props=(S.omit props [| "onWheel"; "onInput"; "onChange"; "ref" |])
     />
 

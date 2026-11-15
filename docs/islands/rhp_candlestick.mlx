@@ -75,14 +75,8 @@ let cross =
   Slat.make ~room:(Slat.room ()) ~css:cross_css (fun r ->
       let d = Row.data r in
       <div>
-        <Tick
-          at=(fun () -> d.close)
-          thick=(fun () -> Either.right 1.)
-          class_="cross"
-        />
-        <Label at=(fun () -> d.close) class_="price">
-          (fun () -> Jsx.string (dollars d.close))
-        </Label>
+        <Tick at=d.close thick=(Either.right 1.) class_="cross" />
+        <Label at=d.close class_="price">(Jsx.string (dollars d.close))</Label>
       </div>)
 
 external candle_css : string = "default"
@@ -114,27 +108,21 @@ let make () =
         let d = Row.data r in
         let pick _ = S.set set_picked (Some d.day) in
         <div class_="day" on_pointer_enter=pick on_pointer_down=pick>
-          <Bar
-            from=(fun () -> d.low)
-            to_=(fun () -> d.high)
-            thick=(fun () -> Either.left "1.5px")
-            class_="wick"
+          <Bar from=d.low to_=d.high thick=(Either.left "1.5px") class_="wick"
           />
           <Bar
-            from=(fun () -> d.open_)
-            to_=(fun () -> d.close)
-            thick=(fun () -> Either.right 0.72)
-            color=(fun () ->
-                    Color.css (if rose d then "#0d7680" else "#990f3d"))
+            from=d.open_
+            to_=d.close
+            thick=(Either.right 0.72)
+            color=(Color.css (if rose d then "#0d7680" else "#990f3d"))
             class_="body"
           />
-          <Show when_=(fun () -> d.latest)>
+          <Show when_=d.latest>
             <Label
-              at=(fun () -> d.close)
+              at=d.close
               class_="last"
-              style=(fun () ->
-                      "--rhp-color: " ^ if rose d then "#0d7680" else "#990f3d")>
-              (fun () -> Jsx.string (dollars d.close))
+              style=("--rhp-color: " ^ if rose d then "#0d7680" else "#990f3d")>
+              (Jsx.string (dollars d.close))
             </Label>
           </Show>
         </div>)
@@ -152,40 +140,34 @@ let make () =
                        if not (String.equal (pointer_type e) "touch") then
                          S.set set_picked None)>
     <p class_="ohlc">
-      <b>(fun () -> Jsx.string ("Day " ^ string_of_int (read () + 1)))</b>
-      <span>
-        (fun () -> Jsx.string ("Open " ^ dollars days.(read ()).open_))
-      </span>
-      <span>
-        (fun () -> Jsx.string ("High " ^ dollars days.(read ()).high))
-      </span>
-      <span>(fun () -> Jsx.string ("Low " ^ dollars days.(read ()).low))</span>
+      <b>(Jsx.string ("Day " ^ string_of_int (read () + 1)))</b>
+      <span>(Jsx.string ("Open " ^ dollars days.(read ()).open_))</span>
+      <span>(Jsx.string ("High " ^ dollars days.(read ()).high))</span>
+      <span>(Jsx.string ("Low " ^ dollars days.(read ()).low))</span>
       <span>
         "Close "
-        <b class_=(fun () -> if change () >= 0. then "up" else "down")>
-          (fun () ->
-            let c = change () in
-            Jsx.string
-              (dollars days.(read ()).close
-              ^ (if c >= 0. then {js| ▲ |js} else {js| ▼ |js})
-              ^ Js.Float.toFixed ~digits:1 (Js.Math.abs_float c)
-              ^ "%"))
+        <b class_=(if change () >= 0. then "up" else "down")>
+          (let c = change () in
+           Jsx.string
+             (dollars days.(read ()).close
+             ^ (if c >= 0. then {js| ▲ |js} else {js| ▼ |js})
+             ^ Js.Float.toFixed ~digits:1 (Js.Math.abs_float c)
+             ^ "%"))
         </b>
       </span>
     </p>
     <Chart
       orientation=`vertical
-      scale=(fun () -> (Nice.min range, Nice.max range))
-      ticks=(fun () -> Ticks.values (Nice.ticks range))
-      format=(fun v ->
-               <span>(fun () -> Jsx.string ("$" ^ Js.Float.toString v))</span>)
+      scale=(Nice.min range, Nice.max range)
+      ticks=(Ticks.values (Nice.ticks range))
+      format=(fun v -> <span>(Jsx.string ("$" ^ Js.Float.toString v))</span>)
       height=300.
-      theme=(fun () -> market)>
-      <Plot rows=(fun () -> days) render=candle />
+      theme=market>
+      <Plot rows=days render=candle />
       <Plot
-        rows=(fun () -> crossed (S.get picked))
+        rows=(crossed (S.get picked))
         overlap=true
-        style=(fun () -> Js.Dict.fromArray [| ("pointer-events", "none") |])
+        style=(Js.Dict.fromArray [| ("pointer-events", "none") |])
         render=cross
       />
     </Chart>

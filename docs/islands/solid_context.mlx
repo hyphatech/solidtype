@@ -12,14 +12,12 @@ module Hello = struct
   let%component make () =
     let locale = Locale.use () in
     <p>
-      (fun () ->
-        Jsx.string
-          (match locale with English -> "Hello" | French -> "Bonjour"))
+      (Jsx.string
+         (match locale with English -> "Hello" | French -> "Bonjour"))
     </p>
 end
 
 let make () =
   <div class_="flex flex-col gap-1">
-    <Hello />
-    <Locale.Provider value=(fun () -> French)><Hello /></Locale.Provider>
+    <Hello /> <Locale.Provider value=French><Hello /></Locale.Provider>
   </div>

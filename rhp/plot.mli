@@ -1,9 +1,9 @@
 (** A plot: a slat for each of its rows, stacked in the chart's band, each in
     its place as the rows change.
 
-    [<Plot rows=(fun () -> fruits)>fruit</Plot>], where [fruits] is an array of
-    records and [fruit] a {!Slat.t} of that record: a slat reads only the fields
-    of its row's type, and a row changed redraws only what reads it.
+    [<Plot rows=fruits>fruit</Plot>], where [fruits] is an array of records and
+    [fruit] a {!Slat.t} of that record: a slat reads only the fields of its
+    row's type, and a row changed redraws only what reads it.
 
     Ported by hand: rhp's [Plot] takes any prop it does not know as a data
     group, a column of the rows, which no declaration names, and its rows are

@@ -15,9 +15,9 @@ module Icon = struct
       () =
     let icon () = after (Styles.Link.icon (slots ())) (S.get class_) in
     <Show
-      when_=(fun () -> Option.is_some (S.get children))
+      when_=(Option.is_some (S.get children))
       fallback=(<span
-                  class_=(fun () -> icon ())
+                  class_=(icon ())
                   data_default_icon="true"
                   data_slot="link-icon"
                   props=(Props.others props)>
@@ -38,9 +38,8 @@ module Icon = struct
                     />
                   </svg>
                 </span>)>
-      <span class_=(fun () -> icon ()) data_slot="link-icon">
-        (fun () ->
-          match S.get children with Some c -> c | None -> Jsx.string "")
+      <span class_=(icon ()) data_slot="link-icon">
+        (match S.get children with Some c -> c | None -> Jsx.string "")
       </span>
     </Show>
   [@@element span]
@@ -87,25 +86,24 @@ let%component make ~(href : string) ?(is_disabled : bool option)
     }
   in
   <Kobalte.Root
-    href=(fun () -> S.get href)
-    disabled=(fun () -> is_disabled ())
-    class_=(fun () ->
-             after
-               (Styles.Link.base (Styles.Link.slots (Styles.Link.options ())))
-               (S.get class_))
+    href=(S.get href)
+    disabled=(is_disabled ())
+    class_=(after
+              (Styles.Link.base (Styles.Link.slots (Styles.Link.options ())))
+              (S.get class_))
     ref=(fun a ->
           ignore (given_ref a : unit option);
           Interaction.watch i a)
     data_slot="link"
-    data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-    data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-    data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-    data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-    data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
-    data_current=(fun () -> Jsx.flag (current ()))
-    ?aria_current=(fun () -> S.get aria_current)
-    ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+    data_hovered=(Jsx.flag (Interaction.hovered i))
+    data_pressed=(Jsx.flag (Interaction.pressed i))
+    data_focused=(Jsx.flag (Interaction.focused i))
+    data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+    data_disabled=(Jsx.flag (Interaction.disabled i))
+    data_current=(Jsx.flag (current ()))
+    ?aria_current=(S.get aria_current)
+    ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
     props=(Props.others props)>
-    (fun () -> Jsx.draw (S.get children) (state ()))
+    (Jsx.draw (S.get children) (state ()))
   </Kobalte.Root>
 [@@element a]

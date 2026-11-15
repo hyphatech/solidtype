@@ -12,7 +12,7 @@
         <Time_field.Group>
           <Time_field.Input>
             (fun segment ->
-              <Time_field.Segment segment=(fun () -> S.get segment) />)
+              <Time_field.Segment segment=(S.get segment) />)
           </Time_field.Input>
         </Time_field.Group>
       </Time_field>

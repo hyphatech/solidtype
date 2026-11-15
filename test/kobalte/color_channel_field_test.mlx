@@ -7,8 +7,7 @@ module Field = K.ColorChannelField
    text, a unit and all, into aria-valuenow once it changes, which axe
    refuses for the hue's degrees and a percentage. *)
 let island () =
-  <Field.Root
-    channel=`red default_value=(fun () -> K.Colors.parse_color "rgb(0, 0, 0)")>
+  <Field.Root channel=`red default_value=(K.Colors.parse_color "rgb(0, 0, 0)")>
     <Field.Label>"Red"</Field.Label>
     <Field.Input />
     <Field.IncrementTrigger aria_label="More" />

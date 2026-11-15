@@ -28,13 +28,7 @@ external set_inner_html : Dom.element -> string -> unit = "innerHTML"
 
 let both ?is_required ?is_disabled ?is_invalid () =
   T.render (fun () ->
-      <Label
-        ?is_required=(fun () -> is_required)
-        ?is_disabled=(fun () -> is_disabled)
-        ?is_invalid=(fun () -> is_invalid)
-        class_="ms-1">
-        "Email"
-      </Label>);
+      <Label ?is_required ?is_disabled ?is_invalid class_="ms-1">"Email"</Label>);
   let solidtype =
     match T.query "[data-slot=label]" with
     | Some e -> T.attributes e

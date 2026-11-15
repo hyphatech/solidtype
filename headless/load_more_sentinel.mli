@@ -8,7 +8,7 @@
 
     {[
       <Load_more_sentinel
-        is_loading=(fun () -> S.get loading)
+        is_loading=(S.get loading)
         on_load_more=load
         style="position: relative; height: 1px; width: 1px;"
       />

@@ -17,47 +17,43 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="variant"
-        choices=(fun () -> variants)
-        picked=(fun () -> S.get variant)
+        choices=variants
+        picked=(S.get variant)
         on_pick=(Controls.choose variants set_variant)
       />
       <Toggle
         label="allows multiple expanded"
-        on=(fun () -> S.get multiple)
+        on=(S.get multiple)
         on_toggle=(S.set set_multiple)
       />
       <Toggle
         label="hide separator"
-        on=(fun () -> S.get hide_separator)
+        on=(S.get hide_separator)
         on_toggle=(S.set set_hide_separator)
       />
       <Toggle
-        label="disabled"
-        on=(fun () -> S.get disabled)
-        on_toggle=(S.set set_disabled)
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
       />
     </div>
     <Side_by_side
       compared="[data-slot=accordion]"
       solidtype=(<Accordion
-                   default_expanded_keys=(fun () -> [| "shipping" |])
-                   allows_multiple_expanded=(fun () -> S.get multiple)
-                   is_disabled=(fun () -> S.get disabled)
-                   variant=(fun () -> fst (S.get variant))
-                   hide_separator=(fun () -> S.get hide_separator)>
-                   <Solidtype.For each=(fun () -> keys)>
+                   default_expanded_keys=[| "shipping" |]
+                   allows_multiple_expanded=(S.get multiple)
+                   is_disabled=(S.get disabled)
+                   variant=(fst (S.get variant))
+                   hide_separator=(S.get hide_separator)>
+                   <Solidtype.For each=keys>
                      (fun key _ ->
-                       <Accordion.Item id=(fun () -> key)>
+                       <Accordion.Item id=key>
                          <Accordion.Heading>
                            <Accordion.Trigger>
-                             (fun () -> Solidtype.Jsx.string key)
-                             <Accordion.Indicator />
+                             (Solidtype.Jsx.string key) <Accordion.Indicator />
                            </Accordion.Trigger>
                          </Accordion.Heading>
                          <Accordion.Panel>
                            <Accordion.Body>
-                             (fun () ->
-                               Solidtype.Jsx.string ("About " ^ key ^ "."))
+                             (Solidtype.Jsx.string ("About " ^ key ^ "."))
                            </Accordion.Body>
                          </Accordion.Panel>
                        </Accordion.Item>)

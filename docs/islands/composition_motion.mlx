@@ -24,9 +24,8 @@ let make () =
   <Button
     as_=(fun p s ->
             <Motion_button
-              animate=(fun () ->
-                        Motion_button.keyframes
-                          ~scale:(if S.get s.is_pressed then 0.9 else 1.))
+              animate=(Motion_button.keyframes
+                         ~scale:(if S.get s.is_pressed then 0.9 else 1.))
               props=p
             />)>
     "Press me"

@@ -12,24 +12,24 @@ let make () =
   let end_item () = Int.min (S.get page * items_per_page) total_items in
   <Pagination class_="w-full">
     <Pagination.Summary>
-      (fun () -> Jsx.int (start_item ()))
+      (Jsx.int (start_item ()))
       " to "
-      (fun () -> Jsx.int (end_item ()))
+      (Jsx.int (end_item ()))
       " of "
-      (fun () -> Jsx.int total_items)
+      (Jsx.int total_items)
       " invoices"
     </Pagination.Summary>
     <Pagination.Content>
       <Pagination.Item>
         <Pagination.Previous
-          is_disabled=(fun () -> S.get page = 1)
+          is_disabled=(S.get page = 1)
           on_press=(fun () -> S.update set_page pred)>
           <Pagination.Previous_icon /> <span>"Prev"</span>
         </Pagination.Previous>
       </Pagination.Item>
       <Pagination.Item>
         <Pagination.Next
-          is_disabled=(fun () -> S.get page = total_pages)
+          is_disabled=(S.get page = total_pages)
           on_press=(fun () -> S.update set_page succ)>
           <span>"Next"</span> <Pagination.Next_icon />
         </Pagination.Next>

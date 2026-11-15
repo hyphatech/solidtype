@@ -8,27 +8,22 @@ let avatar =
 let anchored badge =
   <Badge.Anchor>
     <Avatar>
-      <Avatar.Image src=(fun () -> avatar) />
-      <Avatar.Fallback>"JD"</Avatar.Fallback>
+      <Avatar.Image src=avatar /> <Avatar.Fallback>"JD"</Avatar.Fallback>
     </Avatar>
-    (fun () -> Solidtype.Jsx.element (badge ()))
+    (Solidtype.Jsx.element (badge ()))
   </Badge.Anchor>
 
 let make () =
   <div class_="flex items-center gap-6">
-    (fun () ->
-      Solidtype.Jsx.element
-        (anchored (fun () -> <Badge color=`danger size=`sm>"5"</Badge>)))
-    (fun () ->
-      Solidtype.Jsx.element
-        (anchored (fun () -> <Badge color=`danger size=`sm>"New"</Badge>)))
-    (fun () ->
-      Solidtype.Jsx.element
-        (anchored (fun () -> <Badge color=`danger size=`sm>"99+"</Badge>)))
-    (fun () ->
-      Solidtype.Jsx.element
-        (anchored (fun () ->
-             <Badge color=`accent size=`sm>
-               <Gravity.Bell class_="size-2.5" />
-             </Badge>)))
+    (Solidtype.Jsx.element
+       (anchored (fun () -> <Badge color=`danger size=`sm>"5"</Badge>)))
+    (Solidtype.Jsx.element
+       (anchored (fun () -> <Badge color=`danger size=`sm>"New"</Badge>)))
+    (Solidtype.Jsx.element
+       (anchored (fun () -> <Badge color=`danger size=`sm>"99+"</Badge>)))
+    (Solidtype.Jsx.element
+       (anchored (fun () ->
+            <Badge color=`accent size=`sm>
+              <Gravity.Bell class_="size-2.5" />
+            </Badge>)))
   </div>

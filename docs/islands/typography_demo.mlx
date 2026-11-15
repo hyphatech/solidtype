@@ -34,34 +34,32 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="type"
-        choices=(fun () -> types)
-        picked=(fun () -> S.get type_)
+        choices=types
+        picked=(S.get type_)
         on_pick=(Controls.choose types set_type)
       />
       <Select
         label="align"
-        choices=(fun () -> aligns)
-        picked=(fun () -> S.get align)
+        choices=aligns
+        picked=(S.get align)
         on_pick=(Controls.choose aligns set_align)
       />
       <Select
         label="color"
-        choices=(fun () -> colors)
-        picked=(fun () -> S.get color)
+        choices=colors
+        picked=(S.get color)
         on_pick=(Controls.choose colors set_color)
       />
       <Toggle
-        label="truncate"
-        on=(fun () -> S.get truncate)
-        on_toggle=(S.set set_truncate)
+        label="truncate" on=(S.get truncate) on_toggle=(S.set set_truncate)
       />
     </div>
     <Side_by_side
       solidtype=(<Typography
-                   type_=(fun () -> fst (S.get type_))
-                   align=(fun () -> fst (S.get align))
-                   color=(fun () -> fst (S.get color))
-                   truncate=(fun () -> S.get truncate)>
+                   type_=(fst (S.get type_))
+                   align=(fst (S.get align))
+                   color=(fst (S.get color))
+                   truncate=(S.get truncate)>
                    "Pricing on your terms"
                  </Typography>)
       react=(fun host ->

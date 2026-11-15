@@ -15,13 +15,12 @@ let make () =
           <Pagination.Previous_icon /> <span>"Previous"</span>
         </Pagination.Previous>
       </Pagination.Item>
-      <For each=(fun () -> Array.init total_pages succ)>
+      <For each=(Array.init total_pages succ)>
         (fun p _ ->
           <Pagination.Item>
             <Pagination.Link
-              is_active=(fun () -> p = S.get page)
-              on_press=(fun () -> S.set set_page p)>
-              (fun () -> Jsx.int p)
+              is_active=(p = S.get page) on_press=(fun () -> S.set set_page p)>
+              (Jsx.int p)
             </Pagination.Link>
           </Pagination.Item>)
       </For>

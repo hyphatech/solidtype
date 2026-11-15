@@ -60,7 +60,7 @@ let shown host =
 
 let both ~disabled ~button_enabled =
   T.render (fun () ->
-      <Fieldset disabled=(fun () -> disabled) class_="max-w-96">
+      <Fieldset disabled class_="max-w-96">
         <Fieldset.Legend>"Profile"</Fieldset.Legend>
         <Description>"Update your profile."</Description>
         <Fieldset.Group>
@@ -77,7 +77,7 @@ let both ~disabled ~button_enabled =
         <Fieldset.Actions>
           <Button type_=`submit>"Save"</Button>
           <Button
-            ?is_disabled=(fun () -> if button_enabled then Some false else None)
+            ?is_disabled=(if button_enabled then Some false else None)
             variant=`secondary>
             "Cancel"
           </Button>

@@ -9,12 +9,12 @@ let make () =
     <div class_="flex flex-col gap-2">
       <span class_="text-sm text-muted">"Glow Effect"</span>
       <div class_="flex items-center gap-4">
-        <For each=(fun () -> colors)>
+        <For each=colors>
           (fun color _ ->
             <Color_swatch
-              color=(fun () -> Colors.parse_color color)
+              color=(Colors.parse_color color)
               size=`xl
-              style=(fun () -> "box-shadow: 0 0 20px 2px " ^ color)
+              style=("box-shadow: 0 0 20px 2px " ^ color)
             />)
         </For>
       </div>
@@ -22,14 +22,12 @@ let make () =
     <div class_="flex flex-col gap-2">
       <span class_="text-sm text-muted">"Gradient"</span>
       <div class_="flex items-center gap-4">
-        <For each=(fun () -> colors)>
+        <For each=colors>
           (fun color _ ->
             <Color_swatch
-              color=(fun () -> Colors.parse_color color)
+              color=(Colors.parse_color color)
               size=`xl
-              style=(fun () ->
-                      "background: linear-gradient(135deg, " ^ color
-                      ^ ", white)")
+              style=("background: linear-gradient(135deg, " ^ color ^ ", white)")
             />)
         </For>
       </div>

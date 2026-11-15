@@ -147,30 +147,28 @@ let root ~is_open ~default_open ~on_open_change children =
     }
   in
   <Kobalte.Root
-    ?open_=(fun () -> is_open ())
-    ?default_open=(fun () -> default_open ())
+    ?open_=(is_open ())
+    ?default_open=(default_open ())
     on_open_change=(fun o ->
                      S.set set_kept o;
                      on_open_change o)
     modal=true
     force_mount=true>
-    <Button.Trigger.Provider value=(fun () -> trigger_for_buttons)>
-      <Root.Provider value=(fun () -> true)>
-        (fun () -> children ())
-      </Root.Provider>
+    <Button.Trigger.Provider value=trigger_for_buttons>
+      <Root.Provider value=true>(children ())</Root.Provider>
     </Button.Trigger.Provider>
   </Kobalte.Root>
 
 let trigger ~slot ~class_ ~aria_label ~others children =
   <As_div
     as_="div"
-    ?aria_label=(fun () -> aria_label ())
-    class_=(fun () -> class_ ())
+    ?aria_label=(aria_label ())
+    class_=(class_ ())
     role=`button
     tabindex="0"
-    data_slot=(fun () -> Jsx.data slot)
+    data_slot=(Jsx.data slot)
     props=others>
-    (fun () -> children ())
+    (children ())
   </As_div>
 
 (* Kobalte's portal, mounted on any element: its own check names [Dom.node]
@@ -211,32 +209,30 @@ let backdrop ~slot ~portal_container ~class_ ~style ~ref:given_ref ~dismissable
       }
     in
     let height = viewport_height () in
-    <Show when_=(fun () -> Overlay.present o)>
-      <Portal ?mount=(fun () -> portal_container ())>
+    <Show when_=(Overlay.present o)>
+      <Portal ?mount=(portal_container ())>
         <div
-          class_=(fun () -> class_ ())
-          style=(fun () ->
-                  String.concat " "
-                    (List.filter_map Fun.id
-                       [
-                         Option.map
-                           (fun h ->
-                             "--visual-viewport-height: " ^ Js.Float.toString h
-                             ^ "px;")
-                           (height ());
-                         style ();
-                       ]))
+          class_=(class_ ())
+          style=(String.concat " "
+                   (List.filter_map Fun.id
+                      [
+                        Option.map
+                          (fun h ->
+                            "--visual-viewport-height: " ^ Js.Float.toString h
+                            ^ "px;")
+                          (height ());
+                        style ();
+                      ]))
           ref=(fun e ->
                 ignore (given_ref e : unit option);
                 Overlay.watch o e)
-          data_slot=(fun () -> Jsx.data slot)
-          data_entering=(fun () -> Jsx.flag (Overlay.entering o))
-          data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
-          ?as_=(fun () ->
-                 Option.map (fun f p -> f p (overlay_state o)) (as_ ()))
+          data_slot=(Jsx.data slot)
+          data_entering=(Jsx.flag (Overlay.entering o))
+          data_exiting=(Jsx.flag (Overlay.exiting o))
+          ?as_=(Option.map (fun f p -> f p (overlay_state o)) (as_ ()))
           props=others>
-          <Context.Provider value=(fun () -> f)>
-            (fun () -> children (overlay_state o))
+          <Context.Provider value=f>
+            (children (overlay_state o))
           </Context.Provider>
         </div>
       </Portal>
@@ -247,29 +243,29 @@ let backdrop ~slot ~portal_container ~class_ ~style ~ref:given_ref ~dismissable
   (* A backdrop alone is a dialog of its own, open as it says. *)
   | None ->
       <Kobalte.Root
-        ?open_=(fun () -> is_open ())
-        ?default_open=(fun () -> default_open ())
+        ?open_=(is_open ())
+        ?default_open=(default_open ())
         on_open_change
         modal=true
         force_mount=true>
-        (fun () -> Jsx.element (shown ()))
+        (Jsx.element (shown ()))
       </Kobalte.Root>
 
 let container (f : t) ~slot ~class_ ~placement ~ref:given_ref ~as_ ~others
     children =
   let o = f.overlay in
   <div
-    class_=(fun () -> class_ ())
+    class_=(class_ ())
     ref=(fun e ->
           ignore (given_ref e : unit option);
           Overlay.watch o e)
-    data_placement=(fun () -> Jsx.data (placement ()))
-    data_slot=(fun () -> Jsx.data slot)
-    data_entering=(fun () -> Jsx.flag (Overlay.entering o))
-    data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
-    ?as_=(fun () -> Option.map (fun f p -> f p (overlay_state o)) (as_ ()))
+    data_placement=(Jsx.data (placement ()))
+    data_slot=(Jsx.data slot)
+    data_entering=(Jsx.flag (Overlay.entering o))
+    data_exiting=(Jsx.flag (Overlay.exiting o))
+    ?as_=(Option.map (fun f p -> f p (overlay_state o)) (as_ ()))
     props=others>
-    (fun () -> children (overlay_state o))
+    (children (overlay_state o))
   </div>
 
 let dialog ?(on_element = fun (_ : Dom.element) -> ()) (f : t) ~slot ~role
@@ -290,12 +286,11 @@ let dialog ?(on_element = fun (_ : Dom.element) -> ()) (f : t) ~slot ~role
     | None -> ()
   in
   <As_section
-    as_=(fun () ->
-          Jsx.drawn_as
-            (Option.map (fun g p -> g p { close = f.close }) (as_ ()))
-            "section")
-    class_=(fun () -> class_ ())
-    role=(fun () -> role)
+    as_=(Jsx.drawn_as
+           (Option.map (fun g p -> g p { close = f.close }) (as_ ()))
+           "section")
+    class_=(class_ ())
+    role
     ref=(fun e ->
           ignore (given_ref e : unit option);
           let e = as_element e in
@@ -319,37 +314,35 @@ let dialog ?(on_element = fun (_ : Dom.element) -> ()) (f : t) ~slot ~role
                      Option.is_none (Js.Null.toOption (related_target e))
                      && not (Overlay.exiting f.overlay)
                    then Overlay.focus (target e))
-    data_placement=(fun () -> Jsx.data (placement ()))
-    data_slot=(fun () -> Jsx.data slot)
+    data_placement=(Jsx.data (placement ()))
+    data_slot=(Jsx.data slot)
     props=others>
-    (fun () ->
-      (* Inside the dialog, since Kobalte hides from a reader all else while a
+    (if
+       (* Inside the dialog, since Kobalte hides from a reader all else while a
          modal is open, where React Aria's is just before it. *)
-      if f.dismissable () then Jsx.element (Overlay.dismiss f.close)
-      else Jsx.element Jsx.nothing)
-    <Button.Trigger.Provider value=(fun () -> Button.no_trigger)>
-      <Button.Close.Provider value=(fun () -> f.close)>
-        (fun () -> children { close = f.close })
+       f.dismissable ()
+     then Jsx.element (Overlay.dismiss f.close)
+     else Jsx.element Jsx.nothing)
+    <Button.Trigger.Provider value=Button.no_trigger>
+      <Button.Close.Provider value=f.close>
+        (children { close = f.close })
       </Button.Close.Provider>
     </Button.Trigger.Provider>
   </As_section>
 
 let heading ~slot ~class_ ~others children =
-  <Kobalte.Title
-    class_=(fun () -> class_ ())
-    data_slot=(fun () -> Jsx.data slot)
-    props=others>
-    (fun () -> children ())
+  <Kobalte.Title class_=(class_ ()) data_slot=(Jsx.data slot) props=others>
+    (children ())
   </Kobalte.Title>
 
 let close_trigger (f : t) ~slot ~class_ ~on_click ~as_ ~others ~children =
   <Close_button
-    class_=(fun () -> class_ ())
+    class_=(class_ ())
     on_click=(fun e ->
                ignore (on_click e : unit option);
                f.close ())
-    data_slot=(fun () -> Jsx.data slot)
-    ?as_=(fun () -> as_ ())
+    data_slot=(Jsx.data slot)
+    ?as_=(as_ ())
     props=others>
     (fun s ->
       match children () with

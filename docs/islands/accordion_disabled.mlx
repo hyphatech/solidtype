@@ -1,14 +1,14 @@
 module Accordion = Solidtype_heroui.Accordion
 
 let item ?is_disabled ~title ~content () =
-  <Accordion.Item ?is_disabled=(fun () -> is_disabled)>
+  <Accordion.Item ?is_disabled>
     <Accordion.Heading>
       <Accordion.Trigger>
-        (fun () -> Solidtype.Jsx.string title) <Accordion.Indicator />
+        (Solidtype.Jsx.string title) <Accordion.Indicator />
       </Accordion.Trigger>
     </Accordion.Heading>
     <Accordion.Panel>
-      <Accordion.Body>(fun () -> Solidtype.Jsx.string content)</Accordion.Body>
+      <Accordion.Body>(Solidtype.Jsx.string content)</Accordion.Body>
     </Accordion.Panel>
   </Accordion.Item>
 
@@ -19,20 +19,16 @@ let make () =
         "Entire accordion disabled"
       </h3>
       <Accordion is_disabled=true class_="w-full max-w-md">
-        (fun () ->
-          Solidtype.Jsx.element
-          @@ item ~title:"Disabled Item 1"
-               ~content:
-                 "This content cannot be accessed when the accordion is \
-                  disabled."
-               ())
-        (fun () ->
-          Solidtype.Jsx.element
-          @@ item ~title:"Disabled Item 2"
-               ~content:
-                 "This content cannot be accessed when the accordion is \
-                  disabled."
-               ())
+        (Solidtype.Jsx.element
+        @@ item ~title:"Disabled Item 1"
+             ~content:
+               "This content cannot be accessed when the accordion is disabled."
+             ())
+        (Solidtype.Jsx.element
+        @@ item ~title:"Disabled Item 2"
+             ~content:
+               "This content cannot be accessed when the accordion is disabled."
+             ())
       </Accordion>
     </div>
     <div class_="w-full max-w-md space-y-2">
@@ -40,20 +36,17 @@ let make () =
         "Individual items disabled"
       </h3>
       <Accordion class_="w-full max-w-md">
-        (fun () ->
-          Solidtype.Jsx.element
-          @@ item ~title:"Active Item"
-               ~content:"This item is active and can be toggled normally." ())
-        (fun () ->
-          Solidtype.Jsx.element
-          @@ item ~is_disabled:true ~title:"Disabled Item"
-               ~content:
-                 "This content cannot be accessed when the item is disabled."
-               ())
-        (fun () ->
-          Solidtype.Jsx.element
-          @@ item ~title:"Another Active Item"
-               ~content:"This item is also active and can be toggled." ())
+        (Solidtype.Jsx.element
+        @@ item ~title:"Active Item"
+             ~content:"This item is active and can be toggled normally." ())
+        (Solidtype.Jsx.element
+        @@ item ~is_disabled:true ~title:"Disabled Item"
+             ~content:
+               "This content cannot be accessed when the item is disabled."
+             ())
+        (Solidtype.Jsx.element
+        @@ item ~title:"Another Active Item"
+             ~content:"This item is also active and can be toggled." ())
       </Accordion>
     </div>
   </div>

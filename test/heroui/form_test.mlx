@@ -182,7 +182,7 @@ let () =
                   <Time_field.Group>
                     <Time_field.Input>
                       (fun segment ->
-                        <Time_field.Segment segment=(fun () -> S.get segment) />)
+                        <Time_field.Segment segment=(S.get segment) />)
                     </Time_field.Input>
                   </Time_field.Group>
                 </Time_field>
@@ -268,7 +268,7 @@ let () =
           let submitted = ref 0 in
           T.render (fun () ->
               <Form
-                validation_errors=(fun () -> [ ("email", "Taken") ])
+                validation_errors=[ ("email", "Taken") ]
                 on_submit=(fun e ->
                             prevent_default e;
                             incr submitted)>
@@ -284,7 +284,7 @@ let () =
         (fun () ->
           T.render (fun () ->
               <Form
-                validation_errors=(fun () -> [ ("email", "Taken") ])
+                validation_errors=[ ("email", "Taken") ]
                 on_submit=prevent_default>
                 <Text_field name="email">
                   <Label>"Email"</Label> <Input /> <Field_error />
@@ -315,9 +315,7 @@ let () =
         (fun () ->
           let errors, set_errors = S.create_signal [] in
           T.render (fun () ->
-              <Form
-                validation_errors=(fun () -> S.get errors)
-                on_submit=prevent_default>
+              <Form validation_errors=(S.get errors) on_submit=prevent_default>
                 <Text_field name="email">
                   <Label>"Email"</Label> <Input /> <Field_error />
                 </Text_field>

@@ -58,15 +58,14 @@ let render ~told =
       <ul
         role=`listbox
         ref=(fun e -> S.set set_list_ref (Some e))
-        tabindex=(fun () ->
-                   match S.get (Selectable_list.tab_index list) with
-                   | Some i -> Js.Float.toString i
-                   | None -> "-1")
+        tabindex=(match S.get (Selectable_list.tab_index list) with
+                 | Some i -> Js.Float.toString i
+                 | None -> "-1")
         on_key_down=(fun e -> Selectable_list.on_key_down list e)
         on_mouse_down=(fun e -> Selectable_list.on_mouse_down list e)
         on_focus_in=(fun e -> Selectable_list.on_focus_in list e)
         on_focus_out=(fun e -> Selectable_list.on_focus_out list e)>
-        <For each=(fun () -> fruits)>
+        <For each=fruits>
           (fun fruit _ ->
             let item_ref, set_item_ref = S.create_signal None in
             let item =
@@ -79,18 +78,17 @@ let render ~told =
             <li
               role=`option
               ref=(fun e -> S.set set_item_ref (Some e))
-              aria_selected=(fun () -> Selectable_item.is_selected item ())
-              tabindex=(fun () ->
-                         match S.get (Selectable_item.tab_index item) with
-                         | Some i -> Js.Float.toString i
-                         | None -> "-1")
+              aria_selected=(Selectable_item.is_selected item ())
+              tabindex=(match S.get (Selectable_item.tab_index item) with
+                       | Some i -> Js.Float.toString i
+                       | None -> "-1")
               on_pointer_down=(fun e -> Selectable_item.on_pointer_down item e)
               on_pointer_up=(fun e -> Selectable_item.on_pointer_up item e)
               on_click=(fun e -> Selectable_item.on_click item e)
               on_key_down=(fun e -> Selectable_item.on_key_down item e)
               on_mouse_down=(fun e -> Selectable_item.on_mouse_down item e)
               on_focus=(fun e -> Selectable_item.on_focus item e)>
-              (fun () -> Jsx.string fruit.name)
+              (Jsx.string fruit.name)
             </li>)
         </For>
       </ul>)

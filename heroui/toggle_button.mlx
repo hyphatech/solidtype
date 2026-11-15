@@ -86,23 +86,23 @@ let%component make ?(variant : [ `default | `ghost ] option)
           ~on_change:(fun v -> on_change v)
       in
       <Kobalte.Root
-        pressed=(fun () -> S.get selected)
+        pressed=(S.get selected)
         on_change=set_selected
-        class_=(fun () -> class_ ())
-        ?aria_label=(fun () -> S.get aria_label)
+        class_=(class_ ())
+        ?aria_label=(S.get aria_label)
         ref=watch
         data_slot="toggle-button"
-        data_selected=(fun () -> Jsx.flag (S.get selected))
-        data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-        data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-        data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-        data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
+        data_selected=(Jsx.flag (S.get selected))
+        data_hovered=(Jsx.flag (Interaction.hovered i))
+        data_pressed=(Jsx.flag (Interaction.pressed i))
+        data_focused=(Jsx.flag (Interaction.focused i))
+        data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+        data_disabled=(Jsx.flag (Interaction.disabled i))
         on_click
-        ?as_=(fun () -> drawn selected ())
+        ?as_=(drawn selected ())
         props=(Props.others props)
-        disabled=(fun () -> S.get disabled)>
-        (fun () -> draw selected ())
+        disabled=(S.get disabled)>
+        (draw selected ())
       </Kobalte.Root>
   | Some g -> (
       match S.get id with
@@ -110,21 +110,20 @@ let%component make ?(variant : [ `default | `ghost ] option)
       | Some key ->
           g.join (fun () -> S.get disabled);
           <Item
-            class_=(fun () -> class_ ())
-            ?aria_label=(fun () -> S.get aria_label)
+            class_=(class_ ())
+            ?aria_label=(S.get aria_label)
             ref=watch
             data_slot="toggle-button"
-            data_selected=(fun () -> Jsx.flag (g.is_selected key))
-            data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-            data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-            data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-            data_focus_visible=(fun () ->
-                                 Jsx.flag (Interaction.focus_visible i))
-            data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
+            data_selected=(Jsx.flag (g.is_selected key))
+            data_hovered=(Jsx.flag (Interaction.hovered i))
+            data_pressed=(Jsx.flag (Interaction.pressed i))
+            data_focused=(Jsx.flag (Interaction.focused i))
+            data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+            data_disabled=(Jsx.flag (Interaction.disabled i))
             on_click
             props=(Props.others props)
-            value=(fun () -> key)
-            disabled=(fun () -> S.get disabled)>
-            (fun () -> draw (S.accessor (fun () -> g.is_selected key)) ())
+            value=key
+            disabled=(S.get disabled)>
+            (draw (S.accessor (fun () -> g.is_selected key)) ())
           </Item>)
 [@@element button]

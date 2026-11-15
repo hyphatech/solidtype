@@ -9,7 +9,7 @@ let make () =
   let selected, set_selected = S.create_signal [| "news"; "travel" |] in
   <div class_="flex flex-col gap-3">
     <Tag_group
-      selected_keys=(fun () -> S.get selected)
+      selected_keys=(S.get selected)
       selection_mode=`multiple
       on_selection_change=(S.set set_selected)>
       <Label>"Categories (controlled)"</Label>
@@ -21,11 +21,10 @@ let make () =
       </Tag_group.List>
       <Description>
         "Selected: "
-        (fun () ->
-          Jsx.string
-            (match S.get selected with
-            | [||] -> "None"
-            | keys -> String.concat ", " (Array.to_list keys)))
+        (Jsx.string
+           (match S.get selected with
+           | [||] -> "None"
+           | keys -> String.concat ", " (Array.to_list keys)))
       </Description>
     </Tag_group>
   </div>

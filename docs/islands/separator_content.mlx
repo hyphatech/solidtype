@@ -18,24 +18,21 @@ let items =
 
 let make () =
   <div class_="max-w-md space-y-4">
-    <Solidtype.For each=(fun () -> items)>
+    <Solidtype.For each=items>
       (fun (icon, subtitle, title) index ->
         <div>
           <div class_="flex items-center gap-3">
-            <img alt=(fun () -> title) class_="size-12" src=(fun () -> icon) />
+            <img alt=title class_="size-12" src=icon />
             <div class_="flex-1 space-y-0">
               <h4 class_="text-small font-medium">
-                (fun () -> Solidtype.Jsx.string title)
+                (Solidtype.Jsx.string title)
               </h4>
-              <p class_="text-sm text-muted">
-                (fun () -> Solidtype.Jsx.string subtitle)
-              </p>
+              <p class_="text-sm text-muted">(Solidtype.Jsx.string subtitle)</p>
             </div>
           </div>
-          (fun () ->
-            if Solidtype.Solid.get index < Array.length items - 1 then
-              Solidtype.Jsx.element <Separator class_="my-4" />
-            else Solidtype.Jsx.string "")
+          (if Solidtype.Solid.get index < Array.length items - 1 then
+             Solidtype.Jsx.element <Separator class_="my-4" />
+           else Solidtype.Jsx.string "")
         </div>)
     </Solidtype.For>
   </div>

@@ -11,7 +11,7 @@ let make () =
     <Button aria_label="Menu" variant=`secondary>"Fruits"</Button>
     <Dropdown.Popover class_="min-w-[256px]">
       <Dropdown.Menu
-        selected_keys=(fun () -> S.get selected)
+        selected_keys=(S.get selected)
         selection_mode=`single
         on_selection_change=(S.set set_selected)>
         <Dropdown.Section>

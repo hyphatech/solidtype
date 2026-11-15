@@ -53,7 +53,7 @@ let make () =
   <Autocomplete
     class_="w-[256px]"
     placeholder="Search for a city"
-    value=(fun () -> S.get selected)
+    value=(S.get selected)
     on_change=(S.set set_selected)>
     <Label>"City"</Label>
     <Autocomplete.Trigger>
@@ -74,18 +74,16 @@ let make () =
         <List_box
           render_empty_state=(fun _ ->
                                <Empty_state>
-                                 (fun () ->
-                                   Jsx.string
-                                     (if S.get loading then "Searching..."
-                                      else "No cities found"))
+                                 (Jsx.string
+                                    (if S.get loading then "Searching..."
+                                     else "No cities found"))
                                </Empty_state>)>
-          <Solidtype.For each=(fun () -> cities)>
+          <Solidtype.For each=cities>
             (fun city _ ->
-              <List_box.Item
-                id=(fun () -> city.name) text_value=(fun () -> city.name)>
+              <List_box.Item id=city.name text_value=city.name>
                 <div class_="flex flex-col">
-                  <Label>(fun () -> Jsx.string city.name)</Label>
-                  <Description>(fun () -> Jsx.string city.country)</Description>
+                  <Label>(Jsx.string city.name)</Label>
+                  <Description>(Jsx.string city.country)</Description>
                 </div>
                 <List_box.Item_indicator />
               </List_box.Item>)

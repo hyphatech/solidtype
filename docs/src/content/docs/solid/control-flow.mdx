@@ -17,7 +17,7 @@ OCaml's options and matches want.
 ## Show
 
 ```ocaml
-<Show when_=(fun () -> Solid.get ready) fallback=(<p>"Loading"</p>)>
+<Show when_=(Solid.get ready) fallback=(<p>"Loading"</p>)>
   <Dashboard />
 </Show>
 ```
@@ -29,8 +29,8 @@ value to test. An `option` is shown by `Show.Some`, whose child is given a
 read of the value while it is `Some`:
 
 ```ocaml
-<Show.Some some=(fun () -> Solid.get user)>
-  (fun user -> <p>(fun () -> Jsx.string (Solid.get user).name)</p>)
+<Show.Some some=(Solid.get user)>
+  (fun user -> <p>(Jsx.string (Solid.get user).name)</p>)
 </Show.Some>
 ```
 
@@ -43,8 +43,8 @@ list reorders; its child is the function that renders an item, given the
 item and a tracked index:
 
 ```ocaml
-<For each=(fun () -> Solid.get tasks)>
-  (fun task i -> <li>(fun () -> Jsx.string task.title)</li>)
+<For each=(Solid.get tasks)>
+  (fun task i -> <li>(Jsx.string task.title)</li>)
 </For>
 ```
 
@@ -54,16 +54,15 @@ is what JavaScript holds.
 
 ## Switch and Match
 
-A `Switch` whose only child is a thunk of a `match` gets a `Match` per case,
+A `Switch` whose only child is a `match` gets a `Match` per case,
 written by the ppx:
 
 ```ocaml
 <Switch>
-  (fun () ->
-    match Solid.get answer with
+  (match Solid.get answer with
     | Waiting -> <p>"waiting"</p>
-    | Ready n -> <p>(fun () -> Jsx.int n)</p>
-    | Refused why -> <p>(fun () -> Jsx.string why)</p>)
+    | Ready n -> <p>(Jsx.int n)</p>
+    | Refused why -> <p>(Jsx.string why)</p>)
 </Switch>
 ```
 

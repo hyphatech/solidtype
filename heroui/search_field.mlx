@@ -96,22 +96,19 @@ module Group = struct
     <div
       role=`group
       ref=(fun e -> Interaction.watch i e)
-      class_=(fun () ->
-               after (Styles.SearchField.group (S.get f.slots)) (S.get class_))
+      class_=(after (Styles.SearchField.group (S.get f.slots)) (S.get class_))
       data_slot="search-field-group"
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_focus_within=(fun () ->
-                          Jsx.flag (Interaction.focused i && not (elsewhere f)))
-      data_focus_visible=(fun () ->
-                           Jsx.flag
-                             ((Interaction.focus_visible i
-                              || (Interaction.focused i && returned f))
-                             && not (elsewhere f)))
-      data_disabled=(fun () -> Jsx.flag (S.get f.disabled))
-      data_invalid=(fun () -> Jsx.flag (S.get f.invalid))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_focus_within=(Jsx.flag (Interaction.focused i && not (elsewhere f)))
+      data_focus_visible=(Jsx.flag
+                            ((Interaction.focus_visible i
+                             || (Interaction.focused i && returned f))
+                            && not (elsewhere f)))
+      data_disabled=(Jsx.flag (S.get f.disabled))
+      data_invalid=(Jsx.flag (S.get f.invalid))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (S.get children) (state ()))
+      (Jsx.draw (S.get children) (state ()))
     </div>
   [@@element div]
 end
@@ -124,20 +121,19 @@ module Search_icon = struct
       after (Styles.SearchField.search_icon (S.get f.slots)) (S.get class_)
     in
     <Show
-      when_=(fun () -> Option.is_some (S.get children))
+      when_=(Option.is_some (S.get children))
       fallback=(<Gravity.Magnifier
                   aria_hidden=true
-                  class_=(fun () -> classes ())
+                  class_=(classes ())
                   role=`presentation
                   data_slot="search-field-search-icon"
                   props=(Props.others props)
                 />)>
       <span
-        class_=(fun () -> classes ())
+        class_=(classes ())
         data_slot="search-field-search-icon"
         props=(Props.others props)>
-        (fun () ->
-          match S.get children with Some c -> c | None -> Jsx.string "")
+        (match S.get children with Some c -> c | None -> Jsx.string "")
       </span>
     </Show>
   [@@element svg]
@@ -162,28 +158,26 @@ module Input = struct
         (* An autocomplete's search: Kobalte's combo box input, whose keys
            move through the list and choose, and Escape closes it. *)
         <Kobalte_combo_box.Input
-          ?placeholder=(fun () -> S.get placeholder)
-          ?name=(fun () -> S.get f.name)
-          ?aria_label=(fun () -> S.get f.aria_label)
+          ?placeholder=(S.get placeholder)
+          ?name=(S.get f.name)
+          ?aria_label=(S.get f.aria_label)
           enterkeyhint="go"
           title=""
           type_="search"
-          class_=(fun () -> classes ())
+          class_=(classes ())
           ref=watched
           on_key_down=(fun e -> ignore (on_key_down e : unit option))
           data_slot="search-field-input"
-          data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-          data_focused=(fun () ->
-                         Jsx.flag
-                           (Interaction.focused i && not (S.get s.elsewhere)))
-          data_focus_visible=(fun () ->
-                               Jsx.flag
-                                 ((Interaction.focus_visible i
-                                  || (Interaction.focused i && S.get s.returned)
-                                  )
-                                 && not (S.get s.elsewhere)))
-          data_disabled=(fun () -> Jsx.flag (S.get f.disabled))
-          data_invalid=(fun () -> Jsx.flag (S.get f.invalid))
+          data_hovered=(Jsx.flag (Interaction.hovered i))
+          data_focused=(Jsx.flag
+                          (Interaction.focused i && not (S.get s.elsewhere)))
+          data_focus_visible=(Jsx.flag
+                                ((Interaction.focus_visible i
+                                 || (Interaction.focused i && S.get s.returned)
+                                 )
+                                && not (S.get s.elsewhere)))
+          data_disabled=(Jsx.flag (S.get f.disabled))
+          data_invalid=(Jsx.flag (S.get f.invalid))
           props=(Props.others props)
         />
     | None ->
@@ -200,17 +194,17 @@ module Input = struct
           | _ -> ()
         in
         <Kobalte.Input
-          ?placeholder=(fun () -> S.get placeholder)
+          ?placeholder=(S.get placeholder)
           type_="search"
-          class_=(fun () -> classes ())
+          class_=(classes ())
           ref=watched
           on_key_down=keyed
           data_slot="search-field-input"
-          data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-          data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-          data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-          data_disabled=(fun () -> Jsx.flag (S.get f.disabled))
-          data_invalid=(fun () -> Jsx.flag (S.get f.invalid))
+          data_hovered=(Jsx.flag (Interaction.hovered i))
+          data_focused=(Jsx.flag (Interaction.focused i))
+          data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+          data_disabled=(Jsx.flag (S.get f.disabled))
+          data_invalid=(Jsx.flag (S.get f.invalid))
           props=(Props.others props)
         />
   [@@element input]
@@ -250,14 +244,13 @@ module Clear_button = struct
     in
     <Kobalte_button.Root
       aria_label="Close"
-      class_=(fun () ->
-               after
-                 (Styles.CloseButton.classes (Styles.CloseButton.options ())
-                 ^ " "
-                 ^ Styles.SearchField.clear_button (S.get f.slots))
-                 (S.get class_))
+      class_=(after
+                (Styles.CloseButton.classes (Styles.CloseButton.options ())
+                ^ " "
+                ^ Styles.SearchField.clear_button (S.get f.slots))
+                (S.get class_))
       slot="clear"
-      ?tab_index=(fun () -> if S.get disabled then None else Some "-1")
+      ?tab_index=(if S.get disabled then None else Some "-1")
       type_=`button
       ref=(fun b ->
             ignore (given_ref b : unit option);
@@ -271,17 +264,16 @@ module Clear_button = struct
                  f.clear ();
                  Option.iter focus !(f.input))
       data_slot="search-field-clear-button"
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_pressed=(Jsx.flag (Interaction.pressed i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(Jsx.flag (Interaction.disabled i))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)
-      disabled=(fun () -> S.get disabled)>
-      (fun () ->
-        match S.get children with
-        | Some c -> Jsx.draw c (state ())
-        | None -> Jsx.element <Close_button.Icon />)
+      disabled=(S.get disabled)>
+      (match S.get children with
+      | Some c -> Jsx.draw c (state ())
+      | None -> Jsx.element <Close_button.Icon />)
     </Kobalte_button.Root>
   [@@element button]
 end
@@ -367,19 +359,17 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       is_required;
     }
   in
-  <Context.Provider value=(fun () -> f)>
+  <Context.Provider value=f>
     <Kobalte.Root
-      value=(fun () -> S.get current)
+      value=(S.get current)
       on_change=(fun v -> if not (String.equal v (S.get current)) then set v)
-      validation_state=(fun () -> if S.get invalid then `invalid else `valid)
-      required=(fun () -> S.get is_required)
-      disabled=(fun () -> S.get disabled)
-      read_only=(fun () -> S.get is_read_only)
-      ?name=(fun () -> if Option.is_some search then None else S.get name)
-      ?aria_label=(fun () ->
-                    if Option.is_some search then None else S.get aria_label)
-      class_=(fun () ->
-               after (Styles.SearchField.base (S.get f.slots)) (S.get class_))
+      validation_state=(if S.get invalid then `invalid else `valid)
+      required=(S.get is_required)
+      disabled=(S.get disabled)
+      read_only=(S.get is_read_only)
+      ?name=(if Option.is_some search then None else S.get name)
+      ?aria_label=(if Option.is_some search then None else S.get aria_label)
+      class_=(after (Styles.SearchField.base (S.get f.slots)) (S.get class_))
       ref=(fun e ->
             ignore (given_ref e : unit option);
             in_form.root e)
@@ -391,15 +381,15 @@ let%component make ?(variant : [ `primary | `secondary ] option)
                          on_blur e)
                        e)
       data_slot="search-field"
-      data_empty=(fun () -> Jsx.flag (String.equal (S.get current) ""))
-      data_disabled=(fun () -> Jsx.flag (S.get disabled))
-      data_invalid=(fun () -> Jsx.flag (S.get invalid))
-      data_readonly=(fun () -> Jsx.flag (S.get is_read_only))
-      data_required=(fun () -> Jsx.flag (S.get is_required))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_empty=(Jsx.flag (String.equal (S.get current) ""))
+      data_disabled=(Jsx.flag (S.get disabled))
+      data_invalid=(Jsx.flag (S.get invalid))
+      data_readonly=(Jsx.flag (S.get is_read_only))
+      data_required=(Jsx.flag (S.get is_required))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      <Field_error.Message.Provider value=(fun () -> in_form.error)>
-        <Parts>(fun () -> Jsx.draw (S.get children) (state ()))</Parts>
+      <Field_error.Message.Provider value=in_form.error>
+        <Parts>(Jsx.draw (S.get children) (state ()))</Parts>
       </Field_error.Message.Provider>
     </Kobalte.Root>
   </Context.Provider>

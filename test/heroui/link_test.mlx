@@ -28,21 +28,20 @@ let of_state ~disabled ~current =
   T.render (fun () ->
       <Link
         href="#top"
-        is_disabled=(fun () -> disabled)
-        ?aria_current=(fun () -> if current then Some "page" else None)>
+        is_disabled=disabled
+        ?aria_current=(if current then Some "page" else None)>
         (fun s ->
           <span>
-            (fun () ->
-              Solidtype.Jsx.string
-                (T.words
-                   [
-                     ("current", s.is_current);
-                     ("hovered", s.is_hovered);
-                     ("pressed", s.is_pressed);
-                     ("focused", s.is_focused);
-                     ("focus-visible", s.is_focus_visible);
-                     ("disabled", s.is_disabled);
-                   ]))
+            (Solidtype.Jsx.string
+               (T.words
+                  [
+                    ("current", s.is_current);
+                    ("hovered", s.is_hovered);
+                    ("pressed", s.is_pressed);
+                    ("focused", s.is_focused);
+                    ("focus-visible", s.is_focus_visible);
+                    ("disabled", s.is_disabled);
+                  ]))
           </span>)
       </Link>);
   let marked link = T.attribute link "data-current" in
@@ -72,9 +71,7 @@ let shown link =
    walked. *)
 let both ~disabled =
   T.render (fun () ->
-      <Link href="#top" is_disabled=(fun () -> disabled)>
-        "HeroUI" <Link.Icon />
-      </Link>);
+      <Link href="#top" is_disabled=disabled>"HeroUI" <Link.Icon /></Link>);
   let link = T.by_role "link" in
   let solidtype = shown link in
   let* solidtype_walk = T.walk ~step:Twin.step link in

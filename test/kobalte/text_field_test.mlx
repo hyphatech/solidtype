@@ -8,18 +8,17 @@ let island () =
   let name, set_name = S.create_signal "" in
   <div>
     <TextField.Root
-      value=(fun () -> S.get name)
+      value=(S.get name)
       on_change=(S.set set_name)
       required=true
-      validation_state=(fun () ->
-                         if String.equal (S.get name) "" then `invalid
-                         else `valid)>
+      validation_state=(if String.equal (S.get name) "" then `invalid
+                        else `valid)>
       <TextField.Label>"Name"</TextField.Label>
       <TextField.Input />
       <TextField.Description>"As on your passport"</TextField.Description>
       <TextField.ErrorMessage>"A name is needed"</TextField.ErrorMessage>
     </TextField.Root>
-    <output>(fun () -> Jsx.string (S.get name))</output>
+    <output>(Jsx.string (S.get name))</output>
     <TextField.Root default_value="Hello">
       <TextField.Label>"Notes"</TextField.Label> <TextField.TextArea />
     </TextField.Root>

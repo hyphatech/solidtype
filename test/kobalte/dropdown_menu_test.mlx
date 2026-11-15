@@ -34,7 +34,7 @@ let island () =
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
-    <p>"Chose " (fun () -> Jsx.string (S.get chosen))</p>
+    <p>"Chose " (Jsx.string (S.get chosen))</p>
   </div>
 
 external twin : unit -> Jsx.element = "make"

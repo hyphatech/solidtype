@@ -41,13 +41,12 @@ module Scroll_container = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = in_table "Table.Scroll_container" in
     <div
-      class_=(fun () ->
-               after
-                 (Styles.Table.scroll_container (S.get slots))
-                 (S.get class_))
+      class_=(after
+                (Styles.Table.scroll_container (S.get slots))
+                (S.get class_))
       data_slot="table-scroll-container"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
@@ -66,13 +65,12 @@ module Resizable_container = struct
                         ignore (on_resize_start sizes : unit option))
       on_resize=(fun sizes -> ignore (on_resize sizes : unit option))
       on_resize_end=(fun sizes -> ignore (on_resize_end sizes : unit option))
-      class_=(fun () ->
-               after
-                 (Styles.Table.resizable_container (S.get slots))
-                 (S.get class_))
+      class_=(after
+                (Styles.Table.resizable_container (S.get slots))
+                (S.get class_))
       data_slot="table-resizable-container"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </Headless.Resizable_container>
   [@@element div]
 end
@@ -96,25 +94,24 @@ module Content = struct
       ~(children : Jsx.content) () =
     let slots = in_table "Table.Content" in
     <Headless.Root
-      ?aria_label=(fun () -> S.get aria_label)
-      ?aria_labelledby=(fun () -> S.get aria_labelledby)
-      ?selection_mode=(fun () -> S.get selection_mode)
-      ?selection_behavior=(fun () -> S.get selection_behavior)
-      ?selected_keys=(fun () -> S.get selected_keys)
-      ?default_selected_keys=(fun () -> S.get default_selected_keys)
+      ?aria_label=(S.get aria_label)
+      ?aria_labelledby=(S.get aria_labelledby)
+      ?selection_mode=(S.get selection_mode)
+      ?selection_behavior=(S.get selection_behavior)
+      ?selected_keys=(S.get selected_keys)
+      ?default_selected_keys=(S.get default_selected_keys)
       on_selection_change=(fun keys ->
                             ignore (on_selection_change keys : unit option))
-      ?disabled_keys=(fun () -> S.get disabled_keys)
-      ?disallow_empty_selection=(fun () -> S.get disallow_empty_selection)
-      ?sort_descriptor=(fun () -> S.get sort_descriptor)
+      ?disabled_keys=(S.get disabled_keys)
+      ?disallow_empty_selection=(S.get disallow_empty_selection)
+      ?sort_descriptor=(S.get sort_descriptor)
       on_sort_change=(fun sort -> ignore (on_sort_change sort : unit option))
-      ?tree_column=(fun () -> S.get tree_column)
-      ?expanded_keys=(fun () -> S.get expanded_keys)
-      ?default_expanded_keys=(fun () -> S.get default_expanded_keys)
+      ?tree_column=(S.get tree_column)
+      ?expanded_keys=(S.get expanded_keys)
+      ?default_expanded_keys=(S.get default_expanded_keys)
       on_expanded_change=(fun keys ->
                            ignore (on_expanded_change keys : unit option))
-      class_=(fun () ->
-               after (Styles.Table.content (S.get slots)) (S.get class_))
+      class_=(after (Styles.Table.content (S.get slots)) (S.get class_))
       data_slot="table-content"
       props=(S.merge_props
                [|
@@ -123,7 +120,7 @@ module Content = struct
                     for it rather than selected. *)
                  S.pick props [| "onRowAction" |];
                |])>
-      (fun () -> S.get children)
+      (S.get children)
     </Headless.Root>
   [@@element table]
 end
@@ -147,13 +144,12 @@ module Header = struct
               | `single | `none -> true);
       }
     in
-    <Checkbox.Selection.Provider value=(fun () -> all)>
+    <Checkbox.Selection.Provider value=all>
       <Headless.Header
-        class_=(fun () ->
-                 after (Styles.Table.header (S.get slots)) (S.get class_))
+        class_=(after (Styles.Table.header (S.get slots)) (S.get class_))
         data_slot="table-header"
         props=(Props.others props)>
-        (fun () -> S.get children)
+        (S.get children)
       </Headless.Header>
     </Checkbox.Selection.Provider>
   [@@element thead]
@@ -207,26 +203,25 @@ module Column = struct
       }
     in
     <Headless.Column
-      ?id=(fun () -> S.get id)
-      allows_sorting=(fun () -> S.get allows_sorting)
-      ?is_row_header=(fun () -> S.get is_row_header)
-      ?width=(fun () -> S.get width)
-      ?default_width=(fun () -> S.get default_width)
-      ?min_width=(fun () -> S.get min_width)
-      ?max_width=(fun () -> S.get max_width)
+      ?id=(S.get id)
+      allows_sorting=(S.get allows_sorting)
+      ?is_row_header=(S.get is_row_header)
+      ?width=(S.get width)
+      ?default_width=(S.get default_width)
+      ?min_width=(S.get min_width)
+      ?max_width=(S.get max_width)
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e)
-      class_=(fun () ->
-               after (Styles.Table.column (S.get slots)) (S.get class_))
+      class_=(after (Styles.Table.column (S.get slots)) (S.get class_))
       data_slot="table-column"
-      data_allows_sorting=(fun () -> Jsx.flag (S.get allows_sorting))
-      data_resizing=(fun () -> Jsx.flag (resizing ()))
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_allows_sorting=(Jsx.flag (S.get allows_sorting))
+      data_resizing=(Jsx.flag (resizing ()))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (S.get children) (state ()))
+      (Jsx.draw (S.get children) (state ()))
     </Headless.Column>
   [@@element th]
 end
@@ -263,26 +258,24 @@ module Column_resizer = struct
       }
     in
     <Headless.Column_resizer
-      ?aria_label=(fun () -> S.get aria_label)
+      ?aria_label=(S.get aria_label)
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch handle e;
             S.on_mount (fun () ->
                 Option.iter (Interaction.watch input)
                   (Js.Null.toOption (query_in e "input"))))
-      class_=(fun () ->
-               after (Styles.Table.column_resizer (S.get slots)) (S.get class_))
+      class_=(after (Styles.Table.column_resizer (S.get slots)) (S.get class_))
       data_slot="table-column-resizer"
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered handle))
-      data_focused=(fun () -> Jsx.flag (Interaction.focused input))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible input))
-      data_resizing=(fun () -> Jsx.flag (S.get column.resizing))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_hovered=(Jsx.flag (Interaction.hovered handle))
+      data_focused=(Jsx.flag (Interaction.focused input))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible input))
+      data_resizing=(Jsx.flag (S.get column.resizing))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () ->
-        match S.get children with
-        | Some c -> Jsx.draw c (state ())
-        | None -> Jsx.string "")
+      (match S.get children with
+      | Some c -> Jsx.draw c (state ())
+      | None -> Jsx.string "")
     </Headless.Column_resizer>
   [@@element div]
 end
@@ -307,32 +300,29 @@ module Sortable_column_header = struct
       | None -> Jsx.flag false
     in
     <span
-      class_=(fun () ->
-               after
-                 (Styles.Table.sortable_column_header (S.get slots))
-                 (S.get class_))
-      data_direction=(fun () -> named ())
+      class_=(after
+                (Styles.Table.sortable_column_header (S.get slots))
+                (S.get class_))
+      data_direction=(named ())
       data_slot="table-sortable-column-header"
       props=(Props.others props)>
-      (fun () -> S.get children)
-      <Solidtype.Show.Some some=(fun () -> shown ())>
+      (S.get children)
+      <Solidtype.Show.Some some=(shown ())>
         (fun _ ->
           match S.untrack (fun () -> S.get indicator) with
           | Some own ->
               <span
-                class_=(fun () ->
-                         Styles.Table.sortable_column_indicator (S.get slots))
-                data_direction=(fun () -> named ())
+                class_=(Styles.Table.sortable_column_indicator (S.get slots))
+                data_direction=(named ())
                 data_slot="table-sortable-column-indicator">
-                (fun () -> Jsx.element own)
+                (Jsx.element own)
               </span>
           | None ->
               <Gravity.Chevron_up
                 aria_hidden=true
-                class_=(fun () ->
-                         Styles.Table.sortable_column_indicator (S.get slots))
+                class_=(Styles.Table.sortable_column_indicator (S.get slots))
                 role=`presentation
-                data_direction=(fun () -> named ())
+                data_direction=(named ())
                 data_slot="table-sortable-column-indicator"
               />)
       </Solidtype.Show.Some>
@@ -345,11 +335,11 @@ module Body = struct
       ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = in_table "Table.Body" in
     <Headless.Body
-      ?empty_state=(fun () -> render_empty_state ())
-      class_=(fun () -> after (Styles.Table.body (S.get slots)) (S.get class_))
+      ?empty_state=(render_empty_state ())
+      class_=(after (Styles.Table.body (S.get slots)) (S.get class_))
       data_slot="table-body"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </Headless.Body>
   [@@element tbody]
 end
@@ -388,33 +378,30 @@ module Row = struct
        headless row gives the attributes it writes. *)
     let level () = string_of_int (Headless.Row.Context.use ()).level in
     let tree_state read = Jsx.flag (read (Headless.Row.Context.use ())) in
-    <Checkbox.Selection.Provider value=(fun () -> one)>
+    <Checkbox.Selection.Provider value=one>
       <Headless.Row
-        id=(fun () -> key)
-        ?href=(fun () -> S.get href)
-        ?target=(fun () -> S.get target)
-        ?rel=(fun () -> S.get rel)
-        ?download=(fun () -> S.get download)
-        ?href_lang=(fun () -> S.get href_lang)
-        ?ping=(fun () -> S.get ping)
-        ?referrer_policy=(fun () -> S.get referrer_policy)
+        id=key
+        ?href=(S.get href)
+        ?target=(S.get target)
+        ?rel=(S.get rel)
+        ?download=(S.get download)
+        ?href_lang=(S.get href_lang)
+        ?ping=(S.get ping)
+        ?referrer_policy=(S.get referrer_policy)
         ref=(fun e ->
               ignore (given_ref e : unit option);
               Interaction.watch i e)
-        style=(fun () ->
-                styled ("--table-row-level: " ^ level ()) (S.get style))
-        class_=(fun () -> after (Styles.Table.row (S.get slots)) (S.get class_))
+        style=(styled ("--table-row-level: " ^ level ()) (S.get style))
+        class_=(after (Styles.Table.row (S.get slots)) (S.get class_))
         data_slot="table-row"
-        data_level=(fun () -> Jsx.data (level ()))
-        data_expanded=(fun () ->
-                        tree_state (fun r ->
-                            S.get r.has_child_items && S.get r.is_expanded))
-        data_has_child_items=(fun () ->
-                               tree_state (fun r -> S.get r.has_child_items))
-        data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-        data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-        data_selected=(fun () -> Jsx.flag (S.get selected))
-        data_disabled=(fun () -> Jsx.flag (S.get disabled))
+        data_level=(Jsx.data (level ()))
+        data_expanded=(tree_state (fun r ->
+                           S.get r.has_child_items && S.get r.is_expanded))
+        data_has_child_items=(tree_state (fun r -> S.get r.has_child_items))
+        data_hovered=(Jsx.flag (Interaction.hovered i))
+        data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+        data_selected=(Jsx.flag (S.get selected))
+        data_disabled=(Jsx.flag (S.get disabled))
         props=(S.merge_props
                  [|
                    Props.others props;
@@ -422,7 +409,7 @@ module Row = struct
                       pressed for it rather than selected. *)
                    S.pick props [| "onAction" |];
                  |])>
-        (fun () -> S.get children)
+        (S.get children)
       </Headless.Row>
     </Checkbox.Selection.Provider>
   [@@element tr]
@@ -481,31 +468,27 @@ module Cell = struct
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e)
-      class_=(fun () -> after (Styles.Table.cell (S.get slots)) (S.get class_))
+      class_=(after (Styles.Table.cell (S.get slots)) (S.get class_))
       data_slot="table-cell"
-      data_level=(fun () -> Jsx.data (string_of_int (row ()).level))
-      data_expanded=(fun () ->
-                      let r = row () in
-                      Jsx.flag (S.get r.has_child_items && S.get r.is_expanded))
-      data_has_child_items=(fun () -> Jsx.flag (S.get (row ()).has_child_items))
-      data_tree_column=(fun () ->
-                         Jsx.flag
-                           (S.get (Headless.Cell.Context.use ()).is_tree_column))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_level=(Jsx.data (string_of_int (row ()).level))
+      data_expanded=(let r = row () in
+                     Jsx.flag (S.get r.has_child_items && S.get r.is_expanded))
+      data_has_child_items=(Jsx.flag (S.get (row ()).has_child_items))
+      data_tree_column=(Jsx.flag
+                          (S.get (Headless.Cell.Context.use ()).is_tree_column))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () ->
-        let r = row () in
-        Jsx.element
-          <Button.Chevron.Provider
-            value=(fun () ->
-                    {
-                      Button.toggle = r.toggle_expanded;
-                      focus_row = r.focus;
-                      labelled_by = r.header_id;
-                    })>
-            (fun () -> Jsx.draw (S.get children) (state ()))
-          </Button.Chevron.Provider>)
+      (let r = row () in
+       Jsx.element
+         <Button.Chevron.Provider
+           value={
+                   Button.toggle = r.toggle_expanded;
+                   focus_row = r.focus;
+                   labelled_by = r.header_id;
+                 }>
+           (Jsx.draw (S.get children) (state ()))
+         </Button.Chevron.Provider>)
     </Headless.Cell>
   [@@element td]
 end
@@ -519,16 +502,15 @@ module Load_more = struct
       ~(children : Jsx.content) () =
     let slots = in_table "Table.Load_more" in
     <Headless.Load_more
-      ?is_loading=(fun () -> S.get is_loading)
+      ?is_loading=(S.get is_loading)
       on_load_more=(fun _ -> ignore (on_load_more () : unit option))
-      ?scroll_offset=(fun () -> S.get scroll_offset)
-      style=(fun () -> styled "--table-row-level: 1" (S.get style))
-      class_=(fun () ->
-               after (Styles.Table.load_more (S.get slots)) (S.get class_))
+      ?scroll_offset=(S.get scroll_offset)
+      style=(styled "--table-row-level: 1" (S.get style))
+      class_=(after (Styles.Table.load_more (S.get slots)) (S.get class_))
       data_slot="table-load-more"
       data_level="1"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </Headless.Load_more>
   [@@element tr]
 end
@@ -537,13 +519,12 @@ module Load_more_content = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = in_table "Table.Load_more_content" in
     <div
-      class_=(fun () ->
-               after
-                 (Styles.Table.load_more_content (S.get slots))
-                 (S.get class_))
+      class_=(after
+                (Styles.Table.load_more_content (S.get slots))
+                (S.get class_))
       data_slot="table-load-more-content"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
@@ -552,11 +533,10 @@ module Footer = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = in_table "Table.Footer" in
     <div
-      class_=(fun () ->
-               after (Styles.Table.footer (S.get slots)) (S.get class_))
+      class_=(after (Styles.Table.footer (S.get slots)) (S.get class_))
       data_slot="table-footer"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
@@ -567,12 +547,12 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     S.accessor (fun () ->
         Styles.Table.slots (Styles.Table.options ?variant:(S.get variant) ()))
   in
-  <Slots.Provider value=(fun () -> slots)>
+  <Slots.Provider value=slots>
     <div
-      class_=(fun () -> after (Styles.Table.base (S.get slots)) (S.get class_))
+      class_=(after (Styles.Table.base (S.get slots)) (S.get class_))
       data_slot="table"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   </Slots.Provider>
 [@@element div]

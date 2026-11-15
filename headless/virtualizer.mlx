@@ -53,9 +53,7 @@ module Context = Solidtype.Context.Make_optional (struct
 end)
 
 let%component make ~(layout : layout) ~(children : Jsx.content) () =
-  <Context.Provider value=(fun () -> S.get layout)>
-    (fun () -> S.get children)
-  </Context.Provider>
+  <Context.Provider value=(S.get layout)>(S.get children)</Context.Provider>
 
 (* What the window reads of the page: an element's box, what scrolls it, and
    where it is scrolled to. *)

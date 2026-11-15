@@ -37,8 +37,7 @@ let shown () =
   | None -> "nothing"
 
 let both animation_type =
-  T.render (fun () ->
-      <Skeleton ?animation_type=(fun () -> animation_type) class_="h-3 w-3/5" />);
+  T.render (fun () -> <Skeleton ?animation_type class_="h-3 w-3/5" />);
   let solidtype = shown () in
   T.cleanup ();
   let react = T.attributes (Twin.render animation_type) in

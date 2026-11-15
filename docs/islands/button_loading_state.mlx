@@ -12,10 +12,8 @@ let make () =
       (Js.Global.setTimeout ~f:(fun () -> S.set set_loading false) 2000
         : Js.Global.timeoutId)
   in
-  <Button is_pending=(fun () -> S.get loading) on_click=press>
-    (fun () ->
-      if S.get loading then Jsx.element <Spinner color=`current size=`sm />
-      else Jsx.element <Gravity.Paperclip />)
-    (fun () ->
-      Jsx.string (if S.get loading then "Uploading..." else "Upload File"))
+  <Button is_pending=(S.get loading) on_click=press>
+    (if S.get loading then Jsx.element <Spinner color=`current size=`sm />
+     else Jsx.element <Gravity.Paperclip />)
+    (Jsx.string (if S.get loading then "Uploading..." else "Upload File"))
   </Button>

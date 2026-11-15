@@ -8,11 +8,11 @@ module Button = Solidtype_kobalte.Button
 module E = Jest.Expect
 
 let page () =
-  <div data_slot="frame" data_open=(fun () -> Jsx.flag false)>
+  <div data_slot="frame" data_open=(Jsx.flag false)>
     <Button.Root
       data_slot="button"
-      data_selected=(fun () -> Jsx.flag true)
-      data_hovered=(fun () -> Jsx.flag false)>
+      data_selected=(Jsx.flag true)
+      data_hovered=(Jsx.flag false)>
       "Save"
     </Button.Root>
   </div>

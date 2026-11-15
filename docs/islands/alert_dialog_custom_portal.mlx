@@ -28,12 +28,12 @@ let make () =
       class_="relative flex h-[380px] items-center justify-center \
               overflow-hidden rounded bg-muted/20"
       style="transform: translate(0);">
-      <Solidtype.Show.Some some=(fun () -> S.get container)>
+      <Solidtype.Show.Some some=(S.get container)>
         (fun element ->
           <Alert_dialog>
             <Button>"Open Alert Dialog"</Button>
             <Alert_dialog.Backdrop
-              class_="h-full" portal_container=(fun () -> S.get element)>
+              class_="h-full" portal_container=(S.get element)>
               <Alert_dialog.Container class_="h-full max-h-full">
                 <Alert_dialog.Dialog class_="h-full max-h-full sm:max-w-md">
                   <Alert_dialog.Close_trigger />

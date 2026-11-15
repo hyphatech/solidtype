@@ -7,8 +7,7 @@ let make () =
   let expanded, set_expanded = S.create_signal false in
   <div class_="w-full max-w-sm">
     <Disclosure
-      is_expanded=(fun () -> S.get expanded)
-      on_expanded_change=(S.set set_expanded)>
+      is_expanded=(S.get expanded) on_expanded_change=(S.set set_expanded)>
       <Disclosure.Heading>
         <Button
           class_="w-full justify-between rounded-xl border border-border/70 \

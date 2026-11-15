@@ -74,8 +74,8 @@ let shown host =
 
 let both ?variant (key : key) =
   T.render (fun () ->
-      <Kbd ?variant=(fun () -> variant) class_="ms-1">
-        <Kbd.Abbr key_value=(fun () -> key) /> <Kbd.Content>"K"</Kbd.Content>
+      <Kbd ?variant class_="ms-1">
+        <Kbd.Abbr key_value=key /> <Kbd.Content>"K"</Kbd.Content>
       </Kbd>);
   let solidtype = shown T.body in
   T.cleanup ();

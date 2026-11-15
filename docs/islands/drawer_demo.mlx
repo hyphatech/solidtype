@@ -19,19 +19,19 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="placement"
-        choices=(fun () -> placements)
-        picked=(fun () -> S.get placement)
+        choices=placements
+        picked=(S.get placement)
         on_pick=(Controls.choose placements set_placement)
       />
       <Select
         label="variant"
-        choices=(fun () -> variants)
-        picked=(fun () -> S.get variant)
+        choices=variants
+        picked=(S.get variant)
         on_pick=(Controls.choose variants set_variant)
       />
       <Toggle
         label="dismissable"
-        on=(fun () -> S.get dismissable)
+        on=(S.get dismissable)
         on_toggle=(S.set set_dismissable)
       />
     </div>
@@ -40,10 +40,9 @@ let make () =
       solidtype=(<Drawer>
                    <Button variant=`secondary>"Open Drawer"</Button>
                    <Drawer.Backdrop
-                     variant=(fun () -> fst (S.get variant))
-                     is_dismissable=(fun () -> S.get dismissable)>
-                     <Drawer.Content
-                       placement=(fun () -> fst (S.get placement))>
+                     variant=(fst (S.get variant))
+                     is_dismissable=(S.get dismissable)>
+                     <Drawer.Content placement=(fst (S.get placement))>
                        <Drawer.Dialog>
                          <Drawer.Handle />
                          <Drawer.Close_trigger />

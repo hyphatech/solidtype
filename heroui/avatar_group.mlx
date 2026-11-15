@@ -31,19 +31,17 @@ let counted ~others ~size ~color ~variant ~class_ children =
          ?variant:(S.get variant) ())
   in
   <Kobalte.Root
-    class_=(fun () ->
-             after
-               (Styles.Avatar.base (slots ())
-               ^ " "
-               ^ Styles.AvatarGroup.count
-                   (Styles.AvatarGroup.slots (Styles.AvatarGroup.options ())))
-               (S.get class_))
+    class_=(after
+              (Styles.Avatar.base (slots ())
+              ^ " "
+              ^ Styles.AvatarGroup.count
+                  (Styles.AvatarGroup.slots (Styles.AvatarGroup.options ())))
+              (S.get class_))
     data_slot="avatar-group-count"
     props=others>
     <Kobalte.Fallback
-      class_=(fun () -> Styles.Avatar.fallback (slots ()))
-      data_slot="avatar-fallback">
-      (fun () -> S.get children)
+      class_=(Styles.Avatar.fallback (slots ())) data_slot="avatar-fallback">
+      (S.get children)
     </Kobalte.Fallback>
   </Kobalte.Root>
 
@@ -108,31 +106,29 @@ let%component make ?(size : size = `md) ?(color : color option)
     | Some _ | None -> 0
   in
   let g = { size; color; variant; join; count } in
-  <Context.Provider value=(fun () -> g)>
+  <Context.Provider value=g>
     <div
-      ?role=(fun () -> S.get role)
-      ?aria_label=(fun () -> S.get aria_label)
-      ?aria_labelledby=(fun () -> S.get aria_labelledby)
-      class_=(fun () ->
-               after
-                 (Styles.AvatarGroup.base
-                    (Styles.AvatarGroup.slots
-                       (Styles.AvatarGroup.options ~is_grid:(S.get is_grid)
-                          ~overlap:(S.get overlap) ())))
-                 (S.get class_))
+      ?role=(S.get role)
+      ?aria_label=(S.get aria_label)
+      ?aria_labelledby=(S.get aria_labelledby)
+      class_=(after
+                (Styles.AvatarGroup.base
+                   (Styles.AvatarGroup.slots
+                      (Styles.AvatarGroup.options ~is_grid:(S.get is_grid)
+                         ~overlap:(S.get overlap) ())))
+                (S.get class_))
       data_slot="avatar-group"
       props=(Props.others props)>
-      (fun () -> S.get children)
-      <Show when_=(fun () -> remaining () > 0)>
-        (fun () ->
-          (* The group's own count, given no attributes but its own. *)
-          Jsx.element
-          @@ counted
-               ~others:(S.others (Js.Obj.empty ()) [||])
-               ~size ~color ~variant
-               ~class_:(S.accessor (fun () -> None))
-               (S.accessor (fun () ->
-                    Jsx.string ("+" ^ string_of_int (remaining ())))))
+      (S.get children)
+      <Show when_=(remaining () > 0)>
+        ((* The group's own count, given no attributes but its own. *)
+         Jsx.element
+        @@ counted
+             ~others:(S.others (Js.Obj.empty ()) [||])
+             ~size ~color ~variant
+             ~class_:(S.accessor (fun () -> None))
+             (S.accessor (fun () ->
+                  Jsx.string ("+" ^ string_of_int (remaining ())))))
       </Show>
     </div>
   </Context.Provider>

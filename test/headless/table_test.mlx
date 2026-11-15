@@ -30,8 +30,8 @@ let team ?(mode = `none) ?(disabled = [||]) ?(told = ref [||])
   H.render (fun () ->
       <Table.Root
         aria_label="Team members"
-        selection_mode=(fun () -> mode)
-        disabled_keys=(fun () -> disabled)
+        selection_mode=mode
+        disabled_keys=disabled
         on_selection_change=(fun keys -> told := keys)
         ref=(fun _ -> got_table := true)
         on_key_down>
@@ -41,15 +41,13 @@ let team ?(mode = `none) ?(disabled = [||]) ?(told = ref [||])
           <Table.Column>"Actions"</Table.Column>
         </Table.Header>
         <Table.Body empty_state=(<span>"No members"</span>)>
-          <For each=(fun () -> members)>
+          <For each=members>
             (fun m _ ->
-              <Table.Row id=(fun () -> m.id) on_click=(fun _ -> incr clicked)>
-                <Table.Cell>(fun () -> Jsx.string m.name)</Table.Cell>
-                <Table.Cell>(fun () -> Jsx.string m.role)</Table.Cell>
+              <Table.Row id=m.id on_click=(fun _ -> incr clicked)>
+                <Table.Cell>(Jsx.string m.name)</Table.Cell>
+                <Table.Cell>(Jsx.string m.role)</Table.Cell>
                 <Table.Cell>
-                  <button type_=`button>
-                    (fun () -> Jsx.string ("Edit " ^ m.name))
-                  </button>
+                  <button type_=`button>(Jsx.string ("Edit " ^ m.name))</button>
                 </Table.Cell>
               </Table.Row>)
           </For>
@@ -167,10 +165,10 @@ let () =
                   <Table.Column is_row_header=true>"Name"</Table.Column>
                 </Table.Header>
                 <Table.Body>
-                  <For each=(fun () -> S.get shown)>
+                  <For each=(S.get shown)>
                     (fun m _ ->
-                      <Table.Row id=(fun () -> m.id)>
-                        <Table.Cell>(fun () -> Jsx.string m.name)</Table.Cell>
+                      <Table.Row id=m.id>
+                        <Table.Cell>(Jsx.string m.name)</Table.Cell>
                       </Table.Row>)
                   </For>
                 </Table.Body>
@@ -191,21 +189,18 @@ let () =
           H.render (fun () ->
               <Table.Root aria_label="Team members">
                 <Table.Header>
-                  <For each=(fun () -> S.get columns)>
+                  <For each=(S.get columns)>
                     (fun c _ ->
-                      <Table.Column
-                        is_row_header=(fun () -> String.equal c "Name")>
-                        (fun () -> Jsx.string c)
+                      <Table.Column is_row_header=(String.equal c "Name")>
+                        (Jsx.string c)
                       </Table.Column>)
                   </For>
                 </Table.Header>
                 <Table.Body>
                   <Table.Row id="1">
-                    <For each=(fun () -> S.get columns)>
+                    <For each=(S.get columns)>
                       (fun c _ ->
-                        <Table.Cell>
-                          (fun () -> Jsx.string ("Kate's " ^ c))
-                        </Table.Cell>)
+                        <Table.Cell>(Jsx.string ("Kate's " ^ c))</Table.Cell>)
                     </For>
                   </Table.Row>
                 </Table.Body>
@@ -305,7 +300,7 @@ let () =
           H.render (fun () ->
               <Table.Root aria_label="Team members">
                 <Table.Header>
-                  <Solidtype.Show when_=(fun () -> S.get roles)>
+                  <Solidtype.Show when_=(S.get roles)>
                     <Table.Column>"Role"</Table.Column>
                   </Solidtype.Show>
                   <Table.Column is_row_header=true>"Name"</Table.Column>
@@ -313,7 +308,7 @@ let () =
                 </Table.Header>
                 <Table.Body>
                   <Table.Row id="1">
-                    <Solidtype.Show when_=(fun () -> S.get roles)>
+                    <Solidtype.Show when_=(S.get roles)>
                       <Table.Cell>"CEO"</Table.Cell>
                     </Solidtype.Show>
                     <Table.Cell>"Kate Moore"</Table.Cell>
@@ -366,12 +361,11 @@ module Direction = struct
   let make () =
     let c = Table.Column.Context.use () in
     <span>
-      (fun () ->
-        Jsx.string
-          (match S.get c.direction with
-          | Some `ascending -> "up"
-          | Some `descending -> "down"
-          | None -> "-"))
+      (Jsx.string
+         (match S.get c.direction with
+         | Some `ascending -> "up"
+         | Some `descending -> "down"
+         | None -> "-"))
     </span>
 end
 
@@ -388,17 +382,17 @@ let () =
           H.render (fun () ->
               <Table.Root
                 aria_label="Sortable"
-                sort_descriptor=(fun () -> S.get sort)
+                sort_descriptor=(S.get sort)
                 on_sort_change=(fun (s : Table.sort_descriptor) ->
                                  told := s :: !told;
                                  S.set set_sort s)>
                 <Table.Header>
                   <Table.Column
                     id="name" allows_sorting=true is_row_header=true>
-                    "Name " (fun () -> Jsx.element (Direction.make ()))
+                    "Name " (Jsx.element (Direction.make ()))
                   </Table.Column>
                   <Table.Column id="role" allows_sorting=true>
-                    "Role " (fun () -> Jsx.element (Direction.make ()))
+                    "Role " (Jsx.element (Direction.make ()))
                   </Table.Column>
                   <Table.Column>"Actions"</Table.Column>
                 </Table.Header>
@@ -475,15 +469,15 @@ let () =
                   <Table.Column>"Role"</Table.Column>
                 </Table.Header>
                 <Table.Body>
-                  <For each=(fun () -> members)>
+                  <For each=members>
                     (fun m _ ->
-                      <Table.Row id=(fun () -> m.id)>
-                        <Table.Cell>(fun () -> Jsx.string m.name)</Table.Cell>
-                        <Table.Cell>(fun () -> Jsx.string m.role)</Table.Cell>
+                      <Table.Row id=m.id>
+                        <Table.Cell>(Jsx.string m.name)</Table.Cell>
+                        <Table.Cell>(Jsx.string m.role)</Table.Cell>
                       </Table.Row>)
                   </For>
                   <Table.Load_more
-                    is_loading=(fun () -> S.get loading)
+                    is_loading=(S.get loading)
                     on_load_more=(fun _ -> incr asked)
                     class_="loader">
                     <span>"Loading more"</span>
@@ -575,10 +569,8 @@ let () =
           let ended = ref [] in
           let column ~id ~min name =
             <Table.Column
-              id=(fun () -> id)
-              is_row_header=(fun () -> String.equal id "name")
-              min_width=(fun () -> min)>
-              (fun () -> Jsx.string name) <Table.Column_resizer />
+              id is_row_header=(String.equal id "name") min_width=min>
+              (Jsx.string name) <Table.Column_resizer />
             </Table.Column>
           in
           H.render (fun () ->
@@ -592,10 +584,9 @@ let () =
                                        sizes))>
                 <Table.Root aria_label="Resizable">
                   <Table.Header>
-                    (fun () -> Jsx.element (column ~id:"name" ~min:160. "Name"))
-                    (fun () -> Jsx.element (column ~id:"role" ~min:220. "Role"))
-                    (fun () ->
-                      Jsx.element (column ~id:"status" ~min:100. "Status"))
+                    (Jsx.element (column ~id:"name" ~min:160. "Name"))
+                    (Jsx.element (column ~id:"role" ~min:220. "Role"))
+                    (Jsx.element (column ~id:"status" ~min:100. "Status"))
                     <Table.Column id="email" min_width=200.>
                       "Email"
                     </Table.Column>
@@ -731,10 +722,10 @@ let files =
   |]
 
 let rec file_row f =
-  <Table.Row id=(fun () -> f.file_id)>
-    <Table.Cell>(fun () -> Jsx.string f.title)</Table.Cell>
+  <Table.Row id=f.file_id>
+    <Table.Cell>(Jsx.string f.title)</Table.Cell>
     <Table.Cell>"-"</Table.Cell>
-    <For each=(fun () -> f.files)>(fun f _ -> file_row f)</For>
+    <For each=f.files>(fun f _ -> file_row f)</For>
   </Table.Row>
 
 let tree_grid () =
@@ -753,7 +744,7 @@ let () =
               <Table.Root
                 aria_label="Files"
                 tree_column="name"
-                default_expanded_keys=(fun () -> [| "1" |])
+                default_expanded_keys=[| "1" |]
                 on_expanded_change=(fun keys ->
                                      told :=
                                        Array.of_list
@@ -766,7 +757,7 @@ let () =
                   <Table.Column id="type">"Type"</Table.Column>
                 </Table.Header>
                 <Table.Body>
-                  <For each=(fun () -> files)>(fun f _ -> file_row f)</For>
+                  <For each=files>(fun f _ -> file_row f)</For>
                 </Table.Body>
               </Table.Root>);
           let rows () =
@@ -861,9 +852,8 @@ let () =
          loads more after the last" (fun () ->
           H.render (fun () ->
               <Virtualizer
-                layout=(fun () ->
-                         Virtualizer.table_layout ~heading_size:40.
-                           ~row_size:40. ())>
+                layout=(Virtualizer.table_layout ~heading_size:40. ~row_size:40.
+                          ())>
                 <Table.Root
                   aria_label="Many"
                   data_client_height="200"
@@ -874,17 +864,15 @@ let () =
                     </Table.Column>
                   </Table.Header>
                   <Table.Body>
-                    <For each=(fun () -> Array.init 100 (fun i -> i + 1))>
+                    <For each=(Array.init 100 (fun i -> i + 1))>
                       (fun n _ ->
-                        <Table.Row id=(fun () -> string_of_int n)>
+                        <Table.Row id=(string_of_int n)>
                           <Table.Cell>
-                            (fun () -> Jsx.string ("Row " ^ string_of_int n))
+                            (Jsx.string ("Row " ^ string_of_int n))
                           </Table.Cell>
                         </Table.Row>)
                     </For>
-                    <Table.Load_more is_loading=(fun () -> true)>
-                      "Loading"
-                    </Table.Load_more>
+                    <Table.Load_more is_loading=true>"Loading"</Table.Load_more>
                   </Table.Body>
                 </Table.Root>
               </Virtualizer>);

@@ -69,13 +69,7 @@ let both ?color ?size ?class_ ?aria_label () =
     | `lg -> "lg"
     | `xl -> "xl"
   in
-  T.render (fun () ->
-      <Spinner
-        ?color=(fun () -> color)
-        ?size=(fun () -> size)
-        ?class_=(fun () -> class_)
-        ?aria_label=(fun () -> aria_label)
-      />);
+  T.render (fun () -> <Spinner ?color ?size ?class_ ?aria_label />);
   let solidtype = shown T.body in
   T.cleanup ();
   let react =

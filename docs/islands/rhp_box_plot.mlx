@@ -26,18 +26,18 @@ let runner =
       let r = Row.data d in
       let s = Solidtype_rhp.summary (Array.map Option.some r.laps) in
       <div>
-        <Label edge="start">(fun () -> Jsx.string r.runner)</Label>
+        <Label edge="start">(Jsx.string r.runner)</Label>
         <Bar
-          from=(fun () -> Summary.low s)
-          to_=(fun () -> Summary.high s)
-          thick=(fun () -> Either.left "2px")
-          color=(fun () -> Color.muted)
+          from=(Summary.low s)
+          to_=(Summary.high s)
+          thick=(Either.left "2px")
+          color=Color.muted
         />
-        <Bar from=(fun () -> Summary.q1 s) to_=(fun () -> Summary.q3 s) />
-        <Tick at=(fun () -> Summary.median s) color=(fun () -> Color.surface) />
+        <Bar from=(Summary.q1 s) to_=(Summary.q3 s) />
+        <Tick at=(Summary.median s) color=Color.surface />
       </div>)
 
 let make () =
-  <Chart scale=(fun () -> (55., 75.)) label="Lap times, in seconds">
-    <Plot rows=(fun () -> runners) render=runner />
+  <Chart scale=(55., 75.) label="Lap times, in seconds">
+    <Plot rows=runners render=runner />
   </Chart>

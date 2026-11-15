@@ -59,13 +59,12 @@ module Content = struct
     let r = within "Radio.Content" in
     let state () = state_of r.field in
     <Field_content
-      field=(fun () -> r.field)
+      field=r.field
       slot="radio-content"
-      class_=(fun () ->
-               after (Styles.Radio.content (S.get r.slots)) (S.get class_))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      class_=(after (Styles.Radio.content (S.get r.slots)) (S.get class_))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (S.get children) (state_of r.field))
+      (Jsx.draw (S.get children) (state_of r.field))
     </Field_content>
   [@@element label]
 end
@@ -74,11 +73,10 @@ module Control = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let r = within "Radio.Control" in
     <span
-      class_=(fun () ->
-               after (Styles.Radio.control (S.get r.slots)) (S.get class_))
+      class_=(after (Styles.Radio.control (S.get r.slots)) (S.get class_))
       data_slot="radio-control"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </span>
   [@@element span]
 end
@@ -92,16 +90,13 @@ module Indicator = struct
     let r = within "Radio.Indicator" in
     <span
       aria_hidden=true
-      class_=(fun () ->
-               after (Styles.Radio.indicator (S.get r.slots)) (S.get class_))
+      class_=(after (Styles.Radio.indicator (S.get r.slots)) (S.get class_))
       data_slot="radio-indicator"
-      ?as_=(fun () ->
-             Option.map (fun f p -> f p (Content.state_of r.field)) (S.get as_))
+      ?as_=(Option.map (fun f p -> f p (Content.state_of r.field)) (S.get as_))
       props=(Props.others props)>
-      (fun () ->
-        match S.get children with
-        | Some given -> Jsx.draw given (Content.state_of r.field)
-        | None -> Jsx.string "")
+      (match S.get children with
+      | Some given -> Jsx.draw given (Content.state_of r.field)
+      | None -> Jsx.string "")
     </span>
   [@@element span]
 end
@@ -111,11 +106,8 @@ end
 let description : Description.slot =
  fun classes others children ->
   <Kobalte.ItemDescription
-    class_=(fun () -> classes ())
-    slot="description"
-    data_slot="description"
-    props=others>
-    (fun () -> children ())
+    class_=(classes ()) slot="description" data_slot="description" props=others>
+    (children ())
   </Kobalte.ItemDescription>
 
 (* What its children are drawn of: React Aria's render props for it,
@@ -177,22 +169,21 @@ let%component make ~(value : string) ?(is_disabled : bool = false)
     }
   in
   let state () = state_of r.field in
-  <Context.Provider value=(fun () -> r)>
+  <Context.Provider value=r>
     <Kobalte.Item
-      value=(fun () -> S.get value)
-      disabled=(fun () -> S.get is_disabled)
-      class_=(fun () ->
-               after (Styles.Radio.base (S.get r.slots)) (S.get class_))
+      value=(S.get value)
+      disabled=(S.get is_disabled)
+      class_=(after (Styles.Radio.base (S.get r.slots)) (S.get class_))
       data_slot="radio"
-      data_selected=(fun () -> Jsx.flag (S.get selected))
-      data_disabled=(fun () -> Jsx.flag (S.get disabled))
-      data_invalid=(fun () -> Jsx.flag (S.get g.invalid))
-      data_readonly=(fun () -> Jsx.flag (S.get g.read_only))
-      data_required=(fun () -> Jsx.flag (S.get g.required))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_selected=(Jsx.flag (S.get selected))
+      data_disabled=(Jsx.flag (S.get disabled))
+      data_invalid=(Jsx.flag (S.get g.invalid))
+      data_readonly=(Jsx.flag (S.get g.read_only))
+      data_required=(Jsx.flag (S.get g.required))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      <Description.Slot.Provider value=(fun () -> description)>
-        (fun () -> Jsx.draw (S.get children) (state_of r.field))
+      <Description.Slot.Provider value=description>
+        (Jsx.draw (S.get children) (state_of r.field))
       </Description.Slot.Provider>
     </Kobalte.Item>
   </Context.Provider>

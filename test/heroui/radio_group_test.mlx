@@ -145,17 +145,17 @@ let both ?(read_only = false) ?(required = false) ~variant ~value ~orientation
   in
   T.render (fun () ->
       <Radio_group
-        variant=(fun () -> variant)
-        default_value=(fun () -> value)
-        orientation=(fun () -> orientation)
-        is_disabled=(fun () -> disabled)
-        is_invalid=(fun () -> invalid)
-        is_read_only=(fun () -> read_only)
-        is_required=(fun () -> required)
+        variant
+        default_value=value
+        orientation
+        is_disabled=disabled
+        is_invalid=invalid
+        is_read_only=read_only
+        is_required=required
         name="plan">
         <Label>"Plan"</Label>
         <Description>"Choose the plan that suits you"</Description>
-        <Radio value="starter" is_disabled=(fun () -> starter_disabled)>
+        <Radio value="starter" is_disabled=starter_disabled>
           <Radio.Content>
             <Radio.Control><Radio.Indicator /></Radio.Control> "Starter"
           </Radio.Content>
@@ -189,8 +189,8 @@ let both ?(read_only = false) ?(required = false) ~variant ~value ~orientation
 let of_state ?(disabled = false) ?(read_only = false) ?(invalid = false)
     ?(required = false) () =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   let horizontal (g : Radio_group.state) =
@@ -202,10 +202,10 @@ let of_state ?(disabled = false) ?(read_only = false) ?(invalid = false)
   T.render (fun () ->
       <Radio_group
         aria_label="Plan"
-        is_disabled=(fun () -> disabled)
-        is_read_only=(fun () -> read_only)
-        is_invalid=(fun () -> invalid)
-        is_required=(fun () -> required)>
+        is_disabled=disabled
+        is_read_only=read_only
+        is_invalid=invalid
+        is_required=required>
         (fun g ->
           Solidtype.Jsx.fragment
             [|
@@ -367,14 +367,14 @@ let () =
           let clicks = ref 0 and keys = ref 0 in
           let content_refs = ref 0 and content_clicks = ref 0 in
           let radio value =
-            <Radio value=(fun () -> value)>
+            <Radio value>
               <Radio.Content
-                title=(fun () -> "Chooses " ^ value)
+                title=("Chooses " ^ value)
                 style="--y: 2"
                 ref=(fun _ -> incr content_refs)
                 on_click=(fun _ -> incr content_clicks)>
                 <Radio.Control><Radio.Indicator /></Radio.Control>
-                (fun () -> Solidtype.Jsx.string value)
+                (Solidtype.Jsx.string value)
               </Radio.Content>
             </Radio>
           in
@@ -395,9 +395,9 @@ let () =
                         on_click=(fun _ -> incr clicks)
                         on_key_down=(fun _ -> incr keys)>
                         <Label>"Plan"</Label>
-                        (fun () -> Solidtype.Jsx.element (radio "starter"))
-                        (fun () -> Solidtype.Jsx.element (radio "pro"))
-                        (fun () -> Solidtype.Jsx.element (radio "teams"))
+                        (Solidtype.Jsx.element (radio "starter"))
+                        (Solidtype.Jsx.element (radio "pro"))
+                        (Solidtype.Jsx.element (radio "teams"))
                       </Radio_group>
                       <button data_slot="button" type_=`submit>"Save"</button>
                     </Form>))

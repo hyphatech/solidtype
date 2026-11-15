@@ -19,35 +19,30 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="variant"
-        choices=(fun () -> variants)
-        picked=(fun () -> S.get variant)
+        choices=variants
+        picked=(S.get variant)
         on_pick=(Controls.choose variants set_variant)
       />
       <Select
         label="orientation"
-        choices=(fun () -> orientations)
-        picked=(fun () -> S.get orientation)
+        choices=orientations
+        picked=(S.get orientation)
         on_pick=(Controls.choose orientations set_orientation)
       />
       <Toggle
-        label="disabled"
-        on=(fun () -> S.get disabled)
-        on_toggle=(S.set set_disabled)
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
       />
-      <Toggle
-        label="invalid"
-        on=(fun () -> S.get invalid)
-        on_toggle=(S.set set_invalid)
+      <Toggle label="invalid" on=(S.get invalid) on_toggle=(S.set set_invalid)
       />
     </div>
     <Side_by_side
       compared="[data-slot=radio-content]"
       solidtype=(<Radio_group
                    default_value="pro"
-                   variant=(fun () -> fst (S.get variant))
-                   orientation=(fun () -> fst (S.get orientation))
-                   is_disabled=(fun () -> S.get disabled)
-                   is_invalid=(fun () -> S.get invalid)>
+                   variant=(fst (S.get variant))
+                   orientation=(fst (S.get orientation))
+                   is_disabled=(S.get disabled)
+                   is_invalid=(S.get invalid)>
                    <Label>"Plan"</Label>
                    <Radio value="starter">
                      <Radio.Content>

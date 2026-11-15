@@ -114,8 +114,8 @@ module Root = struct
       | Some _ | None -> ()
     in
     <Kobalte.Root
-      channel=(fun () -> Props.channel props)
-      ?value=(fun () -> current ())
+      channel=(Props.channel props)
+      ?value=(current ())
       on_change=changed
       on_change_end=(fun c -> Jsx.call (Props.on_change_end props) c)
       ref=(fun e ->
@@ -156,8 +156,7 @@ module Thumb = struct
           value ^ ", "
           ^ String.lowercase_ascii (Color.get_color_name shown names)
     in
-    <Kobalte.Thumb aria_valuetext=(fun () -> told ()) props=(S.omit props [||])
-    />
+    <Kobalte.Thumb aria_valuetext=(told ()) props=(S.omit props [||]) />
 
   let component = Jsx.component make
 end

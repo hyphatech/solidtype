@@ -20,8 +20,8 @@ type 'a equals =
   | Never  (** Every write is a change, an equal value too. *)
 
 val get : 'a accessor -> 'a
-(** [get count] reads [count], and inside a tracking scope -- a thunk in a JSX
-    position, an effect, a memo -- subscribes to it. *)
+(** [get count] reads [count], and inside a tracking scope -- an expression in
+    JSX, an effect, a memo -- subscribes to it. *)
 
 external accessor : ((unit -> 'a)[@mel.uncurry]) -> 'a accessor = "valueOf"
 [@@mel.send]
@@ -286,9 +286,7 @@ external drawn_as : 'rest -> ('drawn -> Jsx.element) option = "as"
 [@@mel.get]
 (** What a rest given a part's [as_] draws in the element's place, for a plain
     element drawn apart from the part's [Props.others], in a function a part
-    calls:
-    [<div ?as_=(fun () -> Solid.drawn_as others) props=(Solid.undrawn others)>].
-*)
+    calls: [<div ?as_=(Solid.drawn_as others) props=(Solid.undrawn others)>]. *)
 
 val with_drawn : 'rest -> ('drawn -> Jsx.element) option -> 'rest
 (** [with_drawn rest given] is [rest] with [as_] [given], for what a part hands

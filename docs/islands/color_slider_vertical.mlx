@@ -10,21 +10,21 @@ let make () =
   <div class_="flex h-48 gap-4">
     <Color_slider
       channel=`hue
-      default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")
+      default_value=(Colors.parse_color "hsl(0, 100%, 50%)")
       aria_label="Hue"
       orientation=`vertical>
       <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
     </Color_slider>
     <Color_slider
       channel=`saturation
-      default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")
+      default_value=(Colors.parse_color "hsl(0, 100%, 50%)")
       aria_label="Saturation"
       orientation=`vertical>
       <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
     </Color_slider>
     <Color_slider
       channel=`lightness
-      default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")
+      default_value=(Colors.parse_color "hsl(0, 100%, 50%)")
       aria_label="Lightness"
       orientation=`vertical>
       <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>

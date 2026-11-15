@@ -6,14 +6,13 @@ let avatar =
 
 let make () =
   <div class_="flex items-center gap-6">
-    <Solidtype.For each=(fun () -> [| `accent; `success; `warning; `danger |])>
+    <Solidtype.For each=[| `accent; `success; `warning; `danger |]>
       (fun color _ ->
         <Badge.Anchor>
           <Avatar>
-            <Avatar.Image src=(fun () -> avatar) />
-            <Avatar.Fallback>"JD"</Avatar.Fallback>
+            <Avatar.Image src=avatar /> <Avatar.Fallback>"JD"</Avatar.Fallback>
           </Avatar>
-          <Badge color=(fun () -> color) placement=`bottom_right size=`sm />
+          <Badge color placement=`bottom_right size=`sm />
         </Badge.Anchor>)
     </Solidtype.For>
   </div>

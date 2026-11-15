@@ -30,13 +30,11 @@ let initials name =
 
 let make () =
   <Avatar_group max=3>
-    <For each=(fun () -> users)>
+    <For each=users>
       (fun (name, image) _ ->
         <Avatar>
-          <Avatar.Image alt=(fun () -> name) src=(fun () -> image) />
-          <Avatar.Fallback>
-            (fun () -> Jsx.string (initials name))
-          </Avatar.Fallback>
+          <Avatar.Image alt=name src=image />
+          <Avatar.Fallback>(Jsx.string (initials name))</Avatar.Fallback>
         </Avatar>)
     </For>
   </Avatar_group>

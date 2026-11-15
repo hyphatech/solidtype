@@ -10,8 +10,7 @@ let island () =
   <ToggleButton.Root aria_label="Bold">
     (fun state ->
       <span>
-        (fun () ->
-          Jsx.string (if S.get (State.pressed state) then "On" else "Off"))
+        (Jsx.string (if S.get (State.pressed state) then "On" else "Off"))
       </span>)
   </ToggleButton.Root>
 

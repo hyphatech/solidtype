@@ -12,35 +12,31 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Toggle
         label="allows multiple expanded"
-        on=(fun () -> S.get multiple)
+        on=(S.get multiple)
         on_toggle=(S.set set_multiple)
       />
       <Toggle
-        label="disabled"
-        on=(fun () -> S.get disabled)
-        on_toggle=(S.set set_disabled)
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
       />
     </div>
     <Side_by_side
       compared="[data-slot=disclosure-group]"
       solidtype=(<Disclosure_group
-                   default_expanded_keys=(fun () -> [| "shipping" |])
-                   allows_multiple_expanded=(fun () -> S.get multiple)
-                   is_disabled=(fun () -> S.get disabled)>
-                   <Solidtype.For each=(fun () -> keys)>
+                   default_expanded_keys=[| "shipping" |]
+                   allows_multiple_expanded=(S.get multiple)
+                   is_disabled=(S.get disabled)>
+                   <Solidtype.For each=keys>
                      (fun key _ ->
-                       <Disclosure id=(fun () -> key)>
+                       <Disclosure id=key>
                          <Disclosure.Heading>
                            <Disclosure.Trigger
                              class_="flex w-full items-center gap-2">
-                             (fun () -> Solidtype.Jsx.string key)
-                             <Disclosure.Indicator />
+                             (Solidtype.Jsx.string key) <Disclosure.Indicator />
                            </Disclosure.Trigger>
                          </Disclosure.Heading>
                          <Disclosure.Content>
                            <Disclosure.Body>
-                             (fun () ->
-                               Solidtype.Jsx.string ("About " ^ key ^ "."))
+                             (Solidtype.Jsx.string ("About " ^ key ^ "."))
                            </Disclosure.Body>
                          </Disclosure.Content>
                        </Disclosure>)

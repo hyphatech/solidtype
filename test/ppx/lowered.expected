@@ -47,14 +47,13 @@ let thunk =
     [|(Solidtype.Jsx.dynamic (((fun () -> Solidtype.Jsx.string (name ()))
          [@u ]) : ((unit -> Solidtype.Jsx.content)[@u ])))|]
 let component =
-  (fun (solidtype__text : ((unit -> _)[@u ])) ->
-     if false
-     then
-       Label.Props.check ~text:(Solidtype.Check.thunk solidtype__text)
-         ~count:(Solidtype.Check.literal 1) ();
-     Solidtype.Jsx.c Label.component
-       [|(Solidtype.Jsx.d "text" solidtype__text);(Solidtype.Jsx.s "count" 1)|]
-       [||]) ((fun () -> "x")[@u ])
+  if false
+  then
+    Label.Props.check ~text:(Solidtype.Check.literal {js|x|js})
+      ~count:(Solidtype.Check.literal 1) ();
+  Solidtype.Jsx.c Label.component
+    [|(Solidtype.Jsx.s "text" {js|x|js});(Solidtype.Jsx.s "count" 1)|] 
+    [||]
 let part =
   (fun (solidtype__checked : ((unit -> _)[@u ])) ->
      if false
@@ -355,7 +354,8 @@ let namespaced =
 let namespaced_optional =
   Solidtype.Jsx.el "div"
     [|(Solidtype.Jsx.d "attr:hidden"
-         ((fun () -> Js.Undefined.fromOption (found () : string option))
+         ((fun () ->
+             Js.Undefined.fromOption ((found () : _ option) : string option))
          [@u ]))|] [||]
 let namespaced_on_component =
   if false then Switch.Root.Props.check ();
@@ -364,7 +364,9 @@ let namespaced_on_component =
                                                              "attr:hidden"
                                                              ((fun () ->
                                                                  Js.Undefined.fromOption
-                                                                   (found () : 
+                                                                   ((
+                                                                   found () : 
+                                                                   _ option) : 
                                                                    string
                                                                     option))
                                                              [@u ]));(
@@ -499,8 +501,9 @@ module Read =
               Solidtype.Jsx.d "lang"
                 ((fun () ->
                     Js.Undefined.fromOption
-                      (let (_ : _ Solidtype.Solid.accessor -> _) = S.get in
-                       Props.get_note props : Solidtype.Html.P.lang option))
+                      ((let (_ : _ Solidtype.Solid.accessor -> _) = S.get in
+                        Props.get_note props : _ option) : Solidtype.Html.P.lang
+                                                             option))
                 [@u ]))|]
             [|(Solidtype.Jsx.dynamic
                  (((fun () -> Solidtype.Jsx.string (S.get text))
@@ -599,31 +602,41 @@ module Measured =
   end
 let optional_attribute =
   Solidtype.Jsx.el "a"
-    [|(Solidtype.Jsx.d "title" (((fun () -> "x")
-         [@u ]) : ((unit -> Solidtype.Html.A.title)[@u ])));(Solidtype.Jsx.d
-                                                               "href"
-                                                               ((fun () ->
-                                                                   Js.Undefined.fromOption
-                                                                    (link () : 
-                                                                    Solidtype.Html.A.href
-                                                                    option))
-                                                               [@u ]))|] 
+    [|(Solidtype.Jsx.s "title" ({js|x|js} : Solidtype.Html.A.title));(
+      Solidtype.Jsx.d "href"
+        ((fun () ->
+            Js.Undefined.fromOption
+              ((link () : _ option) : Solidtype.Html.A.href option))[@u ]))|]
     [||]
 let optional_prop =
-  (fun (solidtype__count : ((unit -> _ option)[@u ]))
-     (solidtype__text : ((unit -> _)[@u ])) ->
+  (fun (solidtype__count : ((unit -> _ option)[@u ])) ->
      if false
      then
-       Label.Props.check ~text:(Solidtype.Check.thunk solidtype__text)
+       Label.Props.check ~text:(Solidtype.Check.literal {js|x|js})
          ?count:(Solidtype.Check.optional solidtype__count) ();
      Solidtype.Jsx.c Label.component
-       [|(Solidtype.Jsx.d "text" solidtype__text);(Solidtype.Jsx.d "count"
-                                                     ((fun () ->
-                                                         Js.Undefined.fromOption
-                                                           ((solidtype__count
-                                                               ())[@u ]))
-                                                     [@u ]))|] [||])
-    ((fun () -> count ())[@u ]) ((fun () -> "x")[@u ])
+       [|(Solidtype.Jsx.s "text" {js|x|js});(Solidtype.Jsx.d "count"
+                                               ((fun () ->
+                                                   Js.Undefined.fromOption
+                                                     ((solidtype__count ())
+                                                     [@u ]))[@u ]))|] 
+       [||]) ((fun () -> (count () : _ option))[@u ])
+let optional_name (count : int option) =
+  (fun (solidtype__count : ((unit -> _ option)[@u ])) ->
+     if false
+     then
+       Label.Props.check ~text:(Solidtype.Check.literal {js|x|js})
+         ?count:(Solidtype.Check.optional solidtype__count) ();
+     Solidtype.Jsx.c Label.component
+       [|(Solidtype.Jsx.s "text" {js|x|js});(Solidtype.Jsx.d "count"
+                                               ((fun () ->
+                                                   Js.Undefined.fromOption
+                                                     ((solidtype__count ())
+                                                     [@u ]))[@u ]))|] 
+       [||]) ((fun () -> (count : _ option))[@u ])
+let named_child (mark : Solidtype.Jsx.content) =
+  Solidtype.Jsx.el "p" [||]
+    [|(Solidtype.Jsx.node (Solidtype.Jsx.of_content mark))|]
 let named_render =
   (fun solidtype__children (solidtype__each : ((unit -> _)[@u ])) ->
      if false

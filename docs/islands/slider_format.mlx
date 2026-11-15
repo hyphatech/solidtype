@@ -5,9 +5,9 @@ module Format = Solidtype_kobalte.Types.NumberFormatOptions
 let make () =
   <Slider
     class_="w-64"
-    default_value=(fun () -> [| 200.; 800. |])
+    default_value=[| 200.; 800. |]
     max_value=1000.
-    format_options=(fun () -> Format.make ~style:`currency ~currency:"USD" ())>
+    format_options=(Format.make ~style:`currency ~currency:"USD" ())>
     <Label>"Price"</Label>
     <Slider.Output />
     <Slider.Track>

@@ -40,7 +40,7 @@ module Some = struct
   let%component make ~(some : 'a option)
       ~(children : 'a Solid.accessor -> Jsx.element) () =
     let box = boxed some in
-    <Raw when_=(fun () -> Solid.get box)>
+    <Raw when_=(Solid.get box)>
       (fun b ->
         children
           (Solid.accessor (fun () ->
@@ -53,7 +53,7 @@ end
 module Keyed = struct
   let%component make ~(some : 'a option) ~(children : 'a -> Jsx.element) () =
     let box = boxed some in
-    <Raw when_=(fun () -> Solid.get box) keyed=true>
+    <Raw when_=(Solid.get box) keyed=true>
       (fun b ->
         match b with
         | Option.Some (box : _ box) -> children box.value

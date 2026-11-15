@@ -25,7 +25,7 @@ examples below are styled with Tailwind on HeroUI's colours.
 
 <Example code={switchCode} title="kobalte_switch.mlx"><Switch.make client:visible /></Example>
 
-The switch is controlled: `checked` is a thunk of a signal, and `on_change`
+The switch is controlled: `checked` reads a signal, and `on_change`
 is given the new value, a `bool`, as Kobalte's `onChange` is. Left out,
 `default_checked` sets where an uncontrolled switch starts. `Switch.Input`
 is the native checkbox Kobalte hides, which a form submits and focus
@@ -42,9 +42,7 @@ holds several, a `string array`, and takes `multiple=true`. Each has the
 exact type of its value, where TypeScript has one component whose type
 turns on `multiple`.
 
-`class_=(fun () -> item)` gives each item a class held in a name. A name
-alone is passed to a component as it is, which a component's check takes
-only for a function, so a constant is passed as the thunk it is read by.
+`class_=item` gives each item a class held in a name, passed as it is.
 
 ## Select
 
@@ -71,7 +69,7 @@ A select shows more of the binding:
 <Example code={slider} title="kobalte_slider.mlx"><Slider.make client:visible /></Example>
 
 A slider's value is a `float array`, one number for each thumb: two
-thumbs make a range. `default_value` is a thunk, read once, where the
+thumbs make a range. `default_value`, read once, is where the
 uncontrolled slider starts; `value` and `on_change` would control it.
 Each thumb holds a `Slider.Input`, the native range input a form submits,
 and the arrows move the focused thumb by its step, Page Up and Down by a

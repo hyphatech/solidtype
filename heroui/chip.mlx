@@ -10,10 +10,10 @@ module Label = struct
 
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <span
-      class_=(fun () -> after (label ()) (S.get class_))
+      class_=(after (label ()) (S.get class_))
       data_slot="chip-label"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </span>
   [@@element span]
 end
@@ -29,17 +29,15 @@ let%component make
     ?(variant : [ `primary | `secondary | `soft | `tertiary ] = `secondary)
     ?(class_ : string option) ~(children : Jsx.content) () =
   <span
-    class_=(fun () ->
-             after
-               (Styles.Chip.base
-                  (Styles.Chip.slots
-                     (Styles.Chip.options ~color:(S.get color)
-                        ?size:(S.get size) ~variant:(S.get variant) ())))
-               (S.get class_))
+    class_=(after
+              (Styles.Chip.base
+                 (Styles.Chip.slots
+                    (Styles.Chip.options ~color:(S.get color) ?size:(S.get size)
+                       ~variant:(S.get variant) ())))
+              (S.get class_))
     data_slot="chip"
     props=(Props.others props)>
-    (fun () ->
-      let c = S.get children in
-      if text c then Jsx.element <Label>(fun () -> c)</Label> else c)
+    (let c = S.get children in
+     if text c then Jsx.element <Label>c</Label> else c)
   </span>
 [@@element span]

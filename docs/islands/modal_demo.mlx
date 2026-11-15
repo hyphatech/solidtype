@@ -30,25 +30,25 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="variant"
-        choices=(fun () -> variants)
-        picked=(fun () -> S.get variant)
+        choices=variants
+        picked=(S.get variant)
         on_pick=(Controls.choose variants set_variant)
       />
       <Select
         label="placement"
-        choices=(fun () -> placements)
-        picked=(fun () -> S.get placement)
+        choices=placements
+        picked=(S.get placement)
         on_pick=(Controls.choose placements set_placement)
       />
       <Select
         label="size"
-        choices=(fun () -> sizes)
-        picked=(fun () -> S.get size)
+        choices=sizes
+        picked=(S.get size)
         on_pick=(Controls.choose sizes set_size)
       />
       <Toggle
         label="dismissable"
-        on=(fun () -> S.get dismissable)
+        on=(S.get dismissable)
         on_toggle=(S.set set_dismissable)
       />
     </div>
@@ -57,11 +57,10 @@ let make () =
       solidtype=(<Modal>
                    <Button variant=`secondary>"Open Modal"</Button>
                    <Modal.Backdrop
-                     variant=(fun () -> fst (S.get variant))
-                     is_dismissable=(fun () -> S.get dismissable)>
+                     variant=(fst (S.get variant))
+                     is_dismissable=(S.get dismissable)>
                      <Modal.Container
-                       placement=(fun () -> fst (S.get placement))
-                       size=(fun () -> fst (S.get size))>
+                       placement=(fst (S.get placement)) size=(fst (S.get size))>
                        <Modal.Dialog>
                          <Modal.Close_trigger />
                          <Modal.Header>

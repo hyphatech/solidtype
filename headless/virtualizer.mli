@@ -7,7 +7,7 @@
     and places its entries by {!val-window}.
 
     {[
-      <Virtualizer layout=(fun () -> Virtualizer.list_layout ~row_size:50. ())>
+      <Virtualizer layout=(Virtualizer.list_layout ~row_size:50. ())>
         <List_box aria_label="Users" class_="h-[400px] overflow-y-auto">
           ...
         </List_box>

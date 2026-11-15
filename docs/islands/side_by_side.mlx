@@ -214,7 +214,7 @@ let%component make ?(compared : string = ":scope > *")
           class_="heroui-ground flex min-h-24 items-center justify-center \
                   rounded-xl border border-separator p-6"
           ref=(fun el -> solidtype_host := Some el)>
-          (fun () -> Jsx.element (S.get solidtype))
+          (Jsx.element (S.get solidtype))
         </div>
       </figure>
       <figure class_="flex flex-col gap-2">
@@ -237,7 +237,7 @@ let%component make ?(compared : string = ":scope > *")
         </tr>
       </thead>
       <tbody>
-        <For each=(fun () -> S.get table)>
+        <For each=(S.get table)>
           (fun (name, a, b, focusable) _ ->
             let marked =
               if internal name a b then "text-muted"
@@ -245,9 +245,9 @@ let%component make ?(compared : string = ":scope > *")
               else "bg-warning-soft"
             in
             <tr class_=marked>
-              <td class_="py-1 pe-4">(fun () -> Jsx.string name)</td>
-              <td class_="py-1 pe-4 break-all">(fun () -> cell a)</td>
-              <td class_="py-1 break-all">(fun () -> cell b)</td>
+              <td class_="py-1 pe-4">(Jsx.string name)</td>
+              <td class_="py-1 pe-4 break-all">(cell a)</td>
+              <td class_="py-1 break-all">(cell b)</td>
             </tr>)
         </For>
       </tbody>

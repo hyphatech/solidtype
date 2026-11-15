@@ -63,18 +63,17 @@ module Input_group = struct
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e)
-      class_=(fun () ->
-               after
-                 (Styles.ComboBox.input_group (S.get c.slots))
-                 (S.get class_))
+      class_=(after
+                (Styles.ComboBox.input_group (S.get c.slots))
+                (S.get class_))
       data_slot="combo-box-input-group"
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      data_disabled=(fun () -> Jsx.flag (S.get c.disabled))
-      data_invalid=(fun () -> Jsx.flag (S.get c.invalid))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_focus_within=(Jsx.flag (Interaction.focused i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(Jsx.flag (S.get c.disabled))
+      data_invalid=(Jsx.flag (S.get c.invalid))
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </Kobalte.Control>
   [@@element div]
 end
@@ -86,29 +85,26 @@ module Trigger = struct
     let c = within "Combo_box.Trigger" in
     let i = Interaction.create ~disabled:(fun () -> S.get c.disabled) () in
     <Kobalte.Trigger
-      class_=(fun () ->
-               after (Styles.ComboBox.trigger (S.get c.slots)) (S.get class_))
+      class_=(after (Styles.ComboBox.trigger (S.get c.slots)) (S.get class_))
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e)
       data_slot="combo-box-trigger"
-      data_open=(fun () -> Jsx.flag (S.get c.is_open))
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_pressed=(fun () ->
-                     Jsx.flag (Interaction.pressed i || S.get c.is_open))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      data_disabled=(fun () -> Jsx.flag (S.get c.disabled))
+      data_open=(Jsx.flag (S.get c.is_open))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_pressed=(Jsx.flag (Interaction.pressed i || S.get c.is_open))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(Jsx.flag (S.get c.disabled))
       props=(Props.others props)>
-      (fun () ->
-        match S.get children with
-        | Some drawn -> drawn
-        | None ->
-            Jsx.element
-              <Gravity.Chevron_down
-                aria_hidden=true
-                role=`presentation
-                data_slot="combo-box-trigger-default-icon"
-              />)
+      (match S.get children with
+      | Some drawn -> drawn
+      | None ->
+          Jsx.element
+            <Gravity.Chevron_down
+              aria_hidden=true
+              role=`presentation
+              data_slot="combo-box-trigger-default-icon"
+            />)
     </Kobalte.Trigger>
   [@@element button]
 end
@@ -140,21 +136,19 @@ module Value = struct
       }
     in
     <div
-      class_=(fun () ->
-               after (Styles.ComboBox.value (S.get c.slots)) (S.get class_))
+      class_=(after (Styles.ComboBox.value (S.get c.slots)) (S.get class_))
       data_slot="combo-box-value"
-      data_placeholder=(fun () -> Jsx.flag (empty ()))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_placeholder=(Jsx.flag (empty ()))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () ->
-        match S.get children with
-        | Some given when not (empty ()) -> Jsx.draw given (state ())
-        | Some _ | None ->
-            (* React Aria lists the texts chosen as the reader's language
+      (match S.get children with
+      | Some given when not (empty ()) -> Jsx.draw given (state ())
+      | Some _ | None ->
+          (* React Aria lists the texts chosen as the reader's language
                lists them. *)
-            Jsx.string
-              (if empty () then Option.value (S.get placeholder) ~default:""
-               else List_box.listed (S.get c.selected)))
+          Jsx.string
+            (if empty () then Option.value (S.get placeholder) ~default:""
+             else List_box.listed (S.get c.selected)))
     </div>
   [@@element div]
 end
@@ -195,51 +189,45 @@ module Popover = struct
       [|
         (* Its list box joins the combo box whether it is open or not, as the
            input shows the option chosen. *)
-        <Context.Provider value=(fun () -> c)>
-          (fun () -> S.get children)
-        </Context.Provider>;
-        <Show when_=(fun () -> Overlay.present o)>
+        <Context.Provider value=c>(S.get children)</Context.Provider>;
+        <Show when_=(Overlay.present o)>
           <Kobalte.Portal>
             <Kobalte.Content
-              class_=(fun () ->
-                       after
-                         (Styles.ComboBox.popover (S.get c.slots))
-                         (S.get class_))
-              style=(fun () ->
-                      styled
-                        "--trigger-width: var(--kb-popper-anchor-width); \
-                         --trigger-anchor-point: \
-                         var(--kb-combobox-content-transform-origin); \
-                         max-height: \
-                         var(--kb-popper-content-available-height);"
-                        (S.get style))
+              class_=(after
+                        (Styles.ComboBox.popover (S.get c.slots))
+                        (S.get class_))
+              style=(styled
+                       "--trigger-width: var(--kb-popper-anchor-width); \
+                        --trigger-anchor-point: \
+                        var(--kb-combobox-content-transform-origin); \
+                        max-height: var(--kb-popper-content-available-height);"
+                       (S.get style))
               ref=(fun e ->
                     ignore (given_ref e : unit option);
                     Overlay.watch o e;
                     watch_side e)
               data_slot="combo-box-popover"
-              data_placement=(fun () -> Jsx.data (S.get side))
-              data_entering=(fun () -> Jsx.flag (Overlay.entering o))
-              data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
+              data_placement=(Jsx.data (S.get side))
+              data_entering=(Jsx.flag (Overlay.entering o))
+              data_exiting=(Jsx.flag (Overlay.exiting o))
               props=(Props.others props)>
-              (fun () ->
-                match S.get c.hosted with
-                | Some (h : List_box.hosted) ->
-                    Jsx.element
-                      <As_list
-                        as_="div"
-                        ref=(fun e -> h.list_ref e)
-                        scroll_to_item=(fun key -> h.scroll_to_item key)
-                        aria_orientation=`vertical
-                        class_=(fun () -> S.get h.classes)
-                        data_slot="list-box"
-                        data_layout="stack"
-                        data_orientation="vertical"
-                        data_empty=(fun () -> Jsx.flag (S.get h.empty))
-                        props=h.others>
-                        (fun collection -> h.draw collection)
-                      </As_list>
-                | None -> Jsx.element Jsx.nothing)
+              (match S.get c.hosted with
+              | Some (h : List_box.hosted) ->
+                  Jsx.element
+                    <As_list
+                      as_="div"
+                      ref=(fun e -> h.list_ref e)
+                      scroll_to_item=(fun key -> h.scroll_to_item key)
+                      aria_orientation=`vertical
+                      class_=(S.get h.classes)
+                      data_slot="list-box"
+                      data_layout="stack"
+                      data_orientation="vertical"
+                      data_empty=(Jsx.flag (S.get h.empty))
+                      props=h.others>
+                      (fun collection -> h.draw collection)
+                    </As_list>
+              | None -> Jsx.element Jsx.nothing)
             </Kobalte.Content>
           </Kobalte.Portal>
         </Show>;
@@ -552,17 +540,16 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
   in
   let parts () =
     inside_root ~kobalte ~text ~quiet ~navigated;
-    <Context.Provider value=(fun () -> c)>
-      <Field.Provider value=(fun () -> f)>
-        <List_box.Host.Provider value=(fun () -> host)>
-          <List_box.Listing.Provider value=(fun () -> listing)>
-            <Field_error.Message.Provider value=(fun () -> in_form.error)>
+    <Context.Provider value=c>
+      <Field.Provider value=f>
+        <List_box.Host.Provider value=host>
+          <List_box.Listing.Provider value=listing>
+            <Field_error.Message.Provider value=in_form.error>
               <Parts>
-                (fun () -> Jsx.draw (S.get children) state)
-                <For each=(fun () -> sent_keys ())>
+                (Jsx.draw (S.get children) state)
+                <For each=(sent_keys ())>
                   (fun key _ ->
-                    <input type_="hidden" ?name=(fun () -> S.get name) value=key
-                    />)
+                    <input type_="hidden" ?name=(S.get name) value=key />)
                 </For>
               </Parts>
             </Field_error.Message.Provider>
@@ -619,18 +606,16 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
   match mode with
   | `single ->
       <Kobalte.Root
-        options=(fun () ->
-                  Array.of_list (List.map Types.Either.left (options ())))
+        options=(Array.of_list (List.map Types.Either.left (options ())))
         option_value=(fun o -> Types.Either.left (List_box.key o))
         option_text_value=List_box.text
         option_label=List_box.text
         option_disabled=(fun o -> disabled_key (List_box.key o))
-        value=(fun () ->
-                (* [null], an empty selection Kobalte keeps: [undefined]
+        value=(* [null], an empty selection Kobalte keeps: [undefined]
                    would be no value given. *)
-                match S.get selected with
-                | o :: _ -> Js.Nullable.return o
-                | [] -> Js.Nullable.null)
+              (match S.get selected with
+              | o :: _ -> Js.Nullable.return o
+              | [] -> Js.Nullable.null)
         on_change=(fun o ->
                     change
                       (match Js.Nullable.toOption o with
@@ -638,47 +623,46 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
                       | None -> [||]))
         on_input_change=told
         on_open_change=(fun o _ -> open_change o)
-        trigger_mode=(fun () -> kobalte_trigger ())
-        default_filter=(fun () -> filter)
-        allows_empty_collection=(fun () -> S.get allows_empty_collection)
-        should_focus_wrap=(fun () -> S.get should_focus_wrap)
-        no_reset_input_on_blur=(fun () -> S.get allows_custom_value)
-        placement=(fun () -> S.get c.placement)
+        trigger_mode=(kobalte_trigger ())
+        default_filter=filter
+        allows_empty_collection=(S.get allows_empty_collection)
+        should_focus_wrap=(S.get should_focus_wrap)
+        no_reset_input_on_blur=(S.get allows_custom_value)
+        placement=(S.get c.placement)
         gutter=8.
         overflow_padding=12.
         same_width=false
         virtualized=true
         force_mount=true
-        disabled=(fun () -> S.get is_disabled)
-        read_only=(fun () -> S.get is_read_only)
-        required=(fun () -> S.get is_required)
-        validation_state=(fun () -> if S.get invalid then `invalid else `valid)
-        class_=(fun () -> root_classes ())
+        disabled=(S.get is_disabled)
+        read_only=(S.get is_read_only)
+        required=(S.get is_required)
+        validation_state=(if S.get invalid then `invalid else `valid)
+        class_=(root_classes ())
         ref=given
         on_focus_in=focus_in
         on_key_down=key_down
         on_focus_out=focus_out
         data_slot="combo-box"
-        data_open=(fun () -> Jsx.flag (S.get opened))
-        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-        data_invalid=(fun () -> Jsx.flag (S.get invalid))
-        data_disabled=(fun () -> Jsx.flag (S.get is_disabled))
-        data_readonly=(fun () -> Jsx.flag (S.get is_read_only))
-        data_required=(fun () -> Jsx.flag (S.get is_required))
-        ?as_=(fun () -> Option.map (fun f p -> f p state) (S.get as_))
+        data_open=(Jsx.flag (S.get opened))
+        data_focused=(Jsx.flag (Interaction.focused i))
+        data_invalid=(Jsx.flag (S.get invalid))
+        data_disabled=(Jsx.flag (S.get is_disabled))
+        data_readonly=(Jsx.flag (S.get is_read_only))
+        data_required=(Jsx.flag (S.get is_required))
+        ?as_=(Option.map (fun f p -> f p state) (S.get as_))
         props=others>
-        (fun () -> Jsx.element (parts ()))
+        (Jsx.element (parts ()))
       </Kobalte.Root>
   | `multiple ->
       <Kobalte.Root_multiple
         multiple=true
-        options=(fun () ->
-                  Array.of_list (List.map Types.Either.left (options ())))
+        options=(Array.of_list (List.map Types.Either.left (options ())))
         option_value=(fun o -> Types.Either.left (List_box.key o))
         option_text_value=List_box.text
         option_label=List_box.text
         option_disabled=(fun o -> disabled_key (List_box.key o))
-        value=(fun () -> Array.of_list (S.get selected))
+        value=(Array.of_list (S.get selected))
         on_change=(fun os ->
                     (* Kobalte empties the input of a choice of many, and so
                        moves the focus off the option chosen, which React
@@ -697,35 +681,35 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
                         : unit Js.Promise.t))
         on_input_change=told
         on_open_change=(fun o _ -> open_change o)
-        trigger_mode=(fun () -> kobalte_trigger ())
-        default_filter=(fun () -> filter)
-        allows_empty_collection=(fun () -> S.get allows_empty_collection)
-        should_focus_wrap=(fun () -> S.get should_focus_wrap)
-        no_reset_input_on_blur=(fun () -> S.get allows_custom_value)
-        placement=(fun () -> S.get c.placement)
+        trigger_mode=(kobalte_trigger ())
+        default_filter=filter
+        allows_empty_collection=(S.get allows_empty_collection)
+        should_focus_wrap=(S.get should_focus_wrap)
+        no_reset_input_on_blur=(S.get allows_custom_value)
+        placement=(S.get c.placement)
         gutter=8.
         overflow_padding=12.
         same_width=false
         virtualized=true
         force_mount=true
-        disabled=(fun () -> S.get is_disabled)
-        read_only=(fun () -> S.get is_read_only)
-        required=(fun () -> S.get is_required)
-        validation_state=(fun () -> if S.get invalid then `invalid else `valid)
-        class_=(fun () -> root_classes ())
+        disabled=(S.get is_disabled)
+        read_only=(S.get is_read_only)
+        required=(S.get is_required)
+        validation_state=(if S.get invalid then `invalid else `valid)
+        class_=(root_classes ())
         ref=given
         on_focus_in=focus_in
         on_key_down=key_down
         on_focus_out=focus_out
         data_slot="combo-box"
-        data_open=(fun () -> Jsx.flag (S.get opened))
-        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-        data_invalid=(fun () -> Jsx.flag (S.get invalid))
-        data_disabled=(fun () -> Jsx.flag (S.get is_disabled))
-        data_readonly=(fun () -> Jsx.flag (S.get is_read_only))
-        data_required=(fun () -> Jsx.flag (S.get is_required))
-        ?as_=(fun () -> Option.map (fun f p -> f p state) (S.get as_))
+        data_open=(Jsx.flag (S.get opened))
+        data_focused=(Jsx.flag (Interaction.focused i))
+        data_invalid=(Jsx.flag (S.get invalid))
+        data_disabled=(Jsx.flag (S.get is_disabled))
+        data_readonly=(Jsx.flag (S.get is_read_only))
+        data_required=(Jsx.flag (S.get is_required))
+        ?as_=(Option.map (fun f p -> f p state) (S.get as_))
         props=others>
-        (fun () -> Jsx.element (parts ()))
+        (Jsx.element (parts ()))
       </Kobalte.Root_multiple>
 [@@element div]

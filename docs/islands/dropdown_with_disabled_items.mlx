@@ -14,8 +14,7 @@ let make () =
     </Button>
     <Dropdown.Popover class_="min-w-[220px]">
       <Dropdown.Menu
-        disabled_keys=(fun () -> [| "delete-file" |])
-        on_action=(fun (_ : string) -> ())>
+        disabled_keys=[| "delete-file" |] on_action=(fun (_ : string) -> ())>
         <Dropdown.Section>
           <Header>"Actions"</Header>
           <Dropdown.Item id="new-file" text_value="New file">

@@ -11,8 +11,8 @@ let part = function Some n -> Printf.sprintf "%.0f" n | None -> "-"
 let island () =
   let changed, set_changed = S.create_signal "nothing" in
   <Field.Root
-    default_value=(fun () -> Time.make ~hour:9. ~minute:30. ~second:0. ())
-    granularity=(fun () -> K.Types.Either.left `second)
+    default_value=(Time.make ~hour:9. ~minute:30. ~second:0. ())
+    granularity=(K.Types.Either.left `second)
     on_change=(fun time ->
                 S.set set_changed
                   (String.concat ":"
@@ -23,11 +23,11 @@ let island () =
                      ]))>
     <Field.Label>"Alarm"</Field.Label>
     <Field.Input>
-      (fun segment -> <Field.Segment segment=(fun () -> S.get segment) />)
+      (fun segment -> <Field.Segment segment=(S.get segment) />)
     </Field.Input>
     <Field.HiddenInput />
     <Field.Description>
-      (fun () -> Jsx.string ("Changed to " ^ S.get changed))
+      (Jsx.string ("Changed to " ^ S.get changed))
     </Field.Description>
   </Field.Root>
 

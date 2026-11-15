@@ -13,9 +13,9 @@ let make () =
       "-"
     </button>
     <span class_="tabular-nums">
-      (fun () -> Jsx.int (S.get celsius))
+      (Jsx.int (S.get celsius))
       {js| °C is |js}
-      (fun () -> Jsx.int (S.get fahrenheit))
+      (Jsx.int (S.get fahrenheit))
       {js| °F|js}
     </span>
     <button

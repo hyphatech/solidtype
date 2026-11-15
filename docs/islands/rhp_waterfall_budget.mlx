@@ -103,45 +103,42 @@ let make () =
       (fun d ->
         let s = Row.data d in
         <div
-          class_=(fun () -> s.class_name ^ if s.cut then " cut" else "")
+          class_=(s.class_name ^ if s.cut then " cut" else "")
           on_click=(fun _ -> if is_expense s.kind then toggle s.line)>
           <Label edge="start" class_="item">
-            (fun () ->
-              if is_expense s.kind then
-                Jsx.element
-                  <button
-                    type_=`button
-                    aria_pressed=(fun () -> if s.cut then "true" else "false")>
-                    (fun () -> Jsx.string s.item)
-                  </button>
-              else Jsx.string s.item)
+            (if is_expense s.kind then
+               Jsx.element
+                 <button
+                   type_=`button
+                   aria_pressed=(if s.cut then "true" else "false")>
+                   (Jsx.string s.item)
+                 </button>
+             else Jsx.string s.item)
           </Label>
-          <Show when_=(fun () -> is_expense s.kind)>
+          <Show when_=(is_expense s.kind)>
             <Bar
-              from=(fun () -> s.from)
-              to_=(fun () -> s.from +. s.amount)
-              thick=(fun () -> Either.left "24px")
+              from=s.from
+              to_=(s.from +. s.amount)
+              thick=(Either.left "24px")
               class_="ghost"
             />
           </Show>
           <Bar
-            from=(fun () -> s.from)
-            to_=(fun () -> s.to_)
-            thick=(fun () -> Either.left "24px")
-            color=(fun () ->
-                    match s.kind with
-                    | `in_ -> Color.css "#12b886"
-                    | `out -> Color.css "#f25f5c"
-                    | `total -> Color.css "#1c2433")
+            from=s.from
+            to_=s.to_
+            thick=(Either.left "24px")
+            color=(match s.kind with
+                  | `in_ -> Color.css "#12b886"
+                  | `out -> Color.css "#f25f5c"
+                  | `total -> Color.css "#1c2433")
             class_="step"
           />
           <Show
-            when_=(fun () ->
-                    match s.kind with `total -> false | `in_ | `out -> true)>
-            <Tick at=(fun () -> s.to_) class_="link" />
+            when_=(match s.kind with `total -> false | `in_ | `out -> true)>
+            <Tick at=s.to_ class_="link" />
           </Show>
-          <Label at=(fun () -> Float.max s.from s.to_) class_="amount">
-            (fun () -> Jsx.string (pounds s.amount))
+          <Label at=(Float.max s.from s.to_) class_="amount">
+            (Jsx.string (pounds s.amount))
           </Label>
         </div>)
   in
@@ -154,25 +151,23 @@ let make () =
     kicker=(<span>"Monthly budget"</span>)
     title=(<span>"Where the salary goes"</span>)
     dek=(<span>
-           <b>(fun () -> Jsx.string (pounds (saved ())))</b>
-           " left to save this month."
+           <b>(Jsx.string (pounds (saved ())))</b> " left to save this month."
          </span>)
     note=(<span>
             "Click an expense to cut it from the month; click it again to \
              bring it back."
           </span>)>
     <Chart
-      scale=(fun () -> (0., 5000.))
-      ticks=(fun () -> Ticks.values [| 0.; 1000.; 2000.; 3000.; 4000.; 5000. |])
+      scale=(0., 5000.)
+      ticks=(Ticks.values [| 0.; 1000.; 2000.; 3000.; 4000.; 5000. |])
       format=(fun v ->
                <span>
-                 (fun () ->
-                   Jsx.string
-                     (if v = 0. then "0"
-                      else {js|£|js} ^ Js.Float.toString (v /. 1000.) ^ "k"))
+                 (Jsx.string
+                    (if v = 0. then "0"
+                     else {js|£|js} ^ Js.Float.toString (v /. 1000.) ^ "k"))
                </span>)
       height=320.
-      theme=(fun () -> budget)>
-      <Plot rows=(fun () -> S.get shown) render=step />
+      theme=budget>
+      <Plot rows=(S.get shown) render=step />
     </Chart>
   </Poster>

@@ -8,15 +8,13 @@ module Jsx = Solidtype.Jsx
 
 let island () =
   <Combobox.Root
-    options=(fun () ->
-              Array.map K.Types.Either.left
-                [| "Apple"; "Banana"; "Blueberry"; "Cherry" |])
+    options=(Array.map K.Types.Either.left
+               [| "Apple"; "Banana"; "Blueberry"; "Cherry" |])
     placeholder=(<span>"Pick a fruit"</span>)
     item_component=(fun props ->
-                     <Combobox.Item item=(fun () -> Item_props.item props)>
+                     <Combobox.Item item=(Item_props.item props)>
                        <Combobox.ItemLabel>
-                         (fun () ->
-                           Jsx.string (Node.raw_value (Item_props.item props)))
+                         (Jsx.string (Node.raw_value (Item_props.item props)))
                        </Combobox.ItemLabel>
                      </Combobox.Item>)>
     <Combobox.Label>"Fruit"</Combobox.Label>

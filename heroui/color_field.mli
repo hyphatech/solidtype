@@ -9,11 +9,11 @@
     {!Field_error} shows while it is invalid.
 
     {[
-      <Color_field name="color" default_value=(fun () -> Colors.parse_color "#0485F7")>
+      <Color_field name="color" default_value=(Colors.parse_color "#0485F7")>
         <Label>"Color"</Label>
         <Color_field.Group>
           <Color_field.Prefix>
-            <Color_swatch color=(fun () -> c) size=`xs />
+            <Color_swatch color=c size=`xs />
           </Color_field.Prefix>
           <Color_field.Input />
         </Color_field.Group>

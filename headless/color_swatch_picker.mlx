@@ -391,26 +391,24 @@ module Root = struct
           (fun e -> S.update set_listed (List.filter (fun o -> o.element != e)));
       }
     in
-    <Picker_context.Provider value=(fun () -> picker)>
+    <Picker_context.Provider value=picker>
       <div
         role=`listbox
         ref=(fun e ->
               S.set set_element (Some e);
               Jsx.call (Props.ref props) e)
-        ?aria_label=(fun () ->
-                      match
-                        (Props.aria_label props, Props.aria_labelledby props)
-                      with
-                      | Some l, _ -> Some l
-                      | None, Some _ -> None
-                      | None, None -> Some "Color swatches")
+        ?aria_label=(match
+                       (Props.aria_label props, Props.aria_labelledby props)
+                     with
+                    | Some l, _ -> Some l
+                    | None, Some _ -> None
+                    | None, None -> Some "Color swatches")
         aria_orientation=`vertical
-        tabindex=(fun () -> tabindex (S.get (Selectable_list.tab_index list)))
-        data_layout=(fun () ->
-                      Jsx.data
-                        (match layout () with
-                        | `grid -> "grid"
-                        | `stack -> "stack"))
+        tabindex=(tabindex (S.get (Selectable_list.tab_index list)))
+        data_layout=(Jsx.data
+                       (match layout () with
+                       | `grid -> "grid"
+                       | `stack -> "stack"))
         data_orientation="vertical"
         on_key_down=(fun e ->
                       Jsx.call (Props.on_key_down props) e;
@@ -424,9 +422,9 @@ module Root = struct
         on_focus_out=(fun e ->
                        Jsx.call (Props.on_focus_out props) e;
                        Selectable_list.on_focus_out list e)
-        ?as_=(fun () -> S.drawn_as props)
+        ?as_=(S.drawn_as props)
         props=(S.undrawn (S.omit props own))>
-        (fun () -> Props.children props)
+        (Props.children props)
       </div>
     </Picker_context.Provider>
 
@@ -532,22 +530,20 @@ module Item = struct
         label_id;
       }
     in
-    <Item_context.Provider value=(fun () -> it)>
+    <Item_context.Provider value=it>
       <div
         role=`option
         ref=(fun e ->
               S.set set_element (Some e);
               Jsx.call (Props.ref props) e)
-        ?tabindex=(fun () ->
-                    if S.get disabled then None
-                    else
-                      Some (tabindex (S.get (Selectable_item.tab_index item))))
-        aria_selected=(fun () -> S.get selected)
-        ?aria_disabled=(fun () -> if S.get disabled then Some true else None)
+        ?tabindex=(if S.get disabled then None
+                   else Some (tabindex (S.get (Selectable_item.tab_index item))))
+        aria_selected=(S.get selected)
+        ?aria_disabled=(if S.get disabled then Some true else None)
         aria_labelledby=label_id
-        data_key=(fun () -> Jsx.data (S.get key))
-        data_selected=(fun () -> state (S.get selected))
-        data_disabled=(fun () -> state (S.get disabled))
+        data_key=(Jsx.data (S.get key))
+        data_selected=(state (S.get selected))
+        data_disabled=(state (S.get disabled))
         on_pointer_down=(fun e ->
                           Jsx.call (Props.on_pointer_down props) e;
                           Selectable_item.on_pointer_down item e)
@@ -566,9 +562,9 @@ module Item = struct
         on_focus=(fun e ->
                    Jsx.call (Props.on_focus props) e;
                    Selectable_item.on_focus item e)
-        ?as_=(fun () -> S.drawn_as props)
+        ?as_=(S.drawn_as props)
         props=(S.undrawn (S.omit props own))>
-        (fun () -> Props.children props)
+        (Props.children props)
       </div>
     </Item_context.Provider>
 
@@ -592,9 +588,7 @@ module Swatch = struct
     let it = in_item "Color_swatch_picker.Swatch" in
     let label_id = it.label_id in
     <Color_swatch
-      value=(fun () -> S.get it.state.color)
-      id=(fun () -> label_id)
-      props=(S.omit props [| "id" |])
+      value=(S.get it.state.color) id=label_id props=(S.omit props [| "id" |])
     />
 
   let component = Jsx.component make

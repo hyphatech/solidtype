@@ -112,26 +112,25 @@ module Item = struct
       }
     in
     <Kobalte.Item
-      id=(fun () -> item_id)
-      value=(fun () -> key)
-      disabled=(fun () -> Solid.get disabled || Solid.get trigger_disabled)
+      id=item_id
+      value=key
+      disabled=(Solid.get disabled || Solid.get trigger_disabled)
       force_mount=true
       on_focus_in=focus_in
-      class_=(fun () ->
-               after
-                 (Styles.Accordion.item (Solid.get a.slots))
-                 (Solid.get class_))
-      data_expanded=(fun () -> Jsx.flag (Solid.get i.expanded))
-      data_disabled=(fun () -> Jsx.flag (Solid.get disabled))
-      data_hide_separator=(fun () -> Jsx.flag (Solid.get a.hide_separator))
+      class_=(after
+                (Styles.Accordion.item (Solid.get a.slots))
+                (Solid.get class_))
+      data_expanded=(Jsx.flag (Solid.get i.expanded))
+      data_disabled=(Jsx.flag (Solid.get disabled))
+      data_hide_separator=(Jsx.flag (Solid.get a.hide_separator))
       data_slot="accordion-item"
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch focus e)
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (Solid.get as_))
+      ?as_=(Option.map (fun f p -> f p (state ())) (Solid.get as_))
       props=(Props.others props)>
-      <Item_context.Provider value=(fun () -> i)>
-        (fun () -> Jsx.draw (Solid.get children) (state ()))
+      <Item_context.Provider value=i>
+        (Jsx.draw (Solid.get children) (state ()))
       </Item_context.Provider>
     </Kobalte.Item>
   [@@element div]
@@ -154,14 +153,13 @@ module Heading = struct
       }
     in
     <Kobalte.Header
-      class_=(fun () ->
-               after
-                 (Styles.Accordion.heading (Solid.get a.slots))
-                 (Solid.get class_))
+      class_=(after
+                (Styles.Accordion.heading (Solid.get a.slots))
+                (Solid.get class_))
       data_slot="accordion-heading"
       props=(Props.others props)>
-      <Button.Trigger.Provider value=(fun () -> trigger)>
-        (fun () -> Solid.get children)
+      <Button.Trigger.Provider value=trigger>
+        (Solid.get children)
       </Button.Trigger.Provider>
     </Kobalte.Header>
   [@@element h3]
@@ -214,7 +212,7 @@ module Trigger = struct
       }
     in
     <Kobalte.Trigger
-      disabled=(fun () -> Solid.get disabled)
+      disabled=(Solid.get disabled)
       on_click=(fun e ->
                  ignore (on_click e : unit option);
                  if detail e > 0 then queue_microtask press)
@@ -231,24 +229,23 @@ module Trigger = struct
                       key_down := None;
                       press ()
                   | Some _ | None -> ())
-      class_=(fun () ->
-               after
-                 (Styles.Accordion.trigger (Solid.get a.slots))
-                 (Solid.get class_))
-      aria_controls=(fun () -> i.content_id)
+      class_=(after
+                (Styles.Accordion.trigger (Solid.get a.slots))
+                (Solid.get class_))
+      aria_controls=i.content_id
       slot="trigger"
       ref=(fun b ->
             ignore (given_ref b : unit option);
             Interaction.watch n b)
       data_slot="accordion-trigger"
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered n))
-      data_pressed=(fun () -> Jsx.flag (Interaction.pressed n))
-      data_focused=(fun () -> Jsx.flag (Interaction.focused n))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible n))
-      data_disabled=(fun () -> Jsx.flag (Interaction.disabled n))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (Solid.get as_))
+      data_hovered=(Jsx.flag (Interaction.hovered n))
+      data_pressed=(Jsx.flag (Interaction.pressed n))
+      data_focused=(Jsx.flag (Interaction.focused n))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible n))
+      data_disabled=(Jsx.flag (Interaction.disabled n))
+      ?as_=(Option.map (fun f p -> f p (state ())) (Solid.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (Solid.get children) (state ()))
+      (Jsx.draw (Solid.get children) (state ()))
     </Kobalte.Trigger>
   [@@element button]
 end
@@ -264,22 +261,21 @@ module Indicator = struct
        add them to an element already made, so the span around it takes them,
        and turns over in its place. *)
     <Show
-      when_=(fun () -> Option.is_some (Solid.get children))
+      when_=(Option.is_some (Solid.get children))
       fallback=(<Gravity.Chevron_down
                   aria_hidden=true
-                  class_=(fun () -> classes ())
+                  class_=(classes ())
                   role=`presentation
-                  data_expanded=(fun () -> Jsx.flag (Solid.get i.expanded))
+                  data_expanded=(Jsx.flag (Solid.get i.expanded))
                   data_slot="accordion-indicator"
                   props=(Props.others props)
                 />)>
       <span
-        class_=(fun () -> classes ())
-        data_expanded=(fun () -> Jsx.flag (Solid.get i.expanded))
+        class_=(classes ())
+        data_expanded=(Jsx.flag (Solid.get i.expanded))
         data_slot="accordion-indicator"
         props=(Props.others props)>
-        (fun () ->
-          match Solid.get children with Some c -> c | None -> Jsx.string "")
+        (match Solid.get children with Some c -> c | None -> Jsx.string "")
       </span>
     </Show>
   [@@element svg]
@@ -310,25 +306,23 @@ module Panel = struct
       }
     in
     <Kobalte.Content
-      class_=(fun () ->
-               after
-                 (Styles.Accordion.panel (Solid.get a.slots))
-                 (Solid.get class_))
-      aria_hidden=(fun () -> not (Solid.get i.expanded))
-      ?hidden=(Jsx.attr (fun () -> Panel.hidden panel))
-      style=(fun () ->
-              match Solid.get style with
-              | Some s -> Panel.style panel ^ "; " ^ s
-              | None -> Panel.style panel)
+      class_=(after
+                (Styles.Accordion.panel (Solid.get a.slots))
+                (Solid.get class_))
+      aria_hidden=(not (Solid.get i.expanded))
+      ?hidden=(Jsx.attr (Panel.hidden panel))
+      style=(match Solid.get style with
+            | Some s -> Panel.style panel ^ "; " ^ s
+            | None -> Panel.style panel)
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch focus e;
             Panel.watch panel e)
-      data_expanded=(fun () -> Jsx.flag (Solid.get i.expanded))
+      data_expanded=(Jsx.flag (Solid.get i.expanded))
       data_slot="accordion-panel"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (Solid.get as_))
+      ?as_=(Option.map (fun f p -> f p (state ())) (Solid.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (Solid.get children) (state ()))
+      (Jsx.draw (Solid.get children) (state ()))
     </Kobalte.Content>
   [@@element div]
 end
@@ -337,15 +331,14 @@ module Body = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let a, (_ : item) = within_item "Accordion.Body" in
     <div
-      class_=(fun () -> Styles.Accordion.body (Solid.get a.slots))
+      class_=(Styles.Accordion.body (Solid.get a.slots))
       data_slot="accordion-body"
       props=(Props.others props)>
       <div
-        class_=(fun () ->
-                 after
-                   (Styles.Accordion.body_inner (Solid.get a.slots))
-                   (Solid.get class_))>
-        (fun () -> Solid.get children)
+        class_=(after
+                  (Styles.Accordion.body_inner (Solid.get a.slots))
+                  (Solid.get class_))>
+        (Solid.get children)
       </div>
     </div>
   [@@element div]
@@ -412,33 +405,31 @@ let%component make ?(expanded_keys : string array option)
      where it is shown, so it reads the surface given there. *)
   let accordion () =
     <Kobalte.Root
-      class_=(fun () ->
-               after
-                 (Styles.Accordion.base (Solid.get a.slots))
-                 (Solid.get class_))
-      data_disabled=(fun () -> Jsx.flag (Solid.get is_disabled))
+      class_=(after
+                (Styles.Accordion.base (Solid.get a.slots))
+                (Solid.get class_))
+      data_disabled=(Jsx.flag (Solid.get is_disabled))
       data_slot="accordion"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (Solid.get as_))
+      ?as_=(Option.map (fun f p -> f p (state ())) (Solid.get as_))
       props=(Props.others props)
             (* Kobalte's options come after the rest, which may hold a DOM
          attribute of the same name, on_change, that would replace them. *)
-      value=(fun () -> Solid.get keys)
+      value=(Solid.get keys)
       on_change=change
-      multiple=(fun () -> Solid.get allows_multiple_expanded)
+      multiple=(Solid.get allows_multiple_expanded)
       collapsible=true>
-      <Context.Provider value=(fun () -> a)>
-        (fun () -> Jsx.draw (Solid.get children) (state ()))
+      <Context.Provider value=a>
+        (Jsx.draw (Solid.get children) (state ()))
       </Context.Provider>
     </Kobalte.Root>
   in
   let surface = Solid.accessor (fun () -> `default) in
   (* A surface accordion is a surface to what is inside it, as HeroUI's is. *)
   <Show
-    when_=(fun () ->
-            match Solid.get variant with `surface -> true | `default -> false)
-    fallback=(fun () -> accordion ())>
-    <Surface.Context.Provider value=(fun () -> surface)>
-      (fun () -> Jsx.element (accordion ()))
+    when_=(match Solid.get variant with `surface -> true | `default -> false)
+    fallback=(accordion ())>
+    <Surface.Context.Provider value=surface>
+      (Jsx.element (accordion ()))
     </Surface.Context.Provider>
   </Show>
 [@@element div]

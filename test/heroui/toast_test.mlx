@@ -256,32 +256,31 @@ let () =
       Jest.testPromise
         "draws its parts' children of their state, the toast's own" (fun () ->
           let words name flags =
-            <span data_words=(fun () -> Solidtype.Jsx.data name)>
-              (fun () -> Solidtype.Jsx.string (T.words flags))
+            <span data_words=(Solidtype.Jsx.data name)>
+              (Solidtype.Jsx.string (T.words flags))
             </span>
           in
           T.render (fun () ->
               <Toast.Provider>
                 (fun t ->
-                  <Toast toast=(fun () -> t)>
+                  <Toast toast=t>
                     (fun s ->
                       Solidtype.Jsx.fragment
                         [|
                           <span data_words="toast">
-                            (fun () ->
-                              Solidtype.Jsx.string
-                                (Toast.title s.toast ^ " "
-                                ^ T.words
-                                    [
-                                      ("focused", s.is_focused);
-                                      ("focus-visible", s.is_focus_visible);
-                                    ]))
+                            (Solidtype.Jsx.string
+                               (Toast.title s.toast ^ " "
+                               ^ T.words
+                                   [
+                                     ("focused", s.is_focused);
+                                     ("focus-visible", s.is_focus_visible);
+                                   ]))
                           </span>;
                           <Toast.Action_button>
                             (fun b ->
                               words "action" [ ("pressed", b.is_pressed) ])
                           </Toast.Action_button>;
-                          <Toast.Close_button key=(fun () -> Toast.key t)>
+                          <Toast.Close_button key=(Toast.key t)>
                             (fun c ->
                               words "close" [ ("hovered", c.is_hovered) ])
                           </Toast.Close_button>;
@@ -467,13 +466,13 @@ let () =
                 title="Region" style="--x: 1" ref=(fun _ -> made "region")>
                 (fun t ->
                   <Toast
-                    toast=(fun () -> t)
+                    toast=t
                     title="Toast"
                     style="--x: 1"
                     ref=(fun _ -> made "toast")>
                     <Toast.Content>
                       <Toast.Title title="Title" style="--x: 1">
-                        (fun () -> Solidtype.Jsx.string (Toast.title t))
+                        (Solidtype.Jsx.string (Toast.title t))
                       </Toast.Title>
                       <Toast.Description title="Description" style="--x: 1">
                         "Saved"
@@ -487,7 +486,7 @@ let () =
                       "Undo"
                     </Toast.Action_button>
                     <Toast.Close_button
-                      key=(fun () -> Toast.key t)
+                      key=(Toast.key t)
                       title="Close"
                       style="--x: 1"
                       ref=(fun _ -> made "close")

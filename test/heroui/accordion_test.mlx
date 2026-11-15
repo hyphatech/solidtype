@@ -164,53 +164,47 @@ let render ?expanded_keys ?default_expanded_keys ?allows_multiple_expanded
     ?trigger_disabled ?(presses = false) tell =
   T.render (fun () ->
       <Accordion
-        ?expanded_keys=(fun () -> expanded_keys)
-        ?default_expanded_keys=(fun () -> default_expanded_keys)
-        ?allows_multiple_expanded=(fun () -> allows_multiple_expanded)
-        ?is_disabled=(fun () -> is_disabled)
-        ?variant=(fun () -> variant)
-        ?hide_separator=(fun () -> hide_separator)
+        ?expanded_keys
+        ?default_expanded_keys
+        ?allows_multiple_expanded
+        ?is_disabled
+        ?variant
+        ?hide_separator
         on_expanded_change=(fun k -> tell (Js.Array.join ~sep:"," k))>
-        (fun () ->
-          Solidtype.Jsx.element
-            <Solidtype.For each=(fun () -> keys)>
-              (fun key _ ->
-                <Accordion.Item
-                  id=(fun () -> key)
-                  ?is_disabled=(fun () ->
-                                 match disabled with
-                                 | Some d when String.equal d key -> Some true
-                                 | _ -> None)
-                  on_expanded_change=(fun v ->
-                                       tell (key ^ ":" ^ string_of_bool v))>
-                  <Accordion.Heading>
-                    (fun () ->
-                      Solidtype.Jsx.element
-                        (if button then
-                           <Button slot=`trigger variant=`secondary>
-                             (fun () -> Solidtype.Jsx.string key)
-                             <Accordion.Indicator />
-                           </Button>
-                         else
-                           <Accordion.Trigger
-                             ?is_disabled=(fun () ->
-                                            match trigger_disabled with
-                                            | Some d when String.equal d key ->
-                                                Some true
-                                            | _ -> None)
-                             on_press=(fun () ->
-                                        if presses then tell (key ^ ":pressed"))>
-                             (fun () -> Solidtype.Jsx.string key)
-                             <Accordion.Indicator />
-                           </Accordion.Trigger>))
-                  </Accordion.Heading>
-                  <Accordion.Panel>
-                    <Accordion.Body>
-                      (fun () -> Solidtype.Jsx.string ("About " ^ key ^ "."))
-                    </Accordion.Body>
-                  </Accordion.Panel>
-                </Accordion.Item>)
-            </Solidtype.For>)
+        (Solidtype.Jsx.element
+           <Solidtype.For each=keys>
+             (fun key _ ->
+               <Accordion.Item
+                 id=key
+                 ?is_disabled=(match disabled with
+                              | Some d when String.equal d key -> Some true
+                              | _ -> None)
+                 on_expanded_change=(fun v ->
+                                      tell (key ^ ":" ^ string_of_bool v))>
+                 <Accordion.Heading>
+                   (Solidtype.Jsx.element
+                      (if button then
+                         <Button slot=`trigger variant=`secondary>
+                           (Solidtype.Jsx.string key) <Accordion.Indicator />
+                         </Button>
+                       else
+                         <Accordion.Trigger
+                           ?is_disabled=(match trigger_disabled with
+                                        | Some d when String.equal d key ->
+                                            Some true
+                                        | _ -> None)
+                           on_press=(fun () ->
+                                      if presses then tell (key ^ ":pressed"))>
+                           (Solidtype.Jsx.string key) <Accordion.Indicator />
+                         </Accordion.Trigger>))
+                 </Accordion.Heading>
+                 <Accordion.Panel>
+                   <Accordion.Body>
+                     (Solidtype.Jsx.string ("About " ^ key ^ "."))
+                   </Accordion.Body>
+                 </Accordion.Panel>
+               </Accordion.Item>)
+           </Solidtype.For>)
       </Accordion>)
 
 let both ?expanded_keys ?default_expanded_keys ?allows_multiple_expanded
@@ -245,12 +239,12 @@ let focused () =
    function was given, beside React's. *)
 let of_state ~disabled =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   T.render (fun () ->
-      <Accordion is_disabled=(fun () -> disabled)>
+      <Accordion is_disabled=disabled>
         (fun a ->
           Solidtype.Jsx.fragment
             [|
@@ -309,7 +303,7 @@ let () =
       Jest.testPromise "draws its panel's children of the focus within it"
         (fun () ->
           T.render (fun () ->
-              <Accordion default_expanded_keys=(fun () -> [| "shipping" |])>
+              <Accordion default_expanded_keys=[| "shipping" |]>
                 <Accordion.Item id="shipping">
                   <Accordion.Heading>
                     <Accordion.Trigger>"Shipping"</Accordion.Trigger>
@@ -319,13 +313,12 @@ let () =
                       Solidtype.Jsx.fragment
                         [|
                           <span data_words="panel">
-                            (fun () ->
-                              Solidtype.Jsx.string
-                                (T.words
-                                   [
-                                     ( "focus-visible-within",
-                                       p.is_focus_visible_within );
-                                   ]))
+                            (Solidtype.Jsx.string
+                               (T.words
+                                  [
+                                    ( "focus-visible-within",
+                                      p.is_focus_visible_within );
+                                  ]))
                           </span>;
                           <button>"Track"</button>;
                         |])
@@ -597,7 +590,7 @@ let () =
              has opened once; a panel kept on the page collapsed would open
              the first time with none. *)
           T.render (fun () ->
-              <Accordion default_expanded_keys=(fun () -> [| "one" |])>
+              <Accordion default_expanded_keys=[| "one" |]>
                 <Accordion.Item id="one">
                   <Accordion.Heading>
                     <Accordion.Trigger>"One"</Accordion.Trigger>

@@ -25,14 +25,13 @@ module Separator = struct
   let%component make ?(class_ : string option) () =
     <span
       aria_hidden=true
-      class_=(fun () ->
-               let separator =
-                 Styles.ButtonGroup.separator
-                   (Styles.ButtonGroup.slots (Styles.ButtonGroup.options ()))
-               in
-               match S.get class_ with
-               | Some c -> separator ^ " " ^ c
-               | None -> separator)
+      class_=(let separator =
+                Styles.ButtonGroup.separator
+                  (Styles.ButtonGroup.slots (Styles.ButtonGroup.options ()))
+              in
+              match S.get class_ with
+              | Some c -> separator ^ " " ^ c
+              | None -> separator)
       data_slot="button-group-separator"
       props=(Props.others props)
     />
@@ -54,25 +53,24 @@ let%component make
     ?(class_ : string option) ~(children : Jsx.content) () =
   let g = { variant; size; is_disabled; full_width } in
   let disabled () = Option.value (S.get is_disabled) ~default:false in
-  <Context.Provider value=(fun () -> g)>
+  <Context.Provider value=g>
     <div
       role=`group
-      class_=(fun () ->
-               let base =
-                 Styles.ButtonGroup.base
-                   (Styles.ButtonGroup.slots
-                      (Styles.ButtonGroup.options ?full_width:(S.get full_width)
-                         ~orientation:(S.get orientation) ()))
-               in
-               (* A slot's class takes no class of the caller's, so it is
+      class_=(let base =
+                Styles.ButtonGroup.base
+                  (Styles.ButtonGroup.slots
+                     (Styles.ButtonGroup.options ?full_width:(S.get full_width)
+                        ~orientation:(S.get orientation) ()))
+              in
+              (* A slot's class takes no class of the caller's, so it is
                   added after HeroUI's, as React's className is. *)
-               match S.get class_ with
-               | Some c -> base ^ " " ^ c
-               | None -> base)
+              match S.get class_ with
+              | Some c -> base ^ " " ^ c
+              | None -> base)
       data_slot="button-group"
-      data_disabled=(fun () -> Jsx.flag (disabled ()))
+      data_disabled=(Jsx.flag (disabled ()))
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   </Context.Provider>
 [@@element div]

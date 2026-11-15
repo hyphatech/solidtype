@@ -21,10 +21,7 @@ let%component make ?(class_ : string option) ~(children : Jsx.content) () =
   | Some render ->
       render classes (Props.others props) (fun () -> S.get children)
   | None ->
-      <header
-        class_=(fun () -> classes ())
-        data_slot="header"
-        props=(Props.others props)>
-        (fun () -> S.get children)
+      <header class_=(classes ()) data_slot="header" props=(Props.others props)>
+        (S.get children)
       </header>
 [@@element header]

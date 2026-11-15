@@ -11,8 +11,8 @@ let island () =
   <SpinButton.Root
     aria_label="Volume"
     tab_index="0"
-    value=(fun () -> K.Types.Either.right (float_of_int (S.get volume)))
-    text_value=(fun () -> string_of_int (S.get volume) ^ " of 10")
+    value=(K.Types.Either.right (float_of_int (S.get volume)))
+    text_value=(string_of_int (S.get volume) ^ " of 10")
     min_value=0.
     max_value=10.
     on_increment=(fun () -> change (S.get volume + 1))
@@ -21,7 +21,7 @@ let island () =
     on_decrement_page=(fun () -> change (S.get volume - 5))
     on_decrement_to_min=(fun () -> change 0)
     on_increment_to_max=(fun () -> change 10)>
-    (fun () -> Jsx.int (S.get volume))
+    (Jsx.int (S.get volume))
   </SpinButton.Root>
 
 external twin : unit -> Jsx.element = "make"

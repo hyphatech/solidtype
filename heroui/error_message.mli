@@ -4,7 +4,7 @@
 
     {[
       <Error_message>
-        (fun () -> if invalid () then "Pick at least one" else "")
+        (if invalid () then "Pick at least one" else "")
       </Error_message>
     ]} *)
 

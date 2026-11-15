@@ -106,10 +106,7 @@ let walk ~step host told =
   Js.Promise.resolve (Array.of_list (List.rev !seen))
 
 let checkbox ~aria_label ~variant =
-  <Checkbox
-    aria_label=(fun () -> aria_label)
-    slot=`selection
-    variant=(fun () -> variant)>
+  <Checkbox aria_label slot=`selection variant>
     <Checkbox.Content>
       <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
     </Checkbox.Content>
@@ -122,9 +119,9 @@ let both ~mode ?behavior ?disabled_keys () =
         <Table.Scroll_container>
           <Table.Content
             aria_label="Table with selection"
-            selection_mode=(fun () -> mode)
-            ?selection_behavior=(fun () -> behavior)
-            ?disabled_keys=(fun () -> disabled_keys)
+            selection_mode=mode
+            ?selection_behavior=behavior
+            ?disabled_keys
             on_selection_change=(fun keys ->
                                   told :=
                                     Array.of_list
@@ -132,23 +129,21 @@ let both ~mode ?behavior ?disabled_keys () =
                                          (Array.to_list keys)))>
             <Table.Header>
               <Table.Column class_="pe-0">
-                (fun () ->
-                  Jsx.element
-                    (checkbox ~aria_label:"Select all" ~variant:`primary))
+                (Jsx.element
+                   (checkbox ~aria_label:"Select all" ~variant:`primary))
               </Table.Column>
               <Table.Column is_row_header=true>"Name"</Table.Column>
             </Table.Header>
             <Table.Body>
-              <For each=(fun () -> users)>
+              <For each=users>
                 (fun u _ ->
-                  <Table.Row id=(fun () -> u.id)>
+                  <Table.Row id=u.id>
                     <Table.Cell class_="pe-0">
-                      (fun () ->
-                        Jsx.element
-                          (checkbox ~aria_label:("Select " ^ u.name)
-                             ~variant:`secondary))
+                      (Jsx.element
+                         (checkbox ~aria_label:("Select " ^ u.name)
+                            ~variant:`secondary))
                     </Table.Cell>
-                    <Table.Cell>(fun () -> Jsx.string u.name)</Table.Cell>
+                    <Table.Cell>(Jsx.string u.name)</Table.Cell>
                   </Table.Row>)
               </For>
             </Table.Body>

@@ -37,9 +37,9 @@ let make () =
   <Form class_="flex w-[280px] flex-col gap-4" on_submit=handle_submit>
     <Search_field
       is_required=true
-      is_invalid=(fun () -> is_invalid ())
+      is_invalid=(is_invalid ())
       name="search"
-      value=(fun () -> S.get value)
+      value=(S.get value)
       on_change=(S.set set_value)>
       <Label>"Search products"</Label>
       <Search_field.Group>
@@ -48,28 +48,26 @@ let make () =
         <Search_field.Clear_button />
       </Search_field.Group>
       <Show
-        when_=(fun () -> is_invalid ())
+        when_=(is_invalid ())
         fallback=(<Description>
-                    (fun () ->
-                      Jsx.string
-                        ("Enter at least " ^ string_of_int min_length
-                       ^ " characters to search"))
+                    (Jsx.string
+                       ("Enter at least " ^ string_of_int min_length
+                      ^ " characters to search"))
                   </Description>)>
         <Field_error>
-          (fun () ->
-            Jsx.string
-              ("Search query must be at least " ^ string_of_int min_length
-             ^ " characters"))
+          (Jsx.string
+             ("Search query must be at least " ^ string_of_int min_length
+            ^ " characters"))
         </Field_error>
       </Show>
     </Search_field>
     <Button
       class_="w-full"
-      is_disabled=(fun () -> String.length (S.get value) < min_length)
+      is_disabled=(String.length (S.get value) < min_length)
       type_=`submit
       variant=`primary>
-      <Show when_=(fun () -> not (S.get is_submitting))>"Search"</Show>
-      <Show when_=(fun () -> S.get is_submitting)>
+      <Show when_=(not (S.get is_submitting))>"Search"</Show>
+      <Show when_=(S.get is_submitting)>
         <Spinner color=`current size=`sm /> "Searching..."
       </Show>
     </Button>

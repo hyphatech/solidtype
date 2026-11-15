@@ -4,10 +4,8 @@ module Swatch = K.ColorSwatch
 
 let island () =
   <div>
-    <Swatch.Root value=(fun () -> K.Colors.parse_color "#ff0000") />
-    <Swatch.Root
-      value=(fun () -> K.Colors.parse_color "#0000ff") color_name="Ocean"
-    />
+    <Swatch.Root value=(K.Colors.parse_color "#ff0000") />
+    <Swatch.Root value=(K.Colors.parse_color "#0000ff") color_name="Ocean" />
   </div>
 
 external twin : unit -> Solidtype.Jsx.element = "make"

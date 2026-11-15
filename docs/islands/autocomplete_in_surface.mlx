@@ -12,7 +12,7 @@ let make () =
     <Autocomplete
       class_="w-full"
       placeholder="Select one"
-      value=(fun () -> S.get selected)
+      value=(S.get selected)
       variant=`secondary
       on_change=(S.set set_selected)>
       <Label>"State"</Label>

@@ -26,7 +26,7 @@ let items =
 let make () =
   <Accordion
     class_="bg-surface-1/10 w-full max-w-md rounded-2xl" variant=`surface>
-    <Solidtype.For each=(fun () -> items)>
+    <Solidtype.For each=items>
       (fun (title, subtitle, icon, content) _ ->
         <Accordion.Item
           class_="group/item \
@@ -37,19 +37,19 @@ let make () =
               class_="group flex items-center gap-2 transition-none \
                       hover:bg-surface">
               <img
-                alt=(fun () -> title)
+                alt=title
                 class_="h-11 w-11 transition-[scale,rotate] duration-300 \
                         ease-out group-hover/item:scale-120 \
                         group-hover/item:-rotate-10 \
                         group-hover/item:drop-shadow-lg"
-                src=(fun () -> icon)
+                src=icon
               />
               <div class_="flex flex-col gap-0">
                 <span class_="leading-5 font-medium">
-                  (fun () -> Solidtype.Jsx.string title)
+                  (Solidtype.Jsx.string title)
                 </span>
                 <span class_="leading-6 font-normal text-muted/80">
-                  (fun () -> Solidtype.Jsx.string subtitle)
+                  (Solidtype.Jsx.string subtitle)
                 </span>
               </div>
               <Accordion.Indicator class_="text-muted/50 [&>svg]:size-4">
@@ -59,7 +59,7 @@ let make () =
           </Accordion.Heading>
           <Accordion.Panel>
             <Accordion.Body class_="text-muted/80">
-              (fun () -> Solidtype.Jsx.string content)
+              (Solidtype.Jsx.string content)
             </Accordion.Body>
           </Accordion.Panel>
         </Accordion.Item>)

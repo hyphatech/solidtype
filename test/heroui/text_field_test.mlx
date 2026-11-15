@@ -175,20 +175,19 @@ let both_field ?variant ?full_width ?is_required ?is_disabled ?is_invalid
     ?is_read_only ?default_value ?(multiline = false) () =
   T.render (fun () ->
       <Text_field
-        ?variant=(fun () -> variant)
-        ?full_width=(fun () -> full_width)
-        ?is_required=(fun () -> is_required)
-        ?is_disabled=(fun () -> is_disabled)
-        ?is_invalid=(fun () -> is_invalid)
-        ?is_read_only=(fun () -> is_read_only)
-        ?default_value=(fun () -> default_value)
+        ?variant
+        ?full_width
+        ?is_required
+        ?is_disabled
+        ?is_invalid
+        ?is_read_only
+        ?default_value
         name="email"
         class_="max-w-64">
         <Label>"Email"</Label>
-        (fun () ->
-          if multiline then
-            Solidtype.Jsx.element <Text_area placeholder="Your message" />
-          else Solidtype.Jsx.element <Input placeholder="Enter your email" />)
+        (if multiline then
+           Solidtype.Jsx.element <Text_area placeholder="Your message" />
+         else Solidtype.Jsx.element <Input placeholder="Enter your email" />)
         <Description>"We'll never share it."</Description>
         <Field_error>"Enter a valid email."</Field_error>
       </Text_field>);
@@ -213,18 +212,14 @@ let both_alone ?variant ?full_width ?disabled ?(multiline = false) () =
   T.render (fun () ->
       if multiline then
         <Text_area
-          ?variant=(fun () -> variant)
-          ?full_width=(fun () -> full_width)
-          ?disabled=(fun () -> disabled)
+          ?variant
+          ?full_width
+          ?disabled
           placeholder="Your message"
           aria_label="Message" />
       else
         <Input
-          ?variant=(fun () -> variant)
-          ?full_width=(fun () -> full_width)
-          ?disabled=(fun () -> disabled)
-          placeholder="Name"
-          aria_label="Name" />);
+          ?variant ?full_width ?disabled placeholder="Name" aria_label="Name" />);
   let* solidtype =
     walk
       ~step:(fun action -> action ())
@@ -251,20 +246,19 @@ let () =
           T.render (fun () ->
               <Form
                 on_submit=prevent_default
-                validation_errors=(fun () -> [ ("email", "Too short.") ])>
+                validation_errors=[ ("email", "Too short.") ]>
                 <Text_field name="email">
                   <Label>"Email"</Label>
                   <Input />
                   <Field_error>
                     (fun s ->
                       <span data_words="error">
-                        (fun () ->
-                          Solidtype.Jsx.string
-                            (string_of_bool (Solidtype.Solid.get s.is_invalid)
-                            ^ "|"
-                            ^ String.concat ","
-                                (Array.to_list
-                                   (Solidtype.Solid.get s.validation_errors))))
+                        (Solidtype.Jsx.string
+                           (string_of_bool (Solidtype.Solid.get s.is_invalid)
+                           ^ "|"
+                           ^ String.concat ","
+                               (Array.to_list
+                                  (Solidtype.Solid.get s.validation_errors))))
                       </span>)
                   </Field_error>
                 </Text_field>
@@ -327,8 +321,7 @@ let () =
       Jest.testPromise "shows the value it is given" (fun () ->
           let value, set_value = S.create_signal "Ada" in
           T.render (fun () ->
-              <Text_field
-                value=(fun () -> S.get value) on_change=(S.set set_value)>
+              <Text_field value=(S.get value) on_change=(S.set set_value)>
                 <Label>"Name"</Label> <Input />
               </Text_field>);
           S.set set_value "Grace";

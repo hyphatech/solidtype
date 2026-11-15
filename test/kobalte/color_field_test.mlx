@@ -11,7 +11,7 @@ let island () =
     <Field.Label>"Colour"</Field.Label>
     <Field.Input />
     <Field.Description>
-      (fun () -> Jsx.string ("Changed to " ^ S.get changed))
+      (Jsx.string ("Changed to " ^ S.get changed))
     </Field.Description>
   </Field.Root>
 

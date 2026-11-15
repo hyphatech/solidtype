@@ -15,13 +15,11 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="placement"
-        choices=(fun () -> placements)
-        picked=(fun () -> S.get placement)
+        choices=placements
+        picked=(S.get placement)
         on_pick=(Controls.choose placements set_placement)
       />
-      <Toggle
-        label="arrow" on=(fun () -> S.get arrow) on_toggle=(S.set set_arrow)
-      />
+      <Toggle label="arrow" on=(S.get arrow) on_toggle=(S.set set_arrow) />
     </div>
     <Side_by_side
       compared="[data-slot=button]"
@@ -29,9 +27,9 @@ let make () =
                    <Tooltip default_open=true>
                      <Button variant=`secondary>"Hover me"</Button>
                      <Tooltip.Content
-                       placement=(fun () -> fst (S.get placement))
-                       show_arrow=(fun () -> S.get arrow)>
-                       <Solidtype.Show when_=(fun () -> S.get arrow)>
+                       placement=(fst (S.get placement))
+                       show_arrow=(S.get arrow)>
+                       <Solidtype.Show when_=(S.get arrow)>
                          <Tooltip.Arrow />
                        </Solidtype.Show>
                        <p>"This is a tooltip"</p>

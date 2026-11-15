@@ -49,12 +49,10 @@ let month =
     (fun (d : Scale.tick Row.t) ->
       let t = Row.data d in
       let i = Row.index d in
-      <div class_=(fun () -> if i mod 2 = 1 then "odd" else "")>
-        <Bar from=(fun () -> t.at) to_=(fun () -> t.next) class_="band" />
-        <Show when_=(fun () -> not t.last)>
-          <Label at=(fun () -> t.at) class_="month">
-            (fun () -> Jsx.string months.(i))
-          </Label>
+      <div class_=(if i mod 2 = 1 then "odd" else "")>
+        <Bar from=t.at to_=t.next class_="band" />
+        <Show when_=(not t.last)>
+          <Label at=t.at class_="month">(Jsx.string months.(i))</Label>
         </Show>
       </div>)
 
@@ -76,36 +74,25 @@ let trade =
       let t = Row.data d in
       <div class_="slat">
         <Label edge="start" class_="trade">
-          (fun () -> Jsx.string t.trade)
+          (Jsx.string t.trade)
           <small>
-            (fun () ->
-              Jsx.string
-                ("wk " ^ Js.Float.toString t.start ^ "-"
-               ^ Js.Float.toString t.end_))
+            (Jsx.string
+               ("wk " ^ Js.Float.toString t.start ^ "-"
+              ^ Js.Float.toString t.end_))
           </small>
         </Label>
-        <Bar
-          from=(fun () -> t.start)
-          to_=(fun () -> t.end_)
-          thick=(fun () -> Either.left "10px")
-          class_="job"
-        />
-        <Show when_=(fun () -> t.start < now.week)>
+        <Bar from=t.start to_=t.end_ thick=(Either.left "10px") class_="job" />
+        <Show when_=(t.start < now.week)>
           <Bar
-            from=(fun () -> t.start)
-            to_=(fun () -> Float.min now.week t.end_)
-            thick=(fun () -> Either.left "10px")
+            from=t.start
+            to_=(Float.min now.week t.end_)
+            thick=(Either.left "10px")
             class_="done"
           />
         </Show>
-        <Bar
-          from=(fun () -> t.start)
-          to_=(fun () -> t.end_)
-          thick=(fun () -> Either.left "1px")
-          class_="dim"
-        />
-        <Label at=(fun () -> (t.start +. t.end_) /. 2.) class_="weeks">
-          (fun () -> Jsx.string (Js.Float.toString (t.end_ -. t.start) ^ " WK"))
+        <Bar from=t.start to_=t.end_ thick=(Either.left "1px") class_="dim" />
+        <Label at=((t.start +. t.end_) /. 2.) class_="weeks">
+          (Jsx.string (Js.Float.toString (t.end_ -. t.start) ^ " WK"))
         </Label>
       </div>)
 
@@ -121,10 +108,8 @@ let today =
     (fun d ->
       let n = Row.data d in
       <div>
-        <Tick
-          at=(fun () -> n.week) thick=(fun () -> Either.right 1.) class_="now"
-        />
-        <Label at=(fun () -> n.week) class_="now-label">"TODAY"</Label>
+        <Tick at=n.week thick=(Either.right 1.) class_="now" />
+        <Label at=n.week class_="now-label">"TODAY"</Label>
       </div>)
 
 let make () =
@@ -136,20 +121,18 @@ let make () =
            "Each bar is a trade on site; the orange part is done. Point at one \
             to measure it."
          </span>)>
-    <Chart scale=(fun () -> (0., 32.)) height=340. theme=(fun () -> drawing)>
-      <Scale
-        ticks=(fun () -> Ticks.custom (Solidtype_rhp.every 4. ())) render=month
-      />
+    <Chart scale=(0., 32.) height=340. theme=drawing>
+      <Scale ticks=(Ticks.custom (Solidtype_rhp.every 4. ())) render=month />
       <Plot
-        rows=(fun () -> trades)
+        rows=trades
         key=(fun d -> (Row.data d).trade)
-        order=(fun () -> Order.sort_by (fun d -> (Row.data d).start))
+        order=(Order.sort_by (fun d -> (Row.data d).start))
         render=trade
       />
       <Plot
-        rows=(fun () -> [| now |])
+        rows=[| now |]
         overlap=true
-        style=(fun () -> Js.Dict.fromArray [| ("pointer-events", "none") |])
+        style=(Js.Dict.fromArray [| ("pointer-events", "none") |])
         render=today
       />
     </Chart>

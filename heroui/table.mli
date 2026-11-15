@@ -15,11 +15,11 @@
               <Table.Column>"Role"</Table.Column>
             </Table.Header>
             <Table.Body>
-              <For each=(fun () -> members)>
+              <For each=members>
                 (fun m _ ->
                   <Table.Row id=m.id>
-                    <Table.Cell>(fun () -> Jsx.string m.name)</Table.Cell>
-                    <Table.Cell>(fun () -> Jsx.string m.role)</Table.Cell>
+                    <Table.Cell>(Jsx.string m.name)</Table.Cell>
+                    <Table.Cell>(Jsx.string m.role)</Table.Cell>
                   </Table.Row>)
               </For>
             </Table.Body>

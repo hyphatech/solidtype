@@ -9,9 +9,8 @@ let make () =
     default_value=99.
     min_value=0.
     name="amount"
-    format_options=(fun () ->
-                     Format.make ~currency:"EUR" ~currency_sign:`accounting
-                       ~style:`currency ())>
+    format_options=(Format.make ~currency:"EUR" ~currency_sign:`accounting
+                      ~style:`currency ())>
     <Label>"Number field with chevrons"</Label>
     <Number_field.Group class_="flex">
       <Number_field.Input class_="flex-1" />

@@ -44,28 +44,26 @@ let%component make ?(variant : [ `default ] = `default)
     }
   in
   <Kobalte.Root
-    aria_label=(fun () -> S.get aria_label)
-    class_=(fun () ->
-             Styles.CloseButton.classes
-               (Styles.CloseButton.options ~variant:(S.get variant)
-                  ?class_:(S.get class_) ()))
-    disabled=(fun () -> S.get is_disabled)
+    aria_label=(S.get aria_label)
+    class_=(Styles.CloseButton.classes
+              (Styles.CloseButton.options ~variant:(S.get variant)
+                 ?class_:(S.get class_) ()))
+    disabled=(S.get is_disabled)
     ref=(fun b ->
           ignore (given_ref b : unit option);
           Interaction.watch i b)
     data_slot="close-button"
-    data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-    data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-    data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-    data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-    data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
+    data_hovered=(Jsx.flag (Interaction.hovered i))
+    data_pressed=(Jsx.flag (Interaction.pressed i))
+    data_focused=(Jsx.flag (Interaction.focused i))
+    data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+    data_disabled=(Jsx.flag (Interaction.disabled i))
     type_=`button
     on_click=(fun e -> ignore (on_click e : unit option))
-    ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+    ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
     props=(Props.others props)>
-    (fun () ->
-      match S.get children with
-      | Some c -> Jsx.draw c (state ())
-      | None -> Jsx.element <Icon />)
+    (match S.get children with
+    | Some c -> Jsx.draw c (state ())
+    | None -> Jsx.element <Icon />)
   </Kobalte.Root>
 [@@element button]

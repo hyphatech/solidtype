@@ -36,6 +36,4 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
           ignore (on_change c : unit option));
     }
   in
-  <Context.Provider value=(fun () -> picker)>
-    (fun () -> S.get children)
-  </Context.Provider>
+  <Context.Provider value=picker>(S.get children)</Context.Provider>

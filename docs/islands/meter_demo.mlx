@@ -22,14 +22,14 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="color"
-        choices=(fun () -> colors)
-        picked=(fun () -> S.get color)
+        choices=colors
+        picked=(S.get color)
         on_pick=(Controls.choose colors set_color)
       />
       <Select
         label="size"
-        choices=(fun () -> sizes)
-        picked=(fun () -> S.get size)
+        choices=sizes
+        picked=(S.get size)
         on_pick=(Controls.choose sizes set_size)
       />
     </div>
@@ -37,8 +37,8 @@ let make () =
       compared="[data-slot=meter]"
       solidtype=(<Meter
                    value=60.
-                   color=(fun () -> fst (S.get color))
-                   size=(fun () -> fst (S.get size))
+                   color=(fst (S.get color))
+                   size=(fst (S.get size))
                    class_="w-56">
                    <Label>"Storage"</Label>
                    <Meter.Output />

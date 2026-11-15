@@ -110,8 +110,8 @@ module Container = struct
       ~others:(Props.others props)
       (fun s ->
         Jsx.element
-          <Container_context.Provider value=(fun () -> c)>
-            (fun () -> Jsx.draw (S.get children) s)
+          <Container_context.Provider value=c>
+            (Jsx.draw (S.get children) s)
           </Container_context.Provider>)
   [@@element div]
 end
@@ -145,10 +145,10 @@ end
 module Header = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
-      class_=(fun () -> after (Styles.Modal.header (slots ())) (S.get class_))
+      class_=(after (Styles.Modal.header (slots ())) (S.get class_))
       data_slot="modal-header"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
@@ -157,13 +157,12 @@ module Body = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let c = container () in
     <div
-      class_=(fun () ->
-               after
-                 (Styles.Modal.body (slots ~scroll:(S.get c.scroll) ()))
-                 (S.get class_))
+      class_=(after
+                (Styles.Modal.body (slots ~scroll:(S.get c.scroll) ()))
+                (S.get class_))
       data_slot="modal-body"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
@@ -171,10 +170,10 @@ end
 module Footer = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
-      class_=(fun () -> after (Styles.Modal.footer (slots ())) (S.get class_))
+      class_=(after (Styles.Modal.footer (slots ())) (S.get class_))
       data_slot="modal-footer"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
@@ -182,10 +181,10 @@ end
 module Icon = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
-      class_=(fun () -> after (Styles.Modal.icon (slots ())) (S.get class_))
+      class_=(after (Styles.Modal.icon (slots ())) (S.get class_))
       data_slot="modal-icon"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end

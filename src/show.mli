@@ -1,7 +1,7 @@
 (** Solid's [Show]: its children while a condition holds, else its fallback.
 
-    [<Show when_=(fun () -> ready ())>...</Show>] takes a [bool], never a value
-    Solid reads for truth, since Melange writes [Some 0] and a first constant
+    [<Show when_=(ready ())>...</Show>] takes a [bool], never a value Solid
+    reads for truth, since Melange writes [Some 0] and a first constant
     constructor as [0]. An [option] is shown by {!Some} or {!Keyed}. *)
 
 module Props : sig
@@ -18,8 +18,8 @@ val component : unit Jsx.component
 exception Stale_read
 (** A value read after it is gone, which Solid itself refuses first. *)
 
-(** [<Show.Some some=(fun () -> user ())>(fun u -> ...)</Show.Some>]: its child
-    while [some] is [Some _], rendered once and given a read of the value. *)
+(** [<Show.Some some=(user ())>(fun u -> ...)</Show.Some>]: its child while
+    [some] is [Some _], rendered once and given a read of the value. *)
 module Some : sig
   module Props : sig
     type 'a t

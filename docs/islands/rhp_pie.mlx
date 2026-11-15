@@ -116,35 +116,28 @@ let part =
           ()
       in
       <div class_="slat">
-        <Bar
-          from=(fun () -> p.from)
-          to_=(fun () -> p.to_)
-          color=(fun () -> Color.css p.color)
-          class_="slice">
+        <Bar from=p.from to_=p.to_ color=(Color.css p.color) class_="slice">
           <svg
             view_box="-50 -50 100 100"
             preserve_aspect_ratio="xMidYMid meet"
             aria_hidden=true>
-            <path d=(fun () -> wedge (span None)) />
+            <path d=(wedge (span None)) />
           </svg>
         </Bar>
         <Label
-          at=(fun () -> (p.from +. p.to_) /. 2.)
+          at=((p.from +. p.to_) /. 2.)
           class_="tag"
-          style=(fun () ->
-                  let from, to_ = span None in
-                  "--turn: " ^ Js.Float.toString ((from +. to_) /. 200.))>
+          style=(let from, to_ = span None in
+                 "--turn: " ^ Js.Float.toString ((from +. to_) /. 200.))>
           <span class_="move">
             <b>
-              (fun () ->
-                Jsx.string
-                  (Js.Float.toString (Js.Math.round (p.to_ -. p.from)) ^ "%"))
+              (Jsx.string
+                 (Js.Float.toString (Js.Math.round (p.to_ -. p.from)) ^ "%"))
             </b>
             <span class_="said">
-              <i>(fun () -> Jsx.string p.name)</i>
+              <i>(Jsx.string p.name)</i>
               <i>
-                (fun () ->
-                  Jsx.string (Js.Float.toFixed ~digits:1 p.hours ^ " hours"))
+                (Jsx.string (Js.Float.toFixed ~digits:1 p.hours ^ " hours"))
               </i>
             </span>
           </span>
@@ -167,12 +160,12 @@ let make () =
           </span>)>
     <Chart
       orientation=`vertical
-      scale=(fun () -> (0., 100.))
-      ticks=(fun () -> Ticks.none)
+      scale=(0., 100.)
+      ticks=Ticks.none
       height=450.
-      theme=(fun () -> day)>
+      theme=day>
       <Plot
-        rows=(fun () -> parts)
+        rows=parts
         keyboard=true
         overlap=true
         key=(fun d -> (Row.data d).name)

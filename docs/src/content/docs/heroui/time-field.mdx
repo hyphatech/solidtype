@@ -65,7 +65,7 @@ The marked rows are Kobalte's: its field is a `group` named by its label and des
   <Label />
   <Time_field.Group>
     <Time_field.Input>
-      (fun segment -> <Time_field.Segment segment=(fun () -> S.get segment) />)
+      (fun segment -> <Time_field.Segment segment=(S.get segment) />)
     </Time_field.Input>
   </Time_field.Group>
   <Description />

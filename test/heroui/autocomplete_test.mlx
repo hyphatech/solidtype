@@ -243,8 +243,8 @@ let both ~multiple =
         <button type_=`button>"Before"</button>
         <Autocomplete
           placeholder="Select one"
-          selection_mode=(fun () -> if multiple then `multiple else `single)
-          disabled_keys=(fun () -> [| "texas" |])
+          selection_mode=(if multiple then `multiple else `single)
+          disabled_keys=[| "texas" |]
           name="state"
           on_change=(fun keys ->
                       let keys = Array.copy keys in
@@ -271,8 +271,7 @@ let both ~multiple =
                 </Search_field.Group>
               </Search_field>
               <List_box
-                selection_mode=(fun () ->
-                                 if multiple then `multiple else `single)>
+                selection_mode=(if multiple then `multiple else `single)>
                 <List_box.Item id="florida" text_value="Florida">
                   "Florida" <List_box.Item_indicator />
                 </List_box.Item>
@@ -305,16 +304,14 @@ let value_of_state ~multiple =
   T.render (fun () ->
       <Autocomplete
         aria_label="State"
-        selection_mode=(fun () -> if multiple then `multiple else `single)
-        default_value=(fun () ->
-                        if multiple then [| "florida"; "utah" |]
-                        else [| "florida" |])>
+        selection_mode=(if multiple then `multiple else `single)
+        default_value=(if multiple then [| "florida"; "utah" |]
+                       else [| "florida" |])>
         <Autocomplete.Trigger>
           <Autocomplete.Value>
             (fun s ->
               <span data_words="value">
-                (fun () ->
-                  Solidtype.Jsx.string (Solidtype.Solid.get s.selected_text))
+                (Solidtype.Jsx.string (Solidtype.Solid.get s.selected_text))
               </span>)
           </Autocomplete.Value>
         </Autocomplete.Trigger>
@@ -341,7 +338,7 @@ let value_of_many () =
       <Autocomplete
         aria_label="State"
         selection_mode=`multiple
-        default_value=(fun () -> [| "florida"; "texas"; "utah" |])>
+        default_value=[| "florida"; "texas"; "utah" |]>
         <Autocomplete.Trigger><Autocomplete.Value /></Autocomplete.Trigger>
         <Autocomplete.Popover>
           <List_box selection_mode=`multiple>
@@ -373,16 +370,16 @@ let value_of_many () =
    as words. *)
 let draw_of_state ~disabled ~invalid ~required =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   T.render (fun () ->
       <Autocomplete
         aria_label="State"
-        is_disabled=(fun () -> disabled)
-        is_invalid=(fun () -> invalid)
-        is_required=(fun () -> required)>
+        is_disabled=disabled
+        is_invalid=invalid
+        is_required=required>
         (fun r ->
           Solidtype.Jsx.fragment
             [|
@@ -509,7 +506,7 @@ let states filter =
       <Autocomplete.Value /> <Autocomplete.Indicator />
     </Autocomplete.Trigger>
     <Autocomplete.Popover data_testid="Autocomplete.Popover">
-      (fun () -> Solidtype.Jsx.element (filter ()))
+      (Solidtype.Jsx.element (filter ()))
     </Autocomplete.Popover>
   </Autocomplete>
 
@@ -545,13 +542,11 @@ let () =
          the focus back as it closes" (fun () ->
           T.render (fun () ->
               <form>
-                (fun () ->
-                  Solidtype.Jsx.element
-                    (states (fun () ->
-                         <Autocomplete.Filter>
-                           (fun () ->
-                             Solidtype.Jsx.element (search_and_list ()))
-                         </Autocomplete.Filter>)))
+                (Solidtype.Jsx.element
+                   (states (fun () ->
+                        <Autocomplete.Filter>
+                          (Solidtype.Jsx.element (search_and_list ()))
+                        </Autocomplete.Filter>)))
               </form>);
           let user = T.setup () in
           T.focus (first "[data-slot=autocomplete-trigger] button");
@@ -589,7 +584,7 @@ let () =
                              && Char.equal
                                   (Char.lowercase_ascii text.[0])
                                   (Char.lowercase_ascii typed.[0]))>
-                    (fun () -> Solidtype.Jsx.element (search_and_list ()))
+                    (Solidtype.Jsx.element (search_and_list ()))
                   </Autocomplete.Filter>));
           let user = T.setup () in
           let* () = T.click user (first "[data-slot=autocomplete-trigger]") in
@@ -621,9 +616,9 @@ let () =
           T.render (fun () ->
               states (fun () ->
                   <Autocomplete.Filter
-                    input_value=(fun () -> S.get given)
+                    input_value=(S.get given)
                     on_input_change=(fun t -> told := t :: !told)>
-                    (fun () -> Solidtype.Jsx.element (search_and_list ()))
+                    (Solidtype.Jsx.element (search_and_list ()))
                   </Autocomplete.Filter>));
           let user = T.setup () in
           let* () = T.click user (first "[data-slot=autocomplete-trigger]") in
@@ -649,7 +644,7 @@ let () =
           let note what = refs := what :: !refs in
           T.render (fun () ->
               <Form
-                validation_errors=(fun () -> [ ("state", "Choose again") ])
+                validation_errors=[ ("state", "Choose again") ]
                 on_submit=(fun _ -> ())>
                 <Autocomplete
                   name="state"
@@ -668,7 +663,7 @@ let () =
                   <Autocomplete.Popover
                     title="Options" style="--y: 2" ref=(fun _ -> note "popover")>
                     <Autocomplete.Filter>
-                      (fun () -> Solidtype.Jsx.element (search_and_list ()))
+                      (Solidtype.Jsx.element (search_and_list ()))
                     </Autocomplete.Filter>
                   </Autocomplete.Popover>
                 </Autocomplete>

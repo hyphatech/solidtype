@@ -29,7 +29,7 @@ let make () =
       class_="w-[256px]"
       placeholder="Select states"
       selection_mode=`multiple
-      value=(fun () -> S.get selected)
+      value=(S.get selected)
       on_change=(S.set set_selected)>
       <Label>"States (controlled multiple)"</Label>
       <Autocomplete.Trigger>
@@ -51,10 +51,10 @@ let make () =
             render_empty_state=(fun _ ->
                                  <Empty_state>"No results found"</Empty_state>)
             selection_mode=`multiple>
-            <Solidtype.For each=(fun () -> states)>
+            <Solidtype.For each=states>
               (fun (id, name) _ ->
-                <List_box.Item id=(fun () -> id) text_value=(fun () -> name)>
-                  (fun () -> Jsx.string name) <List_box.Item_indicator />
+                <List_box.Item id text_value=name>
+                  (Jsx.string name) <List_box.Item_indicator />
                 </List_box.Item>)
             </Solidtype.For>
           </List_box>
@@ -62,12 +62,11 @@ let make () =
       </Autocomplete.Popover>
     </Autocomplete>
     <p class_="text-sm text-muted">
-      (fun () ->
-        Jsx.string
-          ("Selected: "
-          ^
-          match names () with
-          | [] -> "None"
-          | names -> String.concat ", " names))
+      (Jsx.string
+         ("Selected: "
+         ^
+         match names () with
+         | [] -> "None"
+         | names -> String.concat ", " names))
     </p>
   </div>

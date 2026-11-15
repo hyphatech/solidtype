@@ -163,13 +163,13 @@ let both ?variant ?is_disabled ?is_invalid ?is_read_only ?is_required () =
   let told = ref [] in
   T.render (fun () ->
       <Checkbox_group
-        ?variant=(fun () -> variant)
-        ?is_disabled=(fun () -> is_disabled)
-        ?is_invalid=(fun () -> is_invalid)
-        ?is_read_only=(fun () -> is_read_only)
-        ?is_required=(fun () -> is_required)
+        ?variant
+        ?is_disabled
+        ?is_invalid
+        ?is_read_only
+        ?is_required
         name="interests"
-        default_value=(fun () -> [ "coding" ])
+        default_value=[ "coding" ]
         on_change=(fun values -> told := values)>
         <Label>"Interests"</Label>
         <Description>"Pick any."</Description>
@@ -221,17 +221,17 @@ let same (solidtype, react) =
 let of_state ?(disabled = false) ?(read_only = false) ?(invalid = false)
     ?(required = false) () =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   T.render (fun () ->
       <Checkbox_group
         aria_label="Interests"
-        is_disabled=(fun () -> disabled)
-        is_read_only=(fun () -> read_only)
-        is_invalid=(fun () -> invalid)
-        is_required=(fun () -> required)>
+        is_disabled=disabled
+        is_read_only=read_only
+        is_invalid=invalid
+        is_required=required>
         (fun g ->
           Solidtype.Jsx.fragment
             [|
@@ -297,8 +297,7 @@ let () =
       Jest.testPromise "checks the values it is given" (fun () ->
           let values, set_values = S.create_signal [ "design" ] in
           T.render (fun () ->
-              <Checkbox_group
-                value=(fun () -> S.get values) on_change=(S.set set_values)>
+              <Checkbox_group value=(S.get values) on_change=(S.set set_values)>
                 <Checkbox value="coding">
                   <Checkbox.Content>"Coding"</Checkbox.Content>
                 </Checkbox>

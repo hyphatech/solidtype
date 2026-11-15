@@ -7,7 +7,7 @@ let make () =
     <Select
       is_disabled=true
       class_="w-[256px]"
-      default_value=(fun () -> [| "california" |])
+      default_value=[| "california" |]
       placeholder="Select one">
       <Label>"State"</Label>
       <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
@@ -37,7 +37,7 @@ let make () =
     <Select
       is_disabled=true
       class_="w-[256px]"
-      default_value=(fun () -> [| "argentina"; "japan"; "france" |])
+      default_value=[| "argentina"; "japan"; "france" |]
       placeholder="Select countries"
       selection_mode=`multiple>
       <Label>"Countries to Visit"</Label>

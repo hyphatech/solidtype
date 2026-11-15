@@ -105,8 +105,8 @@ module Container = struct
       ~others:(Props.others props)
       (fun s ->
         Jsx.element
-          <Container_context.Provider value=(fun () -> c)>
-            (fun () -> Jsx.draw (S.get children) s)
+          <Container_context.Provider value=c>
+            (Jsx.draw (S.get children) s)
           </Container_context.Provider>)
   [@@element div]
 end
@@ -139,11 +139,10 @@ end
 module Header = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
-      class_=(fun () ->
-               after (Styles.AlertDialog.header (slots ())) (S.get class_))
+      class_=(after (Styles.AlertDialog.header (slots ())) (S.get class_))
       data_slot="alert-dialog-header"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
@@ -151,11 +150,10 @@ end
 module Body = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
-      class_=(fun () ->
-               after (Styles.AlertDialog.body (slots ())) (S.get class_))
+      class_=(after (Styles.AlertDialog.body (slots ())) (S.get class_))
       data_slot="alert-dialog-body"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
@@ -163,11 +161,10 @@ end
 module Footer = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
-      class_=(fun () ->
-               after (Styles.AlertDialog.footer (slots ())) (S.get class_))
+      class_=(after (Styles.AlertDialog.footer (slots ())) (S.get class_))
       data_slot="alert-dialog-footer"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
@@ -176,19 +173,16 @@ module Icon = struct
   let%component make ?(status : Status_icon.status = `danger)
       ?(class_ : string option) ?(children : Jsx.content option) () =
     <div
-      class_=(fun () ->
-               after
-                 (Styles.AlertDialog.icon (slots ~status:(S.get status) ()))
-                 (S.get class_))
+      class_=(after
+                (Styles.AlertDialog.icon (slots ~status:(S.get status) ()))
+                (S.get class_))
       data_slot="alert-dialog-icon"
       props=(Props.others props)>
       <Show
-        when_=(fun () -> Option.is_some (S.get children))
-        fallback=(fun () ->
-                   Status_icon.svg ~slot:"alert-dialog-default-icon" (fun () ->
-                       S.get status))>
-        (fun () ->
-          match S.get children with Some c -> c | None -> Jsx.string "")
+        when_=(Option.is_some (S.get children))
+        fallback=(Status_icon.svg ~slot:"alert-dialog-default-icon" (fun () ->
+                      S.get status))>
+        (match S.get children with Some c -> c | None -> Jsx.string "")
       </Show>
     </div>
   [@@element div]

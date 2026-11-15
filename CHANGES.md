@@ -2,10 +2,17 @@
 
 ## Unreleased
 
-- An optional prop is given as any value that changes is, `?title=(fun ()
-  -> S.get note)`, as a required one is. Breaking: `?title=note`, which
-  0.10.0 took for an accessor of an option, is refused with a message saying
-  so, since a bare name is a value read once wherever else it is given.
+- In JSX a value is written as in TSX, and the ppx reads it as Solid's
+  compiler does: a literal or a name is given as it is, and any other
+  expression is read again as what it reads changes, `title=(S.get note)`,
+  `class_=(cls (S.get on))`, `<p>(Jsx.int (S.get count))</p>`; a function is
+  a function, so one that takes nothing is `(fun () -> ...)`. Required and
+  optional props alike: `?title=label_opt`, `?title=(S.get note)`, and a
+  child given by its name is `Jsx.content`. Breaking: the thunk in JSX,
+  `title=(fun () -> S.get note)`, is refused by its type, a function where a
+  value belongs, and is written `title=(S.get note)`; `?title=note`, which
+  0.10.0 took for an accessor of an option, is an option given as it is.
+  Outside JSX a thunk is still written, `S.accessor (fun () -> e)`.
 
 - A function child is given in place as the child, `<For ...>(fun item _ ->
   ...)</For>`, and by its name as `render=f`; `render=(fun ...)` is

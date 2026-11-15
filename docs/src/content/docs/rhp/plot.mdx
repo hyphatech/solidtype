@@ -47,8 +47,8 @@ alone can be an overlap plot's slat, with no element around it.
 ## Anatomy
 
 ```ocaml
-<Chart scale=(fun () -> (0., 30.))>
-  <Plot rows=(fun () -> fruits) render=fruit />
+<Chart scale=((0., 30.))>
+  <Plot rows=(fruits) render=fruit />
 </Chart>
 ```
 
@@ -57,8 +57,8 @@ reads its layout from it; one with no layout of its own can be written in
 place, as the plot's child:
 
 ```ocaml
-<Plot rows=(fun () -> fruits)>
-  (fun d -> let f = Row.data d in <Bar to_=(fun () -> f.sold) />)
+<Plot rows=(fruits)>
+  (fun d -> let f = Row.data d in <Bar to_=(f.sold) />)
 </Plot>
 ```
 

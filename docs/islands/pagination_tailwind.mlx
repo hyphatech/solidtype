@@ -12,28 +12,27 @@ let make () =
     <Pagination.Content class_="gap-1 rounded-xl bg-default p-1">
       <Pagination.Item>
         <Pagination.Previous
-          class_=(fun () -> link_class)
-          is_disabled=(fun () -> S.get page = 1)
+          class_=link_class
+          is_disabled=(S.get page = 1)
           on_press=(fun () -> S.update set_page pred)>
           <Pagination.Previous_icon />
         </Pagination.Previous>
       </Pagination.Item>
-      <For each=(fun () -> [| 1; 2; 3 |])>
+      <For each=[| 1; 2; 3 |]>
         (fun p _ ->
           <Pagination.Item>
             <Pagination.Link
-              class_=(fun () ->
-                       if p = S.get page then active_class else link_class)
-              is_active=(fun () -> p = S.get page)
+              class_=(if p = S.get page then active_class else link_class)
+              is_active=(p = S.get page)
               on_press=(fun () -> S.set set_page p)>
-              (fun () -> Jsx.int p)
+              (Jsx.int p)
             </Pagination.Link>
           </Pagination.Item>)
       </For>
       <Pagination.Item>
         <Pagination.Next
-          class_=(fun () -> link_class)
-          is_disabled=(fun () -> S.get page = 3)
+          class_=link_class
+          is_disabled=(S.get page = 3)
           on_press=(fun () -> S.update set_page succ)>
           <Pagination.Next_icon />
         </Pagination.Next>

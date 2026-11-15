@@ -13,7 +13,7 @@ let make () =
     <Surface class_="w-[256px] rounded-3xl shadow-surface">
       <List_box
         aria_label="Users"
-        selected_keys=(fun () -> S.get selected)
+        selected_keys=(S.get selected)
         selection_mode=`multiple
         on_selection_change=(S.set set_selected)>
         <List_box.Item id="1" text_value="Bob">
@@ -75,10 +75,9 @@ let make () =
     </Surface>
     <p class_="text-sm text-muted">
       "Selected: "
-      (fun () ->
-        Jsx.string
-          (match S.get selected with
-          | [||] -> "None"
-          | keys -> String.concat ", " (Array.to_list keys)))
+      (Jsx.string
+         (match S.get selected with
+         | [||] -> "None"
+         | keys -> String.concat ", " (Array.to_list keys)))
     </p>
   </div>

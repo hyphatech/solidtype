@@ -6,7 +6,7 @@
     where content is hidden at both -- or the edges its [visibility] gives.
 
     {[
-      <Scroll_shadow class_="max-h-[300px]">(fun () -> long_text ())</Scroll_shadow>
+      <Scroll_shadow class_="max-h-[300px]">(long_text ())</Scroll_shadow>
     ]}
 
     It is measured once it is in the browser, never on the server, so a

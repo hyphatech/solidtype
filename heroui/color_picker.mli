@@ -3,7 +3,7 @@
     HeroUI's classes from {!Styles.ColorPicker}. Kobalte has no colour picker.
 
     {[
-      <Color_picker default_value=(fun () -> Colors.parse_color "#0485F7")>
+      <Color_picker default_value=(Colors.parse_color "#0485F7")>
         <Color_picker.Trigger>
           <Color_swatch size=`lg /> <Label>"Pick a color"</Label>
         </Color_picker.Trigger>

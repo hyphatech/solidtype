@@ -3,15 +3,15 @@
     Solid's JSX, and writes a component from [let%component].
 
     An element [<div class_="x" />] becomes [Jsx.el "div"], and a component
-    [<Counter initial=1 />] becomes [Jsx.c Counter.component]. A literal, a JSX
-    element, a handler ([on_] and its event, [on_click]), a function literal
-    other than [fun () -> ...] and a name, [<Row changed />], are static;
-    anything else is a thunk, so a read outside a thunk does not compile. A
-    function prop that takes no argument is written [(fun _ -> ...)], since
-    [fun () -> ...] is a thunk. A string literal, however quoted, is written as
-    a JavaScript string, [{js|...|js}], its backslashes doubled, so text that is
-    not ASCII and a backslash reach the page as written; one written
-    [{js|...|js}] is JavaScript's already, and left as it is.
+    [<Counter initial=1 />] becomes [Jsx.c Counter.component]. A value is read
+    as Solid's compiler reads TSX: a literal, a JSX element, a handler ([on_]
+    and its event, [on_click]), a function and a name, [<Row changed />], are
+    static, and any other expression is a thunk the ppx writes, read again as
+    what it reads changes, [title=(Solid.get note)]. A function given where a
+    value belongs is refused by its type. A string literal, however quoted, is
+    written as a JavaScript string, [{js|...|js}], its backslashes doubled, so
+    text that is not ASCII and a backslash reach the page as written; one
+    written [{js|...|js}] is JavaScript's already, and left as it is.
 
     An element's attribute is annotated with its type from the element's module
     of [Solidtype.Html], [Html.Div.class_]. Its name is given back its
@@ -33,11 +33,12 @@
     [if false], so a prop left out or not taken is a compile error, and Melange
     writes none of it. [props=p] spreads [p] without copying it, TSX's [{...p}],
     so no prop is named [props]. A child is a string literal, an element, or a
-    thunk of [Solidtype.Jsx.content]; a component's only child may be a function
-    the component calls. A [Switch] whose only child is a thunk of a [match]
-    gets a [Match] per case, a [Match.Keyed] where the case binds variables, and
-    the [match] is also checked whole, so a case left out is the compiler's
-    warning.
+    [Solidtype.Jsx.content], given by its name or an expression; a component's
+    only child may be a function the component calls. An optional prop,
+    [?title=o], is an option, read as a required prop's value is. A [Switch]
+    whose only child is a [match] gets a [Match] per case, a [Match.Keyed] where
+    the case binds variables, and the [match] is also checked whole, so a case
+    left out is the compiler's warning.
 
     [let%component make ~(text : string) ?(count : int = 0) () = body] writes
     the module's [Props] -- its type, a getter per prop, [make], which builds
@@ -61,8 +62,8 @@
     the element's place, unless it names [as_] itself, as a part does to give
     the function its state too. A plain element it spreads [Props.others props]
     on is given that function, and a rest spread on a component carries [as_] to
-    it. [<tag ?as_=(fun () -> o)>] is that element while [o] is [None], Solid's
-    compiled template as ever, and otherwise what Solid's [Dynamic] draws by the
+    it. [<tag ?as_=o>] is that element while [o] is [None], Solid's compiled
+    template as ever, and otherwise what Solid's [Dynamic] draws by the
     function, its written [ref] called beside the spread's.
 
     Given the element it draws, [let%component make ... [@@element button]], its

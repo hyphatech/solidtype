@@ -4,7 +4,7 @@
     {[
       let t = Theme.use () in
       <button on_click=(fun _ -> t.set_theme "dark")>
-        (fun () -> Jsx.string (S.get t.theme))
+        (Jsx.string (S.get t.theme))
       </button>
     ]}
 

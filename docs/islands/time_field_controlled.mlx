@@ -22,23 +22,21 @@ let make () =
     <Time_field
       class_="w-[256px]"
       name="time"
-      value=(fun () -> Js.Nullable.fromOption (S.get value))
+      value=(Js.Nullable.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Time"</Label>
       <Time_field.Group>
         <Time_field.Input>
-          (fun segment ->
-            <Time_field.Segment segment=(fun () -> S.get segment) />)
+          (fun segment -> <Time_field.Segment segment=(S.get segment) />)
         </Time_field.Input>
       </Time_field.Group>
       <Description>
-        (fun () ->
-          Jsx.string
-            ("Current value: "
-            ^
-            match S.get value with
-            | Some t -> Time.to_string t ()
-            | None -> "(empty)"))
+        (Jsx.string
+           ("Current value: "
+           ^
+           match S.get value with
+           | Some t -> Time.to_string t ()
+           | None -> "(empty)"))
       </Description>
     </Time_field>
     <div class_="flex gap-2">

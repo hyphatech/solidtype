@@ -112,7 +112,7 @@ let make (props : Props.t) =
     ref=(fun e ->
           sentinel := Some e;
           Jsx.call (Props.ref props) e)
-    ?as_=(fun () -> S.drawn_as props)
+    ?as_=(S.drawn_as props)
     props=(S.undrawn
              (S.omit props
                 [| "isLoading"; "onLoadMore"; "scrollOffset"; "ref" |]))

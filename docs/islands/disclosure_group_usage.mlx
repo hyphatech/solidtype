@@ -9,17 +9,15 @@ module Gravity = Solidtype_gravity_icons
    transparent while it is not. *)
 let item ~expanded ~id ~icon ~title ~body =
   let open_ () = Array.exists (String.equal id) (S.get expanded) in
-  <Disclosure id=(fun () -> id)>
+  <Disclosure id>
     <Disclosure.Heading>
       <Button
         slot=`trigger
-        variant=(fun () -> if open_ () then `secondary else `tertiary)
-        class_=(fun () ->
-                 if open_ () then "w-full border-none"
-                 else "w-full border-none bg-transparent")>
+        variant=(if open_ () then `secondary else `tertiary)
+        class_=(if open_ () then "w-full border-none"
+                else "w-full border-none bg-transparent")>
         <div class_="flex w-full items-center justify-start gap-2">
-          (fun () -> Solidtype.Jsx.element (icon ()))
-          (fun () -> Solidtype.Jsx.string title)
+          (Solidtype.Jsx.element (icon ())) (Solidtype.Jsx.string title)
         </div>
         <Disclosure.Indicator class_="text-muted" />
       </Button>
@@ -27,7 +25,7 @@ let item ~expanded ~id ~icon ~title ~body =
     <Disclosure.Content>
       <Disclosure.Body
         class_="mx-2 flex flex-col items-center gap-2 p-4 text-center">
-        (fun () -> Solidtype.Jsx.element (body ()))
+        (Solidtype.Jsx.element (body ()))
       </Disclosure.Body>
     </Disclosure.Content>
   </Disclosure>
@@ -45,7 +43,7 @@ let preview () =
       <img
         alt="Expo Go QR Code"
         class_="aspect-square w-full max-w-54 object-cover"
-        src=(fun () -> qr_code)
+        src=qr_code
       />;
       <p class_="text-sm text-muted">
         "Expo must be installed on your device."
@@ -66,7 +64,7 @@ let download () =
       <img
         alt="App Store QR Code"
         class_="aspect-square w-full max-w-54 object-cover"
-        src=(fun () -> qr_code)
+        src=qr_code
       />;
       <p class_="text-sm text-muted">"Available on iOS and Android devices."</p>;
       <Button class_="mt-4" variant=`primary>
@@ -79,19 +77,16 @@ let make () =
   <div class_="w-full max-w-md">
     <div class_="flex flex-col gap-4 bg-transparent p-4">
       <Disclosure_group
-        expanded_keys=(fun () -> S.get expanded)
-        on_expanded_change=(S.set set_expanded)>
-        (fun () ->
-          Solidtype.Jsx.element
-          @@ item ~expanded ~id:"preview"
-               ~icon:(fun () -> <Gravity.Qr_code />)
-               ~title:"Preview HeroUI Native" ~body:preview)
+        expanded_keys=(S.get expanded) on_expanded_change=(S.set set_expanded)>
+        (Solidtype.Jsx.element
+        @@ item ~expanded ~id:"preview"
+             ~icon:(fun () -> <Gravity.Qr_code />)
+             ~title:"Preview HeroUI Native" ~body:preview)
         <Separator class_="my-2" />
-        (fun () ->
-          Solidtype.Jsx.element
-          @@ item ~expanded ~id:"download"
-               ~icon:(fun () -> <Iconify.Tabler_brand_apple_filled />)
-               ~title:"Download App" ~body:download)
+        (Solidtype.Jsx.element
+        @@ item ~expanded ~id:"download"
+             ~icon:(fun () -> <Iconify.Tabler_brand_apple_filled />)
+             ~title:"Download App" ~body:download)
       </Disclosure_group>
     </div>
   </div>

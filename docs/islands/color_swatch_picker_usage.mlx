@@ -9,9 +9,9 @@ let colors =
 
 let make () =
   <Color_swatch_picker>
-    <For each=(fun () -> colors)>
+    <For each=colors>
       (fun c _ ->
-        <Color_swatch_picker.Item color=(fun () -> Colors.parse_color c)>
+        <Color_swatch_picker.Item color=(Colors.parse_color c)>
           <Color_swatch_picker.Swatch /> <Color_swatch_picker.Indicator />
         </Color_swatch_picker.Item>)
     </For>

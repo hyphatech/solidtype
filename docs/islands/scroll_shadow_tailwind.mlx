@@ -21,12 +21,12 @@ let make () =
       size=48
       variant=`fade>
       <div class_="space-y-3">
-        <For each=(fun () -> entries)>
+        <For each=entries>
           (fun entry _ ->
             <p
               class_="text-sm leading-relaxed text-neutral-600 \
                       dark:text-neutral-400">
-              (fun () -> Solidtype.Jsx.string entry)
+              (Solidtype.Jsx.string entry)
             </p>)
         </For>
       </div>

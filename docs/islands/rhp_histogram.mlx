@@ -50,9 +50,9 @@ let bin =
     (fun d ->
       let b = Row.data d in
       <div>
-        <Bar to_=(fun () -> b.tally) />
+        <Bar to_=b.tally />
         <Label edge="start">
-          (fun () -> Jsx.string (Js.Float.toString b.from ^ "s"))
+          (Jsx.string (Js.Float.toString b.from ^ "s"))
         </Label>
       </div>)
 
@@ -60,7 +60,7 @@ let make () =
   <Chart
     orientation=`vertical
     height=160.
-    scale=(fun () -> (0., 8.))
+    scale=(0., 8.)
     label="Customers by age, in bins of ten years">
-    <Plot rows=(fun () -> bins) render=bin />
+    <Plot rows=bins render=bin />
   </Chart>

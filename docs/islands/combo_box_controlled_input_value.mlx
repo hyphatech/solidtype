@@ -10,7 +10,7 @@ let make () =
   <div class_="space-y-2">
     <Combo_box
       class_="w-[256px]"
-      input_value=(fun () -> S.get input_value)
+      input_value=(S.get input_value)
       on_input_change=(S.set set_input_value)>
       <Label>"Search (controlled input)"</Label>
       <Combo_box.Input_group>
@@ -40,9 +40,8 @@ let make () =
       </Combo_box.Popover>
     </Combo_box>
     <p class_="text-sm text-muted">
-      (fun () ->
-        Jsx.string
-          ("Input value: "
-          ^ match S.get input_value with "" -> "(empty)" | text -> text))
+      (Jsx.string
+         ("Input value: "
+         ^ match S.get input_value with "" -> "(empty)" | text -> text))
     </p>
   </div>

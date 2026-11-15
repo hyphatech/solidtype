@@ -98,31 +98,31 @@ let both ?size () =
     told := p :: !told
   in
   T.render (fun () ->
-      <Pagination ?size=(fun () -> size)>
+      <Pagination ?size>
         <Pagination.Summary>
-          "Page " (fun () -> Jsx.int (S.get page)) " of 3"
+          "Page " (Jsx.int (S.get page)) " of 3"
         </Pagination.Summary>
         <Pagination.Content>
           <Pagination.Item>
             <Pagination.Previous
-              is_disabled=(fun () -> S.get page = 1)
+              is_disabled=(S.get page = 1)
               on_press=(fun () -> go (S.get page - 1))>
               <Pagination.Previous_icon /> <span>"Previous"</span>
             </Pagination.Previous>
           </Pagination.Item>
-          <For each=(fun () -> [| 1; 2; 3 |])>
+          <For each=[| 1; 2; 3 |]>
             (fun p _ ->
               <Pagination.Item>
                 <Pagination.Link
-                  is_active=(fun () -> p = S.get page) on_press=(fun () -> go p)>
-                  (fun () -> Jsx.int p)
+                  is_active=(p = S.get page) on_press=(fun () -> go p)>
+                  (Jsx.int p)
                 </Pagination.Link>
               </Pagination.Item>)
           </For>
           <Pagination.Item><Pagination.Ellipsis /></Pagination.Item>
           <Pagination.Item>
             <Pagination.Next
-              is_disabled=(fun () -> S.get page = 3)
+              is_disabled=(S.get page = 3)
               on_press=(fun () -> go (S.get page + 1))>
               <span>"Next"</span> <Pagination.Next_icon />
             </Pagination.Next>

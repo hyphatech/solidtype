@@ -12,8 +12,8 @@ let make () =
   in
   <Text_field
     class_="w-64"
-    is_invalid=(fun () -> invalid ())
-    value=(fun () -> S.get value)
+    is_invalid=(invalid ())
+    value=(S.get value)
     on_change=(S.set set_value)>
     <Label>"Username"</Label>
     <Input placeholder="Enter username" />

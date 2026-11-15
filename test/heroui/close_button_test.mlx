@@ -26,19 +26,18 @@ end
    words: what each side's function was given. *)
 let of_state ~disabled =
   T.render (fun () ->
-      <Close_button is_disabled=(fun () -> disabled)>
+      <Close_button is_disabled=disabled>
         (fun s ->
           <span>
-            (fun () ->
-              Solidtype.Jsx.string
-                (T.words
-                   [
-                     ("hovered", s.is_hovered);
-                     ("pressed", s.is_pressed);
-                     ("focused", s.is_focused);
-                     ("focus-visible", s.is_focus_visible);
-                     ("disabled", s.is_disabled);
-                   ]))
+            (Solidtype.Jsx.string
+               (T.words
+                  [
+                    ("hovered", s.is_hovered);
+                    ("pressed", s.is_pressed);
+                    ("focused", s.is_focused);
+                    ("focus-visible", s.is_focus_visible);
+                    ("disabled", s.is_disabled);
+                  ]))
           </span>)
       </Close_button>);
   let* solidtype =
@@ -59,7 +58,7 @@ external first_child : Dom.element -> Dom.element Js.null = "firstElementChild"
 (* The walk on HeroUI's CloseButton in solidtype, then in React, each alone on
    the page, so Tab reaches it. *)
 let both ~disabled =
-  T.render (fun () -> <Close_button is_disabled=(fun () -> disabled) />);
+  T.render (fun () -> <Close_button is_disabled=disabled />);
   let* solidtype = T.walk ~step:Twin.step (T.by_role "button") in
   T.cleanup ();
   let* react = T.walk ~step:Twin.step (Twin.render disabled) in
@@ -124,8 +123,7 @@ let () =
           let disabled, set_disabled = S.create_signal false in
           T.render (fun () ->
               <Close_button
-                is_disabled=(fun () -> S.get disabled)
-                on_click=(fun _ -> incr clicks)
+                is_disabled=(S.get disabled) on_click=(fun _ -> incr clicks)
               />);
           let user = T.setup () in
           let b = T.by_role "button" in

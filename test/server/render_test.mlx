@@ -14,7 +14,7 @@ let waiting answer () =
         | None -> Js.Promise.make (fun ~resolve:_ ~reject:_ -> ()))
   in
   <Suspense fallback=(<p>"loading"</p>)>
-    <p>(fun () -> Jsx.string (Option.value (S.read data) ~default:""))</p>
+    <p>(Jsx.string (Option.value (S.read data) ~default:""))</p>
   </Suspense>
 
 let contains part s = Js.String.includes ~search:part s
@@ -35,10 +35,7 @@ let () =
                       fetched := true;
                       Js.Promise.resolve "fetched")
                 in
-                <p>
-                  (fun () ->
-                    Jsx.string (Option.value (S.read data) ~default:""))
-                </p>)
+                <p>(Jsx.string (Option.value (S.read data) ~default:""))</p>)
           in
           E.(expect (contains "first" html, !fetched) |> toEqual (true, false)));
       Jest.testPromise "renders once what it fetches has resolved" (fun () ->

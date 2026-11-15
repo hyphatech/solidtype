@@ -9,7 +9,7 @@ module Tag_group = Solidtype_heroui.Tag_group
 let make () =
   let selected, set_selected = S.create_signal [||] in
   <Tag_group
-    selected_keys=(fun () -> S.get selected)
+    selected_keys=(S.get selected)
     selection_mode=`multiple
     on_selection_change=(S.set set_selected)>
     <Label>"Required Categories"</Label>
@@ -21,10 +21,9 @@ let make () =
     </Tag_group.List>
     <Description>"Select at least one category"</Description>
     <Error_message>
-      (fun () ->
-        Jsx.string
-          (if Array.length (S.get selected) = 0 then
-             "Please select at least one category"
-           else ""))
+      (Jsx.string
+         (if Array.length (S.get selected) = 0 then
+            "Please select at least one category"
+          else ""))
     </Error_message>
   </Tag_group>

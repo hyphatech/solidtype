@@ -65,48 +65,44 @@ let make () =
       <Select.Value>
         (fun s ->
           <span class_="contents">
-            (fun () ->
-              match S.get s.selected_keys with
-              | [| key |] -> (
-                  match
-                    Array.find_opt
-                      (fun (user : user) -> String.equal user.id key)
-                      users
-                  with
-                  | Some user ->
-                      Jsx.element
-                        <div class_="flex items-center gap-2">
-                          <Avatar class_="size-4" size=`sm>
-                            <Avatar.Image src=(fun () -> user.avatar_url) />
-                            <Avatar.Fallback>
-                              (fun () -> Jsx.string user.fallback)
-                            </Avatar.Fallback>
-                          </Avatar>
-                          <span>(fun () -> Jsx.string user.name)</span>
-                        </div>
-                  | None -> Jsx.element Jsx.nothing)
-              | keys ->
-                  Jsx.string
-                    (string_of_int (Array.length keys) ^ " users selected"))
+            (match S.get s.selected_keys with
+            | [| key |] -> (
+                match
+                  Array.find_opt
+                    (fun (user : user) -> String.equal user.id key)
+                    users
+                with
+                | Some user ->
+                    Jsx.element
+                      <div class_="flex items-center gap-2">
+                        <Avatar class_="size-4" size=`sm>
+                          <Avatar.Image src=user.avatar_url />
+                          <Avatar.Fallback>
+                            (Jsx.string user.fallback)
+                          </Avatar.Fallback>
+                        </Avatar>
+                        <span>(Jsx.string user.name)</span>
+                      </div>
+                | None -> Jsx.element Jsx.nothing)
+            | keys ->
+                Jsx.string
+                  (string_of_int (Array.length keys) ^ " users selected"))
           </span>)
       </Select.Value>
       <Select.Indicator />
     </Select.Trigger>
     <Select.Popover>
       <List_box>
-        <Solidtype.For each=(fun () -> users)>
+        <Solidtype.For each=users>
           (fun (user : user) _ ->
-            <List_box.Item
-              id=(fun () -> user.id) text_value=(fun () -> user.name)>
+            <List_box.Item id=user.id text_value=user.name>
               <Avatar size=`sm>
-                <Avatar.Image src=(fun () -> user.avatar_url) />
-                <Avatar.Fallback>
-                  (fun () -> Jsx.string user.fallback)
-                </Avatar.Fallback>
+                <Avatar.Image src=user.avatar_url />
+                <Avatar.Fallback>(Jsx.string user.fallback)</Avatar.Fallback>
               </Avatar>
               <div class_="flex flex-col">
-                <Label>(fun () -> Jsx.string user.name)</Label>
-                <Description>(fun () -> Jsx.string user.email)</Description>
+                <Label>(Jsx.string user.name)</Label>
+                <Description>(Jsx.string user.email)</Description>
               </div>
               <List_box.Item_indicator />
             </List_box.Item>)

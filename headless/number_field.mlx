@@ -50,10 +50,9 @@ module Root = struct
       S.accessor (fun () ->
           Option.value (Props.change_on_wheel props) ~default:true)
     in
-    <Wheel.Provider value=(fun () -> change_on_wheel)>
+    <Wheel.Provider value=change_on_wheel>
       <Kobalte.Root
-        change_on_wheel=(fun () -> false)
-        props=(S.omit props [| "changeOnWheel" |])
+        change_on_wheel=false props=(S.omit props [| "changeOnWheel" |])
       />
     </Wheel.Provider>
 

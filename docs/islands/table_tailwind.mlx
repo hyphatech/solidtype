@@ -18,25 +18,25 @@ let make () =
     <Table.Scroll_container>
       <Table.Content aria_label="Team members" class_="min-w-[600px]">
         <Table.Header class_="bg-neutral-100/80 dark:bg-neutral-800/80">
-          <Table.Column is_row_header=true class_=(fun () -> header_cell)>
+          <Table.Column is_row_header=true class_=header_cell>
             "Name"
           </Table.Column>
-          <Table.Column class_=(fun () -> header_cell)>"Role"</Table.Column>
-          <Table.Column class_=(fun () -> header_cell)>"Status"</Table.Column>
+          <Table.Column class_=header_cell>"Role"</Table.Column>
+          <Table.Column class_=header_cell>"Status"</Table.Column>
         </Table.Header>
         <Table.Body>
-          <Table.Row class_=(fun () -> row_class)>
-            <Table.Cell class_=(fun () -> name_cell)>"Kate Moore"</Table.Cell>
+          <Table.Row class_=row_class>
+            <Table.Cell class_=name_cell>"Kate Moore"</Table.Cell>
             <Table.Cell>"CEO"</Table.Cell>
             <Table.Cell>"Active"</Table.Cell>
           </Table.Row>
-          <Table.Row class_=(fun () -> row_class)>
-            <Table.Cell class_=(fun () -> name_cell)>"John Smith"</Table.Cell>
+          <Table.Row class_=row_class>
+            <Table.Cell class_=name_cell>"John Smith"</Table.Cell>
             <Table.Cell>"CTO"</Table.Cell>
             <Table.Cell>"Active"</Table.Cell>
           </Table.Row>
-          <Table.Row class_=(fun () -> row_class)>
-            <Table.Cell class_=(fun () -> name_cell)>"Sara Johnson"</Table.Cell>
+          <Table.Row class_=row_class>
+            <Table.Cell class_=name_cell>"Sara Johnson"</Table.Cell>
             <Table.Cell>"CMO"</Table.Cell>
             <Table.Cell>"On leave"</Table.Cell>
           </Table.Row>

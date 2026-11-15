@@ -15,8 +15,8 @@
 
     {[
       <Color_channel_field.Root
-        channel=(fun () -> `hue)
-        default_value=(fun () -> Colors.parse_color "hsl(300, 100%, 25%)")>
+        channel=`hue
+        default_value=(Colors.parse_color "hsl(300, 100%, 25%)")>
         <Color_channel_field.Label>"Hue"</Color_channel_field.Label>
         <Color_channel_field.Input />
       </Color_channel_field.Root>

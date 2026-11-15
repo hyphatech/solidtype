@@ -13,17 +13,14 @@ let sizes =
 
 let make () =
   <div class_="flex flex-col gap-6">
-    <For each=(fun () -> sizes)>
+    <For each=sizes>
       (fun (size, name) _ ->
         <div class_="flex items-center gap-4">
-          <span class_="w-8 text-sm text-muted">
-            (fun () -> Jsx.string name)
-          </span>
-          <Color_swatch_picker size=(fun () -> size)>
-            <For each=(fun () -> colors)>
+          <span class_="w-8 text-sm text-muted">(Jsx.string name)</span>
+          <Color_swatch_picker size>
+            <For each=colors>
               (fun c _ ->
-                <Color_swatch_picker.Item
-                  color=(fun () -> Colors.parse_color c)>
+                <Color_swatch_picker.Item color=(Colors.parse_color c)>
                   <Color_swatch_picker.Swatch />
                   <Color_swatch_picker.Indicator />
                 </Color_swatch_picker.Item>)

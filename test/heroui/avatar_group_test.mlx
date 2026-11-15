@@ -44,26 +44,16 @@ let shown host =
 
 let both ?size ?color ?variant ?max ?is_grid ?overlap ?count () =
   T.render (fun () ->
-      <Avatar_group
-        ?size=(fun () -> size)
-        ?color=(fun () -> color)
-        ?variant=(fun () -> variant)
-        ?max=(fun () -> max)
-        ?is_grid=(fun () -> is_grid)
-        ?overlap=(fun () -> overlap)
-        class_="ms-1">
+      <Avatar_group ?size ?color ?variant ?max ?is_grid ?overlap class_="ms-1">
         <Avatar color=`danger><Avatar.Fallback>"A1"</Avatar.Fallback></Avatar>
         <Avatar><Avatar.Fallback>"A2"</Avatar.Fallback></Avatar>
         <Avatar><Avatar.Fallback>"A3"</Avatar.Fallback></Avatar>
         <Avatar><Avatar.Fallback>"A4"</Avatar.Fallback></Avatar>
-        (fun () ->
-          match count with
-          | Some c ->
-              Solidtype.Jsx.element
-                <Avatar_group.Count>
-                  (fun () -> Solidtype.Jsx.string c)
-                </Avatar_group.Count>
-          | None -> Solidtype.Jsx.string "")
+        (match count with
+        | Some c ->
+            Solidtype.Jsx.element
+              <Avatar_group.Count>(Solidtype.Jsx.string c)</Avatar_group.Count>
+        | None -> Solidtype.Jsx.string "")
       </Avatar_group>);
   let solidtype = shown T.body in
   T.cleanup ();
@@ -131,7 +121,7 @@ let () =
       Jest.test "shows as many as its max as it changes" (fun () ->
           let max, set_max = S.create_signal 3 in
           T.render (fun () ->
-              <Avatar_group max=(fun () -> S.get max)>
+              <Avatar_group max=(S.get max)>
                 <Avatar><Avatar.Fallback>"A1"</Avatar.Fallback></Avatar>
                 <Avatar><Avatar.Fallback>"A2"</Avatar.Fallback></Avatar>
                 <Avatar><Avatar.Fallback>"A3"</Avatar.Fallback></Avatar>

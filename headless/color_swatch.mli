@@ -5,7 +5,7 @@
     props and every attribute its [<div>] does, a [style] after its own.
 
     {[
-      <Color_swatch value=(fun () -> Colors.parse_color "#0485F7") />
+      <Color_swatch value=(Colors.parse_color "#0485F7") />
     ]}
 
     Given no [value], it is its {!Color_picker}'s colour, as React Aria's is,

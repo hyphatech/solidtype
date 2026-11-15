@@ -61,7 +61,7 @@ let%component make ~(on_added : Api.project -> unit) () =
             ())
         : unit Js.Promise.t)
   in
-  <Modal is_open=(fun () -> S.get open_) on_open_change=opened>
+  <Modal is_open=(S.get open_) on_open_change=opened>
     <Button
       variant=`ghost
       class_="h-9 w-full justify-start gap-3 px-3 text-sm [&>svg]:m-0">
@@ -76,13 +76,13 @@ let%component make ~(on_added : Api.project -> unit) () =
           </Modal.Header>
           <Form
             on_submit=submit
-            validation_errors=(fun () -> S.get refused)
+            validation_errors=(S.get refused)
             class_="flex flex-col gap-6">
             <Modal.Body class_="flex flex-col gap-4">
               <Text_field
                 variant=`secondary
                 name="name"
-                value=(fun () -> S.get name)
+                value=(S.get name)
                 on_change=(S.set set_name)
                 is_required=true>
                 <Label>"Name"</Label>
@@ -92,7 +92,7 @@ let%component make ~(on_added : Api.project -> unit) () =
               <Select
                 variant=`secondary
                 name="colour"
-                value=(fun () -> [| Colour.key (S.get colour) |])
+                value=[| Colour.key (S.get colour) |]
                 on_change=(fun keys ->
                             Option.iter (S.set set_colour)
                               (Option.bind
@@ -104,17 +104,16 @@ let%component make ~(on_added : Api.project -> unit) () =
                 </Select.Trigger>
                 <Select.Popover>
                   <List_box>
-                    <For each=(fun () -> Array.of_list Colour.all)>
+                    <For each=(Array.of_list Colour.all)>
                       (fun colour _ ->
                         <List_box.Item
-                          id=(fun () -> Colour.key colour)
-                          text_value=(fun () -> Colour.label colour)>
+                          id=(Colour.key colour)
+                          text_value=(Colour.label colour)>
                           <span class_="flex items-center gap-2">
                             <Gravity.Folder
-                              class_=(fun () ->
-                                         "size-4 " ^ Colour.text_class colour)
+                              class_=("size-4 " ^ Colour.text_class colour)
                             />
-                            (fun () -> Jsx.string (Colour.label colour))
+                            (Jsx.string (Colour.label colour))
                           </span>
                           <List_box.Item_indicator />
                         </List_box.Item>)
@@ -125,7 +124,7 @@ let%component make ~(on_added : Api.project -> unit) () =
               <Text_field
                 variant=`secondary
                 name="repo"
-                value=(fun () -> S.get repo)
+                value=(S.get repo)
                 on_change=(S.set set_repo)>
                 <Label>"Repository"</Label>
                 <Input placeholder="acme/api" />
@@ -133,7 +132,7 @@ let%component make ~(on_added : Api.project -> unit) () =
                 <Field_error>"Write the repository as owner/name."</Field_error>
               </Text_field>
               <p class_="text-sm text-danger empty:hidden" role=`alert>
-                (fun () -> Jsx.string (S.get problem))
+                (Jsx.string (S.get problem))
               </p>
             </Modal.Body>
             <Modal.Footer>

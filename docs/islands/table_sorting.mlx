@@ -80,7 +80,7 @@ let make () =
       <Table.Content
         aria_label="Sortable table"
         class_="min-w-[600px]"
-        sort_descriptor=(fun () -> S.get sort)
+        sort_descriptor=(S.get sort)
         on_sort_change=(S.set set_sort)>
         <Table.Header>
           <Table.Column allows_sorting=true is_row_header=true id="name">
@@ -99,13 +99,13 @@ let make () =
           </Table.Column>
         </Table.Header>
         <Table.Body>
-          <For each=(fun () -> sorted_users ())>
+          <For each=(sorted_users ())>
             (fun user _ ->
-              <Table.Row id=(fun () -> string_of_int user.id)>
-                <Table.Cell>(fun () -> Jsx.string user.name)</Table.Cell>
-                <Table.Cell>(fun () -> Jsx.string user.role)</Table.Cell>
-                <Table.Cell>(fun () -> Jsx.string user.status)</Table.Cell>
-                <Table.Cell>(fun () -> Jsx.string user.email)</Table.Cell>
+              <Table.Row id=(string_of_int user.id)>
+                <Table.Cell>(Jsx.string user.name)</Table.Cell>
+                <Table.Cell>(Jsx.string user.role)</Table.Cell>
+                <Table.Cell>(Jsx.string user.status)</Table.Cell>
+                <Table.Cell>(Jsx.string user.email)</Table.Cell>
               </Table.Row>)
           </For>
         </Table.Body>

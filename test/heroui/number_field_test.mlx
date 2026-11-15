@@ -209,17 +209,17 @@ let both ?variant ?full_width ?is_disabled ?is_invalid ?is_read_only
   let told = ref "" in
   T.render (fun () ->
       <Number_field
-        ?variant=(fun () -> variant)
-        ?full_width=(fun () -> full_width)
-        ?is_disabled=(fun () -> is_disabled)
-        ?is_invalid=(fun () -> is_invalid)
-        ?is_read_only=(fun () -> is_read_only)
-        ?is_wheel_disabled=(fun () -> is_wheel_disabled)
-        ?is_required=(fun () -> is_required)
-        ?min_value=(fun () -> min_value)
-        ?max_value=(fun () -> max_value)
-        ?step=(fun () -> step)
-        ?format_options=(fun () -> format_options)
+        ?variant
+        ?full_width
+        ?is_disabled
+        ?is_invalid
+        ?is_read_only
+        ?is_wheel_disabled
+        ?is_required
+        ?min_value
+        ?max_value
+        ?step
+        ?format_options
         default_value=4.
         name="width"
         on_change=(fun v -> told := Js.Float.toString v)>
@@ -263,17 +263,17 @@ let same (solidtype, react) =
    words. *)
 let draw_of_state ~disabled ~read_only ~invalid ~required =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   T.render (fun () ->
       <Number_field
         aria_label="Field"
-        is_disabled=(fun () -> disabled)
-        is_read_only=(fun () -> read_only)
-        is_invalid=(fun () -> invalid)
-        is_required=(fun () -> required)>
+        is_disabled=disabled
+        is_read_only=read_only
+        is_invalid=invalid
+        is_required=required>
         (fun r ->
           Solidtype.Jsx.fragment
             [|
@@ -363,9 +363,8 @@ let () =
           T.render (fun () ->
               <Number_field
                 default_value=4.
-                format_options=(fun () ->
-                                 Solidtype_kobalte.Types.NumberFormatOptions
-                                 .make ~style:`currency ~currency:"USD" ())>
+                format_options=(Solidtype_kobalte.Types.NumberFormatOptions.make
+                                  ~style:`currency ~currency:"USD" ())>
                 <Label>"Price"</Label>
                 <Number_field.Group><Number_field.Input /></Number_field.Group>
               </Number_field>);
@@ -390,11 +389,11 @@ let snapped ?min_value ?max_value ?step ?format_options default =
   let told = ref "" in
   T.render (fun () ->
       <Number_field
-        ?min_value=(fun () -> min_value)
-        ?max_value=(fun () -> max_value)
-        ?step=(fun () -> step)
-        ?format_options=(fun () -> format_options)
-        default_value=(fun () -> default)
+        ?min_value
+        ?max_value
+        ?step
+        ?format_options
+        default_value=default
         on_change=(fun v -> told := Js.Float.toString v)>
         <Label>"Amount"</Label>
         <Number_field.Group>

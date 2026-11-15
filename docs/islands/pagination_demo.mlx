@@ -14,35 +14,35 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="size"
-        choices=(fun () -> sizes)
-        picked=(fun () -> S.get size)
+        choices=sizes
+        picked=(S.get size)
         on_pick=(Controls.choose sizes set_size)
       />
     </div>
     <Side_by_side
       compared="[data-slot=pagination-next]"
-      solidtype=(<Pagination size=(fun () -> fst (S.get size))>
+      solidtype=(<Pagination size=(fst (S.get size))>
                    <Pagination.Content>
                      <Pagination.Item>
                        <Pagination.Previous
-                         is_disabled=(fun () -> S.get page = 1)
+                         is_disabled=(S.get page = 1)
                          on_press=(fun () -> S.update set_page pred)>
                          <Pagination.Previous_icon /> <span>"Previous"</span>
                        </Pagination.Previous>
                      </Pagination.Item>
-                     <For each=(fun () -> [| 1; 2; 3 |])>
+                     <For each=[| 1; 2; 3 |]>
                        (fun p _ ->
                          <Pagination.Item>
                            <Pagination.Link
-                             is_active=(fun () -> p = S.get page)
+                             is_active=(p = S.get page)
                              on_press=(fun () -> S.set set_page p)>
-                             (fun () -> Jsx.int p)
+                             (Jsx.int p)
                            </Pagination.Link>
                          </Pagination.Item>)
                      </For>
                      <Pagination.Item>
                        <Pagination.Next
-                         is_disabled=(fun () -> S.get page = 3)
+                         is_disabled=(S.get page = 3)
                          on_press=(fun () -> S.update set_page succ)>
                          <span>"Next"</span> <Pagination.Next_icon />
                        </Pagination.Next>

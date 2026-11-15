@@ -9,22 +9,19 @@ let make () =
   <section class_="flex flex-col gap-4">
     <div class_="flex flex-wrap items-end gap-4">
       <Toggle
-        label="show dots"
-        on=(fun () -> S.get show_dots)
-        on_toggle=(S.set set_show_dots)
+        label="show dots" on=(S.get show_dots) on_toggle=(S.set set_show_dots)
       />
       <Toggle
         label="disabled"
-        on=(fun () -> S.get is_disabled)
+        on=(S.get is_disabled)
         on_toggle=(S.set set_is_disabled)
       />
     </div>
     <Side_by_side
       solidtype=(<Color_area
-                   default_value=(fun () ->
-                                   Colors.parse_color "rgb(116, 52, 255)")
-                   show_dots=(fun () -> S.get show_dots)
-                   is_disabled=(fun () -> S.get is_disabled)>
+                   default_value=(Colors.parse_color "rgb(116, 52, 255)")
+                   show_dots=(S.get show_dots)
+                   is_disabled=(S.get is_disabled)>
                    <Color_area.Thumb />
                  </Color_area>)
       react=(fun host ->

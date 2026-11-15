@@ -17,15 +17,14 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="variant"
-        choices=(fun () -> variants)
-        picked=(fun () -> S.get variant)
+        choices=variants
+        picked=(S.get variant)
         on_pick=(Controls.choose variants set_variant)
       />
     </div>
     <Side_by_side
       solidtype=(<Surface
-                   variant=(fun () -> fst (S.get variant))
-                   class_="rounded-3xl p-6">
+                   variant=(fst (S.get variant)) class_="rounded-3xl p-6">
                    "Surface Content"
                  </Surface>)
       react=(fun host ->

@@ -50,13 +50,13 @@ toast after each.
 ```ocaml
 <Toast.Provider>
   (fun toast ->
-    <Toast toast=(fun () -> toast)>
+    <Toast toast=(toast)>
       <Toast.Indicator />
       <Toast.Content>
         <Toast.Title /> <Toast.Description />
       </Toast.Content>
       <Toast.Action_button />
-      <Toast.Close_button key=(fun () -> Toast.key toast) />
+      <Toast.Close_button key=(Toast.key toast) />
     </Toast>)
 </Toast.Provider>
 ```

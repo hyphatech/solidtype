@@ -14,7 +14,7 @@ let make () =
       </Tag_group.List>
       <Description>"Some tags are disabled"</Description>
     </Tag_group>
-    <Tag_group disabled_keys=(fun () -> [| "travel" |]) selection_mode=`single>
+    <Tag_group disabled_keys=[| "travel" |] selection_mode=`single>
       <Label>"Disabled Keys"</Label>
       <Tag_group.List>
         <Tag id="news">"News"</Tag>

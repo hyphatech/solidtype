@@ -14,8 +14,8 @@
 
     {[
       <Color_slider.Root
-        channel=(fun () -> `hue)
-        default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")>
+        channel=`hue
+        default_value=(Colors.parse_color "hsl(0, 100%, 50%)")>
         <Color_slider.Track>
           <Color_slider.Thumb><Color_slider.Input /></Color_slider.Thumb>
         </Color_slider.Track>

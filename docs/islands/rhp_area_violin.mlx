@@ -39,11 +39,11 @@ let route =
     (fun d ->
       let r = Row.data d in
       <div>
-        <Label edge="start">(fun () -> Jsx.string r.route)</Label>
-        <Area points=(fun () -> spread r.minutes) mirror=true smooth=true />
+        <Label edge="start">(Jsx.string r.route)</Label>
+        <Area points=(spread r.minutes) mirror=true smooth=true />
       </div>)
 
 let make () =
-  <Chart scale=(fun () -> (10., 40.)) label="Minutes to work, by route">
-    <Plot rows=(fun () -> routes) render=route />
+  <Chart scale=(10., 40.) label="Minutes to work, by route">
+    <Plot rows=routes render=route />
   </Chart>

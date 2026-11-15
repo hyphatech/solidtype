@@ -444,17 +444,14 @@ module Indicator = struct
       ?(children : Jsx.content option) () =
     let slots = slots_of "Toast.Indicator" in
     <div
-      class_=(fun () ->
-               after (Styles.Toast.indicator (S.get slots)) (S.get class_))
+      class_=(after (Styles.Toast.indicator (S.get slots)) (S.get class_))
       data_slot="toast-indicator"
       props=(Props.others props)>
       <Show
-        when_=(fun () -> Option.is_some (S.get children))
-        fallback=(fun () ->
-                   Status_icon.svg ~slot:"toast-default-icon" (fun () ->
-                       S.get variant))>
-        (fun () ->
-          match S.get children with Some c -> c | None -> Jsx.string "")
+        when_=(Option.is_some (S.get children))
+        fallback=(Status_icon.svg ~slot:"toast-default-icon" (fun () ->
+                      S.get variant))>
+        (match S.get children with Some c -> c | None -> Jsx.string "")
       </Show>
     </div>
   [@@element div]
@@ -464,11 +461,10 @@ module Content = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = slots_of "Toast.Content" in
     <div
-      class_=(fun () ->
-               after (Styles.Toast.content (S.get slots)) (S.get class_))
+      class_=(after (Styles.Toast.content (S.get slots)) (S.get class_))
       data_slot="toast-content"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
@@ -477,10 +473,10 @@ module Title = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = slots_of "Toast.Title" in
     <Kobalte.Title
-      class_=(fun () -> after (Styles.Toast.title (S.get slots)) (S.get class_))
+      class_=(after (Styles.Toast.title (S.get slots)) (S.get class_))
       data_slot="toast-title"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </Kobalte.Title>
   [@@element div]
 end
@@ -489,11 +485,10 @@ module Description = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = slots_of "Toast.Description" in
     <Kobalte.Description
-      class_=(fun () ->
-               after (Styles.Toast.description (S.get slots)) (S.get class_))
+      class_=(after (Styles.Toast.description (S.get slots)) (S.get class_))
       data_slot="toast-description"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </Kobalte.Description>
   [@@element div]
 end
@@ -508,14 +503,13 @@ module Action_button = struct
          option) () =
     let slots = slots_of "Toast.Action_button" in
     <Button
-      variant=(fun () -> S.get variant)
-      class_=(fun () ->
-               after (Styles.Toast.action (S.get slots)) (S.get class_))
+      variant=(S.get variant)
+      class_=(after (Styles.Toast.action (S.get slots)) (S.get class_))
       on_click=(fun e ->
                  ignore (on_click e : unit option);
                  ignore (on_press () : unit option))
       data_slot="toast-action-button"
-      ?as_=(fun () -> S.get as_)
+      ?as_=(S.get as_)
       props=(Props.others props)>
       (fun s -> Jsx.of_content (Jsx.draw (S.get children) s))
     </Button>
@@ -555,12 +549,11 @@ module Close_button = struct
     in
     <Solidtype_kobalte.Button.Root
       aria_label="Close"
-      class_=(fun () ->
-               Styles.CloseButton.classes
-                 (Styles.CloseButton.options
-                    ~class_:
-                      (after (Styles.Toast.close (S.get slots)) (S.get class_))
-                    ()))
+      class_=(Styles.CloseButton.classes
+                (Styles.CloseButton.options
+                   ~class_:
+                     (after (Styles.Toast.close (S.get slots)) (S.get class_))
+                   ()))
       ref=(fun b ->
             ignore (given_ref b : unit option);
             Interaction.watch i b)
@@ -569,16 +562,15 @@ module Close_button = struct
                  ignore (on_click e : unit option);
                  Option.iter (fun k -> close ~queue:s.queue k) (S.get key))
       data_slot="toast-close"
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_pressed=(Jsx.flag (Interaction.pressed i))
+      data_focused=(Jsx.flag (Interaction.focused i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () ->
-        match S.get children with
-        | Some c -> Jsx.draw c (state ())
-        | None -> Jsx.element <Close_button.Icon />)
+      (match S.get children with
+      | Some c -> Jsx.draw c (state ())
+      | None -> Jsx.element <Close_button.Icon />)
     </Solidtype_kobalte.Button.Root>
   [@@element button]
 end
@@ -743,9 +735,9 @@ module Item = struct
           S.accessor (fun () -> Interaction.focus_visible focus);
       }
     in
-    <Slots.Provider value=(fun () -> slots)>
+    <Slots.Provider value=slots>
       <Kobalte.Root
-        toast_id=(fun () -> e.kobalte)
+        toast_id=e.kobalte
         persistent=true
                    (* Escape folds HeroUI's stack; it does not close a toast. *)
         on_escape_key_down=(fun ev -> prevent_default ev)
@@ -753,31 +745,27 @@ module Item = struct
               ignore (given_ref el : unit option);
               Interaction.watch focus el;
               watch el)
-        class_=(fun () ->
-                 after (Styles.Toast.toast (S.get slots)) (S.get class_))
-        style=(fun () ->
-                layout ()
-                ^ match S.get style with Some s -> " " ^ s | None -> "")
-        tab_index=(fun () ->
-                    if
-                      frontmost ()
-                      || (S.get s.expanded && not (hidden () || S.get e.exiting))
-                    then "0"
-                    else "-1")
-        ?aria_hidden=(fun () ->
-                       if hidden () || S.get e.exiting then Some true else None)
-        ?inert=(fun () -> if hidden () then Some true else None)
-        data_entering=(fun () -> Jsx.flag (S.get entering))
-        data_exiting=(fun () -> Jsx.flag (S.get e.exiting))
-        data_expanded=(fun () -> Jsx.flag (S.get s.expanded))
-        data_frontmost=(fun () -> Jsx.flag (frontmost ()))
-        data_hidden=(fun () -> Jsx.flag (hidden ()))
-        data_index=(fun () -> Jsx.data (string_of_int (index ())))
-        data_placement=(fun () -> Jsx.data (placement_name (S.get s.placement)))
+        class_=(after (Styles.Toast.toast (S.get slots)) (S.get class_))
+        style=(layout ()
+              ^ match S.get style with Some s -> " " ^ s | None -> "")
+        tab_index=(if
+                     frontmost ()
+                     || (S.get s.expanded && not (hidden () || S.get e.exiting))
+                   then "0"
+                   else "-1")
+        ?aria_hidden=(if hidden () || S.get e.exiting then Some true else None)
+        ?inert=(if hidden () then Some true else None)
+        data_entering=(Jsx.flag (S.get entering))
+        data_exiting=(Jsx.flag (S.get e.exiting))
+        data_expanded=(Jsx.flag (S.get s.expanded))
+        data_frontmost=(Jsx.flag (frontmost ()))
+        data_hidden=(Jsx.flag (hidden ()))
+        data_index=(Jsx.data (string_of_int (index ())))
+        data_placement=(Jsx.data (placement_name (S.get s.placement)))
         data_slot="toast"
-        ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+        ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
         props=(Props.others props)>
-        (fun () -> Jsx.draw (S.get children) (state ()))
+        (Jsx.draw (S.get children) (state ()))
       </Kobalte.Root>
     </Slots.Provider>
   [@@element li]
@@ -802,10 +790,8 @@ let default_toast e =
   let action () = match (c ()).act with Some a -> Some a | None -> None in
   let button a =
     <Action_button
-      variant=(fun () -> a.button)
-      ?class_=(fun () -> a.button_class)
-      on_press=(fun () -> a.on_press ())>
-      (fun () -> Jsx.string a.label)
+      variant=a.button ?class_=a.button_class on_press=(fun () -> a.on_press ())>
+      (Jsx.string a.label)
     </Action_button>
   in
   let action_in inside () =
@@ -813,36 +799,29 @@ let default_toast e =
     | Some a when Bool.equal (S.get phone) inside -> Jsx.element (button a)
     | Some _ | None -> Jsx.string ""
   in
-  <Item toast=(fun () -> e) variant=(fun () -> (c ()).variant)>
-    (fun () ->
-      match ((c ()).indicator, (c ()).loading) with
-      | _, true ->
-          Jsx.element
-            <Indicator variant=(fun () -> (c ()).variant)>
-              <Spinner color=`current size=`sm />
-            </Indicator>
-      | No_icon, false -> Jsx.string ""
-      | Icon icon, false ->
-          Jsx.element
-            <Indicator variant=(fun () -> (c ()).variant)>
-              (fun () -> Jsx.element icon)
-            </Indicator>
-      | Variant_icon, false ->
-          Jsx.element <Indicator variant=(fun () -> (c ()).variant) />)
+  <Item toast=e variant=(c ()).variant>
+    (match ((c ()).indicator, (c ()).loading) with
+    | _, true ->
+        Jsx.element
+          <Indicator variant=(c ()).variant>
+            <Spinner color=`current size=`sm />
+          </Indicator>
+    | No_icon, false -> Jsx.string ""
+    | Icon icon, false ->
+        Jsx.element
+          <Indicator variant=(c ()).variant>(Jsx.element icon)</Indicator>
+    | Variant_icon, false -> Jsx.element <Indicator variant=(c ()).variant />)
     <Content>
-      (fun () ->
-        if String.length (c ()).title > 0 then
-          Jsx.element <Title>(fun () -> Jsx.string (c ()).title)</Title>
-        else Jsx.string "")
-      (fun () ->
-        match (c ()).description with
-        | Some d ->
-            Jsx.element <Description>(fun () -> Jsx.string d)</Description>
-        | None -> Jsx.string "")
-      (fun () -> action_in true ())
+      (if String.length (c ()).title > 0 then
+         Jsx.element <Title>(Jsx.string (c ()).title)</Title>
+       else Jsx.string "")
+      (match (c ()).description with
+      | Some d -> Jsx.element <Description>(Jsx.string d)</Description>
+      | None -> Jsx.string "")
+      (action_in true ())
     </Content>
-    (fun () -> action_in false ())
-    <Close_button key=(fun () -> e.key) />
+    (action_in false ())
+    <Close_button key=e.key />
   </Item>
 
 (* The page's events the region listens to, as HeroUI's does. *)
@@ -1018,53 +997,49 @@ module Provider = struct
     S.set q.set_render
       (Some
          (fun e ->
-           <Stack.Provider value=(fun () -> s)>
-             (fun () ->
-               Jsx.element
-                 (match children e with
-                 | Some el -> el
-                 | None -> default_toast e))
+           <Stack.Provider value=s>
+             (Jsx.element
+                (match children e with
+                | Some el -> el
+                | None -> default_toast e))
            </Stack.Provider>));
     <Kobalte.Region
-      ?region_id=(fun () -> q.region)
+      ?region_id=q.region
                  (* The port's own hotkey stands in for Kobalte's, which it switches off
          with a key no event has: Kobalte takes an empty hotkey for every key,
          and would focus its list on each one pressed. *)
-      hotkey=(fun () -> [| "" |])
-      limit=(fun () -> 1e9)
+      hotkey=[| "" |]
+      limit=1e9
             (* Named as React Aria names its region, by how many toasts it holds,
          where Kobalte's would name its hotkey, which the port keeps. *)
-      translations=(fun () ->
-                     Types.Toast_Region_Translations.make
-                       ~notifications:(fun _ ->
-                         match List.length (S.get q.entries) with
-                         | 1 -> "1 notification."
-                         | n -> string_of_int n ^ " notifications.")
-                       ())
+      translations=(Types.Toast_Region_Translations.make
+                      ~notifications:(fun _ ->
+                        match List.length (S.get q.entries) with
+                        | 1 -> "1 notification."
+                        | n -> string_of_int n ^ " notifications.")
+                      ())
       pause_on_interaction=false
       pause_on_page_idle=false
       ref=(fun el ->
             ignore (given_ref el : unit option);
             watch el)
-      class_=(fun () ->
-               after
-                 (Styles.Toast.region
-                    (Styles.Toast.slots
-                       (Styles.Toast.options ~placement:(S.get placement) ())))
-                 (S.get class_))
+      class_=(after
+                (Styles.Toast.region
+                   (Styles.Toast.slots
+                      (Styles.Toast.options ~placement:(S.get placement) ())))
+                (S.get class_))
              (* Kobalte's region on the top layer asks for the pointer, inline, over
          HeroUI's region, which lets it through to the page but for its
          toasts. *)
-      style=(fun () ->
-              "pointer-events: none; --gap: "
-              ^ px (S.get gap)
-              ^ "; --placement: "
-              ^ placement_name (S.get placement)
-              ^ "; --scale-factor: "
-              ^ Js.Float.toString (S.get scale_factor)
-              ^ "; --toast-width: " ^ S.get width ^ ";"
-              ^ match S.get style with Some s -> " " ^ s | None -> "")
-      data_expanded=(fun () -> Jsx.flag (S.get expanded))
+      style=("pointer-events: none; --gap: "
+            ^ px (S.get gap)
+            ^ "; --placement: "
+            ^ placement_name (S.get placement)
+            ^ "; --scale-factor: "
+            ^ Js.Float.toString (S.get scale_factor)
+            ^ "; --toast-width: " ^ S.get width ^ ";"
+            ^ match S.get style with Some s -> " " ^ s | None -> "")
+      data_expanded=(Jsx.flag (S.get expanded))
       data_slot="toast-region"
       props=(Props.others props)>
       <Kobalte.List

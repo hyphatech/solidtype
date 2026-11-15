@@ -45,8 +45,7 @@ type drawn
     Solid's [Dynamic] takes either. *)
 
 val drawn_as : ('props -> element) option -> string -> drawn
-(** [drawn_as given tag], which the ppx writes for [<tag ?as_=(fun () -> o)>].
-*)
+(** [drawn_as given tag], which the ppx writes for [<tag ?as_=o>]. *)
 
 val call : (('a -> unit)[@u]) option -> 'a -> unit
 (** [call f x] calls a handler a caller gave, as Solid's props hold one, with
@@ -68,8 +67,8 @@ val is_function : 'state children -> bool
 
 val draw : 'state children -> 'state -> content
 (** [draw children state] is [children] as they are, or what their function
-    draws of [state], read where it is written: in a thunk, Solid tracks both
-    the children and what the function reads. *)
+    draws of [state], read where it is written: in JSX, Solid tracks both the
+    children and what the function reads. *)
 
 (** A value that stands in an element's place among a component's children,
     never rendered, as Solid's [Match] stands among a [Switch]'s: the component
@@ -116,7 +115,7 @@ external data : string -> data = "%identity"
 
 val flag : bool -> data
 (** [flag b] is ["true"] while [b] holds, and no attribute otherwise:
-    [data_selected=(fun () -> Jsx.flag (checked ()))]. *)
+    [data_selected=(Jsx.flag (checked ()))]. *)
 
 external el : string -> prop array -> child array -> element = "el"
 [@@mel.module "vite-plugin-solidtype/markers"]
@@ -150,7 +149,7 @@ external dynamic : ((unit -> content)[@u]) -> child = "dynamic"
     it is written, in an element's attribute, and writes the namespace; a
     wrapper left out is Solid's default. A component takes {!attr}, {!bool} and
     {!named} outside its props' check and passes them on to its element; each,
-    optional, is [?name=(Jsx.attr (fun () -> o))]. *)
+    optional, is [?name=(Jsx.attr o)]. *)
 
 type 'a namespaced
 

@@ -32,10 +32,7 @@ let shown host =
 let both variant =
   T.render (fun () ->
       <Card
-        variant=(fun () -> variant)
-        class_="w-[400px]"
-        role=`article
-        aria_labelledby="card-title">
+        variant class_="w-[400px]" role=`article aria_labelledby="card-title">
         <Card.Header class_="gap-1">
           <Card.Title id="card-title">"Title"</Card.Title>
           <Card.Description>"Description"</Card.Description>
@@ -54,21 +51,20 @@ module On_surface = struct
   let%component make () =
     let surface = Surface.Context.use () in
     <span data_slot="read">
-      (fun () ->
-        Jsx.string
-          (match surface with
-          | Some variant -> (
-              match S.get variant with
-              | `default -> "default"
-              | `secondary -> "secondary"
-              | `tertiary -> "tertiary"
-              | `transparent -> "transparent")
-          | None -> "none"))
+      (Jsx.string
+         (match surface with
+         | Some variant -> (
+             match S.get variant with
+             | `default -> "default"
+             | `secondary -> "secondary"
+             | `tertiary -> "tertiary"
+             | `transparent -> "transparent")
+         | None -> "none"))
     </span>
 end
 
 let on_surface variant =
-  T.render (fun () -> <Card variant=(fun () -> variant)><On_surface /></Card>);
+  T.render (fun () -> <Card variant><On_surface /></Card>);
   match T.query "[data-slot=read]" with Some e -> text e | None -> "nothing"
 
 let () =

@@ -38,10 +38,10 @@ module Root = struct
       S.accessor (fun () -> Option.value (Props.disabled props) ~default:false)
     in
     let picker = Color_picker.Context.use () in
-    <Disabled.Provider value=(fun () -> disabled)>
+    <Disabled.Provider value=disabled>
       <Kobalte.Root
-        data_disabled=(fun () -> state (S.get disabled))
-        ?value=(fun () -> Color_picker.value picker (Props.value props))
+        data_disabled=(state (S.get disabled))
+        ?value=(Color_picker.value picker (Props.value props))
         on_change=(fun c ->
                     Color_picker.changed picker c;
                     Jsx.call (Props.on_change props) c)
@@ -62,7 +62,7 @@ module Background = struct
   let make (props : Props.t) =
     let disabled = Disabled.use () in
     <Kobalte.Background
-      data_disabled=(fun () -> state (S.get disabled)) props=(S.omit props [||])
+      data_disabled=(state (S.get disabled)) props=(S.omit props [||])
     />
 
   let component = Jsx.component make
@@ -84,15 +84,14 @@ module Thumb = struct
     let disabled = Disabled.use () in
     let area = Kobalte.use_color_area_context () in
     <Kobalte.Thumb
-      ?tab_index=(fun () -> if S.get disabled then Some "-1" else None)
-      style=(fun () ->
-              after
-                ("--kb-color-current: "
-                ^ Color.to_string
-                    (S.get (State.value (Area.state area)))
-                    ~format:`rgba ())
-                (Props.style props))
-      data_disabled=(fun () -> state (S.get disabled))
+      ?tab_index=(if S.get disabled then Some "-1" else None)
+      style=(after
+               ("--kb-color-current: "
+               ^ Color.to_string
+                   (S.get (State.value (Area.state area)))
+                   ~format:`rgba ())
+               (Props.style props))
+      data_disabled=(state (S.get disabled))
       props=(S.omit props [| "style" |])
     />
 
@@ -110,9 +109,7 @@ module HiddenInputX = struct
 
   let make (props : Props.t) =
     let disabled = Disabled.use () in
-    <Kobalte.HiddenInputX
-      disabled=(fun () -> S.get disabled) props=(S.omit props [||])
-    />
+    <Kobalte.HiddenInputX disabled=(S.get disabled) props=(S.omit props [||]) />
 
   let component = Jsx.component make
 end
@@ -126,9 +123,7 @@ module HiddenInputY = struct
 
   let make (props : Props.t) =
     let disabled = Disabled.use () in
-    <Kobalte.HiddenInputY
-      disabled=(fun () -> S.get disabled) props=(S.omit props [||])
-    />
+    <Kobalte.HiddenInputY disabled=(S.get disabled) props=(S.omit props [||]) />
 
   let component = Jsx.component make
 end

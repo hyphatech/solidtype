@@ -103,32 +103,29 @@ let data =
 (* A row, its chevron in its tree column while it holds rows, as HeroUI's
    example draws it from its cell's render function. *)
 let rec row f =
-  <Table.Row id=(fun () -> f.id)>
+  <Table.Row id=f.id>
     <Table.Cell>
-      (fun () ->
-        let r = Table.Row.Context.use () in
-        let c = Table.Cell.Context.use () in
-        Jsx.element
-          <span class_="flex items-center gap-1">
-            <Show
-              when_=(fun () ->
-                      S.get r.has_child_items && S.get c.is_tree_column)>
-              <Button
-                is_icon_only=true
-                aria_label="Toggle row"
-                is_disabled=(fun () -> S.get r.is_disabled)
-                size=`sm
-                slot=`chevron
-                variant=`ghost>
-                <svg aria_hidden=true />
-              </Button>
-            </Show>
-            <span>(fun () -> Jsx.string f.title)</span>
-          </span>)
+      (let r = Table.Row.Context.use () in
+       let c = Table.Cell.Context.use () in
+       Jsx.element
+         <span class_="flex items-center gap-1">
+           <Show when_=(S.get r.has_child_items && S.get c.is_tree_column)>
+             <Button
+               is_icon_only=true
+               aria_label="Toggle row"
+               is_disabled=(S.get r.is_disabled)
+               size=`sm
+               slot=`chevron
+               variant=`ghost>
+               <svg aria_hidden=true />
+             </Button>
+           </Show>
+           <span>(Jsx.string f.title)</span>
+         </span>)
     </Table.Cell>
-    <Table.Cell>(fun () -> Jsx.string f.kind)</Table.Cell>
-    <Table.Cell>(fun () -> Jsx.string f.date)</Table.Cell>
-    <For each=(fun () -> f.files)>(fun f _ -> row f)</For>
+    <Table.Cell>(Jsx.string f.kind)</Table.Cell>
+    <Table.Cell>(Jsx.string f.date)</Table.Cell>
+    <For each=f.files>(fun f _ -> row f)</For>
   </Table.Row>
 
 (* What HeroUI's styles read and a reader reaches of each part. Ids, and what
@@ -255,7 +252,7 @@ let () =
                   <Table.Content
                     aria_label="Files"
                     class_="min-w-[520px]"
-                    expanded_keys=(fun () -> S.get expanded)
+                    expanded_keys=(S.get expanded)
                     tree_column="name"
                     on_expanded_change=(fun keys ->
                                          told :=
@@ -271,7 +268,7 @@ let () =
                       <Table.Column id="date">"Date Modified"</Table.Column>
                     </Table.Header>
                     <Table.Body>
-                      <For each=(fun () -> data)>(fun f _ -> row f)</For>
+                      <For each=data>(fun f _ -> row f)</For>
                     </Table.Body>
                   </Table.Content>
                 </Table.Scroll_container>

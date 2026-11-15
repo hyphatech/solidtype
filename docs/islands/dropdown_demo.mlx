@@ -20,12 +20,10 @@ let placements =
 let triggers = [| (`press, "press"); (`long_press, "longPress") |]
 
 let item ~indicator id text variant =
-  <Dropdown.Item
-    id=(fun () -> id) text_value=(fun () -> text) variant=(fun () -> variant)>
-    (fun () ->
-      if indicator then Solidtype.Jsx.element <Dropdown.Item_indicator />
-      else Solidtype.Jsx.element Solidtype.Jsx.nothing)
-    <Label>(fun () -> Solidtype.Jsx.string text)</Label>
+  <Dropdown.Item id text_value=text variant>
+    (if indicator then Solidtype.Jsx.element <Dropdown.Item_indicator />
+     else Solidtype.Jsx.element Solidtype.Jsx.nothing)
+    <Label>(Solidtype.Jsx.string text)</Label>
   </Dropdown.Item>
 
 let make () =
@@ -36,58 +34,53 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="selectionMode"
-        choices=(fun () -> modes)
-        picked=(fun () -> S.get mode)
+        choices=modes
+        picked=(S.get mode)
         on_pick=(Controls.choose modes set_mode)
       />
       <Select
         label="placement"
-        choices=(fun () -> placements)
-        picked=(fun () -> S.get placement)
+        choices=placements
+        picked=(S.get placement)
         on_pick=(Controls.choose placements set_placement)
       />
       <Select
         label="trigger"
-        choices=(fun () -> triggers)
-        picked=(fun () -> S.get trigger)
+        choices=triggers
+        picked=(S.get trigger)
         on_pick=(Controls.choose triggers set_trigger)
       />
     </div>
     <Side_by_side
       compared="[data-slot=button]"
       solidtype=(<div class_="flex justify-center py-16">
-                   (fun () ->
-                     (* A menu's selection is read as it is made, so another
+                   ((* A menu's selection is read as it is made, so another
                         makes another menu, as React's key does. *)
-                     let mode = fst (S.get mode) in
-                     let trigger = fst (S.get trigger) in
-                     let indicator =
-                       match mode with
-                       | `none -> false
-                       | `single | `multiple -> true
-                     in
-                     Solidtype.Jsx.element
-                       <Dropdown trigger=(fun () -> trigger)>
-                         <Button aria_label="Menu" variant=`secondary>
-                           "Actions"
-                         </Button>
-                         <Dropdown.Popover
-                           placement=(fun () -> fst (S.get placement))>
-                           <Dropdown.Menu
-                             selection_mode=(fun () -> mode)
-                             default_selected_keys=(fun () -> [| "copy" |])>
-                             (fun () ->
-                               Solidtype.Jsx.element
-                                 (item ~indicator "new" "New file" `default))
-                             (fun () ->
-                               Solidtype.Jsx.element
-                                 (item ~indicator "copy" "Copy link" `default))
-                             (fun () ->
-                               Solidtype.Jsx.element
-                                 (item ~indicator "delete" "Delete file" `danger))
-                           </Dropdown.Menu>
-                         </Dropdown.Popover>
-                       </Dropdown>)
+                    let mode = fst (S.get mode) in
+                    let trigger = fst (S.get trigger) in
+                    let indicator =
+                      match mode with
+                      | `none -> false
+                      | `single | `multiple -> true
+                    in
+                    Solidtype.Jsx.element
+                      <Dropdown trigger>
+                        <Button aria_label="Menu" variant=`secondary>
+                          "Actions"
+                        </Button>
+                        <Dropdown.Popover placement=(fst (S.get placement))>
+                          <Dropdown.Menu
+                            selection_mode=mode
+                            default_selected_keys=[| "copy" |]>
+                            (Solidtype.Jsx.element
+                               (item ~indicator "new" "New file" `default))
+                            (Solidtype.Jsx.element
+                               (item ~indicator "copy" "Copy link" `default))
+                            (Solidtype.Jsx.element
+                               (item ~indicator "delete" "Delete file" `danger))
+                          </Dropdown.Menu>
+                        </Dropdown.Popover>
+                      </Dropdown>)
                  </div>)
       react=(fun host ->
               Heroui_react.dropdown host

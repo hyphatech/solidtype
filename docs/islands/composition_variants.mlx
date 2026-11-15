@@ -8,11 +8,10 @@ module Pill_button = struct
   let%component make ?(radius : [ `full | `sm ] = `full)
       ~(children : Jsx.content) () =
     <Button
-      class_=(fun () ->
-               match S.get radius with
-               | `full -> "rounded-full font-semibold shadow-md"
-               | `sm -> "rounded-sm font-semibold shadow-md")>
-      (fun () -> S.get children)
+      class_=(match S.get radius with
+             | `full -> "rounded-full font-semibold shadow-md"
+             | `sm -> "rounded-sm font-semibold shadow-md")>
+      (S.get children)
     </Button>
 end
 

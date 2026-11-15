@@ -30,11 +30,10 @@ module Prefix = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let g = within "Input_group.Prefix" in
     <div
-      class_=(fun () ->
-               after (Styles.InputGroup.prefix (S.get g.slots)) (S.get class_))
+      class_=(after (Styles.InputGroup.prefix (S.get g.slots)) (S.get class_))
       data_slot="input-group-prefix"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
@@ -43,11 +42,10 @@ module Suffix = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let g = within "Input_group.Suffix" in
     <div
-      class_=(fun () ->
-               after (Styles.InputGroup.suffix (S.get g.slots)) (S.get class_))
+      class_=(after (Styles.InputGroup.suffix (S.get g.slots)) (S.get class_))
       data_slot="input-group-suffix"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
@@ -141,28 +139,26 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       is_invalid = S.accessor (fun () -> invalid ());
     }
   in
-  <Context.Provider value=(fun () -> g)>
+  <Context.Provider value=g>
     <div
-      role=(fun () ->
-             (* In a field, the field is the group, as React Aria's is. *)
-             match field with
-             | Some _ -> `presentation
-             | None -> `group)
+      role=(* In a field, the field is the group, as React Aria's is. *)
+           (match field with
+           | Some _ -> `presentation
+           | None -> `group)
       ref=(fun e ->
             element := Some e;
             Interaction.watch i e)
       on_click=clicked
-      class_=(fun () ->
-               after (Styles.InputGroup.base (S.get g.slots)) (S.get class_))
+      class_=(after (Styles.InputGroup.base (S.get g.slots)) (S.get class_))
       data_slot="input-group"
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      data_disabled=(fun () -> Jsx.flag (disabled ()))
-      data_invalid=(fun () -> Jsx.flag (invalid ()))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_focus_within=(Jsx.flag (Interaction.focused i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(Jsx.flag (disabled ()))
+      data_invalid=(Jsx.flag (invalid ()))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (S.get children) (state ()))
+      (Jsx.draw (S.get children) (state ()))
     </div>
   </Context.Provider>
 [@@element div]

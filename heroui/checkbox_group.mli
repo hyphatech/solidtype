@@ -8,7 +8,7 @@
     the {!Fieldset} it is in is.
 
     {[
-      <Checkbox_group name="interests" default_value=(fun () -> [ "coding" ])>
+      <Checkbox_group name="interests" default_value=([ "coding" ])>
         <Label>"Interests"</Label>
         <Checkbox value="coding">
           <Checkbox.Content>"Coding"</Checkbox.Content>

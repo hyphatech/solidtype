@@ -80,19 +80,18 @@ it the value, so `Some 0` shows like any other id:
 
 ```ocaml
 let details () =
-  <Show.Some some=(fun () -> S.get selected_id)>
-    (fun id -> <Details id=(fun () -> S.get id) />)
+  <Show.Some some=(S.get selected_id)>
+    (fun id -> <Details id=(S.get id) />)
   </Show.Some>
 ```
 
 An `option` given where Solid tests for truth does not compile:
 
 ```
-2 |   <Solidtype.Show when_=(fun () -> user ())><p>"hello"</p></Solidtype.Show>
-                            ^^^^^^^^^^^^^^^^^^^
-Error: This expression has type string option Solidtype.Check.value
-       but an expression was expected of type bool Solidtype.Check.value
-       Type string option is not compatible with type bool
+2 |   <Solidtype.Show when_=(user ())><p>"hello"</p></Solidtype.Show>
+                            ^^^^^^^^^
+Error: This expression has type string option
+       but an expression was expected of type bool
 ```
 
 A resource has the same trap in TSX: a source of `false` means "not ready",
@@ -148,10 +147,9 @@ type answer = Waiting | Ready of int | Refused
 
 let view answer =
   <Switch>
-    (fun () ->
-      match S.get answer with
+    (match S.get answer with
       | Waiting -> <p>"waiting"</p>
-      | Ready n -> <p>(fun () -> Jsx.int n)</p>)
+      | Ready n -> <p>(Jsx.int n)</p>)
   </Switch>
 ```
 
@@ -160,7 +158,7 @@ Error (warning 8 [partial-match]): this pattern-matching is not exhaustive.
   Here is an example of a case that is not matched: Refused
 ```
 
-### A prop is a call
+### A prop is read where it is used
 
 In TSX, `props.text` is a live read and a destructured `text` a value read
 once, and the two look alike. This label never updates:
@@ -171,13 +169,13 @@ function Label({ text }: { text: string }) {
 }
 ```
 
-In OCaml a prop is a function, `text : unit -> string`. There is nothing to
-destructure, and a read is a call written where it happens, inside the
-thunk Solid tracks:
+In OCaml a prop is an accessor, read by `S.get` as a signal is. There is
+nothing to destructure, and a read in JSX is read again as the prop
+changes:
 
 ```ocaml
 let%component make ~(text : string) () =
-  <span>(fun () -> Jsx.string (text ()))</span>
+  <span>(Jsx.string (S.get text))</span>
 ```
 
 ### Props are parameters
@@ -198,7 +196,7 @@ from them, so the two cannot drift:
 
 ```ocaml
 let%component make ~(name : string) ?(greeting : string = "Hello") () =
-  <p>(fun () -> Jsx.string (S.get greeting ^ ", " ^ S.get name ^ "!"))</p>
+  <p>(Jsx.string (S.get greeting ^ ", " ^ S.get name ^ "!"))</p>
 ```
 
 ## Predictable
@@ -214,8 +212,8 @@ reads as `null` is a `Js.Nullable.t`, so an empty selection says so:
 ```ocaml
 let picker () =
   <Select.Root
-    options=(fun () -> statuses)
-    value=(fun () -> Js.Nullable.fromOption (S.get selected)) />
+    options=statuses
+    value=(Js.Nullable.fromOption (S.get selected)) />
 ```
 
 `None` is `null`, still controlled. Handing the value to Kobalte is leaving
@@ -234,8 +232,7 @@ every step.
 
 ## What it costs
 
-A dynamic value is written as the thunk Solid's compiler makes of it,
-`(fun () -> ...)`, and text as `Jsx.string` or `Jsx.int`: a few characters
-more, for every read standing where it runs. The build is two steps, dune
+A read is `S.get count` where TSX writes `count()`, and text is
+`Jsx.string` or `Jsx.int`: a few characters more. The build is two steps, dune
 and Vite, run side by side as [Vite](/solidtype/start/vite/)
 shows.

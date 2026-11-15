@@ -11,24 +11,23 @@ let make () =
     <Pagination.Content>
       <Pagination.Item>
         <Pagination.Previous
-          is_disabled=(fun () -> S.get page = 1)
+          is_disabled=(S.get page = 1)
           on_press=(fun () -> S.update set_page pred)>
           <Pagination.Previous_icon /> <span>"Previous"</span>
         </Pagination.Previous>
       </Pagination.Item>
-      <For each=(fun () -> Array.init total_pages succ)>
+      <For each=(Array.init total_pages succ)>
         (fun p _ ->
           <Pagination.Item>
             <Pagination.Link
-              is_active=(fun () -> p = S.get page)
-              on_press=(fun () -> S.set set_page p)>
-              (fun () -> Jsx.int p)
+              is_active=(p = S.get page) on_press=(fun () -> S.set set_page p)>
+              (Jsx.int p)
             </Pagination.Link>
           </Pagination.Item>)
       </For>
       <Pagination.Item>
         <Pagination.Next
-          is_disabled=(fun () -> S.get page = total_pages)
+          is_disabled=(S.get page = total_pages)
           on_press=(fun () -> S.update set_page succ)>
           <span>"Next"</span> <Pagination.Next_icon />
         </Pagination.Next>
