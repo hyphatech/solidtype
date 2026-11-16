@@ -1,0 +1,9 @@
+; The rules of Hypha's a lint holds: litany's default set, and opens.
+(lint
+ (select default)
+ (extend open-of-ordinary-module))
+
+(per-path
+ (paths heroui/toggle_button_group.mlx)
+ (ignore suspicious-physical-equality)
+ (reason "a button leaving the group removes its own accessor: identity is the point"))

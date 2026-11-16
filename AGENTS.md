@@ -22,8 +22,8 @@ make setup          # once: the switch solidtype, all dependencies, and
                     # Bun's
 make test           # the ppx's lowering, the plugin's rewrite, the
                     # libraries' tests and the example's
-make lint           # formatting, the plugin's and the generators' types, the
-                    # release build, and the generated bindings
+make lint           # formatting, the plugin's and the generators' types,
+                    # litany, the release build, and the generated bindings
 make fmt            # format in place
 make example        # the board, built by Vite into _build/example-dist, and
                     # its Astro page, into _build/example-astro
@@ -34,7 +34,7 @@ make docs           # the documentation site, odoc's reference copied into
                     # as .github/workflows/docs.yml publishes it from main
 make docs-serve     # the documentation site built, served on DOCS_PORT with
                     # search
-make release VERSION=1.2.3  # once CHANGES.md names it: tag and release with open-opam
+make release VERSION=1.2.3  # tag and release
 ```
 
 The plugin and the example run on Bun 1.3 or later: JavaScript here only
@@ -281,9 +281,6 @@ test/does_not_compile.t
                      each mistake the types refuse, built against the
                      installed library, with the error a user reads
 ```
-
-Each module's contract is its `.mli`. Read the `.mli` before changing a
-module.
 
 ## The pipeline
 
@@ -689,12 +686,6 @@ break.
   a test in TypeScript would reach a component through the names Melange
   emits. Symptom: a `.test.ts` or `.test.tsx` that imports an OCaml
   module.
-- **The opens are the ppx's `Ppxlib`**, which every ppxlib rewriter opens
-  to build the AST it writes, and its `Result.Syntax`, whose `let*` chains
-  the results it builds, **and a test library's `Syntax`**
-  (`Testing.Syntax`, `Harness.Syntax`), whose `let*` awaits a promise as
-  `MELANGE.md` lets a test. Symptom: `rg -n '^\s*open ' src ppx example
-  test | rg -v 'open (Ppxlib|Syntax|\w+\.Syntax)$'` finds any other.
 
 ## Changes and releases
 

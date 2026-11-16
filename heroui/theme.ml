@@ -37,10 +37,12 @@ external set_attribute : Dom.element -> string -> string -> unit
 let stored () =
   match get_item storage_key with
   | value -> Js.Null.toOption value
-  | exception _ -> None
+  | exception Js.Exn.Error _ -> None
 
 let store theme =
-  match set_item storage_key theme with () -> () | exception _ -> ()
+  match set_item storage_key theme with
+  | () -> ()
+  | exception Js.Exn.Error _ -> ()
 
 type t = {
   theme : string S.accessor;

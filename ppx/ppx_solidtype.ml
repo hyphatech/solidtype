@@ -1,4 +1,7 @@
-open Ppxlib
+open Ppxlib [@@litany.allow
+              "open-of-ordinary-module: every ppxlib rewriter opens it to \
+               build the AST it writes"]
+
 open Result.Syntax
 module B = Ast_builder.Default
 
@@ -622,6 +625,12 @@ let element map ~loc name args =
           |]
           [| Solidtype.Jsx.node [%e drawn ~given args] |]]
 
+(* Code written around a tag is at no place in the source, so its location
+   is ghost, as ppxlib asks: a tool reading the typed tree -- litany, whose
+   [suspicious-literal-condition] the [if false] below would wake -- takes
+   none of it for the user's. *)
+let ghost loc = { loc with loc_ghost = true }
+
 (* A component's element also applies the component's [Props.check] to its
    props under [if false]: the compiler checks the application and Melange
    drops it. A prop that can hold JSX is bound once and named in both, since a
@@ -765,6 +774,7 @@ let component map ~loc path args =
               @ [ (Nolabel, [%expr ()]) ])
           in
           let make =
+            let loc = ghost loc in
             [%expr
               if false then [%e check];
               Solidtype.Jsx.c
@@ -911,9 +921,11 @@ let lower map (e : expression) args =
         _ ) -> (
       match switch_cases path args with
       | Some (exhaustive, args) ->
+          let made = component map ~loc path args in
+          let loc = ghost loc in
           [%expr
             if false then [%e exhaustive];
-            [%e component map ~loc path args]]
+            [%e made]]
       | None -> component map ~loc path args)
   | _ -> error ~loc "a JSX tag is a lowercase element or a component module"
 

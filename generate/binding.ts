@@ -23,8 +23,8 @@ export type Library = {
   // already an optional prop's absence; undefined for any other, which the
   // core maps by its rules.
   ported?: (symbol: ts.Symbol, args: Type[], absent: boolean) => Type | undefined;
-  // Whether a number is a small whole one where it is met, by where: an int,
-  // as MELANGE.md lets a binding that knows it; a float anywhere else.
+  // Whether a number is a small whole one where it is met, by where: an int
+  // where the binding knows it fits 32 bits; a float anywhere else.
   whole?: (where: string) => boolean;
   // The classes whose values are one type of Types, Value, a kind each, and
   // the structural interfaces they satisfy: a union of the classes, or one of
