@@ -59,7 +59,7 @@ module Greeting = struct
 end
 
 module Fails = struct
-  let%component make () = if true then raise Broken else <p>"fine"</p>
+  let%component make () = raise Broken
 end
 
 let () =

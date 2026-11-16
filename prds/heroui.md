@@ -264,8 +264,8 @@ on `generate/binding.ts`'s core, and every date port takes its values:
 - **DateField, Calendar, RangeCalendar, DatePicker, DateRangePicker**,
   group 7, are built on the same values and on the library's calendars, so
   a calendar other than the Gregorian is theirs too.
-- **The wire** stays a `Js.Date.t`, an instant, as `MELANGE.md` and
-  wiretype's codecs read one: `Types.ZonedDateTime.to_date` and
+- **The wire** stays a `Js.Date.t`, an instant, as wiretype's codecs read
+  one: `Types.ZonedDateTime.to_date` and
   `from_date` with a zone cross between them, at the boundary.
 
 The binding, as it landed: the four value classes are each a kind of one

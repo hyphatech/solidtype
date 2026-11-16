@@ -1,5 +1,13 @@
 # Changes
 
+## 0.11.1 (2026-11-16)
+
+- The code `ppx_solidtype` writes around a component's tag, the `if false`
+  that holds its props to `Props.check`, is at a ghost location, so a linter
+  reading the typed tree no longer reports a literal condition at every tag.
+- `Theme`'s storage catches the browser's throw alone, `Js.Exn.Error`, and
+  no longer an OCaml exception raised beside it.
+
 ## 0.11.0 (2026-11-15)
 
 - In JSX a value is written as itself, and Solid keeps it current, as its

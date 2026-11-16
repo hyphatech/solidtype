@@ -1,0 +1,8 @@
+(lint
+ (select default)
+ (extend open-of-ordinary-module))
+
+(per-path
+ (paths heroui/toggle_button_group.mlx)
+ (ignore suspicious-physical-equality)
+ (reason "a button leaving the group removes its own accessor: identity is the point"))

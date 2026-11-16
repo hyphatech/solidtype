@@ -829,7 +829,7 @@ let%component make ?(placeholder : string = "Select an item")
      Aria's does; an autocomplete opens with no option at all only by
      [allows_empty_collection]. *)
   let open_refused o =
-    o && (not (S.get allows_empty_collection)) && List.length (options ()) = 0
+    o && (not (S.get allows_empty_collection)) && List.is_empty (options ())
   in
   match mode with
   | `single ->

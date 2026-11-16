@@ -31,9 +31,10 @@ test: build node_modules ## run the tests
 	$(OPAM) bun run test
 
 # Release is the profile opam installs with.
-lint: node_modules ## check formatting, types, the release build and bindings
+lint: node_modules ## check formatting, types, litany, the release build and bindings
 	$(OPAM) dune build @all @fmt
 	$(OPAM) dune build --profile release @all
+	$(OPAM) litany check
 	bun run tsc -p vite-plugin
 	bun run tsc -p generate
 	$(OPAM) bun generate/html.ts --check

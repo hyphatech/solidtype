@@ -123,7 +123,12 @@
   (ocamlformat-mlx
    (and
     :with-dev-setup
-    (= 0.29.0.1)))))
+    (= 0.29.0.1)))
+  (hypha-litany
+   (and
+    :with-dev-setup
+    (>= 1.2.2)
+    (< 2.0.0)))))
 
 (package
  (name solidtype-kobalte)

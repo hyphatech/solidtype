@@ -1,8 +1,9 @@
 ; What ppx_solidtype writes for each JSX form, from MLX's own parse: a change
 ; to the lowering is a diff here, taken with `dune promote`.
 
-(executable
- (name pp)
+(executables
+ (names pp ghost)
+ (modules pp ghost)
  (libraries ppx_solidtype ppxlib))
 
 (rule
@@ -19,3 +20,13 @@
  (alias runtest)
  (action
   (diff lowered.expected lowered.ml)))
+
+(rule
+ (with-stdout-to
+  lowered.bin
+  (run ./pp.exe --impl %{dep:forms.ast} --dump-ast)))
+
+(rule
+ (alias runtest)
+ (action
+  (run ./ghost.exe %{dep:lowered.bin})))
