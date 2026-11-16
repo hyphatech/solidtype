@@ -1,15 +1,12 @@
-(* The props check is no one's code, and a linter reads locations. *)
-
-open Ppxlib [@@litany.allow
-              "open-of-ordinary-module: the AST's constructors are matched"]
+module P = Ppxlib
 
 let () =
-  match Ast_io.read_binary Sys.argv.(1) with
+  match P.Ast_io.read_binary Sys.argv.(1) with
   | Error e ->
       prerr_endline e;
       exit 2
   | Ok bin -> (
-      match Ast_io.get_ast bin with
+      match P.Ast_io.get_ast bin with
       | Intf _ ->
           prerr_endline "an interface, where the lowering is an implementation";
           exit 2
@@ -17,7 +14,7 @@ let () =
           let unmarked = ref [] in
           let iter =
             object
-              inherit Ast_traverse.iter as super
+              inherit P.Ast_traverse.iter as super
 
               method! expression e =
                 (match e.pexp_desc with
@@ -38,7 +35,7 @@ let () =
           in
           iter#structure structure;
           List.iter
-            (fun (loc : location) ->
+            (fun (loc : P.location) ->
               Printf.printf "line %d: an if false not at a ghost location\n"
                 loc.loc_start.pos_lnum)
             (List.rev !unmarked);

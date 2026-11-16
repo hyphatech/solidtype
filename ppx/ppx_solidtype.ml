@@ -1,17 +1,14 @@
-open Ppxlib [@@litany.allow
-              "open-of-ordinary-module: every ppxlib rewriter opens it to \
-               build the AST it writes"]
-
 open Result.Syntax
-module B = Ast_builder.Default
+module P = Ppxlib
+module B = P.Ast_builder.Default
 
-let attribute ~loc ?(payload = PStr []) name =
+let attribute ~loc ?(payload = P.PStr []) name =
   B.attribute ~loc ~name:{ txt = name; loc } ~payload
 
 (* MLX marks every element it parses with this attribute. *)
-let is_jsx (e : expression) =
+let is_jsx (e : P.expression) =
   List.exists
-    (fun (a : attribute) -> String.equal a.attr_name.txt "JSX")
+    (fun (a : P.attribute) -> String.equal a.attr_name.txt "JSX")
     e.pexp_attributes
 
 (* A spread is the attribute [props=p], as MLX has no syntax for one, so
@@ -76,7 +73,7 @@ let js_name label =
    also reads escapes in {js|...|js}, where [s] is already the string's
    value, so each backslash is doubled to reach the page as one. A string
    written {js|...|js} is JavaScript's already, its escapes meant. *)
-let js_string (e : expression) =
+let js_string (e : P.expression) =
   match e.pexp_desc with
   | Pexp_constant (Pconst_string (_, _, Some "js")) -> e
   | Pexp_constant (Pconst_string (s, loc, _)) ->
@@ -84,17 +81,17 @@ let js_string (e : expression) =
       { e with pexp_desc = Pexp_constant (Pconst_string (s, loc, Some "js")) }
   | _ -> e
 
-let last = function Ldot (_, name) | Lident name -> name | Lapply _ -> ""
+let last = function P.Ldot (_, name) | Lident name -> name | Lapply _ -> ""
 
 let is_handler label =
   String.length label > 3 && starts_with ~prefix:"on_" label
 
-let is_unit (p : pattern) =
+let is_unit (p : P.pattern) =
   match p.ppat_desc with
   | Ppat_construct ({ txt = Lident "()"; _ }, None) -> true
   | _ -> false
 
-let is_thunk (e : expression) =
+let is_thunk (e : P.expression) =
   match e.pexp_desc with
   | Pexp_function ({ pparam_desc = Pparam_val (Nolabel, None, p); _ } :: _, _, _)
     ->
@@ -108,21 +105,22 @@ let is_thunk (e : expression) =
 let render = "render"
 let named_render = "solidtype.render"
 
-let is_named_render (e : expression) =
+let is_named_render (e : P.expression) =
   List.exists
-    (fun (a : attribute) -> String.equal a.attr_name.txt named_render)
+    (fun (a : P.attribute) -> String.equal a.attr_name.txt named_render)
     e.pexp_attributes
 
-let unmark (e : expression) =
+let unmark (e : P.expression) =
   {
     e with
     pexp_attributes =
       List.filter
-        (fun (a : attribute) -> not (String.equal a.attr_name.txt named_render))
+        (fun (a : P.attribute) ->
+          not (String.equal a.attr_name.txt named_render))
         e.pexp_attributes;
   }
 
-let is_function (e : expression) =
+let is_function (e : P.expression) =
   is_named_render e
   || match e.pexp_desc with Pexp_function _ -> true | _ -> false
 
@@ -136,7 +134,7 @@ let is_function (e : expression) =
    belongs. *)
 type kind = Literal | Element | Function | Thunk
 
-let kind_of ~handler (e : expression) =
+let kind_of ~handler (e : P.expression) =
   match e.pexp_desc with
   | Pexp_constant _ | Pexp_construct (_, None) | Pexp_variant (_, None) ->
       Literal
@@ -150,14 +148,14 @@ let kind_of ~handler (e : expression) =
    element it is written in, outside a branch Solid has not yet drawn, unless
    it is in a thunk, which Melange never moves out of and the plugin unwraps.
    A name or a function literal makes nothing. *)
-let is_made (e : expression) =
+let is_made (e : P.expression) =
   match e.pexp_desc with Pexp_ident _ | Pexp_function _ -> false | _ -> true
 
 (* Solid calls what it is handed with no argument, so each thunk the ppx
    hands it is a JavaScript function of none, which Melange writes whole for an
    uncurried [fun]: a curried [fun () -> fun x -> e] would be one function of
    two, run at once by a call of none. *)
-let uncurried ~loc (e : expression) =
+let uncurried ~loc (e : P.expression) =
   (* A thunk's result type, [fun () : t -> e] or [fun () :> t -> e], as MLX
      may read [fun () -> (e :> t)], is written on its body instead: an
      uncurried function's result constraint is typed as an exact match on
@@ -174,10 +172,10 @@ let uncurried ~loc (e : expression) =
         { e with pexp_desc = Pexp_function (params, None, Pfunction_body body) }
     | _ -> e
   in
-  let marked (e : expression) =
+  let marked (e : P.expression) =
     if
       List.exists
-        (fun (a : attribute) -> String.equal a.attr_name.txt "u")
+        (fun (a : P.attribute) -> String.equal a.attr_name.txt "u")
         e.pexp_attributes
     then e
     else { e with pexp_attributes = attribute ~loc "u" :: e.pexp_attributes }
@@ -219,9 +217,9 @@ let uncurried ~loc (e : expression) =
         }
   | _ -> marked e
 
-let thunk ~loc (e : expression) = uncurried ~loc [%expr fun () -> [%e e]]
+let thunk ~loc (e : P.expression) = uncurried ~loc [%expr fun () -> [%e e]]
 
-let call ~loc (f : expression) =
+let call ~loc (f : P.expression) =
   let apply f =
     {
       (B.pexp_apply ~loc f [ (Nolabel, [%expr ()]) ]) with
@@ -230,7 +228,7 @@ let call ~loc (f : expression) =
   in
   (* A thunk called where it is written is its body, which Melange would
      otherwise write as a function made and called at once. *)
-  let rec body (f : expression) =
+  let rec body (f : P.expression) =
     match f.pexp_desc with
     | Pexp_function
         ( [ { pparam_desc = Pparam_val (Nolabel, None, p); _ } ],
@@ -251,14 +249,14 @@ let call ~loc (f : expression) =
         [%e apply [%expr solidtype__f]]]
 
 let error ~loc message =
-  B.pexp_extension ~loc (Location.error_extensionf ~loc "%s" message)
+  B.pexp_extension ~loc (P.Location.error_extensionf ~loc "%s" message)
 
 let rec all = function
   | [] -> Ok []
   | Ok x :: rest -> Result.map (fun xs -> x :: xs) (all rest)
   | (Error _ as e) :: _ -> e
 
-let rec list_items (e : expression) =
+let rec list_items (e : P.expression) =
   match e.pexp_desc with
   | Pexp_construct ({ txt = Lident "[]"; _ }, None) -> Ok []
   | Pexp_construct
@@ -271,9 +269,9 @@ let rec list_items (e : expression) =
 let split args =
   let children, props =
     List.partition_map
-      (fun (label, (value : expression)) ->
+      (fun (label, (value : P.expression)) ->
         match (label, value.pexp_desc) with
-        | Labelled "children", _ -> Left value
+        | P.Labelled "children", _ -> Left value
         | Nolabel, Pexp_construct ({ txt = Lident "()"; _ }, None) -> Right None
         | _ -> Right (Some (label, value)))
       args
@@ -282,7 +280,7 @@ let split args =
   let given, props =
     List.partition
       (fun (label, _) ->
-        match label with Labelled l -> String.equal l render | _ -> false)
+        match label with P.Labelled l -> String.equal l render | _ -> false)
       props
   in
   let* cs =
@@ -298,7 +296,7 @@ let split args =
         ( f.pexp_loc,
           "a function written in place is the component's child, <C>(fun \
            ...)</C>; render=f gives one by its name" )
-  | [ (_, (f : expression)) ], [] ->
+  | [ (_, (f : P.expression)) ], [] ->
       let loc = f.pexp_loc in
       Ok
         ( props,
@@ -308,11 +306,11 @@ let split args =
               pexp_attributes = attribute ~loc named_render :: f.pexp_attributes;
             };
           ] )
-  | (_, (f : expression)) :: _, _ ->
+  | (_, (f : P.expression)) :: _, _ ->
       Error (f.pexp_loc, "render=f is a component's only child")
 
 let labelled ~loc = function
-  | Labelled label -> Ok label
+  | P.Labelled label -> Ok label
   | Optional label ->
       Error (loc, Printf.sprintf "?%s is not supported: pass ~%s" label label)
   | Nolabel -> Error (loc, "a JSX prop is labelled")
@@ -321,7 +319,7 @@ let labelled ~loc = function
    is, whose [None] Solid and Kobalte are given as [undefined], absent.
    OCaml's own [?name:] in the check refuses it where the prop is not
    optional. *)
-let optional ~loc label (value : expression) =
+let optional ~loc label (value : P.expression) =
   if starts_with ~prefix:"data_" label || String.equal label spread then
     Error (loc, Printf.sprintf "?%s is not optional: pass %s=" label label)
   else
@@ -333,7 +331,7 @@ let absent_or ~loc read =
 
 (* A child is told apart before it is lowered, while an element still carries
    MLX's attribute. *)
-let child map (e : expression) =
+let child map (e : P.expression) =
   let loc = e.pexp_loc in
   match e.pexp_desc with
   | Pexp_constant (Pconst_string _) ->
@@ -357,12 +355,12 @@ let child map (e : expression) =
 type namespace = Native | Capture | Prop | Attr | Bool
 
 type wrapped =
-  | Namespaced of namespace * expression
-  | Listen of string * expression  (** [on=(Jsx.listen "myEvent" f)] *)
-  | Named of string * expression  (** [attr=(Jsx.named "data-x" s)] *)
+  | Namespaced of namespace * P.expression
+  | Listen of string * P.expression  (** [on=(Jsx.listen "myEvent" f)] *)
+  | Named of string * P.expression  (** [attr=(Jsx.named "data-x" s)] *)
 
-let wrapped (e : expression) =
-  let string_literal (e : expression) =
+let wrapped (e : P.expression) =
+  let string_literal (e : P.expression) =
     match e.pexp_desc with
     | Pexp_constant (Pconst_string (s, _, _)) -> Some s
     | _ -> None
@@ -393,7 +391,7 @@ let wrapped (e : expression) =
 (* An element's attribute, from its OCaml label and its value: its
    JavaScript name, its type -- the element's own in [Solidtype.Html], or the
    namespace's -- and the value the wrapper held. *)
-let dom_attribute ~loc ~tag label (value : expression) =
+let dom_attribute ~loc ~tag label (value : P.expression) =
   let html =
     B.ptyp_constr ~loc
       {
@@ -445,7 +443,7 @@ let dom_attribute ~loc ~tag label (value : expression) =
    of a component: present, or absent while a flag is down, so the
    attribute is Solid's to write on the server as in the browser. A string
    literal, the common case, is written as [Jsx.data] for it. *)
-let data ~loc label (value : expression) =
+let data ~loc label (value : P.expression) =
   let name = B.estring ~loc (js_name label) in
   match (value.pexp_desc, kind_of ~handler:false value) with
   | Pexp_constant (Pconst_string _), _ ->
@@ -462,7 +460,7 @@ let data ~loc label (value : expression) =
    element unchecked, as a data- attribute: [attr:], [bool:], and a name the
    spelling rule cannot keep. A handler's and a property's are an element's
    alone, since a component's props name its own. *)
-let passed_on ~loc label (value : expression) =
+let passed_on ~loc label (value : P.expression) =
   match wrapped value with
   | Some (Ok (Namespaced (Attr, v))) ->
       Ok ("attr:" ^ js_name label, [%type: string], v)
@@ -487,12 +485,12 @@ let element map ~loc name args =
      fall back on while hydrating, so it throws on an element only the browser
      draws, where given a function it only calls it. *)
   let drawn_as, args =
-    List.partition (function Optional "as_", _ -> true | _ -> false) args
+    List.partition (function P.Optional "as_", _ -> true | _ -> false) args
   in
-  let prop (label, (value : expression)) =
+  let prop (label, (value : P.expression)) =
     let loc = value.pexp_loc in
     match label with
-    | Labelled l when String.equal l spread ->
+    | P.Labelled l when String.equal l spread ->
         Ok [%expr Solidtype.Jsx.spread [%e thunk ~loc (map value)]]
     | Labelled l
       when starts_with ~prefix:"data_" l && Option.is_none (wrapped value) ->
@@ -559,9 +557,11 @@ let element map ~loc name args =
   let drawn ~given args =
     let rest =
       match
-        ( List.find_opt (function Labelled "ref", _ -> true | _ -> false) args,
+        ( List.find_opt
+            (function P.Labelled "ref", _ -> true | _ -> false)
+            args,
           List.find_opt
-            (function Labelled l, _ -> String.equal l spread | _ -> false)
+            (function P.Labelled l, _ -> String.equal l spread | _ -> false)
             args )
       with
       | Some (_, written), Some (_, given) -> Some (written, given)
@@ -574,7 +574,7 @@ let element map ~loc name args =
           let rest = [%expr solidtype__rest ()] in
           List.concat_map
             (function
-              | Labelled "ref", _ -> []
+              | P.Labelled "ref", _ -> []
               | (Labelled l as label), _ when String.equal l spread ->
                   [
                     (label, rest);
@@ -625,7 +625,7 @@ let element map ~loc name args =
           |]
           [| Solidtype.Jsx.node [%e drawn ~given args] |]]
 
-let ghost loc = { loc with loc_ghost = true }
+let ghost loc = { loc with P.loc_ghost = true }
 
 (* A component's element also applies the component's [Props.check] to its
    props under [if false]: the compiler checks the application and Melange
@@ -634,16 +634,16 @@ let ghost loc = { loc with loc_ghost = true }
    Vite plugin puts each one back where it is used. *)
 let component map ~loc path args =
   let bound label = "solidtype__" ^ label in
-  let prop (label, (value : expression)) =
+  let prop (label, (value : P.expression)) =
     let loc = value.pexp_loc in
     match label with
-    | Labelled l when String.equal l spread ->
+    | P.Labelled l when String.equal l spread ->
         let x = B.evar ~loc (bound spread) in
         Ok
           ( Some
               ( bound spread,
                 (Some [%type: (unit -> _[@u])], thunk ~loc (map value)) ),
-            Some (Labelled spread, call ~loc x),
+            Some (P.Labelled spread, call ~loc x),
             [%expr Solidtype.Jsx.spread [%e x]] )
     | Optional l when Option.is_some (wrapped value) ->
         let* js, t, v = passed_on ~loc l value in
@@ -677,7 +677,7 @@ let component map ~loc path args =
         let+ value = optional ~loc l value in
         let x = B.evar ~loc (bound l) in
         ( Some (bound l, (Some [%type: (unit -> _ option[@u])], map value)),
-          Some (Optional l, [%expr Solidtype.Check.optional [%e x]]),
+          Some (P.Optional l, [%expr Solidtype.Check.optional [%e x]]),
           [%expr
             Solidtype.Jsx.d
               [%e B.estring ~loc (js_name l)]
@@ -690,7 +690,7 @@ let component map ~loc path args =
         | Literal ->
             let value = js_string value in
             ( None,
-              Some (Labelled label, [%expr Solidtype.Check.literal [%e value]]),
+              Some (P.Labelled label, [%expr Solidtype.Check.literal [%e value]]),
               [%expr Solidtype.Jsx.s [%e name] [%e value]] )
         | Element ->
             ( None,
@@ -725,9 +725,9 @@ let component map ~loc path args =
         in
         Ok
           ( Some (bound "children", (None, map (unmark f))),
-            Some (Labelled "children", check),
+            Some (P.Labelled "children", check),
             [ [%expr Solidtype.Jsx.render [%e x]] ] )
-    | (first : expression) :: rest as written ->
+    | (first : P.expression) :: rest as written ->
         (* A component that takes only a function refuses these children
            where they are written, a function's name among them. *)
         let loc =
@@ -735,14 +735,14 @@ let component map ~loc path args =
             first.pexp_loc with
             loc_end =
               List.fold_left
-                (fun _ (c : expression) -> c.pexp_loc.loc_end)
+                (fun _ (c : P.expression) -> c.pexp_loc.loc_end)
                 first.pexp_loc.loc_end rest;
           }
         in
         Result.map
           (fun cs ->
             ( None,
-              Some (Labelled "children", [%expr Solidtype.Check.elements ()]),
+              Some (P.Labelled "children", [%expr Solidtype.Check.elements ()]),
               cs ))
           (all (List.map (child map) written))
   in
@@ -795,7 +795,7 @@ let component map ~loc path args =
                    in
                    B.pexp_fun ~loc Nolabel None pat body)
                  bindings make)
-              (List.map (fun (_, (_, expr)) -> (Nolabel, expr)) bindings))
+              (List.map (fun (_, (_, expr)) -> (P.Nolabel, expr)) bindings))
 
 (* A [Switch] whose only child is a [match]: each case becomes a
    [Match], a case with variables a [Match.Keyed] given them, so the case's
@@ -803,13 +803,13 @@ let component map ~loc path args =
 
 let with_last path name =
   match path with
-  | Ldot (p, _) -> Ldot (p, name)
+  | P.Ldot (p, _) -> P.Ldot (p, name)
   | Lident _ | Lapply _ -> Lident name
 
-let variables (p : pattern) =
+let variables (p : P.pattern) =
   let collect =
     object
-      inherit [string list] Ast_traverse.fold as super
+      inherit [string list] P.Ast_traverse.fold as super
 
       method! pattern p acc =
         match p.ppat_desc with
@@ -824,12 +824,12 @@ let jsx ~loc path args =
   {
     (B.pexp_apply ~loc
        (B.pexp_ident ~loc { txt = Ldot (path, "createElement"); loc })
-       (args @ [ (Nolabel, [%expr ()]) ]))
+       (args @ [ (P.Nolabel, [%expr ()]) ]))
     with
     pexp_attributes = [ attribute ~loc "JSX" ];
   }
 
-let quiet ~loc warnings (e : expression) =
+let quiet ~loc warnings (e : P.expression) =
   {
     e with
     pexp_attributes =
@@ -839,7 +839,7 @@ let quiet ~loc warnings (e : expression) =
   }
 
 let switch_cases path args =
-  let of_match (e : expression) =
+  let of_match (e : P.expression) =
     match e.pexp_desc with
     | Pexp_match (scrutinee, cases) -> Some (scrutinee, cases)
     | _ -> None
@@ -852,7 +852,7 @@ let switch_cases path args =
         | None -> None
         | Some (scrutinee, cases) ->
             let match_path = with_last path "Match" in
-            let case (c : case) =
+            let case (c : P.case) =
               let loc = c.pc_lhs.ppat_loc in
               let test yes no =
                 quiet ~loc "-11"
@@ -895,7 +895,7 @@ let switch_cases path args =
               quiet ~loc "-26-27"
                 (B.pexp_match ~loc scrutinee
                    (List.map
-                      (fun (c : case) ->
+                      (fun (c : P.case) ->
                         B.case ~lhs:c.pc_lhs ~guard:c.pc_guard ~rhs:[%expr ()])
                       cases))
             in
@@ -907,7 +907,7 @@ let switch_cases path args =
             Some (exhaustive, props @ [ (Labelled "children", children) ]))
     | _ -> None
 
-let lower map (e : expression) args =
+let lower map (e : P.expression) args =
   let loc = e.pexp_loc in
   match e.pexp_desc with
   | Pexp_apply ({ pexp_desc = Pexp_ident { txt = Lident name; _ }; _ }, _) ->
@@ -928,35 +928,35 @@ let lower map (e : expression) args =
 (* let%component: a component's props are its labelled parameters, each with
    its type. *)
 
-type presence = Required | Optional | Default of expression
+type presence = Required | Optional | Default of P.expression
 
 type prop = {
   label : string;
   var : string;
       (** What the body names it: the label, or [given] of [?ref:(given : t)].
       *)
-  typ : core_type;  (** Without the [option] of an optional prop. *)
+  typ : P.core_type;  (** Without the [option] of an optional prop. *)
   presence : presence;
   arity : int;  (** How many arguments a function prop takes; 0 for a value. *)
 }
 
-let rec arity (t : core_type) =
+let rec arity (t : P.core_type) =
   match t.ptyp_desc with
   | Ptyp_arrow (Nolabel, _, rest) -> Result.map succ (arity rest)
   | Ptyp_arrow (_, _, _) ->
       Error (t.ptyp_loc, "a function prop's arguments are not labelled")
   | _ -> Ok 0
 
-let rec type_vars (t : core_type) =
+let rec type_vars (t : P.core_type) =
   match t.ptyp_desc with
   | Ptyp_var v -> [ v ]
   | Ptyp_arrow (_, a, b) -> type_vars a @ type_vars b
   | Ptyp_constr (_, ts) | Ptyp_tuple ts -> List.concat_map type_vars ts
   | _ -> []
 
-let prop_of (p : function_param) =
+let prop_of (p : P.function_param) =
   let loc = p.pparam_loc in
-  let prop label (var : string loc) typ presence =
+  let prop label (var : string P.loc) typ presence =
     if String.equal label spread then
       Error
         ( var.loc,
@@ -1010,7 +1010,7 @@ let prop_of (p : function_param) =
 
 (* [loc] is the component's, where a parameter missing is reported. *)
 let rec props_of ~loc = function
-  | [ { pparam_desc = Pparam_val (Nolabel, None, p); _ } ] when is_unit p ->
+  | [ { P.pparam_desc = Pparam_val (Nolabel, None, p); _ } ] when is_unit p ->
       Ok []
   | p :: rest ->
       let* p = prop_of p in
@@ -1059,7 +1059,7 @@ let props_module ~loc ~element ~drawn props =
         B.type_declaration ~loc ~name:{ txt = "t"; loc }
           ~params:
             (List.map
-               (fun v -> (B.ptyp_var ~loc v, (NoVariance, NoInjectivity)))
+               (fun v -> (B.ptyp_var ~loc v, (P.NoVariance, P.NoInjectivity)))
                vars)
           ~cstrs:[] ~kind:Ptype_abstract ~private_:Public ~manifest:None;
       ]
@@ -1104,7 +1104,7 @@ let props_module ~loc ~element ~drawn props =
           }
       in
       match p.presence with
-      | Required -> (Labelled p.label, typ)
+      | Required -> (P.Labelled p.label, typ)
       | Optional | Default _ -> (Optional p.label, typ)
     in
     let type_ =
@@ -1298,18 +1298,18 @@ let value_read ~loc p =
    [Solidtype.Solid]; a read through another alias calls the accessor, which
    reads the same. A name the body binds again is its own. *)
 let is_solid_get = function
-  | Ldot ((Lident ("S" | "Solid") | Ldot (Lident "Solidtype", "Solid")), "get")
+  | P.Ldot ((Lident ("S" | "Solid") | Ldot (Lident "Solidtype", "Solid")), "get")
     ->
       true
   | _ -> false
 
-let rec inline_reads reads (e : expression) =
+let rec inline_reads reads (e : P.expression) =
   let without names =
     List.filter (fun (v, _) -> not (List.mem v names)) reads
   in
   let map =
     object
-      inherit Ast_traverse.map as super
+      inherit P.Ast_traverse.map as super
 
       method! expression e =
         match e.pexp_desc with
@@ -1323,19 +1323,21 @@ let rec inline_reads reads (e : expression) =
               let (_ : _ Solidtype.Solid.accessor -> _) = [%e get] in
               [%e List.assoc v reads loc]]
         | Pexp_let (rec_flag, vbs, body) ->
-            let bound = List.concat_map (fun vb -> variables vb.pvb_pat) vbs in
+            let bound =
+              List.concat_map (fun vb -> variables vb.P.pvb_pat) vbs
+            in
             let inner = without bound in
             let vbs =
               List.map
                 (fun vb ->
                   {
                     vb with
-                    pvb_expr =
+                    P.pvb_expr =
                       inline_reads
                         (match rec_flag with
                         | Recursive -> inner
                         | Nonrecursive -> reads)
-                        vb.pvb_expr;
+                        vb.P.pvb_expr;
                   })
                 vbs
             in
@@ -1346,7 +1348,7 @@ let rec inline_reads reads (e : expression) =
         | Pexp_function (params, constraint_, body) ->
             let bound =
               List.concat_map
-                (fun (p : function_param) ->
+                (fun (p : P.function_param) ->
                   match p.pparam_desc with
                   | Pparam_val (_, _, pat) -> variables pat
                   | Pparam_newtype _ -> [])
@@ -1355,7 +1357,7 @@ let rec inline_reads reads (e : expression) =
             let inner = without bound in
             let body =
               match body with
-              | Pfunction_body b -> Pfunction_body (inline_reads inner b)
+              | Pfunction_body b -> P.Pfunction_body (inline_reads inner b)
               | Pfunction_cases (cs, l, a) ->
                   Pfunction_cases (List.map (case inner) cs, l, a)
             in
@@ -1378,7 +1380,7 @@ let rec inline_reads reads (e : expression) =
   in
   if List.is_empty reads then e else map#expression e
 
-and case reads (c : case) =
+and case reads (c : P.case) =
   let inner =
     List.filter (fun (v, _) -> not (List.mem v (variables c.pc_lhs))) reads
   in
@@ -1415,7 +1417,7 @@ let reader ~loc p =
       let arg x = if of_unit then [%expr ()] else B.evar ~loc x in
       let call f =
         {
-          (B.pexp_apply ~loc f (List.map (fun x -> (Nolabel, arg x)) xs)) with
+          (B.pexp_apply ~loc f (List.map (fun x -> (P.Nolabel, arg x)) xs)) with
           pexp_attributes = [ attribute ~loc "u" ];
         }
       in
@@ -1438,7 +1440,7 @@ let reader ~loc p =
               | None ->
                   [%e
                     B.pexp_apply ~loc default
-                      (List.map (fun x -> (Nolabel, arg x)) xs)]]
+                      (List.map (fun x -> (P.Nolabel, arg x)) xs)]]
       in
       List.fold_right
         (fun x body -> [%expr fun [%p B.pvar ~loc x] -> [%e body]])
@@ -1466,10 +1468,10 @@ let reader ~loc p =
 (* [[@@element button]]: the element a component draws and passes the rest of
    its props to, whose check its own then ends in: its [Solidtype.Html]
    module, which the compiler finds or reports unbound. *)
-let element_of (vb : value_binding) =
+let element_of (vb : P.value_binding) =
   match
     List.filter
-      (fun (a : attribute) -> String.equal a.attr_name.txt "element")
+      (fun (a : P.attribute) -> String.equal a.attr_name.txt "element")
       vb.pvb_attributes
   with
   | [] -> Ok None
@@ -1490,7 +1492,8 @@ let element_of (vb : value_binding) =
   ] ->
       Ok
         (Some
-           (Ldot (Ldot (Lident "Solidtype", "Html"), String.capitalize_ascii tag)))
+           (P.Ldot
+              (Ldot (Lident "Solidtype", "Html"), String.capitalize_ascii tag)))
   | a :: _ ->
       Error
         ( a.attr_loc,
@@ -1500,7 +1503,7 @@ let element_of (vb : value_binding) =
    part draws, so it draws what [as_] draws in its place. *)
 let draw_by_as =
   object
-    inherit Ast_traverse.map as super
+    inherit P.Ast_traverse.map as super
 
     method! expression e =
       let e = super#expression e in
@@ -1510,9 +1513,9 @@ let draw_by_as =
         when is_jsx e
              && List.exists
                   (function
-                    | ( Labelled "props",
+                    | ( P.Labelled "props",
                         {
-                          pexp_desc =
+                          P.pexp_desc =
                             Pexp_apply
                               ( {
                                   pexp_desc =
@@ -1533,8 +1536,8 @@ let draw_by_as =
           let args =
             List.map
               (function
-                | Labelled "props", _ ->
-                    (Labelled "props", [%expr Props.drawn_others props])
+                | P.Labelled "props", _ ->
+                    (P.Labelled "props", [%expr Props.drawn_others props])
                 | a -> a)
               args
           in
@@ -1547,7 +1550,7 @@ let draw_by_as =
       | _ -> e
   end
 
-let component_of (vb : value_binding) =
+let component_of (vb : P.value_binding) =
   let loc = vb.pvb_loc in
   match (vb.pvb_pat.ppat_desc, vb.pvb_expr.pexp_desc) with
   | ( Ppat_var { txt = "make"; _ },
@@ -1629,7 +1632,7 @@ let component_of (vb : value_binding) =
    names it, and the external is named beside it, so another [accessor] does
    not compile. *)
 let is_solid_accessor = function
-  | Ldot
+  | P.Ldot
       ((Lident ("S" | "Solid") | Ldot (Lident "Solidtype", "Solid")), "accessor")
     ->
       true
@@ -1637,7 +1640,7 @@ let is_solid_accessor = function
 
 let mapper =
   object (self)
-    inherit Ast_traverse.map as super
+    inherit P.Ast_traverse.map as super
 
     method! expression e =
       match e.pexp_desc with
@@ -1663,14 +1666,14 @@ let mapper =
             _ ) -> (
           let drawn =
             List.exists
-              (fun (a : attribute) -> String.equal a.attr_name.txt "element")
+              (fun (a : P.attribute) -> String.equal a.attr_name.txt "element")
               vb.pvb_attributes
             &&
             match vb.pvb_expr.pexp_desc with
             | Pexp_function (params, _, _) ->
                 not
                   (List.exists
-                     (fun (p : function_param) ->
+                     (fun (p : P.function_param) ->
                        match p.pparam_desc with
                        | Pparam_val ((Labelled "as_" | Optional "as_"), _, _) ->
                            true
@@ -1684,7 +1687,8 @@ let mapper =
           match component_of { vb with pvb_expr = self#expression body } with
           | Ok item -> item
           | Error (loc, m) ->
-              B.pstr_extension ~loc (Location.error_extensionf ~loc "%s" m) [])
+              B.pstr_extension ~loc (P.Location.error_extensionf ~loc "%s" m) []
+          )
       | _ -> super#structure_item item
   end
 
@@ -1694,7 +1698,7 @@ let internal = ref false
 
 let unqualify =
   object
-    inherit Ast_traverse.map as super
+    inherit P.Ast_traverse.map as super
 
     method! longident =
       function
@@ -1703,8 +1707,8 @@ let unqualify =
   end
 
 let () =
-  Driver.add_arg "-internal" (Arg.Set internal)
+  P.Driver.add_arg "-internal" (Arg.Set internal)
     ~doc:" lower JSX inside solidtype itself";
-  Driver.register_transformation "solidtype" ~impl:(fun s ->
+  P.Driver.register_transformation "solidtype" ~impl:(fun s ->
       let s = mapper#structure s in
       if !internal then unqualify#structure s else s)
