@@ -625,10 +625,6 @@ let element map ~loc name args =
           |]
           [| Solidtype.Jsx.node [%e drawn ~given args] |]]
 
-(* Code written around a tag is at no place in the source, so its location
-   is ghost, as ppxlib asks: a tool reading the typed tree -- litany, whose
-   [suspicious-literal-condition] the [if false] below would wake -- takes
-   none of it for the user's. *)
 let ghost loc = { loc with loc_ghost = true }
 
 (* A component's element also applies the component's [Props.check] to its

@@ -1,4 +1,3 @@
-; The rules of Hypha's a lint holds: litany's default set, and opens.
 (lint
  (select default)
  (extend open-of-ordinary-module))
