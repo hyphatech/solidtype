@@ -1,0 +1,81 @@
+(* rhp's chart through the binding, as a caller meets it: each row plotted
+   by its slat, the chart scaled to its range with a tick at each step, and a
+   row whose field changes redrawn in place, the others untouched. *)
+
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Scale = Solidtype_rhp.Scale
+module Slat = Solidtype_rhp.Slat
+module Ticks = Solidtype_rhp.Ticks
+module S = Solidtype.Solid
+module E = Jest.Expect
+module H = Harness
+open Harness.Syntax
+
+type fruit = { name : string; sold : float }
+
+let fruit =
+  Slat.make ~thickness:(Slat.number 32.) (fun d ->
+      let f = Row.data d in
+      <div>
+        <Label edge="start">(Jsx.string f.name)</Label> <Bar to_=f.sold />
+      </div>)
+
+let tick =
+  Slat.make (fun (d : Scale.tick Row.t) ->
+      let t = Row.data d in
+      <div><Label at=t.at>(Jsx.string (Js.Float.toString t.at))</Label></div>)
+
+let fruits =
+  [| { name = "Apples"; sold = 5. }; { name = "Bananas"; sold = 15. } |]
+
+let chart rows =
+  H.render (fun () ->
+      <Chart scale=(0., 20.) label="Sold">
+        <Scale ticks=(Ticks.custom (Solidtype_rhp.every 10. ())) render=tick />
+        <Plot rows=(S.get rows) key=(fun d -> (Row.data d).name) render=fruit />
+      </Chart>)
+
+let bars () = H.query_all "[role=list] .rhp-bar"
+
+let () =
+  Jest.describe "rhp's chart" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.test "plots each row by its slat, a bar to its value" (fun () ->
+          let rows, _ = S.create_signal fruits in
+          chart rows;
+          E.(
+            expect
+              ( Array.map H.text (H.query_all "[role=listitem] .rhp-label"),
+                Array.map (H.custom "--rhp-to") (bars ()) )
+            |> toEqual ([| "Apples"; "Bananas" |], [| "5"; "15" |])));
+      Jest.test "scales the chart to its range, a tick at each step" (fun () ->
+          let rows, _ = S.create_signal fruits in
+          chart rows;
+          let ticks = H.query_all ".rhp-scale .rhp-label" in
+          let range = H.query ".rhp-chart" in
+          E.(
+            expect
+              ( Array.map H.text ticks,
+                Array.map (H.custom "--rhp-at") ticks,
+                (H.custom "--rhp-min" range, H.custom "--rhp-max" range) )
+            |> toEqual
+                 ([| "0"; "10"; "20" |], [| "0"; "10"; "20" |], ("0", "20"))));
+      Jest.testPromise
+        "redraws a row whose field changes, in place, the others not" (fun () ->
+          let rows, set_rows = S.create_signal fruits in
+          chart rows;
+          let before = bars () in
+          S.set set_rows [| fruits.(0); { (fruits.(1)) with sold = 18. } |];
+          let* () = H.frame () in
+          let after = bars () in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( Array.for_all2 ( == ) before after,
+                  Array.map (H.custom "--rhp-to") after )
+              |> toEqual (true, [| "5"; "18" |]))))
