@@ -4,6 +4,9 @@
     formats it for the reader's locale, and its {!Fill} is as wide in its
     {!Track} as the value is far along the range.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/meter.md].
+
     {[
       <Meter value=60.>
         <Label>"Storage"</Label>

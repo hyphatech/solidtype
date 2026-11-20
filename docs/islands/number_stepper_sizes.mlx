@@ -1,0 +1,19 @@
+module Number_stepper = Solidtype_heroui.Number_stepper
+
+let sized size name =
+  <div class_="flex flex-col items-center gap-2">
+    <Number_stepper
+      aria_label=("Quantity " ^ name) size default_value=1. min_value=0.>
+      <Number_stepper.Group>
+        <Number_stepper.Decrement_button />
+        <Number_stepper.Value />
+        <Number_stepper.Increment_button />
+      </Number_stepper.Group>
+    </Number_stepper>
+    <span class_="text-xs text-muted">(Solidtype.Jsx.string name)</span>
+  </div>
+
+let make () =
+  <div class_="flex items-end gap-6">
+    (sized `sm "sm") (sized `md "md") (sized `lg "lg")
+  </div>

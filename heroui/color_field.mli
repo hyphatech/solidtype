@@ -8,6 +8,9 @@
     {!Label} names its input, its {!Description} describes it, and its
     {!Field_error} shows while it is invalid.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/color-field.md].
+
     {[
       <Color_field name="color" default_value=(Colors.parse_color "#0485F7")>
         <Label>"Color"</Label>

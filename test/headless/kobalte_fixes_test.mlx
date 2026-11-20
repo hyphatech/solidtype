@@ -366,3 +366,92 @@ let () =
                    ( (steps, steps),
                      ( [ "#0485F7"; "#0485F7"; "#0485F7"; "ff0000"; "ff0000" ],
                        [] ) ))))
+
+module Number_field = Solidtype_headless.Number_field
+module Kobalte_number_field = Solidtype_kobalte.NumberField
+
+(* What a number field, the fixed one or Kobalte's own, shows after two steps
+   up by the keys and a focus that leaves, and which of its caller's handlers
+   were called. *)
+let handled ~fixed =
+  let told = ref [] in
+  let tell what _ = if not (List.mem what !told) then told := what :: !told in
+  H.render (fun () ->
+      <div>
+        (if fixed then
+           <Number_field.Root
+             aria_label="Points"
+             default_value=(Solidtype_kobalte.Types.Either.right 3.)>
+             <Number_field.Input
+               on_key_down=(tell "key")
+               on_focus=(tell "focus")
+               on_blur=(tell "blur")
+             />
+           </Number_field.Root>
+         else
+           <Kobalte_number_field.Root
+             aria_label="Points"
+             default_value=(Solidtype_kobalte.Types.Either.right 3.)>
+             <Kobalte_number_field.Input
+               on_key_down=(tell "key")
+               on_focus=(tell "focus")
+               on_blur=(tell "blur")
+             />
+           </Kobalte_number_field.Root>)
+        <button>"Next"</button>
+      </div>);
+  let input = query "[role=spinbutton]" in
+  let user = H.setup () in
+  H.focus input;
+  let* () = H.keyboard user "{ArrowUp}{ArrowUp}" in
+  let* () = H.tab user in
+  Js.Promise.resolve
+    (H.attribute input "aria-valuenow", List.sort String.compare !told)
+
+(* The hue a channel field, the fixed one or Kobalte's own, tells after a step
+   up by the keys, and whether its caller's key handler was called. *)
+let channel_handled ~fixed =
+  let told = ref false in
+  let value () = Colors.parse_color "hsl(300, 100%, 25%)" in
+  H.render (fun () ->
+      if fixed then
+        <Color_channel_field.Root
+          aria_label="Hue" channel=`hue default_value=(value ())>
+          <Color_channel_field.Input on_key_down=(fun _ -> told := true) />
+        </Color_channel_field.Root>
+      else
+        <Kobalte_channel_field.Root
+          aria_label="Hue" channel=`hue default_value=(value ())>
+          <Kobalte_channel_field.Input on_key_down=(fun _ -> told := true) />
+        </Kobalte_channel_field.Root>);
+  let input = query "[role=spinbutton]" in
+  let user = H.setup () in
+  H.focus input;
+  let* () = H.keyboard user "{ArrowUp}" in
+  Js.Promise.resolve (H.attribute input "aria-valuenow", !told)
+
+let () =
+  Jest.describe "Number_field" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise
+        "steps by the keys, its caller's key, focus and blur handlers called \
+         beside its own" (fun () ->
+          let* fixed = handled ~fixed:true in
+          H.cleanup ();
+          let* kobalte = handled ~fixed:false in
+          Js.Promise.resolve
+            E.(
+              expect (fixed, kobalte)
+              |> toEqual
+                   ( (Some "5", [ "blur"; "focus"; "key" ]),
+                     (Some "3", [ "blur"; "focus"; "key" ]) )));
+      Jest.testPromise
+        "steps a colour's channel by the keys, its caller's key handler called"
+        (fun () ->
+          let* fixed = channel_handled ~fixed:true in
+          H.cleanup ();
+          let* kobalte = channel_handled ~fixed:false in
+          Js.Promise.resolve
+            E.(
+              expect (fixed, kobalte)
+              |> toEqual ((Some "301", true), (Some "300", true)))))

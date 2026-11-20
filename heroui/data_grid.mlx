@@ -1,0 +1,399 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Show = Solidtype.Show
+module Model = Solidtype_headless.Data_grid
+module Headless = Solidtype_headless.Table
+module I18n = Solidtype_kobalte.I18n
+module Collator = Solidtype_kobalte.Types.Collator
+
+type 'row sort = 'row Model.sort =
+  | By_text of ('row -> string)
+  | By of ('row -> 'row -> int)
+
+type header = Model.header =
+  | Text of string
+  | Element of (unit -> Jsx.element)
+  | Sorted of ([ `ascending | `descending ] option -> Jsx.element)
+
+type 'row column = 'row Model.column
+
+let column = Model.column
+let reordered = Model.reordered
+
+type 'row reorder = {
+  keys : string array;
+  target : string;
+  position : [ `before | `after ];
+  rows : 'row array;
+}
+
+let after own = function Some c -> own ^ " " ^ c | None -> own
+
+(* Whether a grid was given [on_reorder] or [on_load_more], read of its props
+   as given, which its own parameter, a call that does nothing where none was,
+   cannot tell: only a grid given one drags its rows, or loads more. *)
+type handler
+
+external reorder_handler : 'props -> handler Js.Undefined.t = "onReorder"
+[@@mel.get]
+
+external load_more_handler : 'props -> handler Js.Undefined.t = "onLoadMore"
+[@@mel.get]
+
+(* A column's width and bounds where the table does not lay its columns out
+   itself, as a resizable one does: written on its header, which a table's
+   automatic layout keeps to. *)
+let laid_out (c : _ Model.column) =
+  let px n = Js.Float.toString n ^ "px" in
+  let width =
+    match match c.width with Some w -> Some w | None -> c.default_width with
+    | Some (Pixels n) -> [ "width: " ^ px n ^ ";"; "min-width: " ^ px n ^ ";" ]
+    | Some (Percent p) -> [ "width: " ^ Js.Float.toString p ^ "%;" ]
+    | Some (Fraction _) | None -> []
+  in
+  let bound name = function
+    | Some n -> [ name ^ ": " ^ px n ^ ";" ]
+    | None -> []
+  in
+  match
+    width @ bound "min-width" c.min_width @ bound "max-width" c.max_width
+  with
+  | [] -> None
+  | given -> Some (String.concat " " given)
+
+let align_name = function
+  | `start -> "start"
+  | `center -> "center"
+  | `end_ -> "end"
+
+(* What a reader reads where a column shows nothing, as React Aria's
+   VisuallyHidden is drawn. *)
+let visually_hidden =
+  "border: 0px; clip: rect(0px, 0px, 0px, 0px); clip-path: inset(50%); height: \
+   1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; \
+   width: 1px; white-space: nowrap;"
+
+let unseen text = <span style=visually_hidden>(Jsx.string text)</span>
+
+(* The chevron the grid's sorted column shows, turned while it is sorted
+   descending. *)
+let sort_icon direction =
+  <svg
+    class_="data-grid__sort-icon"
+    data_slot="data-grid-sort-icon"
+    data_direction=(Jsx.data
+                      (match S.get direction with
+                      | `ascending -> "ascending"
+                      | `descending -> "descending"))
+    aria_hidden=true
+    width="16"
+    height="16"
+    view_box="0 0 16 16"
+    fill="none">
+    <path
+      fill="currentColor"
+      fill_rule="evenodd"
+      clip_rule="evenodd"
+      d="M13.03 10.53a.75.75 0 0 1-1.06 0L8 6.56l-3.97 3.97a.75.75 0 1 \
+         1-1.06-1.06l4.5-4.5a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1 0 1.06"
+    />
+  </svg>
+
+(* The handle that drags a row, as the grid draws it: its row's, its look
+   the grid's own. *)
+let drag_handle () =
+  let i = Interaction.create () in
+  let r = Headless.Row.Context.use () in
+  <Headless.Drag_handle
+    class_="data-grid__drag-handle"
+    ref=(fun e -> Interaction.watch i e)
+    data_hovered=(Jsx.flag (Interaction.hovered i))
+    data_pressed=(Jsx.flag (Interaction.pressed i))
+    data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+    data_dragging=(Jsx.flag (S.get r.drag.is_dragging))>
+    <Solidtype_gravity_icons.Grip aria_hidden=true />
+  </Headless.Drag_handle>
+
+let selection_checkbox ~aria_label ~variant =
+  <Checkbox aria_label slot=`selection variant>
+    <Checkbox.Content>
+      <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+    </Checkbox.Content>
+  </Checkbox>
+
+let%component make ~(rows : 'row array) ~(row_id : 'row -> string)
+    ~(columns : 'row column array) ?(aria_label : string option)
+    ?(aria_labelledby : string option)
+    ?(variant : [ `primary | `secondary ] option) ?(class_ : string option)
+    ?(content_class : string option) ?(scroll_container_class : string option)
+    ?(sticky_header : bool = false)
+    ?(vertical_align : [ `top | `middle | `bottom ] = `middle)
+    ?(selection_mode : [ `none | `single | `multiple ] = `none)
+    ?(selection_behavior : [ `toggle | `replace ] option)
+    ?(selected_keys : string array option)
+    ?(default_selected_keys : string array option)
+    ?(on_selection_change : (string array -> unit) option)
+    ?(show_selection_checkboxes : bool = false)
+    ?(disabled_keys : string array option)
+    ?(disallow_empty_selection : bool option)
+    ?(sort_descriptor : Table.sort_descriptor option)
+    ?(default_sort_descriptor : Table.sort_descriptor option)
+    ?(on_sort_change : (Table.sort_descriptor -> unit) option)
+    ?(allows_column_resize : bool = false)
+    ?(on_column_resize : ((string * Table.column_size) array -> unit) option)
+    ?(on_column_resize_end :
+       ((string * Table.column_size) array -> unit) option)
+    ?(on_reorder : ('row reorder -> unit) option)
+    ?(reorder_messages : Table.reorder_messages option)
+    ?(on_row_action : (string -> unit) option)
+    ?(empty_state : Jsx.element option) ?(footer : Jsx.element option)
+    ?(footer_class : string option) ?(on_load_more : (unit -> unit) option)
+    ?(is_loading_more : bool = false) ?(load_more_content : Jsx.element option)
+    ?(virtualized : bool = false) ?(row_height : float = 42.)
+    ?(heading_height : float = 36.) () =
+  (* A sort the grid is not given is its own, its rows put in order here; one
+     it is given is the application's, its rows drawn as given. *)
+  let kept, set_kept =
+    S.create_signal (S.untrack (fun () -> S.get default_sort_descriptor))
+  in
+  let sort =
+    S.accessor (fun () ->
+        match S.get sort_descriptor with
+        | Some given -> Some given
+        | None -> S.get kept)
+  in
+  (* Its columns as given, read once each time they change: the expression
+     given is read again at every read, and would make them again. *)
+  let columns = S.create_memo (fun () -> S.get columns) in
+  let collator = I18n.create_collator () in
+  let compare_text a b =
+    let c = Collator.compare (S.get collator) a b in
+    if c < 0. then -1 else if c > 0. then 1 else 0
+  in
+  let shown =
+    S.create_memo (fun () ->
+        match S.get sort_descriptor with
+        | Some _ -> S.get rows
+        | None ->
+            Model.sorted ~compare_text (S.get columns) (S.get kept) (S.get rows))
+  in
+  (* Its rows drawn by their keys, so a row given again, a record made anew
+     as a cell's control changes it, keeps its cells and the focus in them:
+     each cell reads its row by its key. *)
+  let keys = S.create_memo (fun () -> Array.map row_id (S.get shown)) in
+  let by_key =
+    S.create_memo (fun () ->
+        Js.Dict.fromArray (Array.map (fun r -> (row_id r, r)) (S.get shown)))
+  in
+  let reorders =
+    Option.is_some (Js.Undefined.toOption (reorder_handler props))
+  in
+  let loads_more =
+    Option.is_some (Js.Undefined.toOption (load_more_handler props))
+  in
+  let selects () =
+    S.get show_selection_checkboxes
+    &&
+    match S.get selection_mode with
+    | `none -> false
+    | `single | `multiple -> true
+  in
+  (* The grid's own columns stay with those pinned to the start, so they
+     never scroll beneath them. *)
+  let lead_pinned () =
+    if
+      Array.exists
+        (fun (c : 'row column) ->
+          match c.pinned with Some `start -> true | Some `end_ | None -> false)
+        (S.get columns)
+    then Some `start
+    else None
+  in
+  let header_of (c : 'row column) =
+    match c.header with
+    | Element draw -> fun (_ : Table.Column.state) -> draw ()
+    | Sorted draw ->
+        fun (state : Table.Column.state) -> draw (S.get state.sort_direction)
+    | Text text -> (
+        match c.sort with
+        | None -> fun _ -> Jsx.string text
+        | Some _ ->
+            fun (state : Table.Column.state) ->
+              <span data_slot="data-grid-sort-header">
+                (Jsx.string text)
+                <Show.Some some=(S.get state.sort_direction)>
+                  (fun d -> sort_icon d)
+                </Show.Some>
+              </span>)
+  in
+  let content () =
+    <Table.Content
+      ?aria_label=(S.get aria_label)
+      ?aria_labelledby=(S.get aria_labelledby)
+      class_=(after "data-grid__content" (S.get content_class))
+      selection_mode=(S.get selection_mode)
+      ?selection_behavior=(S.get selection_behavior)
+      ?selected_keys=(S.get selected_keys)
+      ?default_selected_keys=(S.get default_selected_keys)
+      on_selection_change=(fun keys ->
+                            ignore (on_selection_change keys : unit option))
+      ?disabled_keys=(S.get disabled_keys)
+      ?disallow_empty_selection=(S.get disallow_empty_selection)
+      ?sort_descriptor=(S.get sort)
+      on_sort_change=(fun d ->
+                       (match S.get sort_descriptor with
+                       | Some _ -> ()
+                       | None -> S.set set_kept (Some d));
+                       ignore (on_sort_change d : unit option))
+      sticky_header=(S.get sticky_header)
+      ?reorder_messages=(S.get reorder_messages)
+      props=((* Absent unless given, as the table's own: a row with an action
+                is pressed for it rather than selected. *)
+             S.pick props [| "onRowAction" |])
+      ?on_reorder=(if reorders then
+                     Some
+                       (fun (r : Table.reorder) ->
+                         ignore
+                           (on_reorder
+                              {
+                                keys = r.keys;
+                                target = r.target;
+                                position = r.position;
+                                rows = Model.reordered ~row_id (S.get rows) r;
+                              }
+                             : unit option))
+                   else None)>
+      <Table.Header>
+        <Show when_=(selects ())>
+          <Table.Column
+            class_="data-grid__selection-column" ?pinned=(lead_pinned ())>
+            (match S.get selection_mode with
+            | `multiple ->
+                selection_checkbox ~aria_label:"Select all" ~variant:`primary
+            | `single | `none -> unseen "Select")
+          </Table.Column>
+        </Show>
+        <Show when_=reorders>
+          <Table.Column
+            class_="data-grid__drag-handle-column" ?pinned=(lead_pinned ())>
+            (unseen "Reorder")
+          </Table.Column>
+        </Show>
+        <For each=(S.get columns)>
+          (fun (c : 'row column) _ ->
+            <Table.Column
+              id=c.id
+              is_row_header=c.is_row_header
+              allows_sorting=(Option.is_some c.sort)
+              ?width=c.width
+              ?default_width=c.default_width
+              ?min_width=c.min_width
+              ?max_width=c.max_width
+              ?pinned=c.pinned
+              ?style=(if S.get allows_column_resize then None else laid_out c)
+              ?class_=c.header_class
+              data_align=(Jsx.data (align_name c.align))>
+              (fun state ->
+                Jsx.fragment
+                  [|
+                    header_of c state;
+                    (if S.get allows_column_resize && c.allows_resizing then
+                       <Table.Column_resizer />
+                     else Jsx.fragment [||]);
+                  |])
+            </Table.Column>)
+        </For>
+      </Table.Header>
+      <Table.Body
+        ?render_empty_state=(Option.map
+                               (fun e () ->
+                                 <div class_="data-grid__empty-state">e</div>)
+                               (S.get empty_state))>
+        <For each=(S.get keys)>
+          (fun key _ ->
+            match S.untrack (fun () -> Js.Dict.get (S.get by_key) key) with
+            | None -> Jsx.fragment [||]
+            | Some first ->
+                (* A row whose key has left keeps its last record, read by its
+               cells until they are let go. *)
+                let row =
+                  S.create_memo_from ~init:first (fun last ->
+                      match Js.Dict.get (S.get by_key) key with
+                      | Some r -> r
+                      | None -> last)
+                in
+                <Table.Row id=key>
+                  <Show when_=(selects ())>
+                    <Table.Cell class_="data-grid__selection-cell">
+                      (selection_checkbox ~aria_label:"Select"
+                         ~variant:`secondary)
+                    </Table.Cell>
+                  </Show>
+                  <Show when_=reorders>
+                    <Table.Cell class_="data-grid__drag-handle-cell">
+                      (drag_handle ())
+                    </Table.Cell>
+                  </Show>
+                  <For each=(S.get columns)>
+                    (fun (c : 'row column) _ ->
+                      <Table.Cell
+                        ?class_=c.cell_class
+                        data_align=(Jsx.data (align_name c.align))>
+                        (c.cell row)
+                      </Table.Cell>)
+                  </For>
+                </Table.Row>)
+        </For>
+        <Show when_=loads_more>
+          <Table.Load_more
+            is_loading=(S.get is_loading_more)
+            on_load_more=(fun () -> ignore (on_load_more () : unit option))>
+            <Table.Load_more_content>
+              (Option.value (S.get load_more_content)
+                 ~default:(Jsx.fragment [||]))
+            </Table.Load_more_content>
+          </Table.Load_more>
+        </Show>
+      </Table.Body>
+    </Table.Content>
+  in
+  let scrolled () =
+    if S.untrack (fun () -> S.get allows_column_resize) then
+      <Table.Resizable_container
+        ?class_=(S.get scroll_container_class)
+        on_resize=(fun sizes -> ignore (on_column_resize sizes : unit option))
+        on_resize_end=(fun sizes ->
+                        ignore (on_column_resize_end sizes : unit option))>
+        (content ())
+      </Table.Resizable_container>
+    else
+      <Table.Scroll_container ?class_=(S.get scroll_container_class)>
+        (content ())
+      </Table.Scroll_container>
+  in
+  <Table
+    ?variant=(S.get variant)
+    class_=(after "data-grid" (S.get class_))
+    data_slot="data-grid"
+    data_vertical_align=(Jsx.data
+                           (match S.get vertical_align with
+                           | `top -> "top"
+                           | `middle -> "middle"
+                           | `bottom -> "bottom"))
+    props=(Props.others props)>
+    (if S.untrack (fun () -> S.get virtualized) then
+       <Virtualizer
+         layout=(Virtualizer.table_layout ~row_size:(S.get row_height)
+                   ~heading_size:(S.get heading_height) ())>
+         (scrolled ())
+       </Virtualizer>
+     else scrolled ())
+    <Show.Some some=(S.get footer)>
+      (fun f ->
+        <Table.Footer class_=(after "data-grid__footer" (S.get footer_class))>
+          (S.get f)
+        </Table.Footer>)
+    </Show.Some>
+  </Table>
+[@@element div]

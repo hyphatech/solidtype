@@ -1,0 +1,52 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Data_grid = Solidtype_heroui.Data_grid
+module Table = Solidtype_heroui.Table
+module Gravity = Solidtype_gravity_icons
+
+type task = { id : string; title : string; status : string }
+
+let tasks =
+  [|
+    { id = "1"; title = "Design the landing page"; status = "In progress" };
+    { id = "2"; title = "Write the launch post"; status = "To do" };
+    { id = "3"; title = "Fix the sign-up form"; status = "In review" };
+    { id = "4"; title = "Plan the next sprint"; status = "To do" };
+  |]
+
+let make () =
+  let rows, set_rows = S.create_signal tasks in
+  <Table>
+    <Table.Scroll_container>
+      <Table.Content
+        aria_label="Tasks to reorder"
+        class_="min-w-[480px]"
+        on_reorder=(fun r ->
+                     S.set set_rows
+                       (Data_grid.reordered
+                          ~row_id:(fun t -> t.id)
+                          (S.get rows) r))>
+        <Table.Header>
+          <Table.Column class_="w-12 pe-0">""</Table.Column>
+          <Table.Column is_row_header=true>"Task"</Table.Column>
+          <Table.Column>"Status"</Table.Column>
+        </Table.Header>
+        <Table.Body>
+          <For each=(S.get rows)>
+            (fun t _ ->
+              <Table.Row id=t.id>
+                <Table.Cell class_="pe-0">
+                  <Button slot=`drag is_icon_only=true size=`sm variant=`ghost>
+                    <Gravity.Grip class_="size-4 text-muted" />
+                  </Button>
+                </Table.Cell>
+                <Table.Cell>(Jsx.string t.title)</Table.Cell>
+                <Table.Cell>(Jsx.string t.status)</Table.Cell>
+              </Table.Row>)
+          </For>
+        </Table.Body>
+      </Table.Content>
+    </Table.Scroll_container>
+  </Table>

@@ -1,6 +1,9 @@
 (** rhp's functions of a row and of its values, which [Solidtype_rhp] includes,
     as rhp exports them beside its other helpers.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/helpers.md].
+
     Ported by hand: [series] and [cycle] give a function of rhp's row, which no
     rule maps, and [stackUp], [shares] and [running] are each two overloads
     whose results differ. A missing value, [None], is one rhp leaves out. *)

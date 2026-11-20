@@ -4,6 +4,9 @@
     [is_disabled] and [full_width], each where the button sets none itself. A
     {!Separator} inside a button, but the first, draws a line before it.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/button-group.md].
+
     {[
       <Button_group variant=`tertiary>
         <Button>"Copy"</Button>

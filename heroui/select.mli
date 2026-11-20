@@ -2,6 +2,9 @@
     and opens a {!List_box} of options to choose one or many of, with HeroUI's
     classes from {!Styles.Select}.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/select.md].
+
     {[
       <Select placeholder="Select one">
         <Label>"State"</Label>

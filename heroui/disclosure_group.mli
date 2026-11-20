@@ -2,6 +2,9 @@
     expanded as the group keeps them, with HeroUI's classes from
     {!Styles.DisclosureGroup}. A [<div>].
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/disclosure-group.md].
+
     {[
       <Disclosure_group default_expanded_keys=[| "shipping" |]>
         <Disclosure id="shipping">...</Disclosure>

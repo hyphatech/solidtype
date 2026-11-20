@@ -1,0 +1,42 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Data_grid = Solidtype_heroui.Data_grid
+module Empty_state = Solidtype_heroui.Empty_state
+module Gravity = Solidtype_gravity_icons
+
+type project = { id : string; name : string; owner : string; files : int }
+
+let columns =
+  [|
+    Data_grid.column ~id:"project" ~header:(Text "Project") ~is_row_header:true
+      (fun p -> Jsx.string (S.get p).name);
+    Data_grid.column ~id:"owner" ~header:(Text "Owner") (fun p ->
+        Jsx.string (S.get p).owner);
+    Data_grid.column ~id:"files" ~header:(Text "Files") ~align:`end_ (fun p ->
+        Jsx.int (S.get p).files);
+  |]
+
+let make () =
+  <Data_grid
+    aria_label="Projects"
+    rows=[||]
+    row_id=(fun p -> p.id)
+    columns
+    empty_state=(<Empty_state class_="flex flex-col items-center gap-2 py-12">
+                   <span
+                     class_="flex size-10 items-center justify-center \
+                             rounded-full bg-default">
+                     <Gravity.Folder_open class_="size-5 text-muted" />
+                   </span>
+                   <span class_="font-medium text-foreground">
+                     "No projects yet"
+                   </span>
+                   <span class_="text-sm text-muted">
+                     "Get started by creating your first project."
+                   </span>
+                   <Button size=`sm variant=`secondary>
+                     <Gravity.Plus class_="size-4" /> "Create project"
+                   </Button>
+                 </Empty_state>)
+  />

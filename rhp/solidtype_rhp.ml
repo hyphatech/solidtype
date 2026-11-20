@@ -21,6 +21,8 @@ module Slat = Slat
 module Ticks = Ticks
 include Helpers
 
+(** Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/area.md]. *)
 module Area = struct
   module Props = struct
     external check :
@@ -55,6 +57,8 @@ module Axis = struct
   [@@mel.module "@bezda/rhp"]
 end
 
+(** Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/bar.md]. *)
 module Bar = struct
   module Props = struct
     external check :
@@ -73,6 +77,8 @@ module Bar = struct
   [@@mel.module "@bezda/rhp"]
 end
 
+(** Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/cell.md]. *)
 module Cell = struct
   module Props = struct
     external check :
@@ -89,6 +95,8 @@ module Cell = struct
   [@@mel.module "@bezda/rhp"]
 end
 
+(** Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/chart.md]. *)
 module Chart = struct
   module Props = struct
     external check :
@@ -122,6 +130,8 @@ module Chart = struct
   [@@mel.module "@bezda/rhp"]
 end
 
+(** Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/dot.md]. *)
 module Dot = struct
   module Props = struct
     external check :
@@ -141,6 +151,8 @@ module Dot = struct
   [@@mel.module "@bezda/rhp"]
 end
 
+(** Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/label.md]. *)
 module Label = struct
   module Props = struct
     external check :
@@ -159,7 +171,10 @@ module Label = struct
   [@@mel.module "@bezda/rhp"]
 end
 
-(** A line through points: a sparkline in a slat, or on a Chart's cross scale a line chart. *)
+(** A line through points: a sparkline in a slat, or on a Chart's cross scale a line chart.
+
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/line.md]. *)
 module Line = struct
   module Props = struct
     external check :
@@ -179,7 +194,10 @@ module Line = struct
   [@@mel.module "@bezda/rhp"]
 end
 
-(** A place on the chart and nothing else: no size and nothing drawn, so whatever you put inside it sits at its value. *)
+(** A place on the chart and nothing else: no size and nothing drawn, so whatever you put inside it sits at its value.
+
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/place.md]. *)
 module Place = struct
   module Props = struct
     external check :
@@ -197,7 +215,10 @@ module Place = struct
 end
 
 (** A magazine-style panel around a chart: kicker, headline, dek, the chart, a note. Markup only; its look is the page's
-    CSS, and \@bezda/rhp/posters.css has the gallery's looks to start from. *)
+    CSS, and \@bezda/rhp/posters.css has the gallery's looks to start from.
+
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/poster.md]. *)
 module Poster = struct
   module Props = struct
     external check :
@@ -218,6 +239,8 @@ end
 external theme : Types.RequiredThemeValues.t = "THEME"
 [@@mel.module "@bezda/rhp"]
 
+(** Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/theme.md]. *)
 module Theme = struct
   module Props = struct
     external check :
@@ -231,6 +254,8 @@ module Theme = struct
   [@@mel.module "@bezda/rhp"]
 end
 
+(** Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/tick.md]. *)
 module Tick = struct
   module Props = struct
     external check :

@@ -306,7 +306,11 @@ module Input = struct
       ?aria_valuenow=(let v = S.get (Field_context.raw_value number) in
                       if Float.is_nan v then None
                       else Some (Js.Float.toString v))
-      props=(S.omit props [| "onWheel"; "onInput"; "onChange"; "ref" |])
+      as_=(Number_field.drawn props)
+      props=(S.omit props
+               (Array.append
+                  [| "onWheel"; "onInput"; "onChange"; "ref" |]
+                  Number_field.composed))
     />
 
   let component = Jsx.component make

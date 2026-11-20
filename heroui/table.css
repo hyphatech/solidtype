@@ -1,0 +1,161 @@
+/* HeroUI's Table where its stylesheet draws nothing: a column pinned to a side,
+   a header kept in view, and where a dragged row would land. Tailwind on
+   HeroUI's tokens, in the components layer, so a rule for a part's class
+   restyles it. */
+
+/* A pinned column's header and cells pass over those that scroll beneath
+   them: each opaque, the header on the header's background, a cell on its
+   own, a row's tint, hovered or selected, mixed over what lies beneath the
+   cell as HeroUI's translucent tint would show it. */
+.table__column[data-pinned],
+.table__cell[data-pinned] {
+  @apply z-2;
+}
+
+.table__column[data-pinned] {
+  @apply bg-surface-secondary;
+}
+
+.table-root--primary .table__row {
+  @media (hover: hover) {
+    &:hover .table__cell[data-pinned],
+    &[data-hovered="true"] .table__cell[data-pinned] {
+      background-color: color-mix(
+        in oklab,
+        var(--color-surface) 40%,
+        var(--color-surface-secondary)
+      );
+    }
+  }
+
+  &[data-selected="true"] .table__cell[data-pinned] {
+    background-color: color-mix(
+      in oklab,
+      var(--color-surface) 10%,
+      var(--color-surface-secondary)
+    );
+  }
+}
+
+.table-root--secondary .table__row {
+  .table__cell[data-pinned] {
+    @apply bg-background;
+  }
+
+  @media (hover: hover) {
+    &:hover .table__cell[data-pinned],
+    &[data-hovered="true"] .table__cell[data-pinned] {
+      background-color: color-mix(
+        in oklab,
+        var(--color-default) 50%,
+        var(--color-background)
+      );
+    }
+  }
+}
+
+/* A pinned cell at a corner of the body is rounded, and what scrolls beneath
+   it would show outside its curve: there, the root's own background. */
+.table-root--primary .table__body {
+  --table-corner: min(32px, var(--radius-2xl));
+
+  & tr:first-child td[data-pinned]:first-child::before,
+  & tr:first-child td[data-pinned]:last-child::before,
+  & tr:last-child td[data-pinned]:first-child::before,
+  & tr:last-child td[data-pinned]:last-child::before {
+    content: "";
+    @apply pointer-events-none absolute;
+    width: var(--table-corner);
+    height: var(--table-corner);
+    --table-corner-fill: radial-gradient(
+      circle at var(--table-corner-at),
+      transparent calc(var(--table-corner) - 0.5px),
+      var(--color-surface-secondary) var(--table-corner)
+    );
+    background: var(--table-corner-fill);
+  }
+
+  & tr:first-child td[data-pinned]:first-child::before {
+    @apply start-0 top-0;
+    --table-corner-at: 100% 100%;
+  }
+
+  & tr:first-child td[data-pinned]:last-child::before {
+    @apply end-0 top-0;
+    --table-corner-at: 0 100%;
+  }
+
+  & tr:last-child td[data-pinned]:first-child::before {
+    @apply start-0 bottom-0;
+    --table-corner-at: 100% 0;
+  }
+
+  & tr:last-child td[data-pinned]:last-child::before {
+    @apply end-0 bottom-0;
+    --table-corner-at: 0 0;
+  }
+}
+
+[dir="rtl"] .table-root--primary .table__body {
+  & tr:first-child td[data-pinned]:first-child::before {
+    --table-corner-at: 0 100%;
+  }
+
+  & tr:first-child td[data-pinned]:last-child::before {
+    --table-corner-at: 100% 100%;
+  }
+
+  & tr:last-child td[data-pinned]:first-child::before {
+    --table-corner-at: 0 0;
+  }
+
+  & tr:last-child td[data-pinned]:last-child::before {
+    --table-corner-at: 100% 0;
+  }
+}
+
+/* While content passes beneath a side's pinned columns, a line at the edge
+   of the last of them, the full height of each row. */
+[data-pinned-start-detached] :is(.table__column, .table__cell)[data-pinned="start"][data-pinned-edge]::after,
+[data-pinned-end-detached] :is(.table__column, .table__cell)[data-pinned="end"][data-pinned-edge]::after {
+  content: "";
+  @apply pointer-events-none absolute inset-y-0 h-auto w-px translate-y-0 rounded-none bg-separator;
+}
+
+[data-pinned-start-detached] :is(.table__column, .table__cell)[data-pinned="start"][data-pinned-edge]::after {
+  @apply start-auto end-0;
+}
+
+[data-pinned-end-detached] :is(.table__column, .table__cell)[data-pinned="end"][data-pinned-edge]::after {
+  @apply start-0 end-auto;
+}
+
+/* A header kept in view passes over the rows scrolling beneath it, a pinned
+   one over the pinned cells too. */
+[data-sticky-header] .table__column {
+  @apply z-3 bg-surface-secondary;
+}
+
+[data-sticky-header] .table__column[data-pinned] {
+  @apply z-4;
+}
+
+/* A dragged row would land on the side of a row marked: a line in the accent
+   there, as React Aria's drop indicator is drawn between two rows. */
+.table__row[data-drop-position="before"] .table__cell {
+  box-shadow: inset 0 2px 0 0 var(--color-accent);
+}
+
+.table__row[data-drop-position="after"] .table__cell {
+  box-shadow: inset 0 -2px 0 0 var(--color-accent);
+}
+
+/* The copy of a row a pointer drags, lifted over the page as it follows the
+   pointer. */
+[data-drag-preview] {
+  @apply overflow-hidden rounded-xl shadow-lg ring-1 ring-separator;
+
+  & .table__cell {
+    @apply rounded-none border-b-0;
+  }
+}

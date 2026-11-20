@@ -7,6 +7,9 @@
     {!Fieldset} it is in is. Its props are named as HeroUI's documentation names
     them.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/radio-group.md].
+
     {[
       <Radio_group default_value="pro">
         <Label>"Plan"</Label>

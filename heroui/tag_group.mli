@@ -3,6 +3,9 @@
     {!Styles.Tag}. Its {!Label} names its list, and its {!Description} and
     {!Error_message} describe it.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/tag-group.md].
+
     {[
       <Tag_group selection_mode=`single>
         <Label>"Categories"</Label>

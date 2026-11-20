@@ -1,0 +1,302 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Avatar = Solidtype_heroui.Avatar
+module Button = Solidtype_heroui.Button
+module Chip = Solidtype_heroui.Chip
+module Data_grid = Solidtype_heroui.Data_grid
+module Dropdown = Solidtype_heroui.Dropdown
+module Label = Solidtype_heroui.Label
+module Pagination = Solidtype_heroui.Pagination
+module Search_field = Solidtype_heroui.Search_field
+module Gravity = Solidtype_gravity_icons
+
+type status = Active | Vacation | Inactive
+
+type member = {
+  id : string;
+  name : string;
+  email : string;
+  kind : string;
+  status : status;
+  start : string;
+  team : string;
+}
+
+let first_names =
+  [| "Aaron"; "Alice"; "Bella"; "Bob"; "Carla"; "David"; "Emma"; "Felix" |]
+
+let last_names = [| "Carter"; "Johnson"; "Brown"; "Smith"; "Lopez"; "Kim" |]
+let teams = [| "Design"; "Product"; "Engineering"; "Sales"; "Other" |]
+let two n = (if n < 10 then "0" else "") ^ string_of_int n
+
+let members =
+  Array.init 48 (fun i ->
+      let first = first_names.(i mod Array.length first_names) in
+      let last = last_names.(i mod Array.length last_names) in
+      {
+        id = string_of_int (i + 1);
+        name = first ^ " " ^ last;
+        email =
+          String.lowercase_ascii first
+          ^ "."
+          ^ String.lowercase_ascii last
+          ^ "@example.com";
+        kind = (if i mod 3 = 0 then "Contractor" else "Employee");
+        status =
+          (match i mod 4 with 0 -> Inactive | 1 -> Vacation | _ -> Active);
+        start = "2025-" ^ two ((i mod 12) + 1) ^ "-" ^ two ((i mod 27) + 1);
+        team = teams.(i mod Array.length teams);
+      })
+
+let status_name = function
+  | Active -> "Active"
+  | Vacation -> "Vacation"
+  | Inactive -> "Inactive"
+
+let status_key = function
+  | Active -> "active"
+  | Vacation -> "vacation"
+  | Inactive -> "inactive"
+
+let status_color = function
+  | Active -> `success
+  | Vacation -> `warning
+  | Inactive -> `danger
+
+let initials name =
+  String.concat ""
+    (List.map
+       (fun w -> String.sub w 0 1)
+       (List.filter
+          (fun w -> not (String.equal w ""))
+          (String.split_on_char ' ' name)))
+
+let all_columns =
+  [|
+    Data_grid.column ~id:"member" ~header:(Text "Member") ~is_row_header:true
+      ~pinned:`start ~width:(Pixels 260.)
+      ~sort:(By_text (fun m -> m.name))
+      (fun m ->
+        <span class_="flex items-center gap-3">
+          <Avatar size=`sm>
+            <Avatar.Fallback>
+              (Jsx.string (initials (S.get m).name))
+            </Avatar.Fallback>
+          </Avatar>
+          <span class_="flex flex-col">
+            <span class_="font-medium">(Jsx.string (S.get m).name)</span>
+            <span class_="text-xs text-muted">
+              (Jsx.string (S.get m).email)
+            </span>
+          </span>
+        </span>);
+    Data_grid.column ~id:"kind" ~header:(Text "Worker type")
+      ~width:(Pixels 140.)
+      ~sort:(By_text (fun m -> m.kind))
+      (fun m -> Jsx.string (S.get m).kind);
+    Data_grid.column ~id:"status" ~header:(Text "Status") ~width:(Pixels 130.)
+      ~sort:(By_text (fun m -> status_name m.status))
+      (fun m ->
+        <Chip
+          color=(status_color (S.get m).status)
+          size=`sm
+          variant=`soft
+          class_="gap-1">
+          <span class_="size-1.5 rounded-full bg-current" />
+          (Jsx.string (status_name (S.get m).status))
+        </Chip>);
+    Data_grid.column ~id:"start" ~header:(Text "Start date")
+      ~width:(Pixels 160.)
+      ~sort:(By_text (fun m -> m.start))
+      (fun m ->
+        <span class_="flex items-center gap-2 tabular-nums">
+          <Gravity.Calendar class_="size-4 text-muted" />
+          (Jsx.string (S.get m).start)
+        </span>);
+    Data_grid.column ~id:"team" ~header:(Text "Team") ~width:(Pixels 140.)
+      (fun m ->
+        <Chip size=`sm variant=`secondary>(Jsx.string (S.get m).team)</Chip>);
+    Data_grid.column ~id:"actions"
+      ~header:(Element (fun () -> <span class_="sr-only">"Actions"</span>))
+      ~align:`end_ ~pinned:`end_ ~width:(Pixels 64.)
+      (fun m ->
+        <Dropdown>
+          <Button
+            is_icon_only=true
+            aria_label=("Actions for " ^ (S.get m).name)
+            size=`sm
+            variant=`tertiary>
+            <Gravity.Ellipsis_vertical class_="size-4" />
+          </Button>
+          <Dropdown.Popover>
+            <Dropdown.Menu on_action=(fun (_ : string) -> ())>
+              <Dropdown.Item id="view" text_value="View profile">
+                <Label>"View profile"</Label>
+              </Dropdown.Item>
+              <Dropdown.Item id="remove" text_value="Remove" variant=`danger>
+                <Label>"Remove"</Label>
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown.Popover>
+        </Dropdown>);
+  |]
+
+let per_page = 10
+
+let make () =
+  let query, set_query = S.create_signal "" in
+  let statuses, set_statuses =
+    S.create_signal [| "active"; "vacation"; "inactive" |]
+  in
+  let shown_columns, set_shown_columns =
+    S.create_signal
+      (Array.map (fun (c : member Data_grid.column) -> c.id) all_columns)
+  in
+  let page, set_page = S.create_signal 1 in
+  let selected, set_selected = S.create_signal [||] in
+  let matching () =
+    let q = String.lowercase_ascii (S.get query) in
+    Js.Array.filter
+      ~f:(fun m ->
+        Array.exists (String.equal (status_key m.status)) (S.get statuses)
+        && (String.equal q ""
+           || Js.String.includes ~search:q (String.lowercase_ascii m.name)
+           || Js.String.includes ~search:q m.email))
+      members
+  in
+  let pages () =
+    max 1 ((Array.length (matching ()) + per_page - 1) / per_page)
+  in
+  let shown () =
+    let all = matching () in
+    let start = (min (S.get page) (pages ()) - 1) * per_page in
+    Array.sub all start (min per_page (Array.length all - start))
+  in
+  let columns () =
+    Js.Array.filter
+      ~f:(fun (c : member Data_grid.column) ->
+        Array.exists (String.equal c.id) (S.get shown_columns))
+      all_columns
+  in
+  <div class_="flex flex-col gap-3">
+    <div class_="flex flex-wrap items-center gap-2">
+      <Search_field
+        aria_label="Search members"
+        value=(S.get query)
+        on_change=(fun q ->
+                    S.set set_query q;
+                    S.set set_page 1)>
+        <Search_field.Group>
+          <Search_field.Search_icon />
+          <Search_field.Input class_="w-[220px]" placeholder="Search..." />
+          <Search_field.Clear_button />
+        </Search_field.Group>
+      </Search_field>
+      <Dropdown>
+        <Button size=`sm variant=`secondary>
+          <Gravity.Funnel class_="size-4" /> "Status"
+        </Button>
+        <Dropdown.Popover>
+          <Dropdown.Menu
+            aria_label="Status"
+            selection_mode=`multiple
+            selected_keys=(S.get statuses)
+            on_selection_change=(fun keys ->
+                                  S.set set_statuses keys;
+                                  S.set set_page 1)>
+            <Dropdown.Item id="active" text_value="Active">
+              <Dropdown.Item_indicator /> <Label>"Active"</Label>
+            </Dropdown.Item>
+            <Dropdown.Item id="vacation" text_value="Vacation">
+              <Dropdown.Item_indicator /> <Label>"Vacation"</Label>
+            </Dropdown.Item>
+            <Dropdown.Item id="inactive" text_value="Inactive">
+              <Dropdown.Item_indicator /> <Label>"Inactive"</Label>
+            </Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown.Popover>
+      </Dropdown>
+      <Dropdown>
+        <Button size=`sm variant=`secondary>
+          <Gravity.Layout_columns class_="size-4" /> "Columns"
+        </Button>
+        <Dropdown.Popover>
+          <Dropdown.Menu
+            aria_label="Columns shown"
+            selection_mode=`multiple
+            selected_keys=(S.get shown_columns)
+            disabled_keys=[| "member"; "actions" |]
+            on_selection_change=(S.set set_shown_columns)>
+            <For each=all_columns>
+              (fun (c : member Data_grid.column) _ ->
+                <Dropdown.Item id=c.id text_value=c.id>
+                  <Dropdown.Item_indicator />
+                  <Label>
+                    (Jsx.string
+                       (match c.header with
+                       | Text t -> t
+                       | Element _ | Sorted _ -> "Actions"))
+                  </Label>
+                </Dropdown.Item>)
+            </For>
+          </Dropdown.Menu>
+        </Dropdown.Popover>
+      </Dropdown>
+    </div>
+    <Data_grid
+      aria_label="Team members"
+      rows=(shown ())
+      row_id=(fun m -> m.id)
+      columns=(columns ())
+      selection_mode=`multiple
+      show_selection_checkboxes=true
+      selected_keys=(S.get selected)
+      on_selection_change=(S.set set_selected)
+      sticky_header=true
+      scroll_container_class="max-h-[440px] overflow-auto"
+      content_class="min-w-[900px]"
+      footer=(<div
+                class_="flex w-full flex-wrap items-center justify-between \
+                        gap-3">
+                <span class_="text-sm text-muted">
+                  (Jsx.string
+                     (string_of_int (Array.length (S.get selected))
+                     ^ " of "
+                     ^ string_of_int (Array.length (matching ()))
+                     ^ " selected"))
+                </span>
+                <Pagination size=`sm>
+                  <Pagination.Content>
+                    <Pagination.Item>
+                      <Pagination.Previous
+                        is_disabled=(S.get page <= 1)
+                        on_press=(fun () ->
+                                   S.update set_page (fun p -> max 1 (p - 1)))>
+                        <Pagination.Previous_icon /> "Previous"
+                      </Pagination.Previous>
+                    </Pagination.Item>
+                    <For each=(Array.init (pages ()) (fun i -> i + 1))>
+                      (fun p _ ->
+                        <Pagination.Item>
+                          <Pagination.Link
+                            is_active=(p = S.get page)
+                            on_press=(fun () -> S.set set_page p)>
+                            (Jsx.int p)
+                          </Pagination.Link>
+                        </Pagination.Item>)
+                    </For>
+                    <Pagination.Item>
+                      <Pagination.Next
+                        is_disabled=(S.get page >= pages ())
+                        on_press=(fun () ->
+                                   S.update set_page (fun p ->
+                                       min (pages ()) (p + 1)))>
+                        "Next" <Pagination.Next_icon />
+                      </Pagination.Next>
+                    </Pagination.Item>
+                  </Pagination.Content>
+                </Pagination>
+              </div>)
+    />
+  </div>

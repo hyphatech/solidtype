@@ -2,6 +2,9 @@
     two scales, with no slat and no Solid computation per point, for a large
     scatter plot inside a [Chart] with a [cross] scale. Experimental in rhp.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/many-dots.md].
+
     Ported by hand: each of its props is a value for every point or a function
     of the row, generic over its rows, a pair no rule maps. *)
 

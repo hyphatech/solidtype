@@ -342,6 +342,19 @@ function portedType(t: ts.Type, vars: Vars, where: string, absent: boolean): Typ
 // A property's or a parameter's type as its declaration names it, where that
 // is a type the library ports by hand: an optional one's type, made a union
 // with undefined, has lost the alias it was declared by.
+// A ref is Solid's: given an element or a function of one, it calls the
+// function with the element its part draws, so it is that function, as an
+// element's ref and Solid's Portal's are, of the element it declares; one
+// declared as any of several, a portal's div or g, is any element.
+function refOf(t: ts.Type, vars: Vars, where: string): Type {
+  const fn = (t.isUnion() ? t.types : [t]).find((m) => m.getCallSignatures().length > 0);
+  const param = fn?.getCallSignatures()[0]?.parameters[0];
+  const at = `${where}(element)`;
+  const element = param ? map(checker.getTypeOfSymbol(param), vars, at, false) : null;
+  unmapped.delete(at);
+  return { kind: "arrow", params: [{ type: element ?? tname("Dom.element") }], result: tname("unit") };
+}
+
 function declaredPorted(p: ts.Symbol, vars: Vars, where: string, absent: boolean): Type | null {
   const d = p.valueDeclaration;
   const node = d && (ts.isPropertySignature(d) || ts.isPropertyDeclaration(d) || ts.isParameter(d)) ? d.type : undefined;
@@ -585,7 +598,10 @@ export function part(src: Source, jsModule: string, where: string, decl: ts.Sign
     // A prop only false, as a single-value root's multiple, is not given.
     if (pt.isUnion() && pt.types.every((m) => m.flags & (ts.TypeFlags.BooleanLiteral | ts.TypeFlags.Undefined)) &&
       pt.types.filter((m) => m.flags & ts.TypeFlags.BooleanLiteral).length === 1 && checker.typeToString(pt).includes("false")) continue;
-    const t = declaredPorted(p, vars, `${where}.${p.name}`, optional) ?? map(pt, vars, `${where}.${p.name}`, optional);
+    const t: Type | null =
+      p.name === "ref"
+        ? refOf(pt, vars, `${where}.${p.name}`)
+        : (declaredPorted(p, vars, `${where}.${p.name}`, optional) ?? map(pt, vars, `${where}.${p.name}`, optional));
     if (!t) {
       unmapped.set(`${where}.${p.name}`, checker.typeToString(pt));
       continue;

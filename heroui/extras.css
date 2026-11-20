@@ -1,3 +1,6 @@
 @import "./segment.css" layer(components);
 @import "./trend-chip.css" layer(components);
 @import "./text-shimmer.css" layer(components);
+@import "./number-stepper.css" layer(components);
+@import "./table.css" layer(components);
+@import "./data-grid.css" layer(components);

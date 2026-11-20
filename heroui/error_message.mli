@@ -2,6 +2,9 @@
     field, a {!Tag_group}'s, which the component is described by. It draws
     nothing outside one; a field's error is a {!Field_error}.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/error-message.md].
+
     {[
       <Error_message>
         (if invalid () then "Pick at least one" else "")

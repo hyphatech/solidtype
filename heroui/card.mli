@@ -2,6 +2,9 @@
     {!Styles.Card}. A card but a transparent one is a surface, which it gives
     what is inside it by {!Surface.Context}, as HeroUI's does.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/card.md].
+
     {[
       <Card class_="w-[400px]">
         <Card.Header>

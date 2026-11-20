@@ -4,6 +4,9 @@
     {!Text_field}, Kobalte's description, which the group, the radio's input or
     the field's input is described by.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/description.md].
+
     {[
       <Description>"Includes 100 messages per month"</Description>
     ]} *)

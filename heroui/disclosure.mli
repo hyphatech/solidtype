@@ -2,6 +2,9 @@
     [Collapsible], with HeroUI's classes from {!Styles.Disclosure}. Its heading
     holds the button that expands and collapses it, and its content follows.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/disclosure.md].
+
     {[
       <Disclosure default_expanded=true>
         <Disclosure.Heading>

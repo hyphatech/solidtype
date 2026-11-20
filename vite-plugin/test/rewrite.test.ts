@@ -195,3 +195,19 @@ function Other(funarg) {
   expect(other).toContain(`<${bound(other)} />`);
   expect(code).not.toMatch(/function C\w*\(props\)/);
 });
+
+test("a ref given by a module's member is called with the element, never assigned it", async () => {
+  const code = await written(`
+function make() {
+  return Markers.el("div", [Markers.s("ref", Top_layer.place)], []);
+}`);
+  expect(code).toContain("ref={solidtype__element => Top_layer.place(solidtype__element)}");
+});
+
+test("a ref written as a function stays that function", async () => {
+  const code = await written(`
+function make() {
+  return Markers.el("div", [Markers.s("ref", function (e) { keep(e); })], []);
+}`);
+  expect(code).toContain("ref={function (e)");
+});

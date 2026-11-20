@@ -1,0 +1,128 @@
+# Conventions
+
+How a name, a namespace, a data attribute, an optional prop and a spread from Solid's documentation are written in OCaml.
+
+Solid's and Kobalte's documentation is the reference for what a component
+does. These rules say how to write what it shows in OCaml, so that it reads
+across without a table per component.
+
+## Names
+
+Every name you write is snake case, made by one rule from the name
+Solid's or Kobalte's documentation gives: a capital is an underscore and
+the lower case, a run of capitals one word, a hyphen an underscore, and
+an OCaml keyword takes a trailing underscore.
+
+| Solid | OCaml |
+|---|---|
+| `onClick` | `on_click` |
+| `readOnly` | `read_only` |
+| `aria-label` | `aria_label` |
+| `defaultValue` | `default_value` |
+| `classList` | `class_list` |
+| `createSignal` | `create_signal` |
+| a keyword: `class`, `type`, `for`, `open`, `when` | `class_`, `type_`, `for_`, `open_`, `when_` |
+
+The ppx gives each name back its JavaScript spelling by the rule's inverse,
+and by a table of the few the inverse cannot give, such as `stroke-width`.
+A module keeps its JavaScript name: Solid's `ErrorBoundary` is
+`Solidtype.ErrorBoundary`, Kobalte's `Switch.Root` is
+`Solidtype_kobalte.Switch.Root`.
+
+A handler takes the event its element and name give it: `on_click` a
+`Dom.mouseEvent`, `on_input` a `Dom.inputEvent`.
+
+## Namespaces
+
+One of Solid's namespaces wraps the value, never the name: `ns:name={v}`
+is `name=(Jsx.ns v)`.
+
+| Solid | OCaml |
+|---|---|
+| `on:click={f}` | `on_click=(Jsx.native f)` |
+| `oncapture:click={f}` | `on_click=(Jsx.capture f)` |
+| `prop:value={v}` | `value=(Jsx.prop v)` |
+| `attr:title={s}` | `title=(Jsx.attr s)` |
+| `bool:hidden={b}` | `hidden=(Jsx.bool b)` |
+| `on:my-event={f}` | `on=(Jsx.listen "my-event" f)` |
+| `data-X={s}` | `attr=(Jsx.named "data-X" s)` |
+
+The last two are for a name whose case or spelling the rule cannot keep. A
+wrapper left out is Solid's default, never another namespace.
+
+A component takes an attribute's namespace -- `Jsx.attr`, `Jsx.bool`,
+`Jsx.named` -- and passes it on to its element unchecked, as it does a data
+attribute; optional, it is `?hidden=(Jsx.attr o)`. Solid's
+server writes a plain `hidden` as present or absent, so `hidden="until-found"`
+reaches a prerendered page only as `attr:hidden`. A handler's and a
+property's namespaces are an element's alone.
+
+## Data attributes
+
+A `data-` attribute is a `Jsx.data`, on an element and on a component,
+which passes it on to its element, as TSX lets a component take a
+hyphenated attribute. It is present, or absent while a flag is down, so a
+state is in the HTML a page is prerendered with.
+A component passes it on by spreading `Props.others props`, the props it
+does not name, on its element, after its own attributes:
+
+```ocaml
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+
+let%component make ~(label : string) () =
+  <button class_="chip" props=(Props.others props)>
+    (Jsx.string (S.get label))
+  </button>
+```
+
+| TSX | OCaml |
+|---|---|
+| `data-slot="badge"` | `data_slot="badge"` |
+| `data-selected={on() ? "true" : undefined}` | `data_selected=(Jsx.flag (S.get on))` |
+| `data-id={id()}` | `data_id=(Jsx.data (S.get id))` |
+
+## Values in JSX
+
+A value is written as itself, and Solid keeps it current. A literal or a
+name is given as it is; any other expression is read again whenever what it
+reads changes, as Solid's compiler makes an expression in JSX a getter. A
+function is a function. Solid's own TSX beside it:
+
+| TSX | OCaml |
+|---|---|
+| `title="Save"` | `title="Save"` |
+| `class={item}` | `class_=item` |
+| `title={note()}` | `title=(S.get note)` |
+| `name={props.name}` | `name=(S.get name)` |
+| `class={cls(on())}` | `class_=(cls (S.get on))` |
+| `{count()}` | `(Jsx.int (S.get count))` |
+| `{icon}`, `icon` an element | `icon` |
+| `onClose={() => hide()}` | `on_close=(fun () -> hide ())` |
+
+A signal given by its name, `text=count`, is refused where its value
+belongs: it is read with `S.get`. So is a function, `title=(fun () -> ...)`.
+Outside JSX -- a memo, an effect, an accessor -- a value that changes is
+written `fun () -> e`, as Solid's own API takes `() => e`.
+
+An optional prop, one a component may leave out, is passed on with OCaml's
+own `?`: present while its option is `Some`, absent while it is `None`, as
+TSX passes `undefined`. It is written as a required prop is.
+
+| TSX | OCaml |
+|---|---|
+| `title={note()}` | `?title=(S.get note)` |
+| `name={props.name}` | `?name=(S.get name)` |
+| `onRemove={editable ? remove : undefined}` | `?on_remove=(if editable then Some remove else None)` |
+
+The compiler refuses `?` on a prop that is not optional.
+
+## Spreads
+
+A spread, TSX's `{...props}`, is the attribute `props`, and so no prop is
+named `props`:
+
+```ocaml
+let make (props : Props.t) = <input class_="field" props />
+<Dynamic component=Greeting.component props />
+```

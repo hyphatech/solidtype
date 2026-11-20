@@ -5,6 +5,9 @@
     skeleton is in the browser, never on the server, as HeroUI reads it, so a
     prerendered skeleton hydrates as it was rendered.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/skeleton.md].
+
     {[
       <Skeleton class_="h-3 w-3/5 rounded-lg" />
     ]}

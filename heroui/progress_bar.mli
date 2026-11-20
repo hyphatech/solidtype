@@ -5,6 +5,9 @@
     the reader's locale, and its {!Fill} is as wide in its {!Track} as the value
     is far along the range.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/progress-bar.md].
+
     {[
       <Progress_bar value=60.>
         <Label>"Loading"</Label>

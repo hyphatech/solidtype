@@ -1,10 +1,12 @@
 (** Kobalte's number field, fixed: a field of a number stepped by its buttons,
     the keys and the wheel, as {!Solidtype_kobalte.NumberField} is, its parts
-    taking Kobalte's props and every attribute their element does. Its wheel is
-    fixed: turned down it steps the number up and turned up steps it down, as
-    React Aria's does, where Kobalte's goes the other way; and it leaves alone a
-    field that is read-only, a turn mostly sideways, and one with Control held,
-    which zooms the page, where Kobalte's steps on each.
+    taking Kobalte's props and every attribute their element does. A caller's
+    key, focus and blur handlers are called beside its input's own, which
+    Kobalte's replace. Its wheel is fixed: turned down it steps the number up
+    and turned up steps it down, as React Aria's does, where Kobalte's goes the
+    other way; and it leaves alone a field that is read-only, a turn mostly
+    sideways, and one with Control held, which zooms the page, where Kobalte's
+    steps on each.
 
     {[
       <Number_field.Root default_value="4">
@@ -31,7 +33,9 @@ module Root : sig
 end
 
 (** The field's input, Kobalte's, stepped by the wheel as {!wheel} steps it. Its
-    [on_wheel] is called after its own. *)
+    [on_wheel] is called after its own, and its [on_key_down], [on_focus] and
+    [on_blur] before its own, where Kobalte's replace those that step the value
+    by the keys and format it as the focus leaves. *)
 module Input : sig
   module Props : sig
     include module type of Solidtype_kobalte.NumberField.Input.Props
@@ -42,6 +46,14 @@ module Input : sig
   val make : Props.t -> Jsx.element
   val component : Props.t Jsx.component
 end
+
+val drawn : 'props -> Solidtype.Html.Input.props -> Jsx.element
+(** [drawn props] is the [as_] of an input of Kobalte's number field that is
+    given [props] less {!composed}: what [props] draw it as, its [on_key_down],
+    [on_focus] and [on_blur] called before Kobalte's own. *)
+
+val composed : string array
+(** The props {!drawn} composes, which the input is given without. *)
 
 val wheel :
   change_on_wheel:bool ->

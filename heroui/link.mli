@@ -3,6 +3,9 @@
     React Aria keeps it. It is disabled as [is_disabled] says, else as the
     {!Fieldset} it is in is.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/link.md].
+
     {[
       <Link href="https://heroui.com">"HeroUI" <Link.Icon /></Link>
     ]} *)

@@ -1,0 +1,245 @@
+# Components
+
+A component in OCaml's JSX, its props, its children, and how the compiler checks them.
+
+A component is a function from its props to an element, as in Solid. It
+runs once; what changes afterwards is the expressions in its JSX, which
+Solid reads again. Every module of `solidtype` binds one part of Solid, named as Solid
+names it: `Solidtype.Solid` is `solid-js`, `Solidtype.Web` is
+`solid-js/web`, `Solidtype.Show` is `<Show>`.
+
+## `let%component`
+
+A component another component's JSX names is written with
+`let%component`. Its props are its labelled parameters, and it ends in
+`()`:
+
+```ocaml title="solid_greeting.mlx"
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+
+module Greeting = struct
+  let%component make ~(name : string) ?(greeting : string = "Hello") () =
+    <p>(Jsx.string (S.get greeting ^ ", " ^ S.get name ^ "!"))</p>
+end
+
+let make () =
+  <div class_="flex flex-col gap-1">
+    <Greeting name="Ada" /> <Greeting name="Grace" greeting="Welcome" />
+  </div>
+```
+
+`Greeting` is written with `let%component`; the `make` at the bottom is not.
+The difference is who calls them.
+
+The bottom `make` is a root. Nothing passes it props: a page mounts it, or
+`Web.render` renders it, and it is an ordinary OCaml function, `let make ()
+= ...`. No JSX tag names it.
+
+`Greeting` is named by a tag, `<Greeting name="Ada" />`, and Solid calls
+it the way it calls every component: with one JavaScript object of props,
+`{ name: "Ada" }`, not with OCaml's labelled arguments. Each field of that
+object is a getter that Solid tracks when it is read, so a prop whose value
+changes is seen by the code that reads it then -- which is why, in TSX,
+destructuring `props` in the parameters loses updates. A plain `let make
+~name () = ...` could not be given that object, and reading `name` once at
+the top would be that same lost update.
+
+`let%component` bridges the two. From the labelled parameters, the ppx
+writes:
+
+- `Props`, the module that describes the props object: its type, a
+  getter for each field, `check`, which the compiler applies to every
+  `<Greeting ... />` to catch a prop left out or misspelt, and `omit` and
+  `others`, for a spread;
+- `make`, a function of that object, in which each value parameter is an
+  accessor of its field: `S.get name` reads `props.name` at the moment it
+  runs, in JSX, where Solid tracks it;
+- `component`, `make` as the value a JSX tag names.
+
+So in the body a value prop is read as a signal is, `S.get name`, never as a
+plain value, and is handed on as any value that changes is,
+`?title=(S.get name)`. A function prop is
+called, `on_close ()`. An optional parameter with a default,
+`?(greeting : string = "Hello")`, reads its default while the prop is left
+out; one without, `?(note : string option)`, reads an `option`.
+
+Written by hand, `Greeting` would be its `Props` module, a getter and a
+`check` per prop, kept in step with the body by a reader. `let%component`
+writes them from the one place the props are named, so they cannot drift.
+
+A component is a value, `Greeting.component`, and the tag `<Greeting />`
+names it. The module is the component: `<Greeting.Header />` is the
+component `Greeting.Header.component`.
+
+## Props are checked
+
+Each element of a component applies the component's `Props.check` to its
+props, which the compiler checks and Melange drops. The check takes one
+labelled argument per prop, optional where the prop is, so the compiler
+says what TSX's types would:
+
+```
+1 | let make () = <Label />
+                  ^^^^^^^^^
+Error: This expression has type text:string -> unit
+       but an expression was expected of type unit
+       because it is in the result of a conditional with no else branch
+Hint: This function application is partial, maybe some arguments are missing.
+```
+
+```
+1 | let make () = <Label text="x" colour="red" />
+                                         ^^^^^
+Error: The function applied to this argument has type
+         ?count:int -> ?props:Label.Props.t Solidtype.Solid.rest -> unit
+This argument cannot be applied with label ~colour
+```
+
+A value prop is a `Check.value`: what its expression gives. A function
+prop is the function itself, `on_close=(fun () -> ...)`, and a function
+given where a value belongs is refused. Two props typed by one type
+variable must agree, as in TSX.
+
+## Children
+
+Children are a prop, `children`. As `Jsx.element`, they are any JSX and are
+read where they go, `(S.get children)`:
+
+```ocaml title="solid_children.mlx"
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+
+module Panel = struct
+  let%component make ~(title : string) ~(on_close : unit -> unit)
+      ~(children : Jsx.element) () =
+    <section
+      class_="flex w-72 flex-col gap-2 rounded-xl border border-border p-4">
+      <header class_="flex items-center justify-between">
+        <strong>(Jsx.string (S.get title))</strong>
+        <button
+          class_="button button--sm button--tertiary"
+          type_=`button
+          on_click=(fun _ -> on_close ())>
+          "Close"
+        </button>
+      </header>
+      (S.get children)
+    </section>
+end
+
+let make () =
+  let is_open, set_open = S.create_signal true in
+  <Show
+    when_=(S.get is_open)
+    fallback=(<button
+                class_="button button--sm button--secondary"
+                type_=`button
+                on_click=(fun _ -> S.set set_open true)>
+                "Open the notes"
+              </button>)>
+    <Panel title="Notes" on_close=(fun () -> S.set set_open false)>
+      <p>"A panel's children are any JSX: these two paragraphs."</p>
+      <p class_="text-sm text-muted">
+        "Close it, and a button takes its place."
+      </p>
+    </Panel>
+  </Show>
+```
+
+A component may also take a function as its only child, which it calls, as
+`For` does: `~(children : item -> Jsx.element)`. A check names which kinds
+it takes: `[ `elements ]` for elements, `[ `render ]` for a function, or both.
+
+Children of either kind, as HeroUI's render props are, are
+`~(children : state Jsx.children)`, drawn by `Jsx.draw (S.get children)
+state`. A caller gives elements, or a function that reads the state's
+fields by name, `(fun s -> if S.get s.is_on then ... else ...)`.
+
+State a component hands its children is read as any value that changes,
+with `S.get`. A signal, a memo or a prop is handed on as it is; a value
+derived for them is `S.accessor (fun () -> e)`, computed at each read:
+
+```ocaml
+let%component make ~(width : int) ~(children : state Jsx.children) () =
+  let wide = S.accessor (fun () -> S.get width > 600) in
+  <div>(Jsx.draw (S.get children) { wide })</div>
+```
+
+A function prop that takes nothing is written `(fun () -> ...)`, as
+`on_close` is above, which hides the panel and shows a button in its
+place.
+
+## A component given its element
+
+A component that draws an element and passes on every attribute it does
+not name, as a HeroUI part does, names the element after its body. Its
+check then takes the element's attributes after its own props, and
+`Props.others` passes them on. A prop the element also names, `class_`
+here, is the component's own and takes the attribute's place, as TSX's
+`Omit` does: a switch's `on_change` can take its state, not the DOM's
+event.
+
+```ocaml
+let%component make ?(class_ : string option) () =
+  <input
+    class_=("field " ^ Option.value (S.get class_) ~default:"")
+    props=(Props.others props) />
+[@@element input]
+```
+
+`<Field style="width: 8rem" placeholder="Name" />` compiles, and both reach
+the `<input>`; an attribute an `<input>` does not take does not.
+
+## Props written by hand
+
+Besides a root, one kind of component is written without
+`let%component`: a component
+that passes its props on whole to another component, as a spread, writes its `Props` by hand,
+its check's labels named as solidtype names a prop, and spreads them with
+the attribute `props`:
+
+```ocaml
+let make (props : Props.t) = <input class_="field" props />
+```
+
+`Solid.merge_props` gives props defaults, live, and `Props.omit`, which
+`let%component` writes, leaves some out of a spread by a variant of the
+component's own prop names, so a misspelt one is a compile error.
+`Props.others` leaves out all of them: what is left is what the
+component's check admits besides them, its `data-` attributes, which it
+passes on to its element, `props=(Props.others props)`. A component's
+spread is a rest of its own props, or that rest of any component's.
+
+A handler read from props written by hand is JavaScript's, and is called by
+`Jsx.call f x`, or `Jsx.act f` for one that takes nothing; each does nothing
+where none was given.
+
+## A component chosen at run time
+
+`Dynamic` renders whichever component its expression gives, its props given as one
+value typed by that component, so a prop it needs is not left out:
+
+```ocaml
+<Dynamic component=(pick ()) props=(Greeting.Props.make ~name:"Ada" ()) />
+```
+
+`Dynamic.Element` does the same for an element whose tag is a string.
+`Solid.lazy_` makes a component loaded when it is first rendered, which
+suspends until it arrives.
+
+## What else is bound
+
+| Solid | solidtype |
+|---|---|
+| `children(() => props.children)` | `Solid.children`, then `Solid.to_array` |
+| `mergeProps` | `Solid.merge_props` |
+| `splitProps` | `Solid.omit` and `Solid.others`, or `Props.omit` and `Props.others` |
+| `createUniqueId` | `Solid.create_unique_id` |
+| `lazy` | `Solid.lazy_` |
+| `<Dynamic>` | `Solidtype.Dynamic`, `Dynamic.Element` |
+| `<Portal>` | `Solidtype.Portal` |
+
+Each module's `.mli` is its reference, and says where OCaml writes a form
+Solid's TypeScript has differently.

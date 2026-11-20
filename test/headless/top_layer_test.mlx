@@ -1,0 +1,61 @@
+(* The top layer as a caller meets it: each element placed above those
+   placed before, one kept on top above those placed after, and each gone
+   from it as it leaves the document. *)
+
+module Top_layer = Solidtype_headless.Top_layer
+module E = Jest.Expect
+module H = Harness
+
+external create : string -> Dom.element = "createElement"
+[@@mel.scope "document"]
+
+external append : Dom.element -> Dom.element -> unit = "appendChild"
+[@@mel.send]
+
+external remove : Dom.element -> unit = "remove" [@@mel.send]
+external set_id : Dom.element -> string -> unit = "id" [@@mel.set]
+external id : Dom.element -> string = "id" [@@mel.get]
+
+(* The elements in the top layer, by their ids, from the first shown; the
+   stand-in in test/jsdom.ts keeps them as a browser does. *)
+external top_layer : Dom.element array = "topLayer" [@@mel.scope "HTMLElement"]
+
+let shown () = Array.map id top_layer
+
+(* An element named [name], in the document. *)
+let element name =
+  let e = create "div" in
+  set_id e name;
+  append H.body e;
+  e
+
+let () =
+  Jest.describe "Headless Top_layer" (fun () ->
+      Jest.afterEach (fun () ->
+          Array.iter remove top_layer;
+          H.cleanup ());
+      Jest.test "places each element above those placed before" (fun () ->
+          let menu = element "menu" in
+          Top_layer.place menu;
+          Top_layer.place (element "tooltip");
+          E.(
+            expect (shown (), H.attribute menu "popover")
+            |> toEqual ([| "menu"; "tooltip" |], Some "manual")));
+      Jest.test "takes an element out as it leaves the document" (fun () ->
+          let menu = element "menu" in
+          Top_layer.place menu;
+          Top_layer.place (element "modal");
+          remove menu;
+          E.(expect (shown ()) |> toEqual [| "modal" |]));
+      Jest.test "keeps an element on top of those placed after it" (fun () ->
+          Top_layer.keep_on_top (element "toasts");
+          Top_layer.place (element "modal");
+          Top_layer.place (element "menu");
+          E.(expect (shown ()) |> toEqual [| "modal"; "menu"; "toasts" |]));
+      Jest.test "raises no element kept once it has left the document"
+        (fun () ->
+          let toasts = element "toasts" in
+          Top_layer.keep_on_top toasts;
+          remove toasts;
+          Top_layer.place (element "modal");
+          E.(expect (shown ()) |> toEqual [| "modal" |])))

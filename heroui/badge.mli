@@ -2,6 +2,9 @@
     classes from {!Styles.Badge}. Text it is given is its label's, as HeroUI's
     own wraps a string or a number; with nothing, it is a dot.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/badge.md].
+
     {[
       <Badge.Anchor>
         <img src=avatar alt="" />

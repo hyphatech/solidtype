@@ -1,0 +1,40 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Data_grid = Solidtype_heroui.Data_grid
+
+type entry = { id : string; name : string; email : string; city : string }
+
+let cities = [| "Berlin"; "Lisbon"; "Oslo"; "Tokyo"; "Toronto"; "Nairobi" |]
+
+let entries =
+  Array.init 1000 (fun i ->
+      {
+        id = string_of_int (i + 1);
+        name = "Person " ^ string_of_int (i + 1);
+        email = "person" ^ string_of_int (i + 1) ^ "@example.com";
+        city = cities.(i mod Array.length cities);
+      })
+
+let columns =
+  [|
+    Data_grid.column ~id:"name" ~header:(Text "Name") ~is_row_header:true
+      ~sort:(By_text (fun e -> e.name))
+      (fun e -> Jsx.string (S.get e).name);
+    Data_grid.column ~id:"email" ~header:(Text "Email") (fun e ->
+        Jsx.string (S.get e).email);
+    Data_grid.column ~id:"city" ~header:(Text "City")
+      ~sort:(By_text (fun e -> e.city))
+      (fun e -> Jsx.string (S.get e).city);
+  |]
+
+let make () =
+  <Data_grid
+    aria_label="A thousand people"
+    rows=entries
+    row_id=(fun e -> e.id)
+    columns
+    virtualized=true
+    row_height=48.
+    heading_height=36.
+    content_class="h-[400px] min-w-[640px] overflow-auto"
+  />

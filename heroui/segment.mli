@@ -2,6 +2,9 @@
     sliding to the option chosen, on Kobalte's segmented control, its look
     segment.css's.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/segment.md].
+
     {[
       <Segment aria_label="Billing" default_selected_key="monthly">
         <Segment.Item id="monthly">"Monthly"</Segment.Item>

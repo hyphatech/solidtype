@@ -1,0 +1,21 @@
+module Number_stepper = Solidtype_heroui.Number_stepper
+
+let bounded ~name ~caption ~min ~max ~value =
+  <div class_="flex flex-col items-center gap-2">
+    <span class_="text-xs text-muted">(Solidtype.Jsx.string caption)</span>
+    <Number_stepper
+      aria_label=name default_value=value min_value=min max_value=max>
+      <Number_stepper.Group>
+        <Number_stepper.Decrement_button />
+        <Number_stepper.Value />
+        <Number_stepper.Increment_button />
+      </Number_stepper.Group>
+    </Number_stepper>
+  </div>
+
+let make () =
+  <div class_="flex flex-col items-center gap-4">
+    (bounded ~name:"Rating" ~caption:"Min: 0, Max: 5" ~min:0. ~max:5. ~value:3.)
+    (bounded ~name:"Temperature" ~caption:"Min: -10, Max: 10" ~min:(-10.)
+       ~max:10. ~value:0.)
+  </div>

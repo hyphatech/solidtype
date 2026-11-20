@@ -1,0 +1,64 @@
+# Rendering
+
+Mounting in the browser, rendering on the server, and hydrating what the server rendered.
+
+## In the browser
+
+`Solidtype.Web` binds `solid-js/web`. `Web.render` mounts a root in an
+element, and gives what unmounts it:
+
+```ocaml
+external get_element_by_id : string -> Dom.element Js.Nullable.t
+  = "getElementById"
+[@@mel.scope "document"]
+
+let () =
+  match Js.Nullable.toOption (get_element_by_id "app") with
+  | Some root -> ignore (Solidtype.Web.render App.make root : unit -> unit)
+  | None -> invalid_arg "index.html has no element #app to draw the board in"
+```
+
+`Web.is_server` and `Web.is_dev` say which of Solid's builds is running.
+
+## On the server
+
+`Solidtype.Server` binds what Solid's server build exports from
+`solid-js/web`. It is a module of its own because Solid's browser build
+lacks some of it: an application's browser build that named
+`render_to_string` would fail to import it. Code that renders on the server
+is built with Solid's server compile, `solid({ ssr: true })`.
+
+| Call | What it renders |
+|---|---|
+| `Server.render_to_string app` | the page as HTML, at once |
+| `Server.render_to_string_async app` | the page once every resource read has resolved; ``Error `Timed_out`` after `timeout_ms`, thirty seconds unless given. The promise never rejects for it |
+| `Server.render_to_stream app` | the shell first, then each part as it resolves, written to a web `WritableStream` with `Server.pipe_to` |
+| `Server.generate_hydration_script ()` | the script a hydrating page needs before Solid loads |
+
+`Server.use_assets` adds elements to the page's head while it renders, and
+`Server.get_request_event` reads the request a server framework passed in.
+
+## Hydration
+
+A page rendered on the server is taken over in the browser by
+`Web.hydrate`, which walks the server's HTML and attaches to it, rather
+than rendering again. Both sides must be compiled hydratable, so that
+Solid's compiler writes the markers each finds the other by. The
+`HydrationScript`, `NoHydration` and `Hydration` components mark what is
+hydrated and what is left as HTML.
+
+Hydration needs the server's output and the browser's to agree exactly,
+which is why both are compiled by Solid's compiler from the same JSX, as
+a component written in TSX is.
+
+## With Astro
+
+Astro does all of this for an island: it renders it on the server, writes
+the hydration script, and hydrates it in the browser. `client:load`
+prerenders the island and hydrates it as the page loads, `client:visible`
+when it scrolls into view, and `client:only="solid-js"` skips the server and
+renders it in the browser alone. See [Astro](../start/astro.md#hydration).
+
+A `data-` attribute that marks a state, `data-selected`, is written by Solid
+as an attribute, never set from a `ref`, so the state is in the HTML a page
+is prerendered with and the browser does not repaint it on hydration.

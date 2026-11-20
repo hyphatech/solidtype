@@ -2,6 +2,9 @@
     from {!Styles.Avatar}, that shows its {!Image} once it has loaded and its
     {!Fallback} until then, or where it cannot.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/avatar.md].
+
     {[
       <Avatar>
         <Avatar.Image alt="Ada Lovelace" src="/ada.png" />

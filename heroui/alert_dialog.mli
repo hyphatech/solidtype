@@ -2,6 +2,9 @@
     classes from {!Styles.AlertDialog}, a dialog that asks the user to decide
     before going on.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/alert-dialog.md].
+
     {[
       <Alert_dialog>
         <Button variant=`danger>"Delete Project"</Button>

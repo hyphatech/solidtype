@@ -1,0 +1,160 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Chip = Solidtype_heroui.Chip
+module Data_grid = Solidtype_heroui.Data_grid
+module Gravity = Solidtype_gravity_icons
+
+type strength = Very_strong | Strong | Weak | Very_weak | No_communication
+
+type company = {
+  id : string;
+  name : string;
+  dot : string;
+  industries : string array;
+  linkedin : string;
+  last_interaction : string;
+  strength : strength;
+}
+
+let companies =
+  [|
+    {
+      id = "1";
+      name = "LVMH";
+      dot = "bg-warning";
+      industries = [| "Luxury"; "E-commerce" |];
+      linkedin = "lvmh";
+      last_interaction = "No contact";
+      strength = No_communication;
+    };
+    {
+      id = "2";
+      name = "Disney";
+      dot = "bg-success";
+      industries = [| "Media" |];
+      linkedin = "disney-music-group";
+      last_interaction = "No contact";
+      strength = No_communication;
+    };
+    {
+      id = "3";
+      name = "PayPal";
+      dot = "bg-accent";
+      industries = [| "Financial Services"; "Payments" |];
+      linkedin = "paypal";
+      last_interaction = "No contact";
+      strength = No_communication;
+    };
+    {
+      id = "4";
+      name = "sweetgreen";
+      dot = "bg-success";
+      industries = [| "Food"; "Retail" |];
+      linkedin = "sweetgreen";
+      last_interaction = "about 2 hours ago";
+      strength = Very_strong;
+    };
+    {
+      id = "5";
+      name = "OpenPhone";
+      dot = "bg-accent";
+      industries = [| "Telecom" |];
+      linkedin = "openphone";
+      last_interaction = "2 days ago";
+      strength = Weak;
+    };
+    {
+      id = "6";
+      name = "Attio";
+      dot = "bg-accent";
+      industries = [| "Enterprise"; "CRM" |];
+      linkedin = "attio";
+      last_interaction = "about 3 hours ago";
+      strength = Very_weak;
+    };
+    {
+      id = "7";
+      name = "Opera";
+      dot = "bg-danger";
+      industries = [| "Software"; "Browsers"; "AI" |];
+      linkedin = "opera-software";
+      last_interaction = "14 days ago";
+      strength = Very_weak;
+    };
+    {
+      id = "8";
+      name = "Google";
+      dot = "bg-accent";
+      industries = [| "Hosting"; "Search" |];
+      linkedin = "google";
+      last_interaction = "9 days ago";
+      strength = Weak;
+    };
+  |]
+
+let strength_name = function
+  | Very_strong -> "Very strong"
+  | Strong -> "Strong"
+  | Weak -> "Weak"
+  | Very_weak -> "Very weak"
+  | No_communication -> "No communication"
+
+let strength_class = function
+  | Very_strong | Strong -> "text-success"
+  | Weak -> "text-warning"
+  | Very_weak -> "text-danger"
+  | No_communication -> "text-muted"
+
+let columns =
+  [|
+    Data_grid.column ~id:"company" ~header:(Text "Company") ~is_row_header:true
+      ~pinned:`start ~width:(Pixels 160.)
+      ~sort:(By_text (fun c -> c.name))
+      (fun c ->
+        <span class_="flex items-center gap-2 font-medium">
+          <span class_=("size-2 shrink-0 rounded-full " ^ (S.get c).dot) />
+          (Jsx.string (S.get c).name)
+        </span>);
+    Data_grid.column ~id:"industries" ~header:(Text "Industries")
+      ~width:(Pixels 220.) (fun c ->
+        <span class_="flex items-center gap-1">
+          <Chip size=`sm variant=`soft>
+            (Jsx.string (S.get c).industries.(0))
+          </Chip>
+          (match Array.length (S.get c).industries with
+          | 1 -> Jsx.fragment [||]
+          | n ->
+              <span class_="text-xs text-muted">
+                (Jsx.string ("+" ^ string_of_int (n - 1)))
+              </span>)
+        </span>);
+    Data_grid.column ~id:"linkedin" ~header:(Text "LinkedIn")
+      ~width:(Pixels 200.) (fun c ->
+        <span class_="flex items-center gap-1 text-muted">
+          <Gravity.Link class_="size-3.5" /> (Jsx.string (S.get c).linkedin)
+        </span>);
+    Data_grid.column ~id:"last" ~header:(Text "Last interaction")
+      ~width:(Pixels 180.) (fun c -> Jsx.string (S.get c).last_interaction);
+    Data_grid.column ~id:"strength" ~header:(Text "Connection strength")
+      ~width:(Pixels 200.) (fun c ->
+        <span
+          class_=("flex items-center gap-1.5 "
+                 ^ strength_class (S.get c).strength)>
+          <span class_="size-1.5 rounded-full bg-current" />
+          (Jsx.string (strength_name (S.get c).strength))
+        </span>);
+  |]
+
+let make () =
+  <Data_grid
+    aria_label="Companies"
+    rows=companies
+    row_id=(fun c -> c.id)
+    columns
+    selection_mode=`multiple
+    show_selection_checkboxes=true
+    footer=(<span class_="text-sm text-muted">
+              (Jsx.string (string_of_int (Array.length companies) ^ " count"))
+            </span>)
+  />

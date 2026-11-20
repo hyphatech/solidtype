@@ -6,6 +6,9 @@
     shows while it is invalid, and it submits its value with a form, as
     \@internationalized/date writes it, [14:30:00].
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/time-field.md].
+
     {[
       <Time_field name="start">
         <Label>"Time"</Label>
