@@ -2,6 +2,9 @@
     many of, or to act on, with HeroUI's classes from {!Styles.Listbox},
     {!Styles.ListboxItem} and {!Styles.ListboxSection}.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/list-box.md].
+
     {[
       <List_box aria_label="Users" selection_mode=`single>
         <List_box.Item id="bob" text_value="Bob">

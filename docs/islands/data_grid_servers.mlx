@@ -1,0 +1,163 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Chip = Solidtype_heroui.Chip
+module Data_grid = Solidtype_heroui.Data_grid
+module Progress_circle = Solidtype_heroui.Progress_circle
+module Gravity = Solidtype_gravity_icons
+module Chart = Solidtype_rhp.Chart
+module Line = Solidtype_rhp.Line
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+module Ticks = Solidtype_rhp.Ticks
+
+type server = {
+  id : string;
+  instances : int;
+  active : bool;
+  region : string;
+  capacity : float;
+  cost : float;
+  requests : float array;
+}
+
+let servers =
+  [|
+    {
+      id = "4586930";
+      instances = 25;
+      active = true;
+      region = "US-West 1";
+      capacity = 20.01;
+      cost = 830.04;
+      requests = [| 4.; 6.; 5.; 3.; 4.; 5.; 6.; 5.; 7.; 8.; 7.; 9. |];
+    };
+    {
+      id = "4586931";
+      instances = 13;
+      active = true;
+      region = "US-East 2";
+      capacity = 7.36;
+      cost = 752.72;
+      requests = [| 6.; 6.; 7.; 7.; 6.; 6.; 5.; 6.; 7.; 6.; 6.; 7. |];
+    };
+    {
+      id = "4586932";
+      instances = 27;
+      active = false;
+      region = "EU-Central 1";
+      capacity = 48.25;
+      cost = 517.6;
+      requests = [| 5.; 5.; 6.; 5.; 5.; 6.; 6.; 7.; 6.; 6.; 5.; 5. |];
+    };
+    {
+      id = "4586934";
+      instances = 6;
+      active = true;
+      region = "US-West 2";
+      capacity = 73.12;
+      cost = 412.71;
+      requests = [| 8.; 9.; 8.; 7.; 8.; 6.; 7.; 6.; 5.; 5.; 4.; 5. |];
+    };
+    {
+      id = "4586935";
+      instances = 19;
+      active = true;
+      region = "EU-West 1";
+      capacity = 72.65;
+      cost = 354.06;
+      requests = [| 6.; 7.; 6.; 7.; 6.; 7.; 6.; 7.; 6.; 7.; 6.; 7. |];
+    };
+    {
+      id = "4586937";
+      instances = 27;
+      active = true;
+      region = "AP-Northeast 1";
+      capacity = 11.35;
+      cost = 146.05;
+      requests = [| 4.; 5.; 6.; 6.; 7.; 6.; 7.; 8.; 7.; 6.; 7.; 6. |];
+    };
+  |]
+
+(* A point for each hour, its number along the value axis, its requests
+   across the band. *)
+let points requests =
+  Array.mapi (fun i r -> Some (Some (float_of_int i), Some r)) requests
+
+let spark =
+  Slat.make ~thickness:(Slat.number 32.)
+    ~room:(Slat.room ~start:(Slat.px 0.) ~end_:(Slat.px 0.) ())
+    (fun d ->
+      <Line points=(points (Row.data d).requests) peak=10. smooth=true fill=true
+      />)
+
+let capacity s =
+  let warn = (S.get s).capacity >= 70. in
+  <span
+    class_=("flex items-center gap-2 tabular-nums "
+           ^ if warn then "text-warning" else "")>
+    <Progress_circle
+      aria_label=("Capacity of " ^ (S.get s).id)
+      value=(S.get s).capacity
+      color=(if warn then `warning else `accent)
+      size=`sm>
+      <Progress_circle.Track>
+        <Progress_circle.Track_circle /> <Progress_circle.Fill_circle />
+      </Progress_circle.Track>
+    </Progress_circle>
+    (Jsx.string (Js.Float.toFixed ~digits:2 (S.get s).capacity ^ "%"))
+  </span>
+
+let columns =
+  [|
+    Data_grid.column ~id:"id" ~header:(Text "Cluster ID") ~is_row_header:true
+      ~sort:(By_text (fun s -> s.id))
+      (fun s ->
+        <span class_="flex items-center gap-1 tabular-nums">
+          (Jsx.string (S.get s).id)
+          <Button
+            is_icon_only=true
+            aria_label=("Copy " ^ (S.get s).id)
+            size=`sm
+            variant=`ghost>
+            <Gravity.Copy class_="size-4 text-muted" />
+          </Button>
+        </span>);
+    Data_grid.column ~id:"instances" ~header:(Text "Instances") ~align:`center
+      ~sort:(By (fun a b -> Int.compare a.instances b.instances))
+      (fun s -> Jsx.int (S.get s).instances);
+    Data_grid.column ~id:"status" ~header:(Text "Status") (fun s ->
+        <Chip
+          color=(if (S.get s).active then `success else `default)
+          size=`sm
+          variant=`soft>
+          (Jsx.string (if (S.get s).active then "Active" else "Inactive"))
+        </Chip>);
+    Data_grid.column ~id:"region" ~header:(Text "Region") (fun s ->
+        Jsx.string (S.get s).region);
+    Data_grid.column ~id:"capacity" ~header:(Text "Capacity")
+      ~sort:(By (fun a b -> Float.compare a.capacity b.capacity))
+      capacity;
+    Data_grid.column ~id:"cost" ~header:(Text "Cost") ~align:`end_
+      ~sort:(By (fun a b -> Float.compare a.cost b.cost))
+      ~cell_class:"tabular-nums"
+      (fun s -> Jsx.string ("$" ^ Js.Float.toFixed ~digits:2 (S.get s).cost));
+    Data_grid.column ~id:"requests" ~header:(Text "Requests")
+      ~width:(Pixels 140.) (fun s ->
+        <Chart
+          scale=(0., 11.)
+          ticks=Ticks.none
+          label=("Requests to " ^ (S.get s).id ^ ", hour by hour")>
+          <Plot rows=[| S.get s |] render=spark />
+        </Chart>);
+  |]
+
+let make () =
+  <Data_grid
+    aria_label="Servers"
+    rows=servers
+    row_id=(fun s -> s.id)
+    columns
+    content_class="min-w-[880px]"
+  />

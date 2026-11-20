@@ -1,0 +1,23 @@
+module Number_stepper = Solidtype_heroui.Number_stepper
+
+let stepped step =
+  let caption = "Step: " ^ Js.Float.toString step in
+  <div class_="flex flex-col items-center gap-2">
+    <span class_="text-xs text-muted">(Solidtype.Jsx.string caption)</span>
+    <Number_stepper
+      aria_label=("Quantity step " ^ Js.Float.toString step)
+      default_value=0.
+      min_value=0.
+      step>
+      <Number_stepper.Group>
+        <Number_stepper.Decrement_button />
+        <Number_stepper.Value />
+        <Number_stepper.Increment_button />
+      </Number_stepper.Group>
+    </Number_stepper>
+  </div>
+
+let make () =
+  <div class_="flex flex-col items-center gap-4">
+    (stepped 5.) (stepped 10.)
+  </div>

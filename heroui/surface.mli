@@ -3,6 +3,9 @@
     variant, by {!Context}, which HeroUI's Card, Alert, Accordion and overlays
     give too, so a part can choose the colours that stand out on it.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/surface.md].
+
     {[
       <Surface variant=`secondary class_="rounded-3xl p-6">
         <p>"On a secondary surface"</p>

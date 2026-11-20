@@ -1,0 +1,82 @@
+(* A table's columns as the server writes them: a column pinned to a side
+   marked so, the last of each side its edge, and a resizable table's columns
+   as wide as they ask, in the HTML a page is prerendered with, as the browser
+   draws them, since hydration writes none of it again. *)
+
+module Server = Solidtype.Server
+module Jsx = Solidtype.Jsx
+module Table = Solidtype_heroui.Table
+module E = Jest.Expect
+
+let row () =
+  <Table.Row id="1">
+    <Table.Cell>"Acme"</Table.Cell>
+    <Table.Cell>"Kate"</Table.Cell>
+    <Table.Cell>"Retail"</Table.Cell>
+    <Table.Cell>"..."</Table.Cell>
+  </Table.Row>
+
+let pinned () =
+  <Table>
+    <Table.Scroll_container>
+      <Table.Content aria_label="Companies">
+        <Table.Header>
+          <Table.Column id="company" is_row_header=true pinned=`start>
+            "Company"
+          </Table.Column>
+          <Table.Column id="owner" pinned=`start>"Owner"</Table.Column>
+          <Table.Column id="industry">"Industry"</Table.Column>
+          <Table.Column id="actions" pinned=`end_>"Actions"</Table.Column>
+        </Table.Header>
+        <Table.Body>(row ())</Table.Body>
+      </Table.Content>
+    </Table.Scroll_container>
+  </Table>
+
+let resizable () =
+  <Table>
+    <Table.Resizable_container>
+      <Table.Content aria_label="Companies">
+        <Table.Header>
+          <Table.Column
+            id="company" is_row_header=true width=(Table.Pixels 160.)>
+            "Company"
+          </Table.Column>
+          <Table.Column id="owner" width=(Table.Pixels 120.)>
+            "Owner"
+          </Table.Column>
+          <Table.Column id="industry" width=(Table.Pixels 140.)>
+            "Industry"
+          </Table.Column>
+          <Table.Column id="actions" width=(Table.Pixels 80.)>
+            "Actions"
+          </Table.Column>
+        </Table.Header>
+        <Table.Body>(row ())</Table.Body>
+      </Table.Content>
+    </Table.Resizable_container>
+  </Table>
+
+(* How many times [part] is in [s]. *)
+let count part s = Array.length (Js.String.split ~sep:part s) - 1
+
+let () =
+  Jest.describe "A table's columns on the server" (fun () ->
+      Jest.test "marks those pinned, and each side's edge" (fun () ->
+          let html = Server.render_to_string pinned in
+          E.(
+            expect
+              ( count {js|data-pinned="start"|js} html,
+                count {js|data-pinned="end"|js} html,
+                count {js|data-pinned-edge|js} html,
+                count {js|inset-inline-end: 0px|js} html )
+            |> toEqual (4, 2, 4, 2)));
+      Jest.test "lays a resizable table's columns out as they ask" (fun () ->
+          let html = Server.render_to_string resizable in
+          E.(
+            expect
+              ( count {js|width: 160px|js} html,
+                count {js|width: 120px|js} html,
+                count {js|width: 140px|js} html,
+                count {js|width: 80px|js} html )
+            |> toEqual (1, 1, 1, 1))))

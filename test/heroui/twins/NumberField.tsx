@@ -2,7 +2,7 @@
 // description and error, which the solidtype port's test renders under the
 // same props, to compare every part, and steps as it steps the port's.
 
-import { Description, FieldError, Label, NumberField } from "@heroui/react";
+import { Button, Description, FieldError, Label, NumberField } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { words } from "./words";
@@ -99,6 +99,45 @@ export function renderOfState(
   const group = host.querySelector("[data-slot=number-field-group]");
   if (!(group instanceof HTMLElement)) throw new Error("HeroUI's field rendered no group");
   return group;
+}
+
+// A field stepped by HeroUI's own buttons, given its slots, at its minimum.
+export function renderWithButtons(named: boolean): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <NumberField aria-label={named ? "Quantity" : undefined} defaultValue={0} minValue={0}>
+        {named ? null : <Label>Width</Label>}
+        <NumberField.Group>
+          <Button slot="decrement" isIconOnly size="sm">-</Button>
+          <NumberField.Input />
+          <Button slot="increment" isIconOnly size="sm">+</Button>
+        </NumberField.Group>
+      </NumberField>,
+    ),
+  );
+  mounted = { root, host };
+  return host;
+}
+
+// A field named by its aria-label alone, with no label of its own.
+export function renderNamed(name: string): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <NumberField aria-label={name} defaultValue={1}>
+        <NumberField.Group>
+          <NumberField.DecrementButton />
+          <NumberField.Input />
+          <NumberField.IncrementButton />
+        </NumberField.Group>
+      </NumberField>,
+    ),
+  );
+  mounted = { root, host };
+  return host;
 }
 
 export function cleanup(): void {

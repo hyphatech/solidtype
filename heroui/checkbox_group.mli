@@ -7,6 +7,9 @@
     {!Description} describes it. It is disabled as [is_disabled] says, else as
     the {!Fieldset} it is in is.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/checkbox-group.md].
+
     {[
       <Checkbox_group name="interests" default_value=([ "coding" ])>
         <Label>"Interests"</Label>

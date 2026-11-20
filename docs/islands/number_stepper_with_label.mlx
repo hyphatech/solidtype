@@ -1,0 +1,18 @@
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Number_stepper = Solidtype_heroui.Number_stepper
+
+let make () =
+  <Number_stepper
+    class_="flex-col items-start gap-1.5"
+    default_value=1.
+    min_value=1.
+    max_value=10.>
+    <Label>"Guests"</Label>
+    <Number_stepper.Group>
+      <Number_stepper.Decrement_button />
+      <Number_stepper.Value />
+      <Number_stepper.Increment_button />
+    </Number_stepper.Group>
+    <Description>"Maximum 10 guests per reservation"</Description>
+  </Number_stepper>

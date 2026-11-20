@@ -14,8 +14,8 @@ type t_resolved_date_time_format_options
 type t_resolved_number_format_options
 type t_uint8_array
 type t_accordion_context_value
-type t_alert_dialog_portal_ref
-type t_alert_dialog_portal_ref2
+type t_alert_dialog_portal_ref_element_
+type t_alert_dialog_portal_ref_element_2
 type t_alert_dialog_root_translations
 type t_breadcrumbs_root_translations
 type t_breadcrumbs_context_value
@@ -214,8 +214,8 @@ module AccordionContextValue : sig
   external make : list_state:(t_list_state Solidtype.Solid.accessor [@mel.as "listState"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> unit -> t = "" [@@mel.obj]
 end
 
-module AlertDialog_Portal_Ref : sig
-  type t = t_alert_dialog_portal_ref
+module AlertDialog_Portal_Ref_element_ : sig
+  type t = t_alert_dialog_portal_ref_element_
   (** The `Element.shadowRoot` read-only property represents the shadow root hosted by the element.
       
       \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Element/shadowRoot) *)
@@ -223,8 +223,8 @@ module AlertDialog_Portal_Ref : sig
   external to_element : t -> Dom.element = "%identity"
 end
 
-module AlertDialog_Portal_Ref2 : sig
-  type t = t_alert_dialog_portal_ref2
+module AlertDialog_Portal_Ref_element_2 : sig
+  type t = t_alert_dialog_portal_ref_element_2
   (** The `Element.shadowRoot` read-only property represents the shadow root hosted by the element.
       
       \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Element/shadowRoot) *)

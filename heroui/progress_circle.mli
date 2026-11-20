@@ -5,6 +5,9 @@
     value is along the range, or, indeterminate, spins as HeroUI's styles
     animate it. No label names it, so it is named by its [aria_label].
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/progress-circle.md].
+
     {[
       <Progress_circle value=60. aria_label="Loading">
         <Progress_circle.Track>

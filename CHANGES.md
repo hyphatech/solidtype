@@ -1,5 +1,101 @@
 # Changes
 
+## 0.12.0 (2026-11-20)
+
+- HeroUI's `Data_grid`: rows given as data, each known by its `row_id`, and
+  columns as definitions, `Data_grid.column`, drawn on HeroUI's `Table`. A
+  column sorts exactly when it is given a `sort`, by a row's text in the
+  page's order or a comparison, the grid keeping its own sort or drawing the
+  application's; a cell is given its row as an accessor, so a control in it
+  keeps its focus as the row is given again. Selection checkboxes, columns
+  resized, pinned and aligned, a header kept in view, rows dragged to a new
+  place and told with every row, an empty state, a footer, loading more and
+  virtualization. Its look is `heroui/data-grid.css`, in the plugin's
+  `heroui-extras.css`. `Solidtype_headless.Data_grid` is its model, for
+  another design system's grid.
+- HeroUI's `Table` takes `pinned` on a `Table.Column` and `sticky_header` on
+  its `Table.Content`, drawn by the plugin's `heroui-extras.css`; a pinned
+  cell at a corner of the body fills what lies outside its curve, so nothing
+  scrolling beneath shows there.
+- The headless `Table` reorders its rows, given `on_reorder`: a
+  `Table.Drag_handle` grabs its row by Enter or Space, the arrows move it
+  among the rows of its parent and Enter drops it, Escape lets it go, and a
+  pointer drags it; each step is told to a reader in React Aria's words, a
+  selected row is dragged with the others selected, and `on_reorder` is
+  given the rows moved and the row they land beside. A pointer's drag leaves
+  the row in its place, `data-dragging`, and draws a copy of it that follows
+  the pointer, `data-drag-preview`. HeroUI's `Table` does so by a `Button` of
+  `` slot=`drag ``, its dragged row dimmed, its copy lifted, and a line in the
+  accent where it would land.
+- The headless `Table` pins a column to its start or its end, `pinned=`start`
+  on its `Table.Column`: its header and cells stay in view as the others
+  scroll beneath them, each beside the columns pinned there before it, the
+  last of each side `data-pinned-edge`, and the table
+  `data-pinned-start-detached` and `data-pinned-end-detached` while content
+  passes beneath them; virtualized too. `sticky_header=true` on its
+  `Table.Root` keeps the columns' headers at the top of what scrolls it.
+- A key pressed in a control inside the headless `Table`'s cell, and so the
+  HeroUI `Table`'s, is the control's: a field keeps every key, where the
+  arrows moved focus to another row, a letter could find one, Space selected
+  it and Tab left the table; a key a control handles is its own; and the
+  arrows, Home and End from a button move from its cell.
+- The headless `Table`, and so the HeroUI `Table`, keeps a resizable
+  table's layout and its columns' widths beside a `style` given to its
+  `Table.Root` or a `Table.Column`, which replaced them.
+- A resizable table prerendered on the server lays its columns out as they
+  ask, where every column was 0 pixels wide: the server computes
+  a memo once, before the columns had registered, and hydration never wrote
+  the widths again.
+- A letter typed on the headless `Table`'s row, and so the HeroUI
+  `Table`'s, moves to the next row whose text starts with what was typed,
+  as its interface said; it found none, since each row's text was taken to
+  be its key.
+- HeroUI's `Number_stepper`: a `Number_field` drawn as two round buttons
+  around its value, whose digits roll to each new number the way it moved,
+  up as it rises and down as it falls, in sizes; its
+  value, range, step, format, form and keys are the field's, its input out of
+  sight in the page's order until text is typed in it. Its look is
+  `heroui/number-stepper.css`, in the plugin's `heroui-extras.css`. A
+  component built on a number field draws it in its own classes by
+  `Number_field.Look`, and reads its value by `Number_field.Shown`.
+- A HeroUI `Button` given `` slot=`increment `` or `` slot=`decrement `` steps
+  the `Number_field` or `Number_stepper` it is in, as React Aria's slots do.
+- HeroUI's `Number_field` given `aria_label` and no `Label` names its input
+  by it, and its buttons "Increase" and "Decrease" followed by it, as React
+  Aria's; its input was unnamed and its buttons named by a label that was not
+  there.
+- A caller's `on_key_down`, `on_focus` and `on_blur` on the headless
+  `Number_field`'s and `Color_channel_field`'s input are called beside
+  Kobalte's own, which they replaced, so the arrows no longer stepped it.
+- A component's function child drawn by `Jsx.draw` is drawn where Solid
+  inserts it, so what it reads draws only it again: a menu opened by a button
+  in a HeroUI `Table`'s cell stays open, where the cell drew its content anew
+  and closed it.
+- A press that begins on a control in the headless `Table`'s cell leaves the
+  focus where the control puts it, rather than on the cell.
+- Every overlay of HeroUI's ports is drawn in the browser's top layer, by
+  `Solidtype_headless.Top_layer`: above anything the page stacks, a
+  virtualized table's sticky header among them, and above every overlay
+  opened before it, the toasts kept above them all. A popover, a menu, a
+  select's list and a tooltip were drawn under such a header, since Kobalte
+  copies its content's `z-index`, which HeroUI's styles leave to React Aria.
+- A Kobalte part's `ref` is the function Solid calls with its element, of
+  the element it declares: every portal's, which the binding left out, is
+  `?ref:(Dom.element -> unit)`, since a portal draws a `<div>` or a `<g>`.
+  Breaking: `SegmentedControl`'s root takes `Dom.htmlElement -> unit`, not
+  an element or a function; the `Types` modules written for a portal's
+  ref's element, `AlertDialog_Portal_Ref` and the like, are gone.
+- `vite-plugin-solidtype` writes a `ref` given by name as a function that
+  calls it, so a module's function given as an element's `ref`,
+  `ref=Top_layer.place`, is called with the element, where Solid's compiler
+  would assign the element to it, an import, and the build failed.
+- Each package installs the documentation for a user's agent: `solidtype`
+  its catalogue, `llms.txt`, every page in Markdown with its examples, and
+  a skill, `skills/solidtype`, in `$(opam var solidtype:doc)`; every other
+  package the catalogue, its links reaching those pages. The README's *With
+  an agent* says how to give an agent the skill, and a module with a page
+  names the page's installed path in its `.mli`.
+
 ## 0.11.1 (2026-11-16)
 
 - The code `ppx_solidtype` writes around a component's tag, the `if false`

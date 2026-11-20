@@ -21,6 +21,8 @@ module Slat = Slat
 module Ticks = Ticks
 include module type of struct include Helpers end
 
+(** Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/area.md]. *)
 module Area : sig
   module Props : sig
     external check :
@@ -55,6 +57,8 @@ module Axis : sig
   [@@mel.module "@bezda/rhp"]
 end
 
+(** Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/bar.md]. *)
 module Bar : sig
   module Props : sig
     external check :
@@ -73,6 +77,8 @@ module Bar : sig
   [@@mel.module "@bezda/rhp"]
 end
 
+(** Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/cell.md]. *)
 module Cell : sig
   module Props : sig
     external check :
@@ -89,6 +95,8 @@ module Cell : sig
   [@@mel.module "@bezda/rhp"]
 end
 
+(** Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/chart.md]. *)
 module Chart : sig
   module Props : sig
     external check :
@@ -122,6 +130,8 @@ module Chart : sig
   [@@mel.module "@bezda/rhp"]
 end
 
+(** Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/dot.md]. *)
 module Dot : sig
   module Props : sig
     external check :
@@ -141,6 +151,8 @@ module Dot : sig
   [@@mel.module "@bezda/rhp"]
 end
 
+(** Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/label.md]. *)
 module Label : sig
   module Props : sig
     external check :
@@ -159,7 +171,10 @@ module Label : sig
   [@@mel.module "@bezda/rhp"]
 end
 
-(** A line through points: a sparkline in a slat, or on a Chart's cross scale a line chart. *)
+(** A line through points: a sparkline in a slat, or on a Chart's cross scale a line chart.
+
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/line.md]. *)
 module Line : sig
   module Props : sig
     external check :
@@ -179,7 +194,10 @@ module Line : sig
   [@@mel.module "@bezda/rhp"]
 end
 
-(** A place on the chart and nothing else: no size and nothing drawn, so whatever you put inside it sits at its value. *)
+(** A place on the chart and nothing else: no size and nothing drawn, so whatever you put inside it sits at its value.
+
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/place.md]. *)
 module Place : sig
   module Props : sig
     external check :
@@ -197,7 +215,10 @@ module Place : sig
 end
 
 (** A magazine-style panel around a chart: kicker, headline, dek, the chart, a note. Markup only; its look is the page's
-    CSS, and \@bezda/rhp/posters.css has the gallery's looks to start from. *)
+    CSS, and \@bezda/rhp/posters.css has the gallery's looks to start from.
+
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/poster.md]. *)
 module Poster : sig
   module Props : sig
     external check :
@@ -218,6 +239,8 @@ end
 external theme : Types.RequiredThemeValues.t = "THEME"
 [@@mel.module "@bezda/rhp"]
 
+(** Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/theme.md]. *)
 module Theme : sig
   module Props : sig
     external check :
@@ -231,6 +254,8 @@ module Theme : sig
   [@@mel.module "@bezda/rhp"]
 end
 
+(** Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/rhp/tick.md]. *)
 module Tick : sig
   module Props : sig
     external check :

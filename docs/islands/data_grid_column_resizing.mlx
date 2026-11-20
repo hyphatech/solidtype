@@ -1,0 +1,76 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Data_grid = Solidtype_heroui.Data_grid
+module Table = Solidtype_heroui.Table
+
+type member = { id : string; name : string; role : string; email : string }
+
+let members =
+  [|
+    {
+      id = "1";
+      name = "Kate Moore";
+      role = "Chief Executive Officer";
+      email = "kate@acme.com";
+    };
+    {
+      id = "2";
+      name = "John Smith";
+      role = "Chief Technology Officer";
+      email = "john@acme.com";
+    };
+    {
+      id = "3";
+      name = "Sara Johnson";
+      role = "Chief Marketing Officer";
+      email = "sara@acme.com";
+    };
+    {
+      id = "4";
+      name = "Michael Brown";
+      role = "Chief Financial Officer";
+      email = "michael@acme.com";
+    };
+  |]
+
+let columns =
+  [|
+    Data_grid.column ~id:"name" ~header:(Text "Name") ~is_row_header:true
+      ~allows_resizing:true ~default_width:(Pixels 180.) ~min_width:120.
+      (fun m -> Jsx.string (S.get m).name);
+    Data_grid.column ~id:"role" ~header:(Text "Role") ~allows_resizing:true
+      ~default_width:(Fraction 1.) ~min_width:160. (fun m ->
+        Jsx.string (S.get m).role);
+    Data_grid.column ~id:"email" ~header:(Text "Email") ~allows_resizing:true
+      ~default_width:(Fraction 1.) ~min_width:160. (fun m ->
+        Jsx.string (S.get m).email);
+  |]
+
+let size_name : Table.column_size -> string = function
+  | Pixels p -> Js.Float.toString p ^ "px"
+  | Percent p -> Js.Float.toString p ^ "%"
+  | Fraction f -> Js.Float.toString f ^ "fr"
+
+let make () =
+  let widths, set_widths = S.create_signal "" in
+  <div class_="flex flex-col gap-3">
+    <Data_grid
+      aria_label="Resizable columns"
+      rows=members
+      row_id=(fun m -> m.id)
+      columns
+      allows_column_resize=true
+      on_column_resize_end=(fun sizes ->
+                             S.set set_widths
+                               (String.concat ", "
+                                  (Array.to_list
+                                     (Array.map
+                                        (fun (id, size) ->
+                                          id ^ " " ^ size_name size)
+                                        sizes))))
+    />
+    <p class_="text-sm text-muted">
+      "Widths: "
+      (Jsx.string (match S.get widths with "" -> "as given" | w -> w))
+    </p>
+  </div>

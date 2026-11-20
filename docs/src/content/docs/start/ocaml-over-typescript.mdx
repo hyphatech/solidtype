@@ -113,7 +113,7 @@ let board () =
     fallback=(fun exn reset ->
       match exn with
       | Offline -> <p>"You are offline."</p>
-      | _ -> <button on_click=(fun _ -> reset ())>"Retry"</button>)>
+      | _ -> <Button on_click=(fun _ -> reset ())>"Retry"</Button>)>
     <Columns />
   </ErrorBoundary>
 ```

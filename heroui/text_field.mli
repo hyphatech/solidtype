@@ -6,6 +6,9 @@
     as React Aria writes it -- disabled, invalid, read-only, required, and the
     focus within it.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/text-field.md].
+
     {[
       <Text_field name="email" is_required=true>
         <Label>"Email"</Label>

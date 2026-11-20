@@ -129,6 +129,19 @@ const source = program.getSourceFile(entry);
 const mod = source && checker.getSymbolAtLocation(source);
 if (!mod) throw new Error(`no ${entry}`);
 
+// A component with a page of its own names it in its comment, the page's
+// path as the solidtype package installs it, so an agent reading the
+// signature is sent to how the component is used. Indented as a module's
+// comment is, which top() takes back to the file's margin.
+function pageDoc(comment: string[], name: string): string[] {
+  const page = `rhp/${name.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase()}`;
+  if (!existsSync(`${root}docs/src/content/docs/${page}.mdx`)) return comment;
+  const line = `Its page, with its examples:\n      [$(opam var solidtype:doc)/pages/${page}.md].`;
+  const last = comment.at(-1);
+  if (last === undefined) return [`  (** ${line} *)`];
+  return [...comment.slice(0, -1), last.replace(/ \*\)$/, `\n\n      ${line} *)`)];
+}
+
 const src = new Source();
 for (const sym of [...checker.getExportsOfModule(mod)].sort((a, b) => (a.name < b.name ? -1 : 1))) {
   if (portedExports.has(sym.name)) continue;
@@ -142,7 +155,7 @@ for (const sym of [...checker.getExportsOfModule(mod)].sort((a, b) => (a.name < 
     const props = checker.getTypeOfSymbol(signature.getParameters()[0]!);
     const element = renders[sym.name] ?? (param?.type ? elementOf(param.type) : null);
     const own = checker.getPropertiesOfType(props).filter(ofRhp);
-    src.both(...doc(r, "  "));
+    src.both(...pageDoc(doc(r, "  "), sym.name));
     src.module("  ", sym.name, () => part(src, "@bezda/rhp", sym.name, decl, null, [], sym.name, { element, own }));
     src.both(``);
   } else if (r.flags & ts.SymbolFlags.Function) {

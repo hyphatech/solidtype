@@ -1,0 +1,292 @@
+(* The headless Table's rows reordered, as a caller meets them: a row grabbed
+   by its handle with Enter, moved by the arrows, dropped by Enter or let go
+   by Escape, each step told to a reader as React Aria tells it; dragged by a
+   pointer between two rows; the selected rows dragged together; and no
+   violation axe finds while a row is grabbed. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Table = Solidtype_headless.Table
+module E = Jest.Expect
+module H = Harness
+open Harness.Syntax
+
+type task = { id : string; name : string }
+
+let tasks =
+  [|
+    { id = "1"; name = "Alpha" };
+    { id = "2"; name = "Bravo" };
+    { id = "3"; name = "Charlie" };
+    { id = "4"; name = "Delta" };
+  |]
+
+let reorder_name (r : Table.reorder) =
+  String.concat "," (Array.to_list r.keys)
+  ^ (match r.position with `before -> " before " | `after -> " after ")
+  ^ r.target
+
+let board ?(mode = `none) ?(selected = [||]) told =
+  H.render (fun () ->
+      <Table.Root
+        aria_label="Tasks"
+        selection_mode=mode
+        default_selected_keys=selected
+        on_reorder=(fun r -> told := reorder_name r :: !told)>
+        <Table.Header>
+          <Table.Column>"Move"</Table.Column>
+          <Table.Column is_row_header=true>"Task"</Table.Column>
+        </Table.Header>
+        <Table.Body>
+          <For each=tasks>
+            (fun t i ->
+              <Table.Row
+                id=t.id
+                data_box_top=(Jsx.data (string_of_int (S.get i * 40)))
+                data_box_height="40">
+                <Table.Cell><Table.Drag_handle /></Table.Cell>
+                <Table.Cell>(Jsx.string t.name)</Table.Cell>
+              </Table.Row>)
+          </For>
+        </Table.Body>
+      </Table.Root>)
+
+external query : string -> Dom.element Js.null = "querySelector"
+[@@mel.scope "document"]
+
+let preview () = Js.Null.toOption (query "[data-drag-preview]")
+
+(* Where the copy of a row a pointer drags is, by its own top. *)
+let ghost_top g =
+  let style = Option.value (H.attribute g "style") ~default:"" in
+  let after = Js.String.split ~sep:"top: " style in
+  if Array.length after < 2 then "none"
+  else (Js.String.split ~sep:";" after.(1)).(0)
+
+let announced () =
+  match Js.Null.toOption (query "[data-live-announcer]") with
+  | Some e -> H.text e
+  | None -> "nothing"
+
+let row name =
+  match
+    Array.to_list (H.all_by_role "row")
+    |> List.filter (fun r -> Js.String.includes ~search:name (H.text r))
+  with
+  | r :: _ -> r
+  | [] -> Js.Exn.raiseError ("no row of " ^ name)
+
+external query_in : Dom.element -> string -> Dom.element Js.null
+  = "querySelector"
+[@@mel.send]
+
+let handle name =
+  match Js.Null.toOption (query_in (row name) "button") with
+  | Some b -> b
+  | None -> Js.Exn.raiseError ("no handle of " ^ name)
+
+(* Each row's state while a drag is under way: dragged, or where a drop would
+   land beside it. *)
+let marks () =
+  Array.of_list
+    (List.filter_map
+       (fun t ->
+         let r = row t.name in
+         match
+           ( H.attribute r "data-dragging",
+             H.attribute r "data-drop-target",
+             H.attribute r "data-drop-position" )
+         with
+         | Some _, _, _ -> Some (t.name ^ " dragged")
+         | None, Some _, Some side -> Some (t.name ^ " " ^ side)
+         | None, Some _, None -> Some (t.name ^ " target")
+         | None, None, _ -> None)
+       (Array.to_list tasks))
+
+type pointer
+
+external pointer :
+  client_y:(float[@mel.as "clientY"]) ->
+  ?button:int ->
+  pointer_id:(int[@mel.as "pointerId"]) ->
+  pointer_type:(string[@mel.as "pointerType"]) ->
+  unit ->
+  pointer = ""
+[@@mel.obj]
+
+external pointer_down : Dom.element -> pointer -> bool = "pointerDown"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "fireEvent"]
+
+external pointer_move : Dom.element -> pointer -> bool = "pointerMove"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "fireEvent"]
+
+external pointer_up : Dom.element -> pointer -> bool = "pointerUp"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "fireEvent"]
+
+let at y = pointer ~client_y:y ~button:0 ~pointer_id:1 ~pointer_type:"mouse" ()
+
+let () =
+  Jest.describe "Table, its rows reordered" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise
+        "grabs a row by Enter, moves it by the arrows and drops it by Enter, \
+         telling a reader each step" (fun () ->
+          let told = ref [] in
+          board told;
+          let user = H.setup () in
+          let step k =
+            let* () = H.keyboard user k in
+            let* () = H.frame () in
+            Js.Promise.resolve (marks (), announced ())
+          in
+          H.focus (handle "Alpha");
+          let* grabbed = step "{Enter}" in
+          let* down = step "{ArrowDown}" in
+          let* further = step "{ArrowDown}" in
+          let* last = step "{ArrowDown}{ArrowDown}" in
+          let* back = step "{ArrowUp}" in
+          let* dropped = step "{Enter}" in
+          Js.Promise.resolve
+            E.(
+              expect
+                (grabbed, down, further, last, back, dropped, !told, H.focused)
+              |> toEqual
+                   ( ( [| "Alpha dragged" |],
+                       "Started dragging. Press the arrow keys to move to a \
+                        drop target, then press Enter to drop, or press Escape \
+                        to cancel." ),
+                     ( [| "Alpha dragged"; "Charlie before" |],
+                       "Insert between Bravo and Charlie" ),
+                     ( [| "Alpha dragged"; "Delta before" |],
+                       "Insert between Charlie and Delta" ),
+                     ([| "Alpha dragged"; "Delta after" |], "Insert after Delta"),
+                     ( [| "Alpha dragged"; "Delta before" |],
+                       "Insert between Charlie and Delta" ),
+                     ([||], "Drop complete."),
+                     [ "1 before 4" ],
+                     handle "Alpha" )));
+      Jest.testPromise
+        "lets a row go by Escape, and moves no row dropped where it was"
+        (fun () ->
+          let told = ref [] in
+          board told;
+          let user = H.setup () in
+          H.focus (handle "Delta");
+          let* () = H.keyboard user "{Enter}{ArrowUp}{Escape}" in
+          let* () = H.frame () in
+          let canceled = (marks (), announced ()) in
+          let* () = H.keyboard user "{Enter}{ArrowUp}{ArrowDown}{Enter}" in
+          let* () = H.frame () in
+          Js.Promise.resolve
+            E.(
+              expect (canceled, marks (), announced (), !told)
+              |> toEqual (([||], "Drop canceled."), [||], "Drop complete.", [])));
+      Jest.testPromise
+        "drags a row by a pointer between two others, a copy of it following \
+         the pointer and the row kept in its place" (fun () ->
+          let told = ref [] in
+          board told;
+          let h = handle "Alpha" in
+          ignore (pointer_down h (at 20.) : bool);
+          ignore (pointer_move h (at 95.) : bool);
+          let moving =
+            ( marks (),
+              H.attribute (row "Alpha") "style",
+              Option.map ghost_top (preview ()),
+              Option.map (fun g -> H.text g) (preview ()) )
+          in
+          ignore (pointer_move h (at 150.) : bool);
+          let past = (marks (), Option.map ghost_top (preview ())) in
+          ignore (pointer_up h (at 150.) : bool);
+          Js.Promise.resolve
+            E.(
+              expect (moving, past, marks (), Option.is_some (preview ()), !told)
+              |> toEqual
+                   ( ( [| "Alpha dragged"; "Charlie before" |],
+                       None,
+                       Some "75px",
+                       Some "Alpha" ),
+                     ([| "Alpha dragged"; "Delta after" |], Some "130px"),
+                     [||],
+                     false,
+                     [ "1 after 4" ] )));
+      Jest.testPromise "drags the selected rows together" (fun () ->
+          let told = ref [] in
+          board ~mode:`multiple ~selected:[| "1"; "3" |] told;
+          let user = H.setup () in
+          let labels =
+            ( H.attribute (handle "Alpha") "aria-label",
+              H.attribute (handle "Bravo") "aria-label" )
+          in
+          H.focus (handle "Alpha");
+          let* () = H.keyboard user "{Enter}" in
+          let* () = H.frame () in
+          let grabbed = marks () in
+          let* () = H.keyboard user "{ArrowDown}{ArrowDown}{Enter}" in
+          Js.Promise.resolve
+            E.(
+              expect (labels, grabbed, !told)
+              |> toEqual
+                   ( (Some "Drag 2 selected items", Some "Drag Bravo"),
+                     [| "Alpha dragged"; "Charlie dragged" |],
+                     [ "1,3 after 4" ] )));
+      Jest.testPromise "has no violation axe finds while a row is grabbed"
+        (fun () ->
+          board (ref []);
+          let user = H.setup () in
+          H.focus (handle "Bravo");
+          let* () = H.keyboard user "{Enter}{ArrowDown}" in
+          let* found = H.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))
+
+module Virtualizer = Solidtype_headless.Virtualizer
+
+let () =
+  Jest.describe "Table, virtualized, its rows reordered" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise
+        "moves a row by the keys to a row not yet drawn, drawing and naming it"
+        (fun () ->
+          let told = ref [] in
+          H.render (fun () ->
+              <Virtualizer
+                layout=(Virtualizer.table_layout ~heading_size:40. ~row_size:40.
+                          ())>
+                <Table.Root
+                  aria_label="Many"
+                  data_client_height="200"
+                  data_client_width="400"
+                  on_reorder=(fun r -> told := reorder_name r :: !told)>
+                  <Table.Header>
+                    <Table.Column>"Move"</Table.Column>
+                    <Table.Column is_row_header=true>"Name"</Table.Column>
+                  </Table.Header>
+                  <Table.Body>
+                    <For each=(Array.init 100 (fun i -> i + 1))>
+                      (fun n _ ->
+                        <Table.Row id=(string_of_int n)>
+                          <Table.Cell><Table.Drag_handle /></Table.Cell>
+                          <Table.Cell>
+                            (Jsx.string ("Row " ^ string_of_int n))
+                          </Table.Cell>
+                        </Table.Row>)
+                    </For>
+                  </Table.Body>
+                </Table.Root>
+              </Virtualizer>);
+          let user = H.setup () in
+          H.focus (handle "Row 1");
+          let* () = H.keyboard user "{Enter}{End}" in
+          let* () = H.frame () in
+          let* () = H.frame () in
+          let at_end =
+            ( announced (),
+              Option.is_some (H.attribute (row "Row 100") "data-drop-position")
+            )
+          in
+          let* () = H.keyboard user "{Enter}" in
+          Js.Promise.resolve
+            E.(
+              expect (at_end, !told)
+              |> toEqual (("Insert after Row 100", true), [ "1 after 100" ]))))

@@ -1,6 +1,8 @@
 (** A slat: the template for one row of a plot, a function of the row that
     returns one element, with the CSS and layout every slat of its type shares.
 
+    Its page, with its examples: [$(opam var solidtype:doc)/pages/rhp/slat.md].
+
     Ported by hand: rhp's [slat] is two overloads, [slat(fn)] and
     [slat(layout, fn)], and its result a function with its layout attached; its
     layout's sizes are a number, a CSS length, or one of either per orientation.

@@ -3,6 +3,9 @@
     {!Content}'s {!Title} and {!Description}. It is a default surface to what is
     inside it, as HeroUI's is.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/alert.md].
+
     {[
       <Alert status=`success>
         <Alert.Indicator />

@@ -3,6 +3,9 @@
     {!Number_field} -- shows while it is invalid, as Kobalte's error message,
     and its input is described by.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/field-error.md].
+
     {[
       <Field_error>"Enter a valid email."</Field_error>
     ]}

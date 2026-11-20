@@ -3,6 +3,9 @@
     colour less than opaque drawn over a checkerboard. A reader is told the
     colour's name, Kobalte's for it or [color_name], then [aria_label].
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/color-swatch.md].
+
     {[
       <Color_swatch aria_label="Blue" color=(Colors.parse_color "#0485F7") />
     ]}

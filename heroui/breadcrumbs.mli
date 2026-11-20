@@ -2,6 +2,9 @@
     the last, which is the page itself, on Kobalte's [Breadcrumbs], with
     HeroUI's classes from {!Styles.Breadcrumbs}.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/breadcrumbs.md].
+
     {[
       <Breadcrumbs>
         <Breadcrumbs.Item href="/">"Home"</Breadcrumbs.Item>

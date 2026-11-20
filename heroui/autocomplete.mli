@@ -2,6 +2,9 @@
     [Search_field], on Kobalte's [Combobox], with HeroUI's classes from
     {!Styles.Autocomplete}.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/autocomplete.md].
+
     {[
       <Autocomplete placeholder="Select one">
         <Label>"State"</Label>

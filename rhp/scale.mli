@@ -1,6 +1,8 @@
 (** A scale drawn as a plot of its ticks: a slat for each tick, which draws the
     axis from blocks, a [Tick] and a [Label] at the tick's value.
 
+    Its page, with its examples: [$(opam var solidtype:doc)/pages/rhp/scale.md].
+
     Ported by hand: its slat is a function of rhp's row of a tick, which no rule
     maps; here the tick is a record. *)
 

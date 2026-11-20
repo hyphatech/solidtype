@@ -1,6 +1,9 @@
 (** HeroUI's Popover: Kobalte's [Popover], with HeroUI's classes from
     {!Styles.Popover} and its arrow.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/popover.md].
+
     {[
       <Popover>
         <Button>"Click me"</Button>

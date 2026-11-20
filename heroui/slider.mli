@@ -4,6 +4,9 @@
     keys, on its step's grid within its range. Its {!Label} names it, its
     {!Output} shows its values, and its {!Fill} is drawn between them.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/slider.md].
+
     {[
       <Slider default_value=([| 30. |])>
         <Label>"Volume"</Label>

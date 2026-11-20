@@ -4,6 +4,9 @@
     shows the first [max] of them, and counts the rest, "+2", unless it holds a
     {!Count} of its own.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/avatar-group.md].
+
     {[
       <Avatar_group max=3>
         <Avatar><Avatar.Fallback>"AL"</Avatar.Fallback></Avatar>

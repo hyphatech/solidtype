@@ -6,6 +6,9 @@
     and typing; the port moves between a row's cells, and between a cell and the
     cell above or below it.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/table.md].
+
     {[
       <Table>
         <Table.Scroll_container>
@@ -45,6 +48,26 @@ type sort_descriptor = Solidtype_headless.Table.sort_descriptor = {
 }
 (** How a table is sorted: by the column whose [id] is [column], one way or the
     other; the headless table's. *)
+
+type reorder = Solidtype_headless.Table.reorder = {
+  keys : string array;  (** The rows moved, in the order shown. *)
+  target : string;  (** The row they land beside. *)
+  position : [ `before | `after ];
+}
+(** Rows dropped where a drag let them go; the headless table's. *)
+
+type reorder_messages = Solidtype_headless.Table.reorder_messages = {
+  drag_item : string -> string;
+  drag_selected_items : int -> string;
+  drag_started : string;
+  insert_before : string -> string;
+  insert_between : string -> string -> string;
+  insert_after : string -> string;
+  drop_complete : string;
+  drop_canceled : string;
+}
+(** What a drag tells a reader; the headless table's, React Aria's words by
+    default, {!Solidtype_headless.Table.english}. *)
 
 (** How wide a column is, in a {!Resizable_container}; the headless table's. *)
 type column_size = Solidtype_headless.Table.column_size =
@@ -122,7 +145,13 @@ end
     as do the arrow forward and back on the row.
 
     A row's action runs its own [on_action], then [on_row_action] given its key,
-    as {!Solidtype_headless.Table.Row} runs one. *)
+    as {!Solidtype_headless.Table.Row} runs one.
+
+    Given [on_reorder], its rows are dragged by a {!Button} of [slot=`drag] in
+    each, by the keys or a pointer, and dropped beside a row of the same parent,
+    as {!Solidtype_headless.Table.Drag_handle} drags them; a dragged row is
+    [data-dragging], and the row a drop would land beside [data-drop-position],
+    ["before"] or ["after"] it. *)
 module Content : sig
   module Props : sig
     type t
@@ -144,6 +173,9 @@ module Content : sig
       ?default_expanded_keys:string array Solidtype.Check.value ->
       ?on_expanded_change:(string array -> unit) ->
       ?on_row_action:(string -> unit) ->
+      ?on_reorder:(reorder -> unit) ->
+      ?sticky_header:bool Solidtype.Check.value ->
+      ?reorder_messages:reorder_messages Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Table.props -> Jsx.element) ->
@@ -176,7 +208,13 @@ end
     names. The column whose [is_row_header] names each row, its cells
     [rowheader]s. In a {!Resizable_container} it is as wide as [width] says,
     else [default_width] until resized, within [min_width] and [max_width]. It
-    declares [data-allows-sorting], [data-hovered] and [data-focus-visible]. *)
+    declares [data-allows-sorting], [data-hovered] and [data-focus-visible]. One
+    [pinned] to the table's [`start] or [`end_] stays in view as the others
+    scroll beneath it, its header and cells [data-pinned], as
+    {!Solidtype_headless.Table.Column}'s are, opaque over the columns beneath
+    them, a line at a side's edge while content passes beneath it: HeroUI's
+    stylesheet draws none of it, and the port's own, [heroui/table.css], in the
+    plugin's [heroui-extras.css], does. *)
 module Column : sig
   type state = {
     is_hovered : bool S.accessor;
@@ -201,6 +239,7 @@ module Column : sig
       ?default_width:column_size Solidtype.Check.value ->
       ?min_width:float Solidtype.Check.value ->
       ?max_width:float Solidtype.Check.value ->
+      ?pinned:[ `start | `end_ ] Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlTableCellElement -> unit) ->
       children:

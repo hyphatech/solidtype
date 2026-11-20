@@ -10,7 +10,10 @@
     [default_selected] and [on_change] are not read there. It shows the state
     HeroUI's styles read, [data-selected] and the hover, press and focus React
     Aria shows, and draws its children of that state where they are a function
-    of it. *)
+    of it.
+
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/toggle-button.md]. *)
 
 module S := Solidtype.Solid
 module Jsx := Solidtype.Jsx

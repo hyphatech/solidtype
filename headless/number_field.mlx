@@ -59,6 +59,50 @@ module Root = struct
   let component = Jsx.component make
 end
 
+(* The handlers Kobalte's spin button gives the element it draws, and the
+   caller's in their place, composed. *)
+external key_down : 'props -> ((Dom.keyboardEvent -> unit)[@u]) option
+  = "onKeyDown"
+[@@mel.get]
+
+external focused : 'props -> ((Dom.focusEvent -> unit)[@u]) option = "onFocus"
+[@@mel.get]
+
+external blurred : 'props -> ((Dom.focusEvent -> unit)[@u]) option = "onBlur"
+[@@mel.get]
+
+external handlers :
+  onKeyDown:(Dom.keyboardEvent -> unit) ->
+  onFocus:(Dom.focusEvent -> unit) ->
+  onBlur:(Dom.focusEvent -> unit) ->
+  unit ->
+  Solidtype.Html.Input.props = ""
+[@@mel.obj]
+
+external drawn_as : 'props -> (Solidtype.Html.Input.props -> Jsx.element) option
+  = "as"
+[@@mel.get]
+
+let composed = [| "onKeyDown"; "onFocus"; "onBlur"; "as" |]
+
+(* Kobalte spreads a caller's key, focus and blur handlers over its spin
+   button's, which step the value by the keys and format it as the focus
+   leaves: each is called after the caller's. *)
+let drawn props (own : Solidtype.Html.Input.props) =
+  let both mine theirs e =
+    Jsx.call (mine props) e;
+    Jsx.call (theirs own) e
+  in
+  let p =
+    S.merge_props
+      [|
+        own;
+        handlers ~onKeyDown:(both key_down key_down)
+          ~onFocus:(both focused focused) ~onBlur:(both blurred blurred) ();
+      |]
+  in
+  match drawn_as props with Some f -> f p | None -> <input props=p />
+
 module Input = struct
   module Props = struct
     include Kobalte.Input.Props
@@ -80,7 +124,8 @@ module Input = struct
       on_wheel=(fun e ->
                  wheel ~change_on_wheel:(S.get change_on_wheel) field e;
                  Jsx.call (Props.on_wheel props) e)
-      props=(S.omit props [| "onWheel" |])
+      as_=(drawn props)
+      props=(S.omit props (Array.append [| "onWheel" |] composed))
     />
 
   let component = Jsx.component make

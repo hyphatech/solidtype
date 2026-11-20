@@ -1,0 +1,320 @@
+(* HeroUI's Data_grid as a caller meets it: rows drawn from data and columns
+   from definitions, its parts' classes pinned; sorted by a header pressed,
+   in the page's order, or drawn as given under a sort the application keeps;
+   its checkbox and handle columns first, pinned with the columns pinned to
+   the start; a drop told with every row in its new place; an empty state, a
+   footer, and no violation axe finds. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Data_grid = Solidtype_heroui.Data_grid
+module Table = Solidtype_heroui.Table
+module Button = Solidtype_heroui.Button
+module Dropdown = Solidtype_heroui.Dropdown
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type payment = { id : string; customer : string; amount : float }
+
+let payments =
+  [|
+    { id = "p1"; customer = "olivia"; amount = 1999. };
+    { id = "p2"; customer = "Emma"; amount = 2450. };
+    { id = "p3"; customer = "liam"; amount = 150. };
+  |]
+
+let columns ?pinned () =
+  [|
+    Data_grid.column ~id:"customer" ~header:(Text "Customer")
+      ~is_row_header:true ?pinned ~width:(Pixels 160.)
+      ~sort:(By_text (fun p -> p.customer))
+      (fun p -> Jsx.string (S.get p).customer);
+    Data_grid.column ~id:"amount" ~header:(Text "Amount") ~align:`end_
+      ~sort:(By (fun a b -> Float.compare a.amount b.amount))
+      ~cell_class:"tabular-nums"
+      (fun p -> Jsx.string (Js.Float.toString (S.get p).amount));
+  |]
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+let all selector = Js.Array.from (query_all T.body selector)
+
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
+external target_value : Dom.element -> string = "value" [@@mel.get]
+external event_target : _ Dom.event_like -> Dom.element = "target" [@@mel.get]
+
+let value_of e = target_value (event_target e)
+
+type named
+
+external named : name:string -> named = "" [@@mel.obj]
+
+external by_role_named : string -> named -> Dom.element = "getByRole"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
+
+let button name = by_role_named "button" (named ~name)
+
+let customers () =
+  all "[role=rowheader]" |> Array.map (fun c -> T.text_content c)
+
+let header name =
+  match
+    Array.to_list (all "[role=columnheader]")
+    |> List.filter (fun c -> Js.String.includes ~search:name (T.text_content c))
+  with
+  | c :: _ -> c
+  | [] -> Js.Exn.raiseError ("no column " ^ name)
+
+let () =
+  Jest.describe "Data_grid" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "draws a row of cells for each row given, in HeroUI's look"
+        (fun () ->
+          T.render (fun () ->
+              <Data_grid
+                aria_label="Payments"
+                rows=payments
+                row_id=(fun p -> p.id)
+                columns=(columns ())
+                vertical_align=`top
+              />);
+          let root =
+            match T.query "[data-slot=data-grid]" with
+            | Some r -> r
+            | None -> Js.Exn.raiseError "no grid"
+          in
+          E.(
+            expect
+              ( T.class_name root,
+                T.attribute root "data-vertical-align",
+                customers (),
+                all "td[data-align=end]"
+                |> Array.map (fun c -> (T.text_content c, T.class_name c)) )
+            |> toEqual
+                 ( "table-root table-root--primary data-grid",
+                   Some "top",
+                   [| "olivia"; "Emma"; "liam" |],
+                   [|
+                     ("1999", "table__cell tabular-nums");
+                     ("2450", "table__cell tabular-nums");
+                     ("150", "table__cell tabular-nums");
+                   |] )));
+      Jest.testPromise
+        "sorts its rows by a header pressed, text in the page's order"
+        (fun () ->
+          let told = ref [] in
+          T.render (fun () ->
+              <Data_grid
+                aria_label="Payments"
+                rows=payments
+                row_id=(fun p -> p.id)
+                columns=(columns ())
+                on_sort_change=(fun d -> told := d.column :: !told)
+              />);
+          let user = T.setup () in
+          let* () = T.click user (header "Customer") in
+          let ascending =
+            (customers (), Array.length (all "[data-slot=data-grid-sort-icon]"))
+          in
+          let* () = T.click user (header "Customer") in
+          let descending =
+            ( customers (),
+              Array.map
+                (fun i -> T.attribute i "data-direction")
+                (all "[data-slot=data-grid-sort-icon]") )
+          in
+          let* () = T.click user (header "Amount") in
+          Js.Promise.resolve
+            E.(
+              expect (ascending, descending, customers (), !told)
+              |> toEqual
+                   ( ([| "Emma"; "liam"; "olivia" |], 1),
+                     ([| "olivia"; "liam"; "Emma" |], [| Some "descending" |]),
+                     [| "liam"; "olivia"; "Emma" |],
+                     [ "amount"; "customer"; "customer" ] )));
+      Jest.testPromise "draws its rows as given under a sort it is given"
+        (fun () ->
+          T.render (fun () ->
+              <Data_grid
+                aria_label="Payments"
+                rows=payments
+                row_id=(fun p -> p.id)
+                columns=(columns ())
+                sort_descriptor={ column = "customer"; direction = `ascending }
+              />);
+          let user = T.setup () in
+          let* () = T.click user (header "Amount") in
+          Js.Promise.resolve
+            E.(
+              expect (customers (), T.attribute (header "Customer") "aria-sort")
+              |> toEqual ([| "olivia"; "Emma"; "liam" |], Some "ascending")));
+      Jest.testPromise
+        "puts its checkbox and handle columns first, pinned with the start's, \
+         and tells a drop with every row" (fun () ->
+          let told = ref [||] in
+          T.render (fun () ->
+              <Data_grid
+                aria_label="Payments"
+                rows=payments
+                row_id=(fun p -> p.id)
+                columns=(columns ~pinned:`start ())
+                selection_mode=`multiple
+                show_selection_checkboxes=true
+                on_reorder=(fun r -> told := Array.map (fun p -> p.id) r.rows)
+              />);
+          let headers =
+            all "[role=columnheader]"
+            |> Array.map (fun c ->
+                ( T.class_name c,
+                  T.attribute c "data-pinned",
+                  T.attribute c "data-pinned-edge",
+                  T.attribute c "style" ))
+          in
+          let user = T.setup () in
+          T.focus (all ".data-grid__drag-handle").(0);
+          let* () = T.keyboard user "{Enter}{ArrowDown}{Enter}" in
+          Js.Promise.resolve
+            E.(
+              expect (headers, !told)
+              |> toEqual
+                   ( [|
+                       ( "table__column data-grid__selection-column",
+                         Some "start",
+                         None,
+                         Some "position: sticky; inset-inline-start: 0px;" );
+                       ( "table__column data-grid__drag-handle-column",
+                         Some "start",
+                         None,
+                         Some "position: sticky; inset-inline-start: 0px;" );
+                       ( "table__column",
+                         Some "start",
+                         Some "",
+                         Some
+                           "position: sticky; inset-inline-start: 0px; width: \
+                            160px; min-width: 160px;" );
+                       ("table__column", None, None, None);
+                     |],
+                     [| "p2"; "p1"; "p3" |] )));
+      Jest.testPromise
+        "keeps a cell's field, and its focus, as its row is given again"
+        (fun () ->
+          let rows, set_rows = S.create_signal payments in
+          T.render (fun () ->
+              <Data_grid
+                aria_label="Payments"
+                rows=(S.get rows)
+                row_id=(fun p -> p.id)
+                columns=[|
+                          Data_grid.column ~id:"customer"
+                            ~header:(Text "Customer") ~is_row_header:true
+                            (fun p -> Jsx.string (S.get p).customer);
+                          Data_grid.column ~id:"note" ~header:(Text "Note")
+                            (fun p ->
+                              <input
+                                aria_label=("Name of " ^ (S.get p).id)
+                                value=(S.get p).customer
+                                on_input=(fun e ->
+                                             let v = value_of e in
+                                             S.set set_rows
+                                               (Array.map
+                                                  (fun (q : payment) ->
+                                                    if
+                                                      String.equal q.id
+                                                        (S.get p).id
+                                                    then { q with customer = v }
+                                                    else q)
+                                                  (S.get rows)))
+                              />);
+                        |]
+              />);
+          let field =
+            match T.query "[aria-label=\"Name of p2\"]" with
+            | Some f -> f
+            | None -> Js.Exn.raiseError "no field"
+          in
+          let user = T.setup () in
+          T.focus field;
+          let* () = T.keyboard user "{End}na" in
+          Js.Promise.resolve
+            E.(
+              expect (active == field, customers ())
+              |> toEqual (true, [| "olivia"; "Emmana"; "liam" |])));
+      Jest.testPromise "opens a menu a cell's button triggers, its row kept"
+        (fun () ->
+          T.render (fun () ->
+              <Data_grid
+                aria_label="Payments"
+                rows=payments
+                row_id=(fun p -> p.id)
+                selection_mode=`multiple
+                columns=[|
+                          Data_grid.column ~id:"customer"
+                            ~header:(Text "Customer") ~is_row_header:true
+                            (fun p -> Jsx.string (S.get p).customer);
+                          Data_grid.column ~id:"actions"
+                            ~header:(Text "Actions") (fun p ->
+                              <Dropdown>
+                                <Button
+                                  aria_label=("Actions for " ^ (S.get p).id)>
+                                  "..."
+                                </Button>
+                                <Dropdown.Popover>
+                                  <Dropdown.Menu
+                                    on_action=(fun (_ : string) -> ())>
+                                    <Dropdown.Item id="view" text_value="View">
+                                      "View"
+                                    </Dropdown.Item>
+                                  </Dropdown.Menu>
+                                </Dropdown.Popover>
+                              </Dropdown>);
+                        |]
+              />);
+          let user = T.setup () in
+          let* () = T.click user (button "Actions for p2") in
+          let* () = T.wait 50 in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( Array.length (all "[role=menu]"),
+                  (* An open menu hides the page beneath it from a reader,
+                     so its trigger is found by its name, not its role. *)
+                  Option.bind (T.query "[aria-label=\"Actions for p2\"]")
+                    (fun b -> T.attribute b "aria-expanded"),
+                  all "[aria-selected=true]" |> Array.length )
+              |> toEqual (1, Some "true", 0)));
+      Jest.test "draws its empty state, and its footer below" (fun () ->
+          T.render (fun () ->
+              <Data_grid
+                aria_label="Payments"
+                rows=[||]
+                row_id=(fun p -> p.id)
+                columns=(columns ())
+                empty_state=(<span>"No payments"</span>)
+                footer=(<span>"0 payments"</span>)
+              />);
+          E.(
+            expect
+              ( all ".data-grid__empty-state"
+                |> Array.map (fun e -> T.text_content e),
+                all ".data-grid__footer"
+                |> Array.map (fun e -> (T.class_name e, T.text_content e)) )
+            |> toEqual
+                 ( [| "No payments" |],
+                   [| ("table__footer data-grid__footer", "0 payments") |] )));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          T.render (fun () ->
+              <Data_grid
+                aria_label="Payments"
+                rows=payments
+                row_id=(fun p -> p.id)
+                columns=(columns ~pinned:`start ())
+                selection_mode=`multiple
+                show_selection_checkboxes=true
+                sticky_header=true
+                on_reorder=(fun _ -> ())
+              />);
+          let* found = T.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))

@@ -1,0 +1,224 @@
+# How it works
+
+One component, from OCaml's JSX to the code Solid's compiler emits.
+
+Solid has no runtime that reads JSX. Its compiler turns each JSX element
+into a template, cloned once per render, and each dynamic part into a call
+that updates one node when what it reads changes. Solid's speed is that
+compiler's output, so a binding that called Solid's runtime by hand would
+be a slower Solid. solidtype keeps the compiler: OCaml's JSX is carried
+through Melange to the JSX Solid's compiler reads.
+
+Five tools take part, each doing the one thing it does anyway:
+
+| Step | Tool | From | To |
+|---|---|---|---|
+| 1 | [MLX](https://github.com/ocaml-mlx/mlx) | `.mlx`, OCaml with JSX | OCaml, each element marked `[@JSX]` |
+| 2 | `ppx_solidtype` | the marked elements | calls of `Solidtype.Jsx`, the markers, with their types checked |
+| 3 | [Melange](https://melange.re) | OCaml | a JavaScript module, `.jsx`, the markers as calls |
+| 4 | `vite-plugin-solidtype` | the markers | JSX |
+| 5 | [`vite-plugin-solid`](https://github.com/solidjs/vite-plugin-solid) | JSX | templates and Solid's runtime calls |
+
+Below, the counter on [Getting started](../index.md) goes through each step.
+Every listing is what the tool wrote, unedited.
+
+## 1. MLX parses the JSX
+
+```ocaml title="solid_counter.mlx"
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+
+let make () =
+  let count, set_count = S.create_signal 0 in
+  <button
+    class_="button button--primary"
+    type_=`button
+    on_click=(fun _ -> S.update set_count succ)>
+    "Clicked " (Jsx.int (S.get count)) " times"
+  </button>
+```
+
+An attribute is an OCaml label, in snake case; a value or a child is
+written as itself. MLX's parser reads the file into
+OCaml's own syntax tree, where each element is a function application
+marked `[@JSX]`. Nothing in it yet knows about Solid.
+
+## 2. The ppx turns each element into calls
+
+`ppx_solidtype` rewrites each marked element into calls of
+`Solidtype.Jsx`, which the library calls its markers. A marker is a
+function that stands for a piece of JSX: `el` an element, `s` a static
+attribute, `dynamic` a child that changes:
+
+```ocaml
+Solidtype.Jsx.el "button"
+  [|(Solidtype.Jsx.s "class"
+       ({js|button button--primary|js} : Solidtype.Html.Button.class_));(
+    Solidtype.Jsx.s "type" (`button : Solidtype.Html.Button.type_));(
+    Solidtype.Jsx.s "onClick"
+      (fun _ -> S.update set_count succ : Solidtype.Html.Button.on_click))|]
+  [|(Solidtype.Jsx.text {js|Clicked |js});(Solidtype.Jsx.dynamic
+                                             (((fun () ->
+                                                  Jsx.int (S.get count))
+                                             [@u ]) : ((unit ->
+                                                          Solidtype.Jsx.element)
+                                             [@u ])));(Solidtype.Jsx.text
+                                                         {js| times|js})|]
+```
+
+This is where the types come in:
+
+- **Each attribute is annotated with its element's type for it**:
+  `class_` on a `<button>` is `Solidtype.Html.Button.class_`, a `string`;
+  `type_` is a closed set of tags. Those types are generated from Solid's
+  own JSX types, so an attribute a `<div>` does not take is an unbound type,
+  and a misspelt tag is refused.
+- **A static value is `s`, a dynamic one `d`**, and a child is `text`, a
+  `node` or a `dynamic` thunk. A literal, a handler, a function or a name is
+  static; any other expression is dynamic, in a thunk the ppx writes, as
+  Solid's compiler makes an expression in JSX a getter. A function given where
+  a value belongs is refused by its type:
+
+  ```
+  3 |   <p title=(fun () -> Solidtype.Solid.get name) />
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Error: This expression should not be a function, the expected type is string
+  ```
+
+  A handler an expression makes, `on_click=(remove id)`, and a spread are
+  made when their element is: inside a `Show`, only once it shows.
+
+- **A name gets its JavaScript spelling back**: `class_` is `class`,
+  `on_click` is `onClick`, by the inverse of the
+  [naming rule](conventions.md).
+- **A string literal becomes `{js|...|js}`**, which Melange writes as a
+  JavaScript string, so a page shows `é` as one character.
+
+A component's element also gets its props checked. The ppx applies the
+component's `Props.check` to its props under `if false`, which the compiler
+type-checks and Melange then drops:
+
+```ocaml
+if false then Greeting.Props.check ~name:(Solidtype.Check.literal {js|Ada|js}) ();
+Solidtype.Jsx.c Greeting.component [| Solidtype.Jsx.s "name" {js|Ada|js} |] [||]
+```
+
+A required prop left out is a partial application, and a prop the component
+does not take is a label the function does not have. Both are compile
+errors, as in TSX. [Components](../solid/components.md) says how a
+component's `Props` are written.
+
+## 3. Melange compiles OCaml to JavaScript
+
+Melange knows nothing of JSX: to it, the ppx's output is OCaml like any
+other. The markers are `external`s of one module,
+`vite-plugin-solidtype/markers`, so each comes out as an ordinary
+JavaScript function call through one import, `Markers.el(...)`, which the
+next step finds and turns back into JSX:
+
+```js title="solid_counter.jsx, from Melange"
+import * as Solidtype__Solid from "solidtype/solid.jsx";
+import * as Markers from "vite-plugin-solidtype/markers";
+
+function make(param) {
+  const match = Solidtype__Solid.create_signal(undefined, undefined, 0);
+  const set_count = match[1];
+  const count = match[0];
+  return Markers.el("button", [
+    Markers.s("class", "button button--primary"),
+    Markers.s("type", "button"),
+    Markers.s("onClick", (function (param) {
+      Solidtype__Solid.update(set_count, (function (prim) {
+        return prim + 1 | 0;
+      }));
+    }))
+  ], [
+    "Clicked ",
+    Markers.dynamic(function (param) {
+      return count();
+    }),
+    " times"
+  ]);
+}
+```
+
+`S.get count` is `count()`: an accessor is an uncurried JavaScript
+function and `Solid.get` is inlined, so a read is the call Solid's own JSX
+makes. The type annotations are gone, and so is the props check.
+
+The module's extension is `.jsx`, by `(module_systems (es6 jsx))`, so that
+Vite hands it to the JSX plugins.
+[Melange and dune](melange.md) says why the library is built the way it is.
+
+## 4. The plugin rewrites the markers into JSX
+
+`vite-plugin-solidtype` runs before Solid's plugin. It finds the namespace
+imported from `vite-plugin-solidtype/markers`, rewrites each call through
+it into JSX, and removes the import:
+
+```jsx title="solid_counter.jsx, rewritten"
+import * as Solidtype__Solid from "solidtype/solid.jsx";
+
+function make(param) {
+  const match = Solidtype__Solid.create_signal(undefined, undefined, 0);
+  const set_count = match[1];
+  const count = match[0];
+  return <button class="button button--primary" type="button" onClick={function (param) {
+    Solidtype__Solid.update(set_count, function (prim) {
+      return prim + 1 | 0;
+    });
+  }}>Clicked {count()} times</button>;
+}
+```
+
+A `dynamic` thunk becomes the expression it returns, `{count()}`, which is
+how Solid's compiler sees what to track. A string becomes JSX's own text or
+quoted attribute where JSX reads it back unchanged, else `{"..."}`. A
+function the ppx bound once to name it in both the check and the element is
+put back where it is used. The plugin reads only its markers and the few
+shapes of Melange's that wrap them, so what Melange does around them cannot
+change their meaning. A page bundled without the plugin throws as it loads
+the markers' module, with an error that names the plugin, rather than
+running code Solid's compiler never saw.
+
+## 5. Solid's compiler compiles the JSX
+
+`vite-plugin-solid` compiles that JSX as it compiles TSX:
+
+```js title="solid_counter.jsx, compiled by Solid"
+import { template as _$template } from "solid-js/web";
+import { delegateEvents as _$delegateEvents } from "solid-js/web";
+import { insert as _$insert } from "solid-js/web";
+var _tmpl$ = /*#__PURE__*/_$template(`<button class="button button--primary"type=button>Clicked <!> times`);
+
+function make(param) {
+  const match = Solidtype__Solid.create_signal(undefined, undefined, 0);
+  const set_count = match[1];
+  const count = match[0];
+  return (() => {
+    var _el$ = _tmpl$(),
+      _el$2 = _el$.firstChild,
+      _el$4 = _el$2.nextSibling,
+      _el$3 = _el$4.nextSibling;
+    _el$.$$click = function (param) {
+      Solidtype__Solid.update(set_count, function (prim) {
+        return prim + 1 | 0;
+      });
+    };
+    _$insert(_el$, count, _el$4);
+    return _el$;
+  })();
+}
+_$delegateEvents(["click"]);
+```
+
+The button is one template, the click a delegated handler, and the count
+one `insert` that updates one text node. That is the code Solid emits for
+the same component written in TSX.
+
+## How that is held
+
+The promise that an OCaml component compiles as the same JSX in TSX does is
+tested, not assumed. The plugin's tests hold what it writes for each form
+of JSX, and islands rendered on the server are hydrated in the browser by
+a test of their own.

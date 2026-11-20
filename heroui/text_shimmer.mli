@@ -1,6 +1,9 @@
 (** Text with a highlight sweeping across it, for a label of work under way:
     ["Thinking..."], its look text-shimmer.css's.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/text-shimmer.md].
+
     {[
       <Text_shimmer>"Thinking..."</Text_shimmer>
     ]}

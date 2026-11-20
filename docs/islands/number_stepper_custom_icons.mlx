@@ -1,0 +1,20 @@
+module Number_stepper = Solidtype_heroui.Number_stepper
+module Gravity = Solidtype_gravity_icons
+
+let make () =
+  <Number_stepper
+    aria_label="Zoom level"
+    default_value=100.
+    min_value=10.
+    max_value=400.
+    step=10.>
+    <Number_stepper.Group>
+      <Number_stepper.Decrement_button>
+        <Gravity.Magnifier_minus />
+      </Number_stepper.Decrement_button>
+      <Number_stepper.Value />
+      <Number_stepper.Increment_button>
+        <Gravity.Magnifier_plus />
+      </Number_stepper.Increment_button>
+    </Number_stepper.Group>
+  </Number_stepper>

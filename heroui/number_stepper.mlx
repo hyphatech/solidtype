@@ -1,0 +1,413 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Index = Solidtype.Index
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
+
+type size = [ `sm | `md | `lg ]
+
+let size_name = function `sm -> "sm" | `md -> "md" | `lg -> "lg"
+
+module Size = Solidtype.Context.Make_optional (struct
+  type t = size S.accessor
+end)
+
+(* Each part's classes, its size's after them where it has one. *)
+let look size =
+  {
+    Number_field.Look.slot = "number-stepper";
+    classes =
+      (fun part ->
+        let sized base = base ^ " " ^ base ^ "--" ^ size_name (S.get size) in
+        match part with
+        | `root -> "number-stepper"
+        | `group -> sized "number-stepper__group"
+        | `input -> "number-stepper__input"
+        | `increment -> sized "number-stepper__increment-button"
+        | `decrement -> sized "number-stepper__decrement-button");
+  }
+
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Group = struct
+  let%component make ?(class_ : string option)
+      ~(children : Number_field.Group.state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props ->
+         Number_field.Group.state ->
+         Solidtype.Jsx.element)
+         option) () =
+    <Number_field.Group
+      ?class_=(S.get class_) ?as_=(S.get as_) props=(Props.others props)>
+      (fun state ->
+        Jsx.fragment
+          [| Jsx.draw (S.get children) state; <Number_field.Input /> |])
+    </Number_field.Group>
+  [@@element div]
+end
+
+module Increment_button = Number_field.Increment_button
+module Decrement_button = Number_field.Decrement_button
+
+external request_frame : (float -> unit) -> int = "requestAnimationFrame"
+
+type animation
+type width_frame
+type timing
+
+external width_frame : width:string -> width_frame = "" [@@mel.obj]
+external timing : duration:float -> easing:string -> timing = "" [@@mel.obj]
+
+external animate :
+  _ Dom.element_like -> width_frame array -> timing -> animation = "animate"
+[@@mel.send]
+
+external cancel : animation -> unit = "cancel" [@@mel.send]
+
+external play_state : animation -> [ `idle | `running | `paused | `finished ]
+  = "playState"
+[@@mel.get]
+
+type rect
+
+external bounds : _ Dom.element_like -> rect = "getBoundingClientRect"
+[@@mel.send]
+
+external rect_width : rect -> float = "width" [@@mel.get]
+
+type style
+
+external computed_style : _ Dom.element_like -> style = "getComputedStyle"
+[@@mel.scope "window"]
+
+external property : style -> string -> string = "getPropertyValue" [@@mel.send]
+
+type media
+
+external match_media : string -> media = "matchMedia" [@@mel.scope "window"]
+external matches : media -> bool = "matches" [@@mel.get]
+
+(* A string's characters by code point, as a currency's sign is one. *)
+external characters : string -> string array = "from" [@@mel.scope "Array"]
+
+module Value = struct
+  type shown = {
+    value : float;
+    format_options : Types.NumberFormatOptions.t option;
+  }
+
+  let digit c =
+    match int_of_string_opt c with
+    | Some d when String.length c = 1 && d >= 0 -> Some d
+    | Some _ | None -> None
+
+  type trend = Up | Down
+  type slot = { character : string; leaving : int option }
+
+  (* A reel holds the ten five times over and rests in the middle five, so a
+     digit rolls the way the number moved, up as it rises and down as it
+     falls, past 9 to 0 and back, at most twenty numerals before it settles. *)
+  let copies = 5
+  let resting d = (copies / 2 * 10) + d
+
+  (* A digit that appears rolls in from 0 the way the number moved, as if it
+     had been a leading 0. *)
+  let reel ~trend ~entering ~leaving ~placed character =
+    let first =
+      Option.value (S.untrack (fun () -> digit (S.get character))) ~default:0
+    in
+    let rolled_in way =
+      match way with
+      | Up -> resting 0 + first
+      | Down -> resting 0 - ((10 - first) mod 10)
+    in
+    let position, set_position =
+      S.create_signal
+        (match entering with Some _ -> resting 0 | None -> resting first)
+    in
+    Option.iter
+      (fun way ->
+        S.on_mount (fun () ->
+            ignore
+              (request_frame (fun _ -> S.set set_position (rolled_in way))
+                : int)))
+      entering;
+    let settling, set_settling = S.create_signal false in
+    (* Moved at once to [at]: its transition off while it moves, and on again
+       once a frame has been drawn there. *)
+    let jump at =
+      S.batch (fun () ->
+          S.set set_settling true;
+          S.set set_position at);
+      ignore
+        (request_frame (fun _ ->
+             ignore (request_frame (fun _ -> S.set set_settling false) : int))
+          : int)
+    in
+    S.create_computed_from ~init:first (fun was ->
+        let now = Option.value (digit (S.get character)) ~default:was in
+        (if now <> was then
+           let at = S.untrack (fun () -> S.get position) in
+           let target =
+             match S.untrack (fun () -> S.get trend) with
+             | Up -> at + ((now - was + 10) mod 10)
+             | Down -> at - ((was - now + 10) mod 10)
+           in
+           if target < 0 || target >= copies * 10 then jump (resting now)
+           else S.set set_position target);
+        now);
+    (* Once it has rolled, it settles back in the middle without a sound or a
+       move: the same numeral, a copy over. *)
+    let settle () =
+      let at = S.get position in
+      if at <> resting (at mod 10) then jump (resting (at mod 10))
+    in
+    <span
+      class_="number-stepper__digit"
+      data_enter=(Jsx.flag (Option.is_some entering))
+      data_leave=(Jsx.flag (S.get leaving))
+      ?style=(S.get placed)>
+      <span
+        class_="number-stepper__reel"
+        data_settling=(Jsx.flag (S.get settling))
+        on_transition_end=(fun (_ : Dom.transitionEvent) -> settle ())
+        style=("transform: translateY(-"
+              ^ string_of_int (S.get position * 2)
+              ^ "%);")>
+        (Jsx.fragment
+           (Array.init (copies * 10) (fun n ->
+                <span class_="number-stepper__numeral">
+                  (Jsx.int (n mod 10))
+                </span>)))
+      </span>
+    </span>
+
+  let%component make ?(value : float option)
+      ?(format : Types.NumberFormatOptions.t option) ?(class_ : string option)
+      ?(children : shown Jsx.children option) () =
+    let f = Number_field.Shown.use "Number_stepper.Value" in
+    let size =
+      match Size.use () with Some s -> s | None -> S.accessor (fun () -> `md)
+    in
+    let shown () =
+      {
+        value = (match S.get value with Some v -> v | None -> S.get f.value);
+        format_options =
+          (match S.get format with
+          | Some o -> Some o
+          | None -> S.get f.format_options);
+      }
+    in
+    let formatter =
+      I18n.create_number_formatter
+        (Types.Either.right
+           (S.accessor (fun () ->
+                match (shown ()).format_options with
+                | Some o -> o
+                | None -> Types.NumberFormatOptions.make ())))
+    in
+    (* Counted from the end, laid out from the end, so each digit keeps its
+       reel as the number grows a digit at its start. *)
+    (* Which way the number last moved, which every changed digit rolls, and
+       which a digit that appears comes in from, once the value has been
+       drawn. *)
+    let last = ref Float.nan in
+    let trend =
+      S.create_memo (fun () ->
+          let v = (shown ()).value in
+          let moved = if v < !last then Down else Up in
+          last := v;
+          moved)
+    in
+    let drawn = ref false in
+    S.on_mount (fun () -> drawn := true);
+    (* As its digits change, its width moves from the old to the new on the
+       roll's own curve, so the digits beside a new one slide over rather
+       than jump, as Number Flow's do. *)
+    let held = ref None in
+    let measured = ref None in
+    let running = ref None in
+    let resize () =
+      match !held with
+      | None -> ()
+      | Some e ->
+          (* A width still moving is taken from where it is drawn, so a step
+             during a step carries on from there. *)
+          let drawn_width =
+            match !running with
+            | Some a
+              when match play_state a with
+                   | `running -> true
+                   | `idle | `paused | `finished -> false ->
+                let w = rect_width (bounds e) in
+                cancel a;
+                running := None;
+                Some w
+            | Some _ | None -> !measured
+          in
+          let now = rect_width (bounds e) in
+          (match drawn_width with
+          | Some was
+            when Float.abs (was -. now) > 0.5
+                 && not
+                      (matches (match_media "(prefers-reduced-motion: reduce)"))
+            ->
+              let spring =
+                String.trim
+                  (property (computed_style e) "--number-stepper-spring")
+              in
+              running :=
+                Some
+                  (animate e
+                     [|
+                       width_frame ~width:(Js.Float.toString was ^ "px");
+                       width_frame ~width:(Js.Float.toString now ^ "px");
+                     |]
+                     (timing ~duration:900.
+                        ~easing:
+                          (if String.equal spring "" then "ease-out" else spring)))
+          | Some _ | None -> ());
+          measured := Some now
+    in
+    let from_the_end () =
+      let v = (shown ()).value in
+      if Float.is_nan v then [||]
+      else
+        let c = characters (Types.NumberFormat.format (S.get formatter) v) in
+        let n = Array.length c in
+        Array.init n (fun i -> c.(n - 1 - i))
+    in
+    (* A digit the number loses stays a moment, rolling to 0 and fading out,
+       out of the line as its width closes, as if it had become a leading
+       0. *)
+    let as_slots = Array.map (fun character -> { character; leaving = None }) in
+    let slots, set_slots =
+      S.create_signal (S.untrack (fun () -> as_slots (from_the_end ())))
+    in
+    let before = ref (S.untrack from_the_end) in
+    let generation = ref 0 in
+    S.create_effect (fun () ->
+        let now = from_the_end () in
+        let was = !before in
+        before := now;
+        let n = Array.length now in
+        let gone =
+          if Array.length was > n then
+            Array.init
+              (Array.length was - n)
+              (fun i ->
+                let c = was.(n + i) in
+                {
+                  character = (if Option.is_some (digit c) then "0" else c);
+                  leaving = Some i;
+                })
+          else [||]
+        in
+        incr generation;
+        let current = !generation in
+        S.set set_slots (Array.append (as_slots now) gone);
+        if Array.length gone > 0 then
+          ignore
+            (Js.Global.setTimeout
+               ~f:(fun () ->
+                 if !generation = current then S.set set_slots (as_slots now))
+               900
+              : Js.Global.timeoutId));
+    S.create_effect (fun () ->
+        ignore (S.get slots : slot array);
+        resize ());
+    <span
+      class_=(after
+                ("number-stepper__value number-stepper__value--"
+                ^ size_name (S.get size))
+                (S.get class_))
+      data_slot="number-stepper-value"
+      aria_hidden=true
+      props=(Props.others props)>
+      (match S.get children with
+      | Some c -> Jsx.draw c (shown ())
+      | None ->
+          <span
+            class_="number-stepper__characters" ref=(fun e -> held := Some e)>
+            <Index each=(S.get slots)>
+              (fun slot _ ->
+                let c = S.accessor (fun () -> (S.get slot).character) in
+                let away = S.accessor (fun () -> (S.get slot).leaving) in
+                let leaving =
+                  S.accessor (fun () -> Option.is_some (S.get away))
+                in
+                (* Each character it loses keeps its place beside the line,
+                   counted out from it. *)
+                let placed =
+                  S.accessor (fun () ->
+                      Option.map
+                        (fun i ->
+                          "--number-stepper-away: " ^ string_of_int i ^ ";")
+                        (S.get away))
+                in
+                <Show
+                  when_=(Option.is_some (digit (S.get c)))
+                  fallback=(<span
+                              class_="number-stepper__symbol"
+                              data_leave=(Jsx.flag (S.get leaving))
+                              ?style=(S.get placed)>
+                              (Jsx.string (S.get c))
+                            </span>)>
+                  (reel ~trend
+                     ~entering:
+                       (if !drawn then Some (S.untrack (fun () -> S.get trend))
+                        else None)
+                     ~leaving ~placed c)
+                </Show>)
+            </Index>
+          </span>)
+    </span>
+  [@@element span]
+end
+
+let%component make ?(size : size = `md) ?(value : float option)
+    ?(default_value : float option) ?(on_change : (float -> unit) option)
+    ?(min_value : float option) ?(max_value : float option)
+    ?(step : float option) ?(is_disabled : bool option)
+    ?(is_invalid : bool option) ?(is_read_only : bool option)
+    ?(is_wheel_disabled : bool option) ?(is_required : bool option)
+    ?(name : string option) ?(aria_label : string option)
+    ?(class_ : string option)
+    ?(format_options : Types.NumberFormatOptions.t option)
+    ?(on_blur : (Dom.focusEvent -> unit) option)
+    ?(on_focus_out : (Dom.focusEvent -> unit) option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ~(children : Number_field.state Jsx.children)
+    ?(as_ :
+       (Solidtype.Html.Div.props -> Number_field.state -> Solidtype.Jsx.element)
+       option) () =
+  let sized = S.accessor (fun () -> S.get size) in
+  <Size.Provider value=sized>
+    <Number_field.Look.Provider value=(look sized)>
+      <Number_field
+        ?value=(S.get value)
+        ?default_value=(S.get default_value)
+        on_change=(fun v -> ignore (on_change v : unit option))
+        ?min_value=(S.get min_value)
+        ?max_value=(S.get max_value)
+        ?step=(S.get step)
+        ?is_disabled=(S.get is_disabled)
+        ?is_invalid=(S.get is_invalid)
+        ?is_read_only=(S.get is_read_only)
+        ?is_wheel_disabled=(S.get is_wheel_disabled)
+        ?is_required=(S.get is_required)
+        ?name=(S.get name)
+        ?aria_label=(S.get aria_label)
+        ?class_=(S.get class_)
+        ?format_options=(S.get format_options)
+        on_blur=(fun e -> ignore (on_blur e : unit option))
+        on_focus_out=(fun e -> ignore (on_focus_out e : unit option))
+        ref=(fun e -> ignore (given_ref e : unit option))
+        ?as_=(S.get as_)
+        props=(Props.others props)>
+        (fun state -> Jsx.draw (S.get children) state)
+      </Number_field>
+    </Number_field.Look.Provider>
+  </Size.Provider>
+[@@element div]

@@ -4,6 +4,9 @@
     {!Thumb} is pressed and dragged over, or stepped by the arrow keys, Page Up
     and Page Down, Home and End.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/color-area.md].
+
     {[
       <Color_area default_value=(Colors.parse_color "rgb(116, 52, 255)")>
         <Color_area.Thumb />

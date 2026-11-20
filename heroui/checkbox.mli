@@ -7,6 +7,9 @@
     by. Inside a {!Checkbox_group}, it is checked while its [value] is among the
     group's, and takes the group's variant where it sets none, and its state.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/checkbox.md].
+
     {[
       <Checkbox default_selected=true>
         <Checkbox.Content>

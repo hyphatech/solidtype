@@ -59,8 +59,8 @@ val is_function : 'state children -> bool
 
 val draw : 'state children -> 'state -> element
 (** [draw children state] is [children] as they are, or what their function
-    draws of [state], read where it is written: in JSX, Solid tracks both the
-    children and what the function reads. *)
+    draws of [state], drawn by Solid where it is inserted: what the function
+    reads draws only it again, never the children it came from. *)
 
 (** A value that stands in an element's place among a component's children,
     never rendered, as Solid's [Match] stands among a [Switch]'s: the component

@@ -1,0 +1,53 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Data_grid = Solidtype_heroui.Data_grid
+module Spinner = Solidtype_heroui.Spinner
+
+type order = { id : string; customer : string; total : string }
+
+let page n =
+  Array.init 20 (fun i ->
+      let k = (n * 20) + i + 1 in
+      {
+        id = string_of_int k;
+        customer = "Customer " ^ string_of_int k;
+        total = "$" ^ string_of_int ((k * 37 mod 900) + 100) ^ ".00";
+      })
+
+let columns =
+  [|
+    Data_grid.column ~id:"id" ~header:(Text "Order") ~is_row_header:true
+      ~cell_class:"tabular-nums" (fun o -> Jsx.string ("#" ^ (S.get o).id));
+    Data_grid.column ~id:"customer" ~header:(Text "Customer") (fun o ->
+        Jsx.string (S.get o).customer);
+    Data_grid.column ~id:"total" ~header:(Text "Total") ~align:`end_
+      ~cell_class:"tabular-nums" (fun o -> Jsx.string (S.get o).total);
+  |]
+
+let make () =
+  let rows, set_rows = S.create_signal (page 0) in
+  let loading, set_loading = S.create_signal false in
+  let more () = Array.length (S.get rows) < 100 in
+  <Data_grid
+    aria_label="Orders"
+    rows=(S.get rows)
+    row_id=(fun o -> o.id)
+    columns
+    scroll_container_class="max-h-[400px] overflow-y-auto"
+    sticky_header=true
+    is_loading_more=(S.get loading)
+    on_load_more=(fun () ->
+                   if more () && not (S.get loading) then begin
+                     S.set set_loading true;
+                     ignore
+                       (Js.Global.setTimeout
+                          ~f:(fun () ->
+                            S.set set_rows
+                              (Array.append (S.get rows)
+                                 (page (Array.length (S.get rows) / 20)));
+                            S.set set_loading false)
+                          800
+                         : Js.Global.timeoutId)
+                   end)
+    load_more_content=(<Spinner size=`md />)
+  />

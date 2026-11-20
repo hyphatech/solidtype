@@ -6,6 +6,9 @@
     neither a group nor the state its styles read. A component's own
     [is_disabled] is its own.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/fieldset.md].
+
     {[
       <Fieldset>
         <Fieldset.Legend>"Profile"</Fieldset.Legend>

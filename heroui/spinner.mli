@@ -3,6 +3,9 @@
     gradients given ids of their own by {!Solidtype.Solid.create_unique_id}, the
     same on the server and in the browser.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/spinner.md].
+
     {[
       <Spinner color=`current size=`sm />
     ]}

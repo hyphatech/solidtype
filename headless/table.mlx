@@ -115,6 +115,56 @@ let open_link row attributes e =
       : bool);
   remove_element link
 
+type reorder = {
+  keys : string array;
+  target : string;
+  position : [ `before | `after ];
+}
+
+type reorder_messages = {
+  drag_item : string -> string;
+  drag_selected_items : int -> string;
+  drag_started : string;
+  insert_before : string -> string;
+  insert_between : string -> string -> string;
+  insert_after : string -> string;
+  drop_complete : string;
+  drop_canceled : string;
+}
+
+(* React Aria's, in English: what its drag button is named and what a drag
+   tells a reader, but for a grabbed row moved by the arrows, where React
+   Aria's is moved by Tab among drop targets of their own. *)
+let english =
+  {
+    drag_item = (fun name -> "Drag " ^ name);
+    drag_selected_items =
+      (fun n ->
+        "Drag " ^ string_of_int n
+        ^ if n = 1 then " selected item" else " selected items");
+    drag_started =
+      "Started dragging. Press the arrow keys to move to a drop target, then \
+       press Enter to drop, or press Escape to cancel.";
+    insert_before = (fun name -> "Insert before " ^ name);
+    insert_between =
+      (fun before after -> "Insert between " ^ before ^ " and " ^ after);
+    insert_after = (fun name -> "Insert after " ^ name);
+    drop_complete = "Drop complete.";
+    drop_canceled = "Drop canceled.";
+  }
+
+type drag_handle = {
+  can_drag : bool S.accessor;
+  is_dragging : bool S.accessor;
+  label : string S.accessor;
+  on_pointer_down : Dom.pointerEvent -> unit;
+  on_pointer_move : Dom.pointerEvent -> unit;
+  on_pointer_up : Dom.pointerEvent -> unit;
+  on_pointer_cancel : Dom.pointerEvent -> unit;
+  on_key_down : Dom.keyboardEvent -> unit;
+  on_blur : Dom.focusEvent -> unit;
+}
+
 type row = {
   key : string;
   level : int;
@@ -125,6 +175,7 @@ type row = {
   toggle_expanded : unit -> unit;
   focus : unit -> unit;
   header_id : string;
+  drag : drag_handle;
 }
 
 type cell = { is_tree_column : bool S.accessor; column_index : int S.accessor }
@@ -137,6 +188,8 @@ type listed = {
   parent : string option;
   child_keys : string array S.accessor;
 }
+
+type item = { item_key : string }
 
 type sort_descriptor = {
   column : string;
@@ -287,6 +340,8 @@ type column_spec = {
   default_width : column_size option;
   min_width : float option S.accessor;
   max_width : float option S.accessor;
+  pinned : [ `start | `end_ ] option S.accessor;
+  box_width : float S.accessor;  (** Its header's width, as measured. *)
 }
 
 (* What the parts of a resizable table read of its layout, and how a resize
@@ -319,9 +374,47 @@ type virtualized = {
   focused_row : int option S.accessor;
       (** The focused row, drawn wherever it is. *)
   scrolling : bool S.accessor;
+  scroll_left : float S.accessor;
+  view_width : float S.accessor;
 }
 
 let px n = Js.Float.toString n ^ "px"
+
+(* What the table derives from its columns, which register as they are drawn:
+   a memo in the browser, but read anew on the server, whose memo is computed
+   once, as it is made, before any column has registered, and whose HTML
+   hydration never writes again. *)
+let of_columns f =
+  if Solidtype.Web.is_server then S.accessor f else S.create_memo f
+
+type side = [ `start | `end_ ]
+
+(* A pinned column's side, how far from that side's edge it sticks -- the
+   widths of the columns pinned there before it -- and whether it is the
+   last of that side, beside the columns that scroll. *)
+type pin = { side : side; inset : float; edge : bool }
+
+let pinned_side = function
+  | Some { side = `start; _ } -> Jsx.data "start"
+  | Some { side = `end_; _ } -> Jsx.data "end"
+  | None -> Jsx.flag false
+
+let pinned_edge = function
+  | Some { edge = true; _ } -> Jsx.data ""
+  | Some { edge = false; _ } | None -> Jsx.flag false
+
+(* A pinned part's style where the page lays it out: it sticks to its side at
+   its inset, written in the page's direction, so a right-to-left page pins
+   its start to the right. *)
+let sticks ~top = function
+  | Some { side; inset; _ } ->
+      "position: sticky;"
+      ^ (if top then " top: 0px;" else "")
+      ^ (match side with
+        | `start -> " inset-inline-start: "
+        | `end_ -> " inset-inline-end: ")
+      ^ px inset ^ ";"
+  | None -> if top then "position: sticky; top: 0px;" else ""
 
 (* A virtualized part's place, the style React Aria's VirtualizerItem writes
    from its layout. *)
@@ -339,6 +432,28 @@ external as_element : _ Dom.element_like -> Dom.element = "%identity"
 (* What the parts read of their table beside what a style reads: its rows in
    the page's order, Kobalte's selection of them, its columns, and their
    layout where it is resizable or virtualized. *)
+(* A drag under way: the rows it moves, the rows beside them it moves among,
+   in order, the place among those it would land, by index, the place it began
+   at, and, for a pointer's, the row it holds, where it was pressed and where
+   it is. *)
+type dragging = {
+  moved : string array;
+  others : string array;
+  slot : int;
+  from_slot : int;
+  held : (string * float * float) option;
+  handle : Dom.element;
+}
+
+(* What a row reads of a drag under way: its handle, whether it is dragged,
+   whether a drop would land beside it and on which side, and how far a
+   pointer has moved it. *)
+type reordering = {
+  handle : string -> drag_handle;
+  dragged : string -> bool;
+  drop_at : string -> [ `before | `after ] option;
+}
+
 type table = {
   context : context;
   rows : listed list S.accessor;
@@ -357,9 +472,22 @@ type table = {
       (** How many columns the header reads. *)
   add_column : column_spec -> unit;
   remove_column : string -> unit;
+  pin_of : int -> pin option;  (** The pin of the column at an index. *)
+  reordering : reordering;
+  sticky_header : bool S.accessor;
   sizing : sizing option;
   virtualized : virtualized option;
 }
+
+(* A virtualized part's left, kept in view where its column is pinned: never
+   left of the view's start past its inset, nor right of its end. *)
+let pinned_left (v : virtualized) pin ~left ~width =
+  let start = S.get v.scroll_left -. v.options.padding in
+  match pin with
+  | Some { side = `start; inset; _ } -> Float.max left (start +. inset)
+  | Some { side = `end_; inset; _ } ->
+      Float.min left (start +. S.get v.view_width -. inset -. width)
+  | None -> left
 
 module Table_context = Solidtype.Context.Make_optional (struct
   type t = table
@@ -418,7 +546,11 @@ end)
 
 (* A column, drawn by the header once it has read them all, its place among
    them its index, which a reorder moves. *)
-type drawn_column = { draw_column : index:int S.accessor -> Jsx.element }
+type drawn_column = {
+  register : index:int S.accessor -> unit;
+      (** Tells the table of it, before any column is drawn. *)
+  draw_column : index:int S.accessor -> Jsx.element;
+}
 
 module Columns = Jsx.Token (struct
   type t = drawn_column
@@ -550,6 +682,120 @@ let scrolls e =
     (fun o -> String.equal o "auto" || String.equal o "scroll")
     [ overflow style; overflow_x style; overflow_y style ]
 
+external scroll_left : Dom.element -> float = "scrollLeft" [@@mel.get]
+external scroll_width : Dom.element -> float = "scrollWidth" [@@mel.get]
+
+type rect
+
+external bounds : Dom.element -> rect = "getBoundingClientRect" [@@mel.send]
+external rect_width : rect -> float = "width" [@@mel.get]
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external input_type : Dom.element -> string = "type" [@@mel.get]
+
+external content_editable : Dom.element -> bool = "isContentEditable"
+[@@mel.get]
+
+external default_prevented : Dom.keyboardEvent -> bool = "defaultPrevented"
+[@@mel.get]
+
+(* Whether an element takes text, whose every key -- the arrows, Home, End,
+   Space, Tab, a letter -- moves its caret, writes in it or leaves it. *)
+let edits e =
+  content_editable e
+  ||
+  match tag_name e with
+  | "TEXTAREA" | "SELECT" -> true
+  | "INPUT" -> (
+      match input_type e with
+      | "checkbox" | "radio" | "button" | "submit" | "reset" | "image" | "file"
+      | "color" | "range" | "hidden" ->
+          false
+      | _ -> true)
+  | _ -> false
+
+(* A part's own style from its pieces, none where each is empty. *)
+let own_style pieces =
+  match List.filter (fun p -> not (String.equal p "")) pieces with
+  | [] -> None
+  | given -> Some (String.concat " " given)
+
+(* A part's own style, then the caller's, which a spread of the caller's
+   props would put in its place. *)
+let with_style own given =
+  match (own, given) with
+  | None, None -> None
+  | Some o, None -> Some o
+  | None, Some g -> Some g
+  | Some o, Some g -> Some (o ^ " " ^ g)
+
+external pointer_y : Dom.pointerEvent -> float = "clientY" [@@mel.get]
+external pointer_button : Dom.pointerEvent -> int = "button" [@@mel.get]
+external pointer_number : Dom.pointerEvent -> int = "pointerId" [@@mel.get]
+external rect_top : rect -> float = "top" [@@mel.get]
+external rect_left : rect -> float = "left" [@@mel.get]
+
+external clone : Dom.element -> (_[@mel.as {json|true|json}]) -> Dom.element
+  = "cloneNode"
+[@@mel.send]
+
+external remove_attribute : Dom.element -> string -> unit = "removeAttribute"
+[@@mel.send]
+
+external rect_height : rect -> float = "height" [@@mel.get]
+
+external hold_pointer : Dom.element -> int -> unit = "setPointerCapture"
+[@@mel.send]
+
+external release_pointer : Dom.element -> int -> unit = "releasePointerCapture"
+[@@mel.send]
+
+external connected : Dom.element -> bool = "isConnected" [@@mel.get]
+
+external next_frame : ((float -> unit)[@mel.uncurry]) -> int
+  = "requestAnimationFrame"
+
+external document_listen : string -> (Dom.keyboardEvent -> unit) -> unit
+  = "addEventListener"
+[@@mel.scope "document"]
+
+external document_unlisten : string -> (Dom.keyboardEvent -> unit) -> unit
+  = "removeEventListener"
+[@@mel.scope "document"]
+
+external query_document : string -> Dom.element Js.null = "querySelector"
+[@@mel.scope "document"]
+
+external document_body : Dom.element = "body" [@@mel.scope "document"]
+external set_text : Dom.element -> string -> unit = "textContent" [@@mel.set]
+
+(* What a visually hidden element is styled, as React Aria's VisuallyHidden
+   is: read by a reader, drawn nowhere. *)
+let visually_hidden =
+  "border: 0px; clip: rect(0px, 0px, 0px, 0px); clip-path: inset(50%); height: \
+   1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; \
+   width: 1px; white-space: nowrap;"
+
+(* Tells a reader, as React Aria's announcer does: in a region of the page's
+   own that a reader reads as it changes, made once, on the next frame, so a
+   row it names that was scrolled to is drawn, and read, by then. *)
+let announce text =
+  ignore
+    (next_frame (fun _ ->
+         let text = text () in
+         let region =
+           match Js.Null.toOption (query_document "[data-live-announcer]") with
+           | Some r -> r
+           | None ->
+               let r = create_element "div" in
+               set_attribute r "data-live-announcer" "";
+               set_attribute r "aria-live" "assertive";
+               set_attribute r "style" visually_hidden;
+               ignore (append_child document_body r : Dom.element);
+               r
+         in
+         set_text region text)
+      : int)
+
 type resize_observer
 
 external resize_observer : ((unit -> unit)[@mel.uncurry]) -> resize_observer
@@ -664,6 +910,9 @@ module Root = struct
       ?default_expanded_keys:string array Solidtype.Check.value ->
       ?on_expanded_change:(string array -> unit) ->
       ?on_row_action:(string -> unit) ->
+      ?sticky_header:bool Solidtype.Check.value ->
+      ?on_reorder:(reorder -> unit) ->
+      ?reorder_messages:reorder_messages Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Table.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
@@ -719,6 +968,15 @@ module Root = struct
     external on_row_action : t -> ((string -> unit)[@u]) option = "onRowAction"
     [@@mel.get]
 
+    external sticky_header : t -> bool option = "stickyHeader" [@@mel.get]
+
+    external on_reorder : t -> ((reorder -> unit)[@u]) option = "onReorder"
+    [@@mel.get]
+
+    external reorder_messages : t -> reorder_messages option = "reorderMessages"
+    [@@mel.get]
+
+    external style : t -> string option = "style" [@@mel.get]
     external children : t -> Jsx.element = "children" [@@mel.get]
 
     (* A virtualized table's element is a <div>: what it is given is an
@@ -731,6 +989,10 @@ module Root = struct
 
     external on_mouse_down : t -> ((Dom.mouseEvent -> unit)[@u]) option
       = "onMouseDown"
+    [@@mel.get]
+
+    external on_pointer_down : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerDown"
     [@@mel.get]
 
     external on_focus_in : t -> ((Dom.focusEvent -> unit)[@u]) option
@@ -759,15 +1021,23 @@ module Root = struct
       "defaultExpandedKeys";
       "onExpandedChange";
       "onRowAction";
+      "stickyHeader";
+      "onReorder";
+      "reorderMessages";
+      "style";
       "children";
       "ref";
       "onKeyDown";
       "onMouseDown";
+      "onPointerDown";
       "onFocusIn";
       "onFocusOut";
     |]
 
   let make (props : Props.t) =
+    (* Kobalte's state attribute, before its list's state takes the name. *)
+    let marked = state in
+    let press_in_control = ref false in
     let selection_mode =
       S.accessor (fun () ->
           Option.value (Props.selection_mode props) ~default:`none)
@@ -839,11 +1109,19 @@ module Root = struct
       | Some r -> text_content r.element
       | None -> ""
     in
+    (* Kobalte's collection reads an item's text through the getter only for
+       an object, and takes a string for its own text: each row is given as
+       an object, or a typed letter would look for it by its key. *)
+    let items =
+      S.create_memo (fun () ->
+          Array.map (fun key -> { item_key = key }) (S.get keys))
+    in
     let state =
       Selection.create_list_state
-        (Types.CreateListStateProps.make ~data_source:(Either.right keys)
-           ~get_key:(Either.left Fun.id) ~get_text_value:(Either.left text)
-           ~get_disabled:(Either.left disabled)
+        (Types.CreateListStateProps.make ~data_source:(Either.right items)
+           ~get_key:(Either.left (fun i -> i.item_key))
+           ~get_text_value:(Either.left (fun i -> text i.item_key))
+           ~get_disabled:(Either.left (fun i -> disabled i.item_key))
            ~selection_mode:
              (Either.right
                 (S.create_memo (fun () -> Some (S.get selection_mode))))
@@ -922,7 +1200,7 @@ module Root = struct
           let narrowest c = Option.value (S.get c.min_width) ~default:75. in
           let widest c = Option.value (S.get c.max_width) ~default:max_safe in
           let layout =
-            S.create_memo (fun () ->
+            of_columns (fun () ->
                 let columns = Array.of_list (ordered_columns ()) in
                 let widths =
                   column_widths ~available:(S.get told.width)
@@ -1005,6 +1283,7 @@ module Root = struct
         (fun (l : Virtualizer.table_layout) ->
           let size, set_size = S.create_signal (0., 400.) in
           let scroll, set_scroll = S.create_signal 0. in
+          let across, set_across = S.create_signal 0. in
           let up, set_up = S.create_signal false in
           let scrolling, set_scrolling = S.create_signal false in
           let settle = ref None in
@@ -1031,7 +1310,10 @@ module Root = struct
                   measure ();
                   let o = resize_observer measure in
                   watch_size o g;
-                  let on_scroll (_ : Dom.event) = scrolled (scroll_top g) in
+                  let on_scroll (_ : Dom.event) =
+                    S.set set_across (scroll_left g);
+                    scrolled (scroll_top g)
+                  in
                   listen g "scroll" on_scroll;
                   S.on_cleanup (fun () ->
                       stop_watching o;
@@ -1044,7 +1326,7 @@ module Root = struct
             | None -> Option.value c.default_width ~default:(Fraction 1.)
           in
           let widths =
-            S.create_memo (fun () ->
+            of_columns (fun () ->
                 let columns = Array.of_list (ordered_columns ()) in
                 match sizing with
                 | Some z -> Array.map (fun c -> z.width_of c.column_key) columns
@@ -1158,8 +1440,471 @@ module Root = struct
             window;
             focused_row;
             scrolling;
+            scroll_left = across;
+            view_width = S.accessor (fun () -> fst (S.get size));
           })
         layout
+    in
+    (* Each pinned column's side and inset, from the widths of the columns
+       laid out: a resizable or a virtualized table's own layout, else each
+       header as measured. *)
+    let pins =
+      of_columns (fun () ->
+          let columns = Array.of_list (ordered_columns ()) in
+          let width i c =
+            match (virtualized, sizing) with
+            | Some v, _ -> snd (v.column_box i)
+            | None, Some z -> z.width_of c.column_key
+            | None, None -> S.get c.box_width
+          in
+          let sides = Array.map (fun c -> S.get c.pinned) columns in
+          let n = Array.length columns in
+          let on side i =
+            match sides.(i) with
+            | Some s -> (
+                match (s, side) with
+                | `start, `start | `end_, `end_ -> true
+                | `start, `end_ | `end_, `start -> false)
+            | None -> false
+          in
+          let sum side ~from ~until =
+            let total = ref 0. in
+            for j = from to until do
+              if on side j then total := !total +. width j columns.(j)
+            done;
+            !total
+          in
+          let rec any side ~from ~until =
+            from <= until && (on side from || any side ~from:(from + 1) ~until)
+          in
+          Array.mapi
+            (fun i c ->
+              ( S.get c.column_index,
+                match sides.(i) with
+                | Some `start ->
+                    Some
+                      {
+                        side = `start;
+                        inset = sum `start ~from:0 ~until:(i - 1);
+                        edge = not (any `start ~from:(i + 1) ~until:(n - 1));
+                      }
+                | Some `end_ ->
+                    Some
+                      {
+                        side = `end_;
+                        inset = sum `end_ ~from:(i + 1) ~until:(n - 1);
+                        edge = not (any `end_ ~from:0 ~until:(i - 1));
+                      }
+                | None -> None ))
+            columns)
+    in
+    let pin_of i =
+      Array.find_map
+        (fun (index, pin) -> if index = i then pin else None)
+        (S.get pins)
+    in
+    let has_pins side =
+      Array.exists
+        (fun (_, pin) ->
+          match (pin, side) with
+          | Some { side = `start; _ }, `start | Some { side = `end_; _ }, `end_
+            ->
+              true
+          | Some _, _ | None, _ -> false)
+        (S.get pins)
+    in
+    (* Whether content has scrolled beneath the columns pinned to the start,
+       and whether there is more beneath those pinned to the end: read from
+       what scrolls the table, the table itself where it is virtualized, else
+       the first element above it that scrolls. A right-to-left page scrolls
+       its start by a negative amount. *)
+    let beneath, set_beneath = S.create_signal (false, false) in
+    S.on_mount (fun () ->
+        match S.get element with
+        | None -> ()
+        | Some table -> (
+            let rec up e =
+              if scrolls e then Some e
+              else Option.bind (Js.Null.toOption (parent e)) up
+            in
+            let scroller =
+              match virtualized with
+              | Some _ -> Some table
+              | None -> Option.bind (Js.Null.toOption (parent table)) up
+            in
+            match scroller with
+            | None -> ()
+            | Some s ->
+                let measure () =
+                  let at = Float.abs (scroll_left s) in
+                  S.set set_beneath
+                    (at > 0., at +. client_width s < scroll_width s -. 1.)
+                in
+                measure ();
+                let on_scroll (_ : Dom.event) = measure () in
+                listen s "scroll" on_scroll;
+                let o = resize_observer measure in
+                watch_size o s;
+                watch_size o table;
+                S.on_cleanup (fun () ->
+                    unlisten s "scroll" on_scroll;
+                    stop_watching o)));
+    let sticky_header =
+      S.accessor (fun () ->
+          Option.value (Props.sticky_header props) ~default:false)
+    in
+    let reordering =
+      let drag, set_drag = S.create_signal None in
+      let on_reorder = S.untrack (fun () -> Props.on_reorder props) in
+      let messages () =
+        Option.value (Props.reorder_messages props) ~default:english
+      in
+      let listed k =
+        List.find_opt (fun (r : listed) -> String.equal r.key k) (S.get rows)
+      in
+      (* A row's name, its row header's text, as a reader reads it. *)
+      let name k =
+        match listed k with
+        | Some r -> (
+            match
+              Js.Null.toOption (query_in r.element ":scope > [role=rowheader]")
+            with
+            | Some h -> text_content h
+            | None -> text_content r.element)
+        | None -> k
+      in
+      let selected () =
+        match S.get selection_mode with
+        | `none -> [||]
+        | `single | `multiple ->
+            Js.Set.toArray (S.get (Manager.selected_keys (m ())))
+      in
+      (* A selected row is dragged with the others selected, as React Aria
+         drags them. *)
+      let with_selected k =
+        let chosen = selected () in
+        Array.length chosen > 1 && Array.exists (String.equal k) chosen
+      in
+      (* The rows beside one, of the same parent, in the order shown: all the
+         body holds where it is virtualized, whose rows hold none. *)
+      let beside k =
+        match (virtualized, S.get body_keys) with
+        | Some _, Some all -> Array.to_list all
+        | Some _, None | None, _ ->
+            let parent = Option.bind (listed k) (fun r -> r.parent) in
+            List.filter_map
+              (fun (r : listed) ->
+                if Option.equal String.equal r.parent parent then Some r.key
+                else None)
+              (S.get ordered)
+      in
+      let target d =
+        let n = Array.length d.others in
+        if n = 0 then None
+        else if d.slot < n then Some (d.others.(d.slot), `before)
+        else Some (d.others.(n - 1), `after)
+      in
+      let tell d =
+        let m = messages () and n = Array.length d.others in
+        if n > 0 then
+          announce (fun () ->
+              if d.slot = 0 then m.insert_before (name d.others.(0))
+              else if d.slot >= n then m.insert_after (name d.others.(n - 1))
+              else
+                m.insert_between
+                  (name d.others.(d.slot - 1))
+                  (name d.others.(d.slot)))
+      in
+      let grab key ~held handle =
+        let all = beside key in
+        let moved =
+          if with_selected key then
+            List.filter (fun k -> Manager.is_selected (m ()) k) all
+          else [ key ]
+        in
+        let is_moved k = List.exists (String.equal k) moved in
+        let others = List.filter (fun k -> not (is_moved k)) all in
+        let rec before = function
+          | k :: rest when not (is_moved k) -> 1 + before rest
+          | _ :: _ | [] -> 0
+        in
+        let from_slot = before all in
+        S.set set_drag
+          (Some
+             {
+               moved = Array.of_list moved;
+               others = Array.of_list others;
+               slot = from_slot;
+               from_slot;
+               held;
+               handle;
+             });
+        announce (fun () -> (messages ()).drag_started)
+      in
+      let move_to slot =
+        match S.get drag with
+        | Some d ->
+            let slot = max 0 (min (Array.length d.others) slot) in
+            if slot <> d.slot then begin
+              let d = { d with slot } in
+              S.set set_drag (Some d);
+              (* A virtualized table draws the row it would land beside. *)
+              Option.iter (fun (k, _) -> !scroll_to k) (target d);
+              tell d
+            end
+        | None -> ()
+      in
+      (* The place a pointer at [y] points to: before the first of the rows
+         beside it whose middle is below it, else after the last. *)
+      let slot_at d y =
+        let n = Array.length d.others in
+        let rec find i =
+          if i >= n then n
+          else
+            match listed d.others.(i) with
+            | Some r ->
+                let box = bounds r.element in
+                if y < rect_top box +. (rect_height box /. 2.) then i
+                else find (i + 1)
+            | None -> find (i + 1)
+        in
+        find 0
+      in
+      (* Escape lets a pointer's drag go wherever the focus is. *)
+      let escape = ref None in
+      (* A copy of the row a pointer drags follows the pointer, as a browser's
+         drag image follows React Aria's, the row kept in its place: drawn in
+         a table of the table's own classes beside it, so a style's rules for
+         them reach it, each cell as wide as the row's, out of every reader's
+         and key's reach. *)
+      let preview = ref None in
+      let drop_preview () =
+        Option.iter (fun (g, _) -> remove_element g) !preview;
+        preview := None
+      in
+      let placed ~box ~top =
+        "position: fixed; pointer-events: none; z-index: 50; margin: 0; \
+         table-layout: fixed; left: "
+        ^ px (rect_left box)
+        ^ "; top: " ^ px top ^ "; width: "
+        ^ px (rect_width box)
+        ^ ";"
+      in
+      let follow key ~from ~now =
+        match (!preview, listed key) with
+        | Some (g, box), _ ->
+            set_attribute g "style"
+              (placed ~box ~top:(rect_top box +. now -. from))
+        | None, Some r -> (
+            match Js.Null.toOption (parent r.element) with
+            | None -> ()
+            | Some _ ->
+                let box = bounds r.element in
+                let row = clone r.element in
+                Array.iter
+                  (fun e -> remove_attribute e "id")
+                  (Js.Array.from (query_all row "[id]"));
+                Array.iter
+                  (fun e -> set_attribute e "tabindex" "-1")
+                  (Js.Array.from (query_all row "button, input, a, [tabindex]"));
+                Array.iter2
+                  (fun copy (cell : Dom.element) ->
+                    set_attribute copy "style"
+                      ("width: " ^ px (rect_width (bounds cell)) ^ ";"))
+                  (cells row) (cells r.element);
+                (* The copy is the row as it looks at rest, not as it is
+                   dragged, hovered or pressed. *)
+                List.iter (remove_attribute row)
+                  [
+                    "id";
+                    "data-key";
+                    "data-dragging";
+                    "data-hovered";
+                    "data-pressed";
+                    "data-focus-visible";
+                    "data-drop-target";
+                    "data-drop-position";
+                  ];
+                let wrapper =
+                  match Js.Null.toOption (closest r.element "table") with
+                  | Some table ->
+                      let copy = create_element "table" in
+                      Option.iter
+                        (set_attribute copy "class")
+                        (Js.Null.toOption (attribute table "class"));
+                      let body = create_element "tbody" in
+                      ignore (append_child body row : Dom.element);
+                      ignore (append_child copy body : Dom.element);
+                      copy
+                  | None ->
+                      let copy = create_element "div" in
+                      ignore (append_child copy row : Dom.element);
+                      copy
+                in
+                set_attribute wrapper "data-drag-preview" "";
+                set_attribute wrapper "aria-hidden" "true";
+                set_attribute wrapper "inert" "";
+                set_attribute wrapper "role" "presentation";
+                set_attribute wrapper "style"
+                  (placed ~box ~top:(rect_top box +. now -. from));
+                let host =
+                  match
+                    Js.Null.toOption (closest r.element "table, [role=grid]")
+                  with
+                  | Some table -> Js.Null.toOption (parent table)
+                  | None -> None
+                in
+                Option.iter
+                  (fun h -> ignore (append_child h wrapper : Dom.element))
+                  host;
+                preview := Some (wrapper, box))
+        | None, None -> ()
+      in
+      S.on_cleanup drop_preview;
+      let end_drag () =
+        drop_preview ();
+        S.set set_drag None;
+        Option.iter (document_unlisten "keydown") !escape;
+        escape := None
+      in
+      S.on_cleanup (fun () -> Option.iter (document_unlisten "keydown") !escape);
+      let cancel () =
+        match S.get drag with
+        | Some _ ->
+            end_drag ();
+            announce (fun () -> (messages ()).drop_canceled)
+        | None -> ()
+      in
+      let drop () =
+        match S.get drag with
+        | Some d ->
+            end_drag ();
+            (match target d with
+            | Some (target, position) when d.slot <> d.from_slot ->
+                Jsx.call on_reorder { keys = d.moved; target; position }
+            | Some _ | None -> ());
+            announce (fun () -> (messages ()).drop_complete);
+            (* A row moved is drawn again where it lands, which takes the
+               focus from its handle: it is given back. *)
+            let handle = d.handle in
+            ignore
+              (next_frame (fun _ ->
+                   match (d.held, Js.Null.toOption active) with
+                   | None, Some now when now == handle -> ()
+                   | None, (Some _ | None) ->
+                       if connected handle then focus handle
+                   | Some _, (Some _ | None) -> ())
+                : int)
+        | None -> ()
+      in
+      let can_drag = S.accessor (fun () -> Option.is_some on_reorder) in
+      let held_by key =
+        match S.get drag with
+        | Some { held = Some (k, _, _); _ } -> String.equal k key
+        | Some { held = None; _ } | None -> false
+      in
+      let handle key =
+        {
+          can_drag;
+          is_dragging =
+            S.accessor (fun () ->
+                match S.get drag with
+                | Some d -> Array.exists (String.equal key) d.moved
+                | None -> false);
+          label =
+            S.accessor (fun () ->
+                let m = messages () in
+                if with_selected key then
+                  m.drag_selected_items (Array.length (selected ()))
+                else m.drag_item (name key));
+          on_key_down =
+            (fun e ->
+              let keyboard =
+                match S.get drag with
+                | Some { held = None; _ } -> true
+                | Some { held = Some _; _ } | None -> false
+              in
+              match (S.get drag, key_name e) with
+              | None, ("Enter" | " ") when S.get can_drag ->
+                  prevent_default e;
+                  grab key ~held:None (event_target e)
+              | Some d, "ArrowDown" when keyboard ->
+                  prevent_default e;
+                  move_to (d.slot + 1)
+              | Some d, "ArrowUp" when keyboard ->
+                  prevent_default e;
+                  move_to (d.slot - 1)
+              | Some _, "Home" when keyboard ->
+                  prevent_default e;
+                  move_to 0
+              | Some d, "End" when keyboard ->
+                  prevent_default e;
+                  move_to (Array.length d.others)
+              | Some _, ("Enter" | " ") when keyboard ->
+                  prevent_default e;
+                  drop ()
+              | Some _, "Escape" ->
+                  prevent_default e;
+                  cancel ()
+              | (Some _ | None), _ -> ());
+          on_blur =
+            (fun _ ->
+              match S.get drag with
+              | Some { held = None; _ } -> cancel ()
+              | Some { held = Some _; _ } | None -> ());
+          on_pointer_down =
+            (fun e ->
+              match S.get drag with
+              | None when S.get can_drag && pointer_button e = 0 ->
+                  (* No text is chosen as the row is dragged. *)
+                  prevent e;
+                  let h = event_target e in
+                  hold_pointer h (pointer_number e);
+                  let y = pointer_y e in
+                  grab key ~held:(Some (key, y, y)) h;
+                  let on_escape k =
+                    if String.equal (key_name k) "Escape" then cancel ()
+                  in
+                  document_listen "keydown" on_escape;
+                  escape := Some on_escape
+              | Some _ | None -> ());
+          on_pointer_move =
+            (fun e ->
+              match S.get drag with
+              | Some ({ held = Some (k, from, _); _ } as d)
+                when String.equal k key ->
+                  let y = pointer_y e in
+                  let slot = slot_at d y in
+                  follow k ~from ~now:y;
+                  S.set set_drag
+                    (Some { d with held = Some (k, from, y); slot })
+              | Some _ | None -> ());
+          on_pointer_up =
+            (fun e ->
+              if held_by key then begin
+                release_pointer (event_target e) (pointer_number e);
+                drop ()
+              end);
+          on_pointer_cancel = (fun _ -> if held_by key then cancel ());
+        }
+      in
+      {
+        handle;
+        dragged =
+          (fun k ->
+            match S.get drag with
+            | Some d -> Array.exists (String.equal k) d.moved
+            | None -> false);
+        (* A drop where the rows already are is no place to show. *)
+        drop_at =
+          (fun k ->
+            match S.get drag with
+            | Some d when d.slot <> d.from_slot -> (
+                match target d with
+                | Some (t, side) when String.equal t k -> Some side
+                | Some _ | None -> None)
+            | Some _ | None -> None);
+      }
     in
     let t =
       {
@@ -1230,6 +1975,9 @@ module Root = struct
               (List.filter
                  (fun c -> not (String.equal c.column_key k))
                  (S.get specs)));
+        pin_of;
+        reordering;
+        sticky_header;
         sizing;
         virtualized;
       }
@@ -1245,62 +1993,86 @@ module Root = struct
         | Some s -> Option.is_some (S.get s.resizing)
         | None -> false
       in
+      (* A key pressed in a control inside a cell is the control's, never
+         the list's, which would take a letter for a row's name, Space for
+         its selection and Tab for leaving the table: a field's every key,
+         and any key the control handled. Only the arrows, Home and End of
+         a control that does not take text move, from its cell, as from the
+         cell itself. *)
+      let target = event_target e in
+      let in_cell =
+        match
+          Js.Null.toOption (closest target "[role=gridcell], [role=rowheader]")
+        with
+        | Some cell when not (same cell target) -> Some cell
+        | Some _ | None -> None
+      in
       let moved =
-        match (Js.Null.toOption active, S.get element) with
-        | _ when resizing -> `own
-        (* Tab from a column's header reaches its resizer, as the page's
+        match (in_cell, S.get element) with
+        | Some cell, Some table -> (
+            if default_prevented e || edits target then `own
+            else
+              match key e with
+              | "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight" | "Home"
+              | "End" ->
+                  `grid (from_cell table cell (key e))
+              | _ -> `own)
+        | Some _, None | None, _ -> (
+            match (Js.Null.toOption active, S.get element) with
+            | _ when resizing -> `own
+            (* Tab from a column's header reaches its resizer, as the page's
            order has it, where the list would leave the table. *)
-        | Some focused, Some _
-          when String.equal (key e) "Tab"
-               && (not (shift_key e))
-               && has_role focused "columnheader"
-               && Option.is_some (Js.Null.toOption (query_in focused "input"))
-          ->
-            `own
-        | Some focused, Some table -> (
-            match role focused with
-            | Some ("gridcell" | "rowheader" | "columnheader") -> (
-                match key e with
-                | "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight" | "Home"
-                | "End" ->
-                    `grid (from_cell table focused (key e))
-                | _ -> `list)
-            | Some "row" -> (
-                (* A row of a tree is expanded by the arrow forward and
+            | Some focused, Some _
+              when String.equal (key e) "Tab"
+                   && (not (shift_key e))
+                   && has_role focused "columnheader"
+                   && Option.is_some
+                        (Js.Null.toOption (query_in focused "input")) ->
+                `own
+            | Some focused, Some table -> (
+                match role focused with
+                | Some ("gridcell" | "rowheader" | "columnheader") -> (
+                    match key e with
+                    | "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight"
+                    | "Home" | "End" ->
+                        `grid (from_cell table focused (key e))
+                    | _ -> `list)
+                | Some "row" -> (
+                    (* A row of a tree is expanded by the arrow forward and
                    collapsed by the arrow back, which then reaches the row it
                    is in, as an accessible tree grid's is. *)
-                let listed =
-                  if tree () then
-                    List.find_opt
-                      (fun (r : listed) -> same r.element focused)
-                      (S.get t.rows)
-                  else None
-                in
-                match (listed, key e) with
-                | Some r, "ArrowRight"
-                  when Array.length (S.get r.child_keys) > 0
-                       && not (is_expanded r.key) ->
-                    toggle_expanded r.key;
-                    `grid None
-                | Some r, "ArrowLeft"
-                  when Array.length (S.get r.child_keys) > 0
-                       && is_expanded r.key ->
-                    toggle_expanded r.key;
-                    `grid None
-                | Some { parent = Some above; _ }, "ArrowLeft" -> (
-                    match
-                      List.find_opt
-                        (fun (r : listed) -> String.equal r.key above)
-                        (S.get t.rows)
-                    with
-                    | Some r -> `row r.element
-                    | None -> `grid None)
-                | _ -> (
-                    match from_row focused (key e) with
-                    | Some target -> `grid (Some target)
-                    | None -> `list))
-            | Some _ | None -> `list)
-        | _ -> `list
+                    let listed =
+                      if tree () then
+                        List.find_opt
+                          (fun (r : listed) -> same r.element focused)
+                          (S.get t.rows)
+                      else None
+                    in
+                    match (listed, key e) with
+                    | Some r, "ArrowRight"
+                      when Array.length (S.get r.child_keys) > 0
+                           && not (is_expanded r.key) ->
+                        toggle_expanded r.key;
+                        `grid None
+                    | Some r, "ArrowLeft"
+                      when Array.length (S.get r.child_keys) > 0
+                           && is_expanded r.key ->
+                        toggle_expanded r.key;
+                        `grid None
+                    | Some { parent = Some above; _ }, "ArrowLeft" -> (
+                        match
+                          List.find_opt
+                            (fun (r : listed) -> String.equal r.key above)
+                            (S.get t.rows)
+                        with
+                        | Some r -> `row r.element
+                        | None -> `grid None)
+                    | _ -> (
+                        match from_row focused (key e) with
+                        | Some target -> `grid (Some target)
+                        | None -> `list))
+                | Some _ | None -> `list)
+            | _ -> `list)
       in
       match moved with
       | `grid target ->
@@ -1353,12 +2125,30 @@ module Root = struct
                               | `multiple -> Some true
                               | `single | `none -> None)
         tabindex=(tabindex (S.get (Selectable_list.tab_index list)))
-        ?style=(match sizing with
-               | Some _ -> Some "table-layout: fixed; width: min-content;"
-               | None -> None)
+        ?style=(with_style
+                  (match sizing with
+                  | Some _ -> Some "table-layout: fixed; width: min-content;"
+                  | None -> None)
+                  (Props.style props))
+        data_sticky_header=(marked (S.get sticky_header))
+        data_pinned_start_detached=(marked
+                                      (has_pins `start && fst (S.get beneath)))
+        data_pinned_end_detached=(marked
+                                    (has_pins `end_ && snd (S.get beneath)))
         on_key_down
+        on_pointer_down=(fun e ->
+                          Jsx.call (Props.on_pointer_down props) e;
+                          press_in_control := in_control e)
         on_mouse_down=(fun e ->
                         Jsx.call (Props.on_mouse_down props) e;
+                        (* A press begun in a control is the control's to
+                           its end: its mousedown, landing beside the
+                           control under a menu the press opened, which
+                           takes the pointer from the page, focuses no cell
+                           and closes no menu. *)
+                        if !press_in_control && not (in_control e) then
+                          prevent e;
+                        press_in_control := false;
                         Selectable_list.on_mouse_down list e)
         on_focus_in=(fun e ->
                       Jsx.call (Props.on_focus_in props) e;
@@ -1423,6 +2213,18 @@ module Header = struct
     t.set_column_count
       (Some (S.accessor (fun () -> Array.length (S.get columns))));
     S.on_cleanup (fun () -> t.set_column_count None);
+    (* Every column is known before any is drawn, so a pinned one knows those
+       after it, on the server too, which draws each once. *)
+    S.create_computed (fun () ->
+        let now = S.get columns in
+        S.untrack (fun () ->
+            Array.iter
+              (fun c ->
+                c.register
+                  ~index:
+                    (S.accessor (fun () ->
+                         Js.Array.indexOf ~value:c (S.get columns))))
+              now));
     let drawn () =
       Jsx.fragment
         [|
@@ -1497,6 +2299,7 @@ module Column = struct
       ?default_width:column_size Solidtype.Check.value ->
       ?min_width:float Solidtype.Check.value ->
       ?max_width:float Solidtype.Check.value ->
+      ?pinned:side Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Th.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
@@ -1513,6 +2316,8 @@ module Column = struct
 
     external min_width : t -> float option = "minWidth" [@@mel.get]
     external max_width : t -> float option = "maxWidth" [@@mel.get]
+    external pinned : t -> side option = "pinned" [@@mel.get]
+    external style : t -> string option = "style" [@@mel.get]
     external children : t -> Jsx.element = "children" [@@mel.get]
     external ref : t -> ((Dom.element -> unit)[@u]) option = "ref" [@@mel.get]
 
@@ -1534,13 +2339,15 @@ module Column = struct
       "defaultWidth";
       "minWidth";
       "maxWidth";
+      "pinned";
+      "style";
       "children";
       "ref";
       "onClick";
       "onKeyDown";
     |]
 
-  let draw t ~index (props : Props.t) =
+  let draw t ~key ~set_box_width ~index (props : Props.t) =
     let names_rows =
       S.untrack (fun () ->
           Option.value (Props.is_row_header props) ~default:false)
@@ -1549,11 +2356,6 @@ module Column = struct
       t.set_row_header (Some index);
       S.on_cleanup (fun () -> t.set_row_header None)
     end;
-    let key =
-      match S.untrack (fun () -> Props.id props) with
-      | Some k -> k
-      | None -> S.create_unique_id ()
-    in
     (match S.untrack (fun () -> S.get t.context.tree_column) with
     | Some column when String.equal column key ->
         t.set_tree_index (Some index);
@@ -1572,18 +2374,18 @@ module Column = struct
        sorted by. *)
     let press () = if sortable () then t.context.sort_by key in
     let header_id = S.create_unique_id () in
-    (* A table laid out by its columns' sizes knows them as they are made, so
-       the server lays it out as the browser does. *)
-    t.add_column
-      {
-        column_key = key;
-        column_index = index;
-        width = S.accessor (fun () -> Props.width props);
-        default_width = S.untrack (fun () -> Props.default_width props);
-        min_width = S.accessor (fun () -> Props.min_width props);
-        max_width = S.accessor (fun () -> Props.max_width props);
-      };
-    S.on_cleanup (fun () -> t.remove_column key);
+    (* Its header's width as the page lays it out, which the columns pinned
+       after it stick beside. *)
+    let header, set_header = S.create_signal None in
+    S.on_mount (fun () ->
+        Option.iter
+          (fun h ->
+            let measure () = S.set set_box_width (rect_width (bounds h)) in
+            measure ();
+            let o = resize_observer measure in
+            watch_size o h;
+            S.on_cleanup (fun () -> stop_watching o))
+          (S.get header));
     let resizing =
       S.accessor (fun () ->
           match t.sizing with
@@ -1603,12 +2405,26 @@ module Column = struct
             id=header_id
             tabindex="-1"
             aria_colindex=(string_of_int (S.get index + 1))
-            ?style=(Option.map
-                      (fun s ->
-                        "width: " ^ Js.Float.toString (s.width_of key) ^ "px;")
-                      t.sizing)
+            ?style=(with_style
+                      (own_style
+                         [
+                           (match t.sizing with
+                           | Some s -> "width: " ^ px (s.width_of key) ^ ";"
+                           | None -> "");
+                           (match t.virtualized with
+                           | Some _ -> ""
+                           | None ->
+                               sticks ~top:(S.get t.sticky_header)
+                                 (t.pin_of (S.get index)));
+                         ])
+                      (Props.style props))
             data_resizing=(state (S.get resizing))
-            ref=(fun e -> Jsx.call (Props.ref props) (as_element e))
+            data_pinned=(pinned_side (t.pin_of (S.get index)))
+            data_pinned_edge=(pinned_edge (t.pin_of (S.get index)))
+            ref=(fun e ->
+                  let e = as_element e in
+                  S.set set_header (Some e);
+                  Jsx.call (Props.ref props) e)
             ?aria_sort=(if sortable () then
                           Some
                             (match S.get direction with
@@ -1644,15 +2460,48 @@ module Column = struct
           role=`presentation
           style=(let i = S.get index in
                  let left, width = v.column_box i in
-                 placed ~overflow:"visible"
-                   ~z:(S.get v.column_count - i + 1)
-                   ~top:0. ~left ~width ~height:v.options.heading_size ())>
+                 let pin = t.pin_of i in
+                 (* A pinned column over every other, as its cells are over
+                    theirs. *)
+                 let z =
+                   match pin with
+                   | Some _ -> S.get v.column_count + 2
+                   | None -> S.get v.column_count - i + 1
+                 in
+                 placed ~overflow:"visible" ~z ~top:0.
+                   ~left:(pinned_left v pin ~left ~width)
+                   ~width ~height:v.options.heading_size ())>
           drawn
         </div>
 
   let make (props : Props.t) =
     let t = in_table "Table.Column" in
-    Columns.element { draw_column = (fun ~index -> draw t ~index props) }
+    let key =
+      match S.untrack (fun () -> Props.id props) with
+      | Some k -> k
+      | None -> S.create_unique_id ()
+    in
+    let box_width, set_box_width = S.create_signal 0. in
+    Columns.element
+      {
+        (* A table laid out by its columns' sizes knows them before they are
+           drawn, so the server lays it out as the browser does. *)
+        register =
+          (fun ~index ->
+            t.add_column
+              {
+                column_key = key;
+                column_index = index;
+                width = S.accessor (fun () -> Props.width props);
+                default_width = S.untrack (fun () -> Props.default_width props);
+                min_width = S.accessor (fun () -> Props.min_width props);
+                max_width = S.accessor (fun () -> Props.max_width props);
+                pinned = S.accessor (fun () -> Props.pinned props);
+                box_width;
+              };
+            S.on_cleanup (fun () -> t.remove_column key));
+        draw_column = (fun ~index -> draw t ~key ~set_box_width ~index props);
+      }
 
   let component = Jsx.component make
 end
@@ -1790,6 +2639,7 @@ module Row = struct
     external href_lang : t -> string option = "hrefLang" [@@mel.get]
     external ping : t -> string option = "ping" [@@mel.get]
     external referrer_policy : t -> string option = "referrerPolicy" [@@mel.get]
+    external style : t -> string option = "style" [@@mel.get]
     external children : t -> Jsx.element = "children" [@@mel.get]
     external ref : t -> ((Dom.element -> unit)[@u]) option = "ref" [@@mel.get]
 
@@ -1844,6 +2694,7 @@ module Row = struct
       "hrefLang";
       "ping";
       "referrerPolicy";
+      "style";
       "children";
       "ref";
       "onPointerDown";
@@ -1958,6 +2809,7 @@ module Row = struct
         toggle_expanded = (fun () -> t.context.toggle_expanded key);
         focus = (fun () -> Option.iter focus (S.get element));
         header_id;
+        drag = t.reordering.handle key;
       }
     in
     S.on_mount (fun () ->
@@ -2021,6 +2873,13 @@ module Row = struct
            data_disabled=(state (S.get disabled))
            data_expanded=(state
                             (tree () && S.get has_child_items && S.get expanded))
+           data_dragging=(state (t.reordering.dragged key))
+           data_drop_target=(state (Option.is_some (t.reordering.drop_at key)))
+           data_drop_position=(match t.reordering.drop_at key with
+                              | Some `before -> Jsx.data "before"
+                              | Some `after -> Jsx.data "after"
+                              | None -> Jsx.flag false)
+           ?style=(Props.style props)
            on_pointer_down=(pressed (Props.on_pointer_down props) (fun e ->
                                 pointer := pointer_type e;
                                 primary_at_down := primary ();
@@ -2166,6 +3025,7 @@ module Cell = struct
       Solidtype.Html.Td.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
+    external style : t -> string option = "style" [@@mel.get]
     external children : t -> Jsx.element = "children" [@@mel.get]
     external ref : t -> ((Dom.element -> unit)[@u]) option = "ref" [@@mel.get]
   end
@@ -2191,8 +3051,16 @@ module Cell = struct
           tabindex="-1"
           data_column_index=(Jsx.data (string_of_int (S.get index)))
           data_tree_column=(state (S.get is_tree_column))
+          data_pinned=(pinned_side (t.pin_of (S.get index)))
+          data_pinned_edge=(pinned_edge (t.pin_of (S.get index)))
+          ?style=(with_style
+                    (match t.virtualized with
+                    | Some _ -> None
+                    | None ->
+                        own_style [ sticks ~top:false (t.pin_of (S.get index)) ])
+                    (Props.style props))
           ref=(fun e -> Jsx.call (Props.ref props) (as_element e))
-          props=(S.undrawn (S.omit props [| "children"; "ref" |]))>
+          props=(S.undrawn (S.omit props [| "children"; "ref"; "style" |]))>
           (Props.children props)
         </Dynamic.Drawn>
       </Cell_context.Provider>
@@ -2203,8 +3071,12 @@ module Cell = struct
         <div
           role=`presentation
           style=(let left, width = v.column_box (S.get index) in
-                 placed ~overflow:"visible" ~z:1 ~top:0. ~left ~width
-                   ~height:v.options.row_size ())>
+                 let pin = t.pin_of (S.get index) in
+                 placed ~overflow:"visible"
+                   ~z:(match pin with Some _ -> 2 | None -> 1)
+                   ~top:0.
+                   ~left:(pinned_left v pin ~left ~width)
+                   ~width ~height:v.options.row_size ())>
           drawn
         </div>
 
@@ -2216,6 +3088,98 @@ module Cell = struct
       | None -> invalid_arg "Table.Cell is used inside a Table.Row"
     in
     Cells.element { draw_cell = (fun ~index -> draw t r ~index props) }
+
+  let component = Jsx.component make
+end
+
+module Drag_handle = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Button.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external style : t -> string option = "style" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
+    external ref : t -> ((Dom.element -> unit)[@u]) option = "ref" [@@mel.get]
+
+    external on_pointer_down : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerDown"
+    [@@mel.get]
+
+    external on_pointer_move : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerMove"
+    [@@mel.get]
+
+    external on_pointer_up : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerUp"
+    [@@mel.get]
+
+    external on_pointer_cancel : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerCancel"
+    [@@mel.get]
+
+    external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyDown"
+    [@@mel.get]
+
+    external on_blur : t -> ((Dom.focusEvent -> unit)[@u]) option = "onBlur"
+    [@@mel.get]
+  end
+
+  let own =
+    [|
+      "style";
+      "children";
+      "ref";
+      "onPointerDown";
+      "onPointerMove";
+      "onPointerUp";
+      "onPointerCancel";
+      "onKeyDown";
+      "onBlur";
+    |]
+
+  let make (props : Props.t) =
+    let d =
+      match Row_context.use () with
+      | Some r -> r.drag
+      | None -> invalid_arg "Table.Drag_handle is used inside a Table.Row"
+    in
+    <button
+      type_=`button
+      aria_label=(S.get d.label)
+      disabled=(not (S.get d.can_drag))
+      data_dragging=(state (S.get d.is_dragging))
+      ?style=((* A touch drags the row rather than scrolling the page. *)
+              with_style (Some "touch-action: none;") (Props.style props))
+      ref=(fun e -> Jsx.call (Props.ref props) (as_element e))
+      on_pointer_down=(fun e ->
+                        Jsx.call (Props.on_pointer_down props) e;
+                        d.on_pointer_down e)
+      on_pointer_move=(fun e ->
+                        Jsx.call (Props.on_pointer_move props) e;
+                        d.on_pointer_move e)
+      on_pointer_up=(fun e ->
+                      Jsx.call (Props.on_pointer_up props) e;
+                      d.on_pointer_up e)
+      on_pointer_cancel=(fun e ->
+                          Jsx.call (Props.on_pointer_cancel props) e;
+                          d.on_pointer_cancel e)
+      on_key_down=(fun e ->
+                    Jsx.call (Props.on_key_down props) e;
+                    d.on_key_down e)
+      on_blur=(fun e ->
+                Jsx.call (Props.on_blur props) e;
+                d.on_blur e)
+      ?as_=(S.drawn_as props)
+      props=(S.undrawn (S.omit props own))>
+      (Props.children props)
+    </button>
 
   let component = Jsx.component make
 end
@@ -2331,13 +3295,6 @@ external set_user_select : inline_style -> string -> unit = "userSelect"
 [@@mel.set]
 
 external focus_input : Dom.htmlInputElement -> unit = "focus" [@@mel.send]
-
-(* What a visually hidden element is styled, as React Aria's VisuallyHidden
-   is: read by a reader, drawn nowhere. *)
-let visually_hidden =
-  "border: 0px; clip: rect(0px, 0px, 0px, 0px); clip-path: inset(50%); height: \
-   1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; \
-   width: 1px; white-space: nowrap;"
 
 module Column_resizer = struct
   module Props = struct

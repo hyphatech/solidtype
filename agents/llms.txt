@@ -1,0 +1,186 @@
+# solidtype
+
+> SolidJS for modern OCaml.
+
+Solid, typed, for OCaml front ends on SolidJS and Kobalte, compiled by Melange. A component is written in OCaml's JSX (`.mlx`) and reaches the browser as the code Solid's own compiler emits for the same JSX. HeroUI's components are ported onto Kobalte, and rhp's charts are bound.
+
+A signal given where its value belongs does not compile, and neither does a prop left out, an attribute an element does not take, or a `match` in a `Switch` that misses a case. Solid's, Kobalte's and HeroUI's own documentation stays the reference for what a component does; these pages say how it is written in OCaml.
+
+## Packages
+
+- `solidtype`: Solid 1.9 bound whole, for Melange: signals, resources, stores, its components, its renderer, server rendering included.
+- `ppx_solidtype`: rewrites the JSX of `.mlx` files into calls Melange compiles.
+- `vite-plugin-solidtype`: turns those calls back into JSX for Solid's compiler. It is not on npm: it is the asset `vite-plugin-solidtype-<version>.tgz` of each release at https://github.com/hyphatech/solidtype/releases, at the version of the opam packages.
+- `solidtype-kobalte`: Kobalte 0.13 bound whole, generated from its declarations.
+- `solidtype-headless`: the components Kobalte lacks, with no style, and Kobalte's own where they need a fix.
+- `solidtype-heroui`: HeroUI 3's components, ported onto Kobalte. Their look is `@import "@heroui/styles";` after Tailwind's, and for Segment, TrendChip and TextShimmer, which HeroUI has no styles for, `@import "vite-plugin-solidtype/heroui-extras.css";`.
+- `solidtype-rhp`: rhp 2.2's charts.
+- `solidtype-internationalized-date`: @internationalized/date, the values HeroUI's date components take.
+- `solidtype-gravity-icons`: every icon of Gravity UI, the set HeroUI's examples draw: `ChevronDown` is `Solidtype_gravity_icons.Chevron_down`. It imports nothing from npm; `solidtype-heroui` depends on it and draws its own icons from it.
+
+The opam packages come from open-opam: `opam repo add open-opam https://github.com/open-opam/opam-repository.git`. Each names the npm packages it imports in its opam field `x-npm-depends`: `bun add $(opam show solidtype-heroui --field x-npm-depends)`. In Vite, `solidtype()` goes before `solid()`.
+
+## Writing it
+
+- Every name is snake case, by one rule from the name in Solid's, Kobalte's or HeroUI's documentation: `onClick` is `on_click`, `aria-label` is `aria_label`, `isDisabled` is `is_disabled`; a keyword takes a trailing underscore, `class_`, `type_`. A module keeps its JavaScript name: `Solidtype_kobalte.Switch.Root`, `Solidtype_heroui.Button`.
+- In JSX a value is written as itself, and Solid keeps it current. A literal or a name is given as it is; any other expression is read again as what it reads changes, as Solid's compiler makes an expression in JSX a getter: `title=(S.get note)` is `title={note()}`, a child `(Jsx.int (S.get count))` is `{count()}`. What changes is read by `S.get` (a signal, a prop, a part's state). Outside JSX a value that changes is `fun () -> e`, as Solid's own API takes `() => e`; state a component derives for its children is `S.accessor (fun () -> e)`. Nothing but a binding writes `[@u]`.
+- A function is a function wherever it is given, `on_close=(fun () -> hide ())`, and one given where a value belongs is refused by its type.
+- An optional prop is given as OCaml gives an optional argument: a value, `count=3`, or an option, `?title=label_opt`, `?title=(S.get note)`, absent while `None`.
+- What JSX holds is one type, `Jsx.element`, as Solid's `JSX.Element` is: a node, `Jsx.string s`, `Jsx.int n`. A child given by its name or an expression is one, `let icon = <Icon /> in <Button>icon "Save"</Button>`.
+- A function child is written in place as the child, `<For each=items>(fun item _ -> ...)</For>`, or given by its name as `render=f`.
+- A component is `let%component make ~(name : string) () = ...`, and reads a prop as a signal is read, `S.get name`; its tag is the module, `<Greeting name="Ada" />`. A root mounted by a page is a plain `let make () = ...`.
+- A spread, TSX's `{...props}`, is the attribute `props`; no prop is named `props`.
+- A `data-` attribute is a `Jsx.data`: `data_selected=(Jsx.flag (S.get on))`.
+- A namespace wraps the value: `on:click={f}` is `on_click=(Jsx.native f)`.
+- A part draws another element by `as_`, HeroUI's `render`.
+
+A page is built from the library's parts, as this counter is from HeroUI's Button: a raw element is written only where no part draws it.
+
+```ocaml
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+
+let make () =
+  let count, set_count = S.create_signal 0 in
+  <Button variant=`secondary on_click=(fun _ -> S.update set_count succ)>
+    "Clicked " (Jsx.int (S.get count)) " times"
+  </Button>
+```
+
+## Start here
+
+- [Getting Started](pages/index.md): SolidJS for modern OCaml.
+- [OCaml over TypeScript](pages/start/ocaml-over-typescript.md): Safe, readable and predictable, and still Solid underneath.
+- [How it works](pages/start/how-it-works.md): One component, from OCaml's JSX to the code Solid's compiler emits.
+- [Melange and dune](pages/start/melange.md): How components are built by dune, compiled by Melange, and why the libraries are shaped as they are.
+- [Vite](pages/start/vite.md): The plugin in Vite, under Astro, and under vitest.
+- [Astro](pages/start/astro.md): Build a site with Astro, its interactive parts written as OCaml islands.
+- [Conventions](pages/start/conventions.md): How a name, a namespace, a data attribute, an optional prop and a spread from Solid's documentation are written in OCaml.
+
+## Solid
+
+- [Solid](pages/solid.md): Zero-cost bindings to Solid.
+- [Components](pages/solid/components.md): A component in OCaml's JSX, its props, its children, and how the compiler checks them.
+- [Reactivity](pages/solid/reactivity.md): Signals, derived values and effects, and where a reactive read is tracked.
+- [Control flow](pages/solid/control-flow.md): Show, For, Index, Switch and Match, ErrorBoundary and Portal, with OCaml's options and matches.
+- [Stores and context](pages/solid/state.md): State tracked field by field, and a value given to every component below a provider.
+- [Async](pages/solid/async.md): Resources, Suspense and transitions, with OCaml's options and results.
+- [Rendering](pages/solid/rendering.md): Mounting in the browser, rendering on the server, and hydrating what the server rendered.
+
+## Kobalte
+
+- [Kobalte](pages/kobalte.md): Zero-cost bindings to Kobalte, generated from its own types.
+- [The binding](pages/kobalte/binding.md): How solidtype-kobalte is generated from Kobalte's own declarations, and how Kobalte's types become OCaml's.
+- [Using Kobalte](pages/kobalte/usage.md): Kobalte's components in OCaml's JSX, styled by their own data attributes.
+- [Headless components](pages/kobalte/headless.md): Components Kobalte lacks, made as Kobalte makes its own, of its hooks, and Kobalte's own, fixed.
+
+## HeroUI
+
+Each component's page gives HeroUI's own examples in OCaml, and a table of its props with the name HeroUI's React component gives each.
+
+- [HeroUI](pages/heroui.md): A maintained port of HeroUI's design system to solidtype.
+- [Coverage](pages/heroui/coverage.md): Which of HeroUI's components solidtype has ported.
+- [Theming](pages/heroui/theming.md): Customize HeroUI's design system with CSS variables and global styles.
+- [Styling](pages/heroui/styling.md): Style HeroUI components with CSS or Tailwind.
+- [Composition](pages/heroui/composition.md): Build flexible UI with component composition patterns.
+- [Button](pages/heroui/button.md): A clickable button component with multiple variants and states.
+- [ButtonGroup](pages/heroui/button-group.md): Group related buttons together with consistent styling and spacing.
+- [CloseButton](pages/heroui/close-button.md): Button component for closing dialogs, modals, or dismissing content.
+- [Segment](pages/heroui/segment.md): A segmented control, for a few options of which one is selected.
+- [ToggleButton](pages/heroui/toggle-button.md): An interactive toggle control for on/off or selected/unselected states.
+- [ToggleButtonGroup](pages/heroui/toggle-button-group.md): Groups multiple ToggleButtons into a unified control, allowing users to select one or multiple options.
+- [Dropdown](pages/heroui/dropdown.md): A dropdown displays a list of actions or options that a user can choose.
+- [EmptyState](pages/heroui/empty-state.md): What a list shows where it has nothing to show.
+- [ListBox](pages/heroui/list-box.md): A listbox displays a list of options and allows a user to select one or more of them.
+- [TagGroup](pages/heroui/tag-group.md): A focusable list of tags with support for keyboard navigation, selection, and removal.
+- [ColorArea](pages/heroui/color-area.md): A 2D color picker that allows users to select colors from a gradient area.
+- [ColorField](pages/heroui/color-field.md): Color input field with labels, descriptions, and validation.
+- [ColorPicker](pages/heroui/color-picker.md): A composable color picker that synchronizes color value between multiple color components.
+- [ColorSlider](pages/heroui/color-slider.md): A color slider allows users to adjust an individual channel of a color value.
+- [ColorSwatch](pages/heroui/color-swatch.md): A visual preview of a color value with accessibility support.
+- [ColorSwatchPicker](pages/heroui/color-swatch-picker.md): A list of color swatches that allows users to select a color from a predefined palette.
+- [Slider](pages/heroui/slider.md): A slider allows a user to select one or more values within a range.
+- [Switch](pages/heroui/switch.md): A toggle switch component for boolean states.
+- [Badge](pages/heroui/badge.md): Displays a small indicator positioned relative to another element, commonly used for notification counts, status dots, and labels.
+- [Chip](pages/heroui/chip.md): Small informational badges for displaying labels, statuses, and categories.
+- [Data Grid](pages/heroui/data-grid.md): A grid of records given as data, with sorting, selection, column resizing, pinned columns, drag and drop, virtualization and loading more, on HeroUI's Table.
+- [Table](pages/heroui/table.md): Tables display structured data in rows and columns with support for sorting, selection, column resizing, and infinite scrolling.
+- [TrendChip](pages/heroui/trend-chip.md): A chip that shows a change, its arrow and colour from its trend.
+- [TimeField](pages/heroui/time-field.md): Time input field with labels, descriptions, and validation.
+- [Alert](pages/heroui/alert.md): Display important messages and notifications to users with status indicators.
+- [Meter](pages/heroui/meter.md): A meter represents a quantity within a known range, or a fractional value.
+- [ProgressBar](pages/heroui/progress-bar.md): A progress bar shows either determinate or indeterminate progress of an operation over time.
+- [ProgressCircle](pages/heroui/progress-circle.md): A circular progress indicator that shows determinate or indeterminate progress.
+- [Skeleton](pages/heroui/skeleton.md): Skeleton is a placeholder to show a loading state and the expected shape of a component.
+- [Spinner](pages/heroui/spinner.md): A loading indicator component to show pending states.
+- [TextShimmer](pages/heroui/text-shimmer.md): Text with a highlight sweeping across it, for a label of work under way.
+- [Checkbox](pages/heroui/checkbox.md): Checkboxes allow users to select multiple items from a list of individual items, or to mark one individual item as selected.
+- [CheckboxGroup](pages/heroui/checkbox-group.md): A checkbox group component for managing multiple checkbox selections.
+- [Description](pages/heroui/description.md): Provides supplementary text for form fields and other components.
+- [ErrorMessage](pages/heroui/error-message.md): An error message for non-form components such as a TagGroup.
+- [FieldError](pages/heroui/field-error.md): Displays validation error messages for form fields.
+- [Fieldset](pages/heroui/fieldset.md): Group related form controls with legends, descriptions, and actions.
+- [Form](pages/heroui/form.md): Wrapper component for form validation and submission handling.
+- [Input](pages/heroui/input.md): Primitive single-line text input component that accepts standard HTML attributes.
+- [InputGroup](pages/heroui/input-group.md): Group related input controls with prefix and suffix elements for enhanced form fields.
+- [Label](pages/heroui/label.md): Renders an accessible label associated with form controls.
+- [NumberField](pages/heroui/number-field.md): Number input fields with increment/decrement buttons, validation, and internationalized formatting.
+- [NumberStepper](pages/heroui/number-stepper.md): A number between two round buttons, which rolls to each new value.
+- [Radio Group](pages/heroui/radio-group.md): Radio group for selecting a single option from a list.
+- [SearchField](pages/heroui/search-field.md): Search input field with clear button and search icon.
+- [TextArea](pages/heroui/text-area.md): Primitive multiline text input component that accepts standard HTML attributes.
+- [TextField](pages/heroui/text-field.md): Composition-friendly text fields with labels, descriptions, and inline validation.
+- [Card](pages/heroui/card.md): Flexible container component for grouping related content and actions.
+- [Separator](pages/heroui/separator.md): Visually divide content sections.
+- [Surface](pages/heroui/surface.md): Container component that provides surface-level styling and context for child components.
+- [Avatar](pages/heroui/avatar.md): Display user profile images with customizable fallback content.
+- [AvatarGroup](pages/heroui/avatar-group.md): Display a stacked or grid group of avatars with overflow counting.
+- [Accordion](pages/heroui/accordion.md): A collapsible content panel for organizing information in a compact space.
+- [Breadcrumbs](pages/heroui/breadcrumbs.md): Navigation breadcrumbs showing the current page's location within a hierarchy.
+- [Disclosure](pages/heroui/disclosure.md): A disclosure is a collapsible section with a header containing a heading and a trigger button, and a panel that wraps the content.
+- [DisclosureGroup](pages/heroui/disclosure-group.md): Container that manages multiple Disclosure items with coordinated expanded states.
+- [Link](pages/heroui/link.md): A styled anchor component for navigation with built-in icon support.
+- [Pagination](pages/heroui/pagination.md): Page navigation with composable page links, previous/next buttons, and ellipsis indicators.
+- [Tabs](pages/heroui/tabs.md): Tabs organize content into multiple sections and allow users to navigate between them.
+- [AlertDialog](pages/heroui/alert-dialog.md): Modal dialog for critical confirmations requiring user attention and explicit action.
+- [Drawer](pages/heroui/drawer.md): Slide-out panel for supplementary content and actions.
+- [Modal](pages/heroui/modal.md): Dialog overlay for focused user interactions and important content.
+- [Popover](pages/heroui/popover.md): Displays rich content in a portal triggered by a button or any custom element.
+- [Toast](pages/heroui/toast.md): Display temporary notifications and messages to users with automatic dismissal and customizable placement.
+- [Tooltip](pages/heroui/tooltip.md): Displays informative text when users hover over or focus on an element.
+- [Autocomplete](pages/heroui/autocomplete.md): An autocomplete combines a select with filtering, allowing users to search and select from a list of options.
+- [ComboBox](pages/heroui/combo-box.md): A combo box combines a text input with a listbox, allowing users to filter a list of options to items matching a query.
+- [Select](pages/heroui/select.md): A select displays a collapsible list of options and allows a user to select one of them.
+- [Kbd](pages/heroui/kbd.md): Display keyboard shortcuts and key combinations.
+- [Typography](pages/heroui/typography.md): A semantic typography primitive for headings, body copy, and inline code.
+- [ScrollShadow](pages/heroui/scroll-shadow.md): Apply visual shadows to indicate scrollable content overflow with automatic detection of scroll position.
+
+## Charts
+
+Each page links to the page of rhp's documentation it follows.
+
+- [Charts](pages/rhp.md): Zero-cost bindings to rhp, Solid's reactive charts made of HTML.
+- [Gallery](pages/rhp/gallery.md): rhp's gallery charts in OCaml: a waterfall, a pie, a heatmap, a Gantt chart and candlesticks.
+- [Theme](pages/rhp/theme.md): The colours and font of every chart inside it.
+- [Chart](pages/rhp/chart.md): The frame of a chart -- its scale, its axis and its orientation.
+- [Plot](pages/rhp/plot.md): A slat for each row, stacked in the chart's band, each in its place as the rows change.
+- [Scale](pages/rhp/scale.md): An axis drawn as a plot of its ticks, from blocks.
+- [Slat](pages/rhp/slat.md): The template for one row, with the CSS and layout every slat of its type shares.
+- [Many dots](pages/rhp/many-dots.md): Many points at once, without a slat or a computation for each.
+- [Poster](pages/rhp/poster.md): A panel around a chart, as a magazine sets one: kicker, headline, dek and note.
+- [Helpers](pages/rhp/helpers.md): The functions of data rhp gives: stacks, running totals, bins, summaries, densities.
+- [Bar](pages/rhp/bar.md): A bar along the value axis, from one value to another.
+- [Dot](pages/rhp/dot.md): A round point at a value, or at a value on each of two scales.
+- [Tick](pages/rhp/tick.md): A short line across the band at a value: a goal, a median, a mark.
+- [Label](pages/rhp/label.md): Text placed on the chart's scale, or outside it at an edge.
+- [Cell](pages/rhp/cell.md): A cell of the band, coloured by its value on the scale.
+- [Place](pages/rhp/place.md): A place on the scale, which draws nothing, for whatever is put in it.
+- [Line](pages/rhp/line.md): A line through points: a sparkline in a slat, or a line chart on a second scale.
+- [Area](pages/rhp/area.md): A filled outline across the band: ridgelines, or violins drawn both ways.
+
+## Reference
+
+Each module's interface, its `.mli`, is its contract: what each function does, refuses and defaults to.
+
+- [Reference](pages/reference.md): The packages, and a link to each module's odoc page.

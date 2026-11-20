@@ -3,6 +3,9 @@
     classes from {!Styles.ColorSwatchPicker}. Kobalte has no such component; its
     list is made of Kobalte's list hooks, as Kobalte makes its own.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/color-swatch-picker.md].
+
     {[
       <Color_swatch_picker default_value=(Colors.parse_color "#8B5CF6")>
         <For each=colors>

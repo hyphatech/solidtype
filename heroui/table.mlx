@@ -8,6 +8,23 @@ type sort_descriptor = Headless.sort_descriptor = {
   direction : [ `ascending | `descending ];
 }
 
+type reorder = Headless.reorder = {
+  keys : string array;
+  target : string;
+  position : [ `before | `after ];
+}
+
+type reorder_messages = Headless.reorder_messages = {
+  drag_item : string -> string;
+  drag_selected_items : int -> string;
+  drag_started : string;
+  insert_before : string -> string;
+  insert_between : string -> string -> string;
+  insert_after : string -> string;
+  drop_complete : string;
+  drop_canceled : string;
+}
+
 type column_size = Headless.column_size =
   | Pixels of float
   | Percent of float
@@ -90,7 +107,9 @@ module Content = struct
       ?(tree_column : string option) ?(expanded_keys : string array option)
       ?(default_expanded_keys : string array option)
       ?(on_expanded_change : (string array -> unit) option)
-      ?(on_row_action : (string -> unit) option) ?(class_ : string option)
+      ?(on_row_action : (string -> unit) option)
+      ?(on_reorder : (reorder -> unit) option) ?(sticky_header : bool option)
+      ?(reorder_messages : reorder_messages option) ?(class_ : string option)
       ~(children : Jsx.element) () =
     let slots = in_table "Table.Content" in
     <Headless.Root
@@ -111,14 +130,17 @@ module Content = struct
       ?default_expanded_keys=(S.get default_expanded_keys)
       on_expanded_change=(fun keys ->
                            ignore (on_expanded_change keys : unit option))
+      ?reorder_messages=(S.get reorder_messages)
+      ?sticky_header=(S.get sticky_header)
       class_=(after (Styles.Table.content (S.get slots)) (S.get class_))
       data_slot="table-content"
       props=(S.merge_props
                [|
                  Props.others props;
                  (* Absent unless given, since a row with an action is pressed
-                    for it rather than selected. *)
-                 S.pick props [| "onRowAction" |];
+                    for it rather than selected, and a table that takes no
+                    reorder drags none. *)
+                 S.pick props [| "onRowAction"; "onReorder" |];
                |])>
       (S.get children)
     </Headless.Root>
@@ -171,7 +193,8 @@ module Column = struct
   let%component make ?(id : string option) ?(allows_sorting : bool = false)
       ?(is_row_header : bool option) ?(width : column_size option)
       ?(default_width : column_size option) ?(min_width : float option)
-      ?(max_width : float option) ?(class_ : string option)
+      ?(max_width : float option) ?(pinned : [ `start | `end_ ] option)
+      ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlTableCellElement -> unit) option)
       ~(children : state Jsx.children)
       ?(as_ :
@@ -210,6 +233,7 @@ module Column = struct
       ?default_width=(S.get default_width)
       ?min_width=(S.get min_width)
       ?max_width=(S.get max_width)
+      ?pinned=(S.get pinned)
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e)
@@ -398,6 +422,7 @@ module Row = struct
         data_expanded=(tree_state (fun r ->
                            S.get r.has_child_items && S.get r.is_expanded))
         data_has_child_items=(tree_state (fun r -> S.get r.has_child_items))
+        data_dragging=(tree_state (fun r -> S.get r.drag.is_dragging))
         data_hovered=(Jsx.flag (Interaction.hovered i))
         data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
         data_selected=(Jsx.flag (S.get selected))
@@ -480,14 +505,16 @@ module Cell = struct
       ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
       (let r = row () in
-       <Button.Chevron.Provider
-         value={
-                 Button.toggle = r.toggle_expanded;
-                 focus_row = r.focus;
-                 labelled_by = r.header_id;
-               }>
-         (Jsx.draw (S.get children) (state ()))
-       </Button.Chevron.Provider>)
+       <Button.Drag.Provider value=r.drag>
+         <Button.Chevron.Provider
+           value={
+                   Button.toggle = r.toggle_expanded;
+                   focus_row = r.focus;
+                   labelled_by = r.header_id;
+                 }>
+           (Jsx.draw (S.get children) (state ()))
+         </Button.Chevron.Provider>
+       </Button.Drag.Provider>)
     </Headless.Cell>
   [@@element td]
 end

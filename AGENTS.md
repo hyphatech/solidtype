@@ -23,7 +23,8 @@ make setup          # once: the switch solidtype, all dependencies, and
 make test           # the ppx's lowering, the plugin's rewrite, the
                     # libraries' tests and the example's
 make lint           # formatting, the plugin's and the generators' types,
-                    # litany, the release build, and the generated bindings
+                    # litany, the release build, the generated bindings, and
+                    # agents/ against the pages
 make fmt            # format in place
 make example        # the board, built by Vite into _build/example-dist, and
                     # its Astro page, into _build/example-astro
@@ -34,6 +35,7 @@ make docs           # the documentation site, odoc's reference copied into
                     # as .github/workflows/docs.yml publishes it from main
 make docs-serve     # the documentation site built, served on DOCS_PORT with
                     # search
+make agents         # agents/ written from the documentation's pages
 make release VERSION=1.2.3  # tag and release
 ```
 
@@ -65,10 +67,14 @@ headless/            solidtype-headless: the components Kobalte lacks, one
                      taken and passed on; and Kobalte's own where they need
                      a fix, each fixed part Kobalte's beneath, the others
                      Kobalte's as they are
+  data_grid          a data grid's model, whoever dresses it: its columns,
+                     its rows sorted, and reordered by a drop
   table              a grid of rows and cells: Kobalte's list of rows,
                      their selection, the keys through their cells, a row
                      that loads more, columns laid out and resized as
-                     React Stately lays them out, and rows that hold rows,
+                     React Stately lays them out, columns pinned to a side
+                     and a header kept in view, rows reordered by a drag or
+                     the keys, and rows that hold rows,
                      each row's cells and rows tokens it draws once read
   color_picker       one colour its parts share, as React Aria's: the colour
                      components below read it, given no value of their own;
@@ -81,6 +87,9 @@ headless/            solidtype-headless: the components Kobalte lacks, one
                      with a wrap, removed by a button or the keys and the
                      focus moved on
   load_more_sentinel what asks a list for more as its end comes into view
+  top_layer          the browser's top layer: an overlay drawn above the
+                     page and every overlay opened before it, and one
+                     kept above those opened after
   virtualizer        React Aria's Virtualizer: a collection draws the entries
                      in view, each placed by a layout
   color_swatch       Kobalte's, a colour less than opaque one a browser
@@ -131,9 +140,15 @@ heroui/              solidtype-heroui: HeroUI's components ported onto
   selection_indicator
                      what a tab's and a segment's indicator share: drawn in
                      the selected item, it starts where the last one was
-  segment trend_chip text_shimmer
+  segment trend_chip text_shimmer number_stepper
                      components HeroUI ships no stylesheet for, made as
                      every port is: their look a stylesheet each
+  table.css          what HeroUI's table stylesheet does not draw: a column
+                     pinned, a header kept in view, where a dragged row
+                     would land
+  data_grid          a grid of rows given as data and columns as
+                     definitions, drawn on the Table port, its look
+                     data-grid.css
   extras.css         those stylesheets in the components layer, which the
                      plugin's tarball ships as heroui-extras.css
 docs/                the documentation, a Starlight site in Hypha's look,
@@ -166,13 +181,23 @@ docs/                the documentation, a Starlight site in Hypha's look,
                      the packages, and a link to each module's odoc page,
                      which `make docs` copies into public/reference/,
                      ignored, since Starlight serves public/ as it is
-  public/llms.txt    the site's index for a model, written by hand: what
-                     solidtype is, how it is written, every page; amended
-                     with each page added or changed
+  agents.md          what an agent knows before any page -- the packages
+                     and how solidtype is written -- which the theme puts
+                     at the head of llms.txt; each group's note, and the
+                     skill's description and the parts agents have been
+                     seen writing by hand instead, are in astro.config.mjs
   src/pages/demo/    the Astro page's demo, pages of Astro's own outside
                      Starlight: a route per tea, its islands given props,
                      under a basket the client router keeps; the page
                      imports their sources as @demo/<path>?raw
+agents/              the documentation for a user's agent, generated by
+                     starlight-theme-hypha from the pages, `make agents`:
+                     llms.txt, the catalogue; pages/, each page as
+                     Markdown, its examples written in; skills/solidtype/,
+                     the skill that sends an agent there; installed by the
+                     root dune into $(opam var solidtype:doc), and llms.txt
+                     alone, its links to solidtype's pages, into every other
+                     package's doc/
 prds/               the PRDs of work being decided and built, and which
                      document owns each kind of fact once it lands
 generate/            what writes the generated bindings from Solid's,
@@ -275,8 +300,8 @@ test/internationalized_date/
 test/ppx/            what the ppx writes for each JSX form
 test/test_docs.ml    every island of docs/islands on some page, or a part of
                      other islands, every rhp page linked to rhp's, every
-                     page in llms.txt, and the plugin a page installs the
-                     newest release's in CHANGES.md
+                     port's to HeroUI's before its usage, and the plugin a
+                     page installs the newest release's in CHANGES.md
 test/does_not_compile.t
                      each mistake the types refuse, built against the
                      installed library, with the error a user reads
@@ -680,6 +705,15 @@ break.
   `_ Jsx.component`, never a function type, and an OCaml component is
   `Jsx.component make`. Why: Melange wraps an external function used as
   a value in a closure, which no JSX tag can name.
+- **`agents/` is generated, never edited.** starlight-theme-hypha writes it
+  from the documentation's pages, `docs/agents.md` and the `agents` options
+  in `docs/astro.config.mjs`: a page changed is `make agents` run in the
+  same commit. A module with a page of its own names the page's installed
+  path, `$(opam var solidtype:doc)/pages/<page>.md`, in its `.mli`'s opening
+  comment, and `generate/rhp.ts` writes it for rhp's generated components.
+  Why: a user's agent reads what the release installs, offline, and a page
+  it reads must be the release's. Test: `make lint` runs `HYPHA_AGENTS=check
+  astro sync`, which fails on each file that differs from the pages.
 - **Tests of what runs in a browser are OCaml, run by vitest.** Alcotest
   does not build for Melange; `melange-jest` reaches the globals vitest
   shares with Jest. The ppx, native, is tested by its expectations. Why:

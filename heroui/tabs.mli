@@ -1,6 +1,9 @@
 (** HeroUI's Tabs: a list of tabs, each showing its panel while it is selected,
     Kobalte's [Tabs], with HeroUI's classes from {!Styles.Tabs}.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/tabs.md].
+
     {[
       <Tabs>
         <Tabs.List_container>

@@ -4,6 +4,9 @@
     the focus. Inside a {!Text_field}, its input is the field's, which the
     field's label names, and it takes the field's variant where it sets none.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/input-group.md].
+
     {[
       <Input_group>
         <Input_group.Prefix>"https://"</Input_group.Prefix>

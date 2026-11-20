@@ -2,6 +2,9 @@
     shows a key or a combination of keys, each modifier by its symbol and the
     rest by its text.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/kbd.md].
+
     {[
       <Kbd>
         <Kbd.Abbr key_value=`command />

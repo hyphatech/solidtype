@@ -1,6 +1,9 @@
 (** A chip that shows a change: HeroUI's {!Chip}, coloured by its [trend], with
     an arrow and its value in tabular figures, its look trend-chip.css's.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/trend-chip.md].
+
     {[
       <Trend_chip trend=`down>
         "-5.9%" <Trend_chip.Suffix>"vs last month"</Trend_chip.Suffix>

@@ -62,6 +62,7 @@ module Radio_group = H.Radio_group
 module Scroll_shadow = H.Scroll_shadow
 module Search_field = H.Search_field
 module Segment = H.Segment
+module Data_grid = H.Data_grid
 module Trend_chip = H.Trend_chip
 module Text_shimmer = H.Text_shimmer
 module Separator = H.Separator
@@ -1966,6 +1967,24 @@ let () =
                         "Year"
                       </Segment.Item>
                     </Segment>
+                    <Data_grid
+                      ?as_=(drawn "Data_grid" "div" ())
+                      data_testid="Data_grid"
+                      class_="given-class"
+                      title="Data_grid"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Data_grid" e)
+                      on_key_down=(fun e -> heard "Data_grid" e)
+                      aria_label="Grid"
+                      rows=[| "one" |]
+                      row_id=Fun.id
+                      columns=[|
+                                Data_grid.column ~id:"name"
+                                  ~header:(Text "Name") ~is_row_header:true
+                                  (fun r ->
+                                    Solidtype.Jsx.string (Solidtype.Solid.get r));
+                              |]
+                    />
                     <Text_shimmer
                       ?as_=(drawn "Text_shimmer" "span" ())
                       data_testid="Text_shimmer"
@@ -2355,6 +2374,7 @@ let () =
                        ("Tabs.Separator", "[data-slot=tabs-separator]");
                        ("Tabs.Panel", "[data-slot=tabs-panel]");
                        ("Segment", "[data-slot=segment]");
+                       ("Data_grid", "[data-slot=data-grid]");
                        ("Segment.Item", "[data-slot=segment-item]");
                        ("Segment.Separator", "[data-slot=segment-separator]");
                        ("Text_shimmer", "[data-slot=text-shimmer]");

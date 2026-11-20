@@ -5,6 +5,9 @@
     [data-bottom-scroll], ["true"] or ["false"], or [data-top-bottom-scroll]
     where content is hidden at both -- or the edges its [visibility] gives.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/scroll-shadow.md].
+
     {[
       <Scroll_shadow class_="max-h-[300px]">(long_text ())</Scroll_shadow>
     ]}

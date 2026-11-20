@@ -1,0 +1,184 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Chip = Solidtype_heroui.Chip
+module Data_grid = Solidtype_heroui.Data_grid
+module List_box = Solidtype_heroui.List_box
+module Number_stepper = Solidtype_heroui.Number_stepper
+module Select = Solidtype_heroui.Select
+module Switch = Solidtype_heroui.Switch
+
+type priority = Low | Medium | High
+
+type flag = {
+  id : string;
+  feature : string;
+  priority : priority;
+  points : float;
+  enabled : bool;
+}
+
+let flags =
+  [|
+    {
+      id = "1";
+      feature = "Dark mode";
+      priority = High;
+      points = 8.;
+      enabled = true;
+    };
+    {
+      id = "2";
+      feature = "CSV export";
+      priority = Medium;
+      points = 6.;
+      enabled = true;
+    };
+    {
+      id = "3";
+      feature = "Keyboard shortcuts";
+      priority = Low;
+      points = 5.;
+      enabled = false;
+    };
+    {
+      id = "4";
+      feature = "Two-factor auth";
+      priority = Medium;
+      points = 16.;
+      enabled = true;
+    };
+    {
+      id = "5";
+      feature = "Bulk import";
+      priority = Medium;
+      points = 8.;
+      enabled = false;
+    };
+    {
+      id = "6";
+      feature = "Audit log";
+      priority = High;
+      points = 5.;
+      enabled = true;
+    };
+  |]
+
+let priority_key = function Low -> "low" | Medium -> "medium" | High -> "high"
+let priority_of = function "high" -> High | "medium" -> Medium | _ -> Low
+
+let priority_name = function
+  | Low -> "Low"
+  | Medium -> "Medium"
+  | High -> "High"
+
+let priority_color = function
+  | Low -> `default
+  | Medium -> `warning
+  | High -> `danger
+
+let make () =
+  let rows, set_rows = S.create_signal flags in
+  let change id f =
+    S.set set_rows
+      (Array.map
+         (fun r -> if String.equal r.id id then f r else r)
+         (S.get rows))
+  in
+  let columns =
+    [|
+      Data_grid.column ~id:"feature" ~header:(Text "Feature")
+        ~is_row_header:true ~cell_class:"font-medium" (fun row ->
+          Jsx.string (S.get row).feature);
+      Data_grid.column ~id:"priority" ~header:(Text "Priority")
+        ~width:(Pixels 200.) (fun row ->
+          <Select
+            aria_label=("Priority of " ^ (S.get row).feature)
+            variant=`secondary
+            class_="w-36"
+            value=[| priority_key (S.get row).priority |]
+            on_change=(fun keys ->
+                        match keys with
+                        | [| k |] ->
+                            change (S.get row).id (fun r ->
+                                { r with priority = priority_of k })
+                        | _ -> ())>
+            <Select.Trigger>
+              <Select.Value>
+                <Chip
+                  color=(priority_color (S.get row).priority)
+                  size=`sm
+                  variant=`soft>
+                  (Jsx.string (priority_name (S.get row).priority))
+                </Chip>
+              </Select.Value>
+              <Select.Indicator />
+            </Select.Trigger>
+            <Select.Popover>
+              <List_box>
+                <List_box.Item id="high" text_value="High">
+                  "High" <List_box.Item_indicator />
+                </List_box.Item>
+                <List_box.Item id="medium" text_value="Medium">
+                  "Medium" <List_box.Item_indicator />
+                </List_box.Item>
+                <List_box.Item id="low" text_value="Low">
+                  "Low" <List_box.Item_indicator />
+                </List_box.Item>
+              </List_box>
+            </Select.Popover>
+          </Select>);
+      Data_grid.column ~id:"points" ~header:(Text "Story points") ~align:`center
+        ~width:(Pixels 160.) (fun row ->
+          <Number_stepper
+            aria_label=("Story points of " ^ (S.get row).feature)
+            size=`sm
+            class_="justify-center"
+            value=(S.get row).points
+            min_value=0.
+            on_change=(fun points ->
+                        change (S.get row).id (fun r -> { r with points }))>
+            <Number_stepper.Group>
+              <Number_stepper.Decrement_button />
+              <Number_stepper.Value />
+              <Number_stepper.Increment_button />
+            </Number_stepper.Group>
+          </Number_stepper>);
+      Data_grid.column ~id:"enabled" ~header:(Text "Enabled") ~align:`center
+        ~width:(Pixels 100.) (fun row ->
+          <Switch
+            aria_label=("Enable " ^ (S.get row).feature)
+            is_selected=(S.get row).enabled
+            on_change=(fun enabled ->
+                        change (S.get row).id (fun r -> { r with enabled }))>
+            <Switch.Content>
+              <Switch.Control><Switch.Thumb /></Switch.Control>
+            </Switch.Content>
+          </Switch>);
+    |]
+  in
+  let enabled () =
+    Array.length (Js.Array.filter ~f:(fun r -> r.enabled) (S.get rows))
+  in
+  let effort () =
+    Array.fold_left (fun sum r -> sum +. r.points) 0. (S.get rows)
+  in
+  <Data_grid
+    aria_label="Feature flags"
+    rows=(S.get rows)
+    row_id=(fun r -> r.id)
+    columns
+    content_class="min-w-[640px]"
+    footer=(<span class_="flex gap-6 text-sm text-muted">
+              <span>
+                (Jsx.string
+                   (string_of_int (enabled ())
+                   ^ " of "
+                   ^ string_of_int (Array.length (S.get rows))
+                   ^ " enabled"))
+              </span>
+              <span>
+                (Jsx.string
+                   ("Total effort: " ^ Js.Float.toString (effort ()) ^ " pts"))
+              </span>
+            </span>)
+  />

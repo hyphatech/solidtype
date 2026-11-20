@@ -3,6 +3,9 @@
     to [<h6>], body text a [<p>], code a [<code>] -- unless it is given another,
     by [element_type], as React Aria's [Text] is.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/typography.md].
+
     {[
       <Typography type_=`h2>"Pricing on your terms"</Typography>
     ]}

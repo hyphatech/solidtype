@@ -1,0 +1,230 @@
+---
+title: Data Grid
+description: A grid of records given as data, with sorting, selection, column resizing, pinned columns, drag and drop, virtualization and loading more, on HeroUI's Table.
+---
+
+import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/data_grid_usage.jsx";
+import ExUsageCode from "@islands/data_grid_usage.mlx?raw";
+import * as ExSorting from "@islands/data_grid_sorting.jsx";
+import ExSortingCode from "@islands/data_grid_sorting.mlx?raw";
+import * as ExColumnResizing from "@islands/data_grid_column_resizing.jsx";
+import ExColumnResizingCode from "@islands/data_grid_column_resizing.mlx?raw";
+import * as ExPinnedColumns from "@islands/data_grid_pinned_columns.jsx";
+import ExPinnedColumnsCode from "@islands/data_grid_pinned_columns.mlx?raw";
+import * as ExDragAndDrop from "@islands/data_grid_drag_and_drop.jsx";
+import ExDragAndDropCode from "@islands/data_grid_drag_and_drop.mlx?raw";
+import * as ExEditableCells from "@islands/data_grid_editable_cells.jsx";
+import ExEditableCellsCode from "@islands/data_grid_editable_cells.mlx?raw";
+import * as ExEmptyState from "@islands/data_grid_empty_state.jsx";
+import ExEmptyStateCode from "@islands/data_grid_empty_state.mlx?raw";
+import * as ExAsyncLoading from "@islands/data_grid_async_loading.jsx";
+import ExAsyncLoadingCode from "@islands/data_grid_async_loading.mlx?raw";
+import * as ExVirtualization from "@islands/data_grid_virtualization.jsx";
+import ExVirtualizationCode from "@islands/data_grid_virtualization.mlx?raw";
+import * as ExTeamMembers from "@islands/data_grid_team_members.jsx";
+import ExTeamMembersCode from "@islands/data_grid_team_members.mlx?raw";
+import * as ExServers from "@islands/data_grid_servers.jsx";
+import ExServersCode from "@islands/data_grid_servers.mlx?raw";
+
+A grid takes its rows as data, each known by its `row_id`, and its columns as
+definitions, and draws HeroUI's [Table](/solidtype/heroui/table/) from them:
+its keys, selection, resizing and virtualization are the Table's. Its look is
+a stylesheet the library ships, imported as
+[Theming](/solidtype/heroui/theming/#setup) shows.
+
+## Usage
+
+<Example code={ExUsageCode} title="data_grid_usage.mlx" fill><ExUsage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Data_grid aria_label="Payments" rows row_id=(fun p -> p.id) columns />
+```
+
+## Column Definitions
+
+`Data_grid.column ~id ~header cell` makes a column: `cell` draws a cell from
+its row, and `header` is `Text`, `Element` of a function drawn where the
+header is, or `Sorted`, drawn from the column's sort direction. A column is
+sortable exactly when it has a `sort`, `By_text` of a row's text, in the
+order of the page's language, or `By` a comparison of two rows. `align`,
+`width`, `min_width`, `max_width`, `pinned`, `header_class` and `cell_class`
+lay it out.
+
+## Sorting
+
+A grid given no `sort_descriptor` keeps its own sort, `default_sort_descriptor`
+at first, and orders its rows as a header is pressed. Given one, the sort is
+the application's: the grid draws its rows as given and tells
+`on_sort_change`, as a server sorts them. A `By` comparison orders rows by
+anything, here priorities by their rank.
+
+<Example code={ExSortingCode} title="data_grid_sorting.mlx" fill><ExSorting.make client:visible /></Example>
+
+## Row Selection
+
+`selection_mode` with `show_selection_checkboxes` adds a column of
+checkboxes, the header's choosing every row. The selection is
+`selected_keys`, or `default_selected_keys`, and `on_selection_change`.
+
+## Column Resizing
+
+`allows_column_resize` on the grid, and `allows_resizing` on a column, let a
+column be resized by a drag or the keys, within its `min_width` and
+`max_width`; `on_column_resize` is told each step and `on_column_resize_end`
+the last. A column needs no width of its own to be resized.
+
+<Example code={ExColumnResizingCode} title="data_grid_column_resizing.mlx" fill><ExColumnResizing.make client:visible /></Example>
+
+## Pinned Columns
+
+A column `pinned` to `` `start `` or `` `end_ `` stays in view as the others
+scroll sideways, a line at its edge while content passes beneath it. It needs
+no width of its own: its place is measured. The checkbox and handle columns
+stay with the columns pinned to the start.
+
+<Example code={ExPinnedColumnsCode} title="data_grid_pinned_columns.mlx" fill><ExPinnedColumns.make client:visible /></Example>
+
+## Drag and Drop
+
+Given `on_reorder`, each row has a handle: Enter grabs the row, the arrows
+move it, Enter drops it and Escape lets it go, and a pointer drags it.
+`on_reorder` is told the rows moved, where they landed, and `rows`, every row
+in its new order. Selected rows are dragged together.
+
+<Example code={ExDragAndDropCode} title="data_grid_drag_and_drop.mlx" fill><ExDragAndDrop.make client:visible /></Example>
+
+## Editable Cells
+
+A cell draws any control: a `Select`, a
+[`Number_stepper`](/solidtype/heroui/number-stepper/), a `Switch`. Every key
+of a field is its own, and the arrows from a button move between cells.
+
+<Example code={ExEditableCellsCode} title="data_grid_editable_cells.mlx" fill><ExEditableCells.make client:visible /></Example>
+
+## Empty State
+
+`empty_state` is drawn across every column while there are no rows.
+
+<Example code={ExEmptyStateCode} title="data_grid_empty_state.mlx" fill><ExEmptyState.make client:visible /></Example>
+
+## Async Loading
+
+Given `on_load_more`, the grid asks for more rows as its end comes into view,
+`load_more_content` drawn while `is_loading_more`. Give the scroll container
+a height by `scroll_container_class`.
+
+<Example code={ExAsyncLoadingCode} title="data_grid_async_loading.mlx" fill><ExAsyncLoading.make client:visible /></Example>
+
+## Sticky Header
+
+`sticky_header` keeps the header at the top of the scroll container, which
+`scroll_container_class` gives a height or a maximum height; the grid above
+keeps its header so.
+
+## Virtualization
+
+`virtualized` draws only the rows in view, each `row_height` high below a
+header `heading_height` high. The table is what scrolls: give it a height by
+`content_class`. The keys reach every row.
+
+<Example code={ExVirtualizationCode} title="data_grid_virtualization.mlx" fill><ExVirtualization.make client:visible /></Example>
+
+## Team Members
+
+Search, a status filter and the columns shown are the application's: it
+filters `rows` and `columns` before giving them. Rows paged in the `footer`,
+a header kept in view, a column pinned to each side.
+
+<Example code={ExTeamMembersCode} title="data_grid_team_members.mlx" fill><ExTeamMembers.make client:visible /></Example>
+
+## Servers
+
+A sparkline in a cell is an [rhp](/solidtype/rhp/line/) `Line` in a chart of
+one row; a capacity a `Progress_circle`.
+
+<Example code={ExServersCode} title="data_grid_servers.mlx" fill><ExServers.make client:visible /></Example>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.data-grid` - The root, with HeroUI's `.table-root`
+- `.data-grid__selection-column`, `.data-grid__selection-cell` - The
+  checkbox column, `--data-grid-selection-column-width` wide, 40px
+- `.data-grid__drag-handle-column`, `.data-grid__drag-handle-cell` - The
+  handle column, `--data-grid-drag-handle-column-width` wide, 32px
+- `.data-grid__drag-handle` - A row's handle
+- `.data-grid__sort-icon` - A sorted column's chevron, turned for descending
+- `.data-grid__empty-state` - What is drawn with no rows
+- `.data-grid__footer` - The footer, with HeroUI's `.table__footer`
+
+### Interactive States
+
+- **Alignment**: `[data-align="start"]`, `"center"` or `"end"` on a column's
+  header and cells
+- **Vertical alignment**: `[data-vertical-align]` on the root, `top`,
+  `middle` or `bottom`
+- **Pinned**: `[data-pinned="start"]` or `"end"` on a header and its cells,
+  `[data-pinned-edge]` on the last of each side, and
+  `[data-pinned-start-detached]`, `[data-pinned-end-detached]` on the table
+  while content passes beneath
+- **Sticky header**: `[data-sticky-header]` on the table
+- **Handle**: `[data-hovered="true"]`, `[data-pressed="true"]`,
+  `[data-focus-visible="true"]`, `[data-dragging="true"]`
+- **Rows**: HeroUI's Table's, and `[data-dragging="true"]`,
+  `[data-drop-position]`
+
+## API Reference
+
+### Data_grid
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `rows` | `'row array` | | The rows |
+| `row_id` | `'row -> string` | | Each row's key |
+| `columns` | `'row Data_grid.column array` | | Its columns, from `Data_grid.column` |
+| `aria_label` | `string` | | What names it |
+| `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | The Table's variant |
+| `class_`, `content_class`, `scroll_container_class` | `string` | | Added to the root, the `<table>` and the scroll container |
+| `sticky_header` | `bool` | `false` | The header kept in view |
+| `vertical_align` | `` [ `top \| `middle \| `bottom ] `` | `` `middle `` | Where cells' content sits |
+| `selection_mode` | `` [ `none \| `single \| `multiple ] `` | `` `none `` | How many rows may be selected |
+| `selection_behavior` | `` [ `toggle \| `replace ] `` | `` `toggle `` | Whether a press toggles a row or chooses it alone |
+| `selected_keys`, `default_selected_keys` | `string array` | | The rows selected, controlled or at first |
+| `on_selection_change` | `string array -> unit` | | Told each change |
+| `show_selection_checkboxes` | `bool` | `false` | A checkbox column first |
+| `disabled_keys` | `string array` | | Rows never selected |
+| `sort_descriptor` | `Table.sort_descriptor` | | The application's sort, rows drawn as given |
+| `default_sort_descriptor` | `Table.sort_descriptor` | | The grid's own sort at first |
+| `on_sort_change` | `Table.sort_descriptor -> unit` | | Told each sort |
+| `allows_column_resize` | `bool` | `false` | Columns that allow it resized |
+| `on_column_resize`, `on_column_resize_end` | `(string * Table.column_size) array -> unit` | | Every column's size, at each step and at the end |
+| `on_reorder` | `'row Data_grid.reorder -> unit` | | Rows dragged by their handles, told where they landed |
+| `reorder_messages` | `Table.reorder_messages` | React Aria's | What a drag tells a reader |
+| `on_row_action` | `string -> unit` | | A row's action, given its key |
+| `empty_state` | `Jsx.element` | | Drawn with no rows |
+| `footer`, `footer_class` | `Jsx.element`, `string` | | Below the table |
+| `on_load_more` | `unit -> unit` | | Asked as its end comes into view |
+| `is_loading_more` | `bool` | `false` | Whether more are loading |
+| `load_more_content` | `Jsx.element` | | Shown while loading more |
+| `virtualized` | `bool` | `false` | Only the rows in view drawn |
+| `row_height`, `heading_height` | `float` | `42.`, `36.` | A virtualized grid's rows and header, in pixels |
+
+### Data_grid.column
+
+| Argument | Type | Default | Description |
+|---|---|---|---|
+| `~id` | `string` | | What a sort names it by |
+| `~header` | `Data_grid.header` | | `Text`, `Element` or `Sorted` |
+| `?sort` | `'row Data_grid.sort` | | `By_text` or `By`; sortable only with one |
+| `?is_row_header` | `bool` | `false` | Its cells name their rows |
+| `?width`, `?default_width` | `Table.column_size` | | Its width, controlled or at first |
+| `?min_width`, `?max_width` | `float` | | Its bounds when resized |
+| `?allows_resizing` | `bool` | `false` | Resizable in a grid that `allows_column_resize` |
+| `?align` | `` [ `start \| `center \| `end_ ] `` | `` `start `` | Its header's and cells' alignment |
+| `?pinned` | `` [ `start \| `end_ ] `` | | The side it stays in view at |
+| `?header_class`, `?cell_class` | `string` | | Added to its header and cells |
+| cell | `'row -> Jsx.element` | | Draws a cell from its row |

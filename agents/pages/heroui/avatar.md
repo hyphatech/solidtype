@@ -1,0 +1,402 @@
+# Avatar
+
+Display user profile images with customizable fallback content.
+
+Original HeroUI documentation: [Avatar](https://heroui.com/en/docs/react/components/avatar).
+
+## Usage
+
+```ocaml title="avatar_usage.mlx"
+module Avatar = Solidtype_heroui.Avatar
+
+let make () =
+  <div class_="flex items-center gap-4">
+    <Avatar>
+      <Avatar.Image
+        alt="John Doe"
+        src="https://img.heroui.chat/image/avatar?w=400&h=400&u=3"
+      />
+      <Avatar.Fallback>"JD"</Avatar.Fallback>
+    </Avatar>
+    <Avatar>
+      <Avatar.Image
+        alt="Blue"
+        src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
+      />
+      <Avatar.Fallback>"B"</Avatar.Fallback>
+    </Avatar>
+    <Avatar><Avatar.Fallback>"JR"</Avatar.Fallback></Avatar>
+  </div>
+```
+
+## Parity
+
+The same HeroUI Avatar twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two avatars: a
+marked row is one they disagree on.
+
+## Anatomy
+
+```ocaml
+<Avatar>
+  <Avatar.Image alt="Ada Lovelace" src="/ada.png" />
+  <Avatar.Fallback>"AL"</Avatar.Fallback>
+</Avatar>
+```
+
+`Avatar.Image` shows once its image has loaded, and `Avatar.Fallback` until
+then, or where it fails to load.
+
+## Examples
+
+### Sizes
+
+```ocaml title="avatar_sizes.mlx"
+module Avatar = Solidtype_heroui.Avatar
+
+let make () =
+  <div class_="flex items-center gap-4">
+    <Avatar size=`sm>
+      <Avatar.Image
+        alt="Small Avatar"
+        src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
+      />
+      <Avatar.Fallback>"SM"</Avatar.Fallback>
+    </Avatar>
+    <Avatar size=`md>
+      <Avatar.Image
+        alt="Medium Avatar"
+        src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/purple.jpg"
+      />
+      <Avatar.Fallback>"MD"</Avatar.Fallback>
+    </Avatar>
+    <Avatar size=`lg>
+      <Avatar.Image
+        alt="Large Avatar"
+        src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/red.jpg"
+      />
+      <Avatar.Fallback>"LG"</Avatar.Fallback>
+    </Avatar>
+  </div>
+```
+
+### Colors
+
+```ocaml title="avatar_colors.mlx"
+module Avatar = Solidtype_heroui.Avatar
+
+let make () =
+  <div class_="flex items-center gap-4">
+    <Avatar color=`default><Avatar.Fallback>"DF"</Avatar.Fallback></Avatar>
+    <Avatar color=`accent><Avatar.Fallback>"AC"</Avatar.Fallback></Avatar>
+    <Avatar color=`success><Avatar.Fallback>"SC"</Avatar.Fallback></Avatar>
+    <Avatar color=`warning><Avatar.Fallback>"WR"</Avatar.Fallback></Avatar>
+    <Avatar color=`danger><Avatar.Fallback>"DG"</Avatar.Fallback></Avatar>
+  </div>
+```
+
+### Variants
+
+```ocaml title="avatar_variants.mlx"
+module Avatar = Solidtype_heroui.Avatar
+module Separator = Solidtype_heroui.Separator
+module Gravity = Solidtype_gravity_icons
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <div class_="flex items-center gap-3">
+      <div class_="w-24 shrink-0" />
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <span class_="text-xs text-muted capitalize">"accent"</span>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <span class_="text-xs text-muted capitalize">"default"</span>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <span class_="text-xs text-muted capitalize">"success"</span>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <span class_="text-xs text-muted capitalize">"warning"</span>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <span class_="text-xs text-muted capitalize">"danger"</span>
+      </div>
+    </div>
+    <Separator />
+    <div class_="flex items-center gap-3">
+      <div class_="w-24 shrink-0 text-sm text-muted">"letter"</div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`accent><Avatar.Fallback>"AG"</Avatar.Fallback></Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`default><Avatar.Fallback>"AG"</Avatar.Fallback></Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`success><Avatar.Fallback>"AG"</Avatar.Fallback></Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`warning><Avatar.Fallback>"AG"</Avatar.Fallback></Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`danger><Avatar.Fallback>"AG"</Avatar.Fallback></Avatar>
+      </div>
+    </div>
+    <div class_="flex items-center gap-3">
+      <div class_="w-24 shrink-0 text-sm text-muted">"letter soft"</div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`accent variant=`soft>
+          <Avatar.Fallback>"AG"</Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`default variant=`soft>
+          <Avatar.Fallback>"AG"</Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`success variant=`soft>
+          <Avatar.Fallback>"AG"</Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`warning variant=`soft>
+          <Avatar.Fallback>"AG"</Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`danger variant=`soft>
+          <Avatar.Fallback>"AG"</Avatar.Fallback>
+        </Avatar>
+      </div>
+    </div>
+    <div class_="flex items-center gap-3">
+      <div class_="w-24 shrink-0 text-sm text-muted">"icon"</div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`accent>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`default>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`success>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`warning>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`danger>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+    </div>
+    <div class_="flex items-center gap-3">
+      <div class_="w-24 shrink-0 text-sm text-muted">"icon soft"</div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`accent variant=`soft>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`default variant=`soft>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`success variant=`soft>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`warning variant=`soft>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`danger variant=`soft>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+    </div>
+    <div class_="flex items-center gap-3">
+      <div class_="w-24 shrink-0 text-sm text-muted">"img"</div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`accent>
+          <Avatar.Image
+            alt="Avatar accent"
+            src="https://img.heroui.chat/image/avatar?w=400&h=400&u=3"
+          />
+          <Avatar.Fallback>"A"</Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`default>
+          <Avatar.Image
+            alt="Avatar default"
+            src="https://img.heroui.chat/image/avatar?w=400&h=400&u=4"
+          />
+          <Avatar.Fallback>"D"</Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`success>
+          <Avatar.Image
+            alt="Avatar success"
+            src="https://img.heroui.chat/image/avatar?w=400&h=400&u=5"
+          />
+          <Avatar.Fallback>"S"</Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`warning>
+          <Avatar.Image
+            alt="Avatar warning"
+            src="https://img.heroui.chat/image/avatar?w=400&h=400&u=8"
+          />
+          <Avatar.Fallback>"W"</Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`danger>
+          <Avatar.Image
+            alt="Avatar danger"
+            src="https://img.heroui.chat/image/avatar?w=400&h=400&u=16"
+          />
+          <Avatar.Fallback>"D"</Avatar.Fallback>
+        </Avatar>
+      </div>
+    </div>
+  </div>
+```
+
+### Fallback Content
+
+The avatar's `fallback_delay`, in milliseconds, delays the fallback to prevent
+a flash while the image loads.
+
+```ocaml title="avatar_fallback.mlx"
+module Avatar = Solidtype_heroui.Avatar
+module Gravity = Solidtype_gravity_icons
+
+let make () =
+  <div class_="flex items-center gap-4">
+    <Avatar><Avatar.Fallback>"JD"</Avatar.Fallback></Avatar>
+    <Avatar><Avatar.Fallback><Gravity.Person /></Avatar.Fallback></Avatar>
+    <Avatar fallback_delay=600.>
+      <Avatar.Image
+        alt="Delayed Avatar"
+        src="https://invalid-url-to-show-fallback.com/image.jpg"
+      />
+      <Avatar.Fallback>"NA"</Avatar.Fallback>
+    </Avatar>
+    <Avatar>
+      <Avatar.Fallback
+        class_="border-none bg-gradient-to-br from-pink-500 to-purple-500 \
+                text-white">
+        "GB"
+      </Avatar.Fallback>
+    </Avatar>
+  </div>
+```
+
+### Not yet
+
+HeroUI's Custom Image Component example composes a custom image component;
+here `Avatar.Image` takes `as_`, as
+[Composition](composition.md#custom-dom-element) shows.
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes, on the avatar and on each part.
+
+```ocaml title="avatar_tailwind.mlx"
+module Avatar = Solidtype_heroui.Avatar
+
+let make () =
+  <Avatar class_="rounded-lg">
+    <Avatar.Image
+      alt="John Doe" src="https://img.heroui.chat/image/avatar?w=400&h=400&u=3"
+    />
+    <Avatar.Fallback class_="rounded-lg">"JD"</Avatar.Fallback>
+  </Avatar>
+```
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every avatar, as with
+HeroUI in React:
+
+```css
+@layer components {
+  .avatar {
+    @apply size-16 border-2 border-accent;
+  }
+
+  .avatar__fallback {
+    @apply bg-gradient-to-br from-purple-500 to-pink-500;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+- `.avatar` - Base container with default size (size-10)
+- `.avatar__image` - Image element with aspect-square sizing
+- `.avatar__fallback` - Fallback container with centered content
+- `.avatar--sm` - Small avatar (size-8)
+- `.avatar--md` - Medium avatar (default, no additional styles)
+- `.avatar--lg` - Large avatar (size-12)
+- `.avatar--soft` - Soft variant with lighter background
+- `.avatar__fallback--default` - Default text color
+- `.avatar__fallback--accent` - Accent text color
+- `.avatar__fallback--success` - Success text color
+- `.avatar__fallback--warning` - Warning text color
+- `.avatar__fallback--danger` - Danger text color
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Avatar
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Avatar size |
+| `color` | `color` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | `` `default `` | Fallback color theme |
+| `variant` | `variant` | `` [ `default \| `soft ] `` | `` `default `` | Visual style variant |
+| `Avatar.Fallback`'s `delayMs` | `fallback_delay` | `float` | | Delay before showing fallback (prevents flash) |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | Its image and fallback |
+
+### Avatar.Image
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `src` | `src` | `string` | Image source URL |
+| `alt` | `alt` | `string` | Alternative text for the image |
+| `srcSet` | `srcset` | `string` | The image `srcset` attribute for responsive images |
+| `sizes` | `sizes` | `string` | The image `sizes` attribute for responsive images |
+| `crossOrigin` | `crossorigin` | `` [ `anonymous \| `use_credentials ] `` | CORS setting for the image request |
+| `loading` | `loading` | `string` | Native lazy loading attribute, `"lazy"` or `"eager"` |
+| `className` | `class_` | `string` | Added after HeroUI's class |
+| `onLoad`, `onError` | — | | Not yet |
+| `asChild` | `as_` | a function of its props | Draws another element in its place |
+
+### Avatar.Fallback
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `color` | `color` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | Override color from parent |
+| `className` | `class_` | `string` | Added after HeroUI's class |
+| `children` | `children` | elements | Initials or an icon |
