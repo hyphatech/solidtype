@@ -4,7 +4,7 @@ DOCS_PORT ?= 4321
 REFERENCE = solidtype solidtype-kobalte solidtype-headless solidtype-heroui solidtype-rhp solidtype-internationalized-date solidtype-gravity-icons ppx_solidtype odoc.support
 
 .DEFAULT_GOAL := help
-.PHONY: help setup build test lint fmt example example-serve docs docs-serve agents generate release
+.PHONY: help setup build test lint fmt example example-serve docs docs-serve generate release
 
 help: ## list targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -73,10 +73,6 @@ docs: build node_modules ## build the documentation site
 # text. Run from docs/, where Astro finds its config again.
 docs-serve: docs ## serve the built documentation site
 	cd docs && bun --bun astro preview --open --port $(DOCS_PORT)
-
-# Each page as Markdown, llms.txt and the skill, written by the docs' build
-# for the solidtype package to install.
-agents: docs ## write agents/ from the documentation's pages
 
 generate: node_modules ## write the generated bindings
 	$(OPAM) bun generate/html.ts

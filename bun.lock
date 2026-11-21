@@ -63,7 +63,7 @@
         "react-dom": "^19.2.0",
         "solid-js": "~1.9.17",
         "solid-motionone": "~1.0.4",
-        "starlight-hypha-agents": "github:hyphatech/starlight-hypha-agents#v0.1.0",
+        "starlight-hypha-agents": "github:hyphatech/starlight-hypha-agents#v0.2.0",
         "starlight-links-validator": "^0.27.0",
         "starlight-theme-hypha": "github:hyphatech/starlight-theme-hypha#v0.8.0",
         "tailwindcss": "^4.3.3",
@@ -1151,7 +1151,7 @@
 
     "space-separated-tokens": ["space-separated-tokens@2.0.2", "", {}, "sha512-PEGlAwrG8yXGXRjW32fGbg66JAlOAwbObuqVoJpv/mRgoWDQfgH1wDPvtzWyUSNAXBGSk8h755YDbbcEy3SH2Q=="],
 
-    "starlight-hypha-agents": ["starlight-hypha-agents@github:hyphatech/starlight-hypha-agents#f4d5889", { "dependencies": { "mdast-util-from-markdown": "^2.0.2", "mdast-util-mdx": "^3.0.0", "micromark-extension-mdxjs": "^3.0.0", "yaml": "^2.9.1" }, "peerDependencies": { "@astrojs/starlight": "~0.42.6", "astro": "^7.3.3" } }, "hyphatech-starlight-hypha-agents-f4d5889", "sha512-VWfTEY3oEtdyrAukv4KDIj1uVJxhCopxE6l5FeQvFqCd9nJ8unBff9hbw3DdLu/E15RZX8Qz7nck8BO/h8NcEA=="],
+    "starlight-hypha-agents": ["starlight-hypha-agents@github:hyphatech/starlight-hypha-agents#3ee7026", { "dependencies": { "mdast-util-from-markdown": "^2.0.2", "mdast-util-mdx": "^3.0.0", "micromark-extension-mdxjs": "^3.0.0", "yaml": "^2.9.1" }, "peerDependencies": { "@astrojs/starlight": "~0.42.6", "astro": "^7.3.3" } }, "hyphatech-starlight-hypha-agents-3ee7026", "sha512-CRpk3KikuTkpb+Sbq5wMWOibJyR9DScrqijg08vp17qul6BB/GVfYV4XVK9nGVUsGJVjfYgVlCr5j51ZmXHf+A=="],
 
     "starlight-links-validator": ["starlight-links-validator@0.27.0", "", { "dependencies": { "@astrojs/markdown-satteri": "^0.4.0", "github-slugger": "^2.0.0", "hast-util-from-html": "^2.0.3", "is-absolute-url": "^5.0.0", "mdast-util-mdx-jsx": "^3.2.0", "mdast-util-to-hast": "^13.2.1", "picomatch": "^4.0.3", "satteri": "^0.10.3", "terminal-link": "^5.0.0", "unist-util-visit": "^5.1.0", "yaml": "^2.8.3" }, "peerDependencies": { "@astrojs/starlight": ">=0.42.0", "astro": ">=7.2.10" } }, "sha512-UvPl8L9hfWR+yWbLOEtljLmpJCGcM6AVseVy5IO9dmqdOjW4R+Y8FaYyVA5axCC8RvxM5xU7M1WTerpwU8rYbw=="],
 

@@ -37,28 +37,14 @@ Setting up dune and Vite to build it:
 
 ## With an agent
 
-Each release installs its documentation for an agent with it: `llms.txt`,
-every page in Markdown, and a skill that sends the agent there before it
-writes code with solidtype. With opam alone, copy the skill into your
-project, into `.agents/skills/` for Codex, Cursor and most agents or
-`.claude/skills/` for Claude Code:
-
-```sh
-mkdir -p .agents/skills
-cp -r $(opam var solidtype:doc)/skills/solidtype .agents/skills/
-```
-
-With Node or Bun:
-
-```sh
-npx skills add hyphatech/solidtype
-```
-
-An agent that reads no skills is told in your project's `AGENTS.md`:
+Each release installs its documentation for an agent with it, at
+`$(opam var solidtype:doc)`: `llms.txt`, and every page in Markdown. An
+agent reads it when your project's `AGENTS.md` tells it to:
 
 ```md
-Before writing code with solidtype, read `$(opam var solidtype:doc)/llms.txt`
-and the page of each part the work needs; build from its parts.
+Before writing code with solidtype, read `$(opam var solidtype:doc)/llms.txt` and
+the pages it lists for the parts you need, and use those parts rather than
+writing your own.
 ```
 
 ## Licence
