@@ -6,6 +6,7 @@ import solid from "@astrojs/solid-js";
 import starlight from "@astrojs/starlight";
 import tailwindcss from "@tailwindcss/vite";
 import links from "starlight-links-validator";
+import agents from "starlight-hypha-agents";
 import hypha from "starlight-theme-hypha";
 import solidtype from "vite-plugin-solidtype";
 import astro from "@shikijs/langs/astro";
@@ -51,27 +52,27 @@ export default defineConfig({
           github: "hyphatech/solidtype",
           tabs: { "Start here": "rocket", Solid: "zap", Kobalte: "blocks", HeroUI: "component", Charts: "waves-horizontal", Reference: "library" },
           links: [{ label: "Hypha Stack", href: "https://hyphatech.io/stack", icon: "layers" }],
-          // Each page as Markdown, llms.txt and a skill, written into
-          // agents/ for the solidtype package to install, and held to the
-          // pages by `make lint`. agents.md is what an agent knows before any
-          // page.
-          agents: {
-            dir: "../agents",
-            preamble: readFileSync(new URL("./agents.md", import.meta.url), "utf-8"),
-            groups: {
-              HeroUI: "Each component's page gives HeroUI's own examples in OCaml, and a table of its props with the name HeroUI's React component gives each.",
-              Charts: "Each page links to the page of rhp's documentation it follows.",
-              Reference: "Each module's interface, its `.mli`, is its contract: what each function does, refuses and defaults to.",
-            },
-            skill: {
-              name: "solidtype",
-              package: "solidtype",
-              description:
-                "Use before writing or changing OCaml code that uses solidtype or its packages: Solid's components, signals and stores in OCaml's JSX (.mlx), Kobalte's components, HeroUI's ported onto them (buttons, fields, lists, tabs, overlays, tables), rhp's charts, Gravity UI's icons and @internationalized/date.",
-              instead: [
-                "a raw `<button>`, `<input>`, `<a>`, `<ul>`/`<li>` used as a list, `<nav>`, or a `style=`, where solidtype-heroui has Button, TextField/Input, Link, ListBox, Tabs/Breadcrumbs, and the design's tokens",
-              ],
-            },
+        }),
+        // Each page as Markdown, llms.txt and a skill, written into agents/
+        // by the build, for the solidtype package to install; the docs
+        // workflow holds it to the pages. agents.md is what an agent knows
+        // before any page.
+        agents({
+          dir: "../agents",
+          preamble: readFileSync(new URL("./agents.md", import.meta.url), "utf-8"),
+          groups: {
+            HeroUI: "Each component's page gives HeroUI's own examples in OCaml, and a table of its props with the name HeroUI's React component gives each.",
+            Charts: "Each page links to the page of rhp's documentation it follows.",
+            Reference: "Each module's interface, its `.mli`, is its contract: what each function does, refuses and defaults to.",
+          },
+          skill: {
+            name: "solidtype",
+            package: "solidtype",
+            description:
+              "Use before writing or changing OCaml code that uses solidtype or its packages: Solid's components, signals and stores in OCaml's JSX (.mlx), Kobalte's components, HeroUI's ported onto them (buttons, fields, lists, tabs, overlays, tables), rhp's charts, Gravity UI's icons and @internationalized/date.",
+            instead: [
+              "a raw `<button>`, `<input>`, `<a>`, `<ul>`/`<li>` used as a list, `<nav>`, or a `style=`, where solidtype-heroui has Button, TextField/Input, Link, ListBox, Tabs/Breadcrumbs, and the design's tokens",
+            ],
           },
         }),
         // The reference is odoc's, in public/, and the Astro page's demo is

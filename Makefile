@@ -30,10 +30,8 @@ test: build node_modules ## run the tests
 	$(OPAM) dune test --force
 	$(OPAM) bun run test
 
-# Release is the profile opam installs with. agents/ is checked from docs/,
-# where Astro finds its config, by reading the pages without building the
-# site.
-lint: node_modules ## check formatting, types, litany, the release build, bindings and agents/
+# Release is the profile opam installs with.
+lint: node_modules ## check formatting, types, litany, the release build and bindings
 	$(OPAM) dune build @all @fmt
 	$(OPAM) dune build --profile release @all
 	$(OPAM) litany check
@@ -45,7 +43,6 @@ lint: node_modules ## check formatting, types, litany, the release build, bindin
 	$(OPAM) bun generate/rhp.ts --check
 	$(OPAM) bun generate/internationalized_date.ts --check
 	$(OPAM) bun generate/gravity_icons.ts --check
-	cd docs && HYPHA_AGENTS=check bunx astro sync
 
 fmt: ## format the code
 	$(OPAM) dune fmt
@@ -77,10 +74,9 @@ docs: build node_modules ## build the documentation site
 docs-serve: docs ## serve the built documentation site
 	cd docs && bun --bun astro preview --open --port $(DOCS_PORT)
 
-# Each page as Markdown, llms.txt and the skill, from the documentation's
-# pages, for the solidtype package to install.
-agents: node_modules ## write agents/ from the documentation's pages
-	cd docs && HYPHA_AGENTS=write bunx astro sync
+# Each page as Markdown, llms.txt and the skill, written by the docs' build
+# for the solidtype package to install.
+agents: docs ## write agents/ from the documentation's pages
 
 generate: node_modules ## write the generated bindings
 	$(OPAM) bun generate/html.ts
