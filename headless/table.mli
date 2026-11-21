@@ -38,9 +38,12 @@
     [selection_behavior] [`replace] chooses it alone, Shift and the platform's
     key extending and adding. A press that begins in a control inside a row --
     an input, a button, a link, a label, a checkbox -- is the control's, never
-    the row's. A selected row is [aria-selected], and [data-selected], and a
-    disabled one [aria-disabled] and [data-disabled], present and empty as
-    Kobalte's state is.
+    the row's. So is a key pressed in a control inside a cell: every key of a
+    field that takes text, Tab and Space among them, any key the control
+    handled, and all but the arrows, Home and End, which move from its cell as
+    from the cell itself. A selected row is [aria-selected], and
+    [data-selected], and a disabled one [aria-disabled] and [data-disabled],
+    present and empty as Kobalte's state is.
 
     Inside a {!Virtualizer} given {!Virtualizer.val-table_layout}, it is laid
     out as React Aria's TableLayout lays one out: each part a [<div>] of its
@@ -99,6 +102,48 @@ module Context : sig
   (** The table above; outside a {!Root} it raises [Invalid_argument]. *)
 end
 
+type reorder = {
+  keys : string array;  (** The rows moved, in the order shown. *)
+  target : string;  (** The row they land beside. *)
+  position : [ `before | `after ];
+}
+(** Rows dropped where a drag let them go, beside a row of the same parent. *)
+
+type reorder_messages = {
+  drag_item : string -> string;  (** A handle's name, given its row's. *)
+  drag_selected_items : int -> string;
+      (** A handle's name where its row is dragged with the others selected,
+          given how many. *)
+  drag_started : string;
+  insert_before : string -> string;
+  insert_between : string -> string -> string;
+  insert_after : string -> string;
+  drop_complete : string;
+  drop_canceled : string;
+}
+(** What a drag tells a reader, given the names of the rows it lands beside. *)
+
+val english : reorder_messages
+(** React Aria's words: [Drag Alpha], [Drag 2 selected items],
+    [Insert between Alpha and Bravo], [Drop complete.], and its own for a row
+    grabbed:
+    [Started dragging. Press the arrow keys to move to a drop target, then press
+     Enter to drop, or press Escape to cancel.] *)
+
+type drag_handle = {
+  can_drag : bool S.accessor;  (** Whether its table takes [on_reorder]. *)
+  is_dragging : bool S.accessor;
+  label : string S.accessor;  (** Its name, as {!reorder_messages} gives it. *)
+  on_pointer_down : Dom.pointerEvent -> unit;
+  on_pointer_move : Dom.pointerEvent -> unit;
+  on_pointer_up : Dom.pointerEvent -> unit;
+  on_pointer_cancel : Dom.pointerEvent -> unit;
+  on_key_down : Dom.keyboardEvent -> unit;
+  on_blur : Dom.focusEvent -> unit;
+}
+(** What drags a row: a {!Drag_handle}'s handlers, or a style's own button's, as
+    {!Drag_handle} describes. *)
+
 type row = {
   key : string;
   level : int;  (** 1 in the body, and one more in each row it is inside. *)
@@ -109,6 +154,7 @@ type row = {
   toggle_expanded : unit -> unit;
   focus : unit -> unit;  (** Gives it the focus, as a press of it does. *)
   header_id : string;  (** The id of the cell that names it. *)
+  drag : drag_handle;
 }
 (** What a part inside a {!Row} reads of it, and a style's attribute on it. *)
 
@@ -174,7 +220,20 @@ end
     keys do.
 
     A row's action, [on_row_action] given its key, runs after the row's own, as
-    React Aria runs one. *)
+    React Aria runs one.
+
+    With [sticky_header], it is [data-sticky-header] and its {!Column}s stick to
+    the top of what scrolls it. While content has scrolled beneath the columns
+    pinned to its start, it is [data-pinned-start-detached], and while there is
+    more beneath those pinned to its end, [data-pinned-end-detached]: read from
+    what scrolls it, the table itself where it is virtualized, else the first
+    element above it that scrolls.
+
+    Given [on_reorder], its rows are dragged by their {!Drag_handle}s, among the
+    rows of the same parent, and dropped beside one, [on_reorder] then given
+    them and where they landed; a selected row is dragged with the others
+    selected. What it tells a reader is [reorder_messages], {!english} by
+    default. *)
 module Root : sig
   module Props : sig
     type t
@@ -194,6 +253,9 @@ module Root : sig
       ?default_expanded_keys:string array Solidtype.Check.value ->
       ?on_expanded_change:(string array -> unit) ->
       ?on_row_action:(string -> unit) ->
+      ?sticky_header:bool Solidtype.Check.value ->
+      ?on_reorder:(reorder -> unit) ->
+      ?reorder_messages:reorder_messages Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Table.props -> Jsx.element) ->
       ?props:'spread S.rest ->
       (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
@@ -227,7 +289,14 @@ end
     [allows_sorting] is [aria-sort], and pressed by a pointer, Enter or Space to
     be sorted by. In a {!Resizable_container} it is as wide as [width] says,
     controlled, else [default_width] until it is resized, and [data-resizing]
-    while it is. *)
+    while it is; a caller's [style] is written after its width, as a {!Root}'s
+    is after its fixed layout.
+
+    A column [pinned] to the table's [`start] or [`end_] stays in view as the
+    others scroll beneath it: its header and its cells stick to that side,
+    beside the columns pinned there before them, at their widths as laid out,
+    and are [data-pinned], ["start"] or ["end"], the last of each side beside
+    the columns that scroll [data-pinned-edge]. *)
 module Column : sig
   module Context : sig
     val use : unit -> column
@@ -245,6 +314,7 @@ module Column : sig
       ?default_width:column_size Solidtype.Check.value ->
       ?min_width:float Solidtype.Check.value ->
       ?max_width:float Solidtype.Check.value ->
+      ?pinned:[ `start | `end_ ] Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Th.props -> Jsx.element) ->
       ?props:'spread S.rest ->
       (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
@@ -288,7 +358,11 @@ end
     it too; with [`toggle], a press runs it while no row is selected, and
     selects once one is; with [`replace], a press selects and a double press
     runs it, and a touch held half a second selects and turns the table to
-    [`toggle], so a tap then selects. A disabled row runs none. *)
+    [`toggle], so a tap then selects. A disabled row runs none.
+
+    While it is dragged it is [data-dragging], kept in its place; and the row a
+    drop would land beside is [data-drop-target], [data-drop-position]
+    ["before"] or ["after"] it. *)
 module Row : sig
   module Context : sig
     val use : unit -> row
@@ -338,6 +412,35 @@ module Cell : sig
       ?props:'spread S.rest ->
       (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Td.check
+  end
+
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
+end
+
+(** A [<button>] that drags its {!Row}, named [Drag] and its row's name, or how
+    many selected rows it drags with it, as React Aria's drag button is, and
+    disabled while its table takes no [on_reorder]. Enter or Space grabs its
+    row, telling a reader so; the arrows move it among the rows of its parent,
+    Home and End to the first place and the last, each place told; Enter or
+    Space drops it there, and Escape, or the focus leaving, lets it go. A
+    pointer pressed on it drags the row to before the first row whose middle is
+    below the pointer, else after the last, a copy of the row following the
+    pointer, [data-drag-preview], in a table of the table's classes beside it,
+    out of a reader's and the keys' reach, and drops it as it is let go; Escape
+    lets it go. The focus is on the handle after a drop. It is [data-dragging]
+    while its row is, and takes every attribute of a [<button>], its handlers
+    and [ref] called beside its own. Outside a {!Row} it raises
+    [Invalid_argument] as it is made. *)
+module Drag_handle : sig
+  module Props : sig
+    type t
+
+    val check :
+      ?as_:(Solidtype.Html.Button.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Button.check
   end
 
   val make : Props.t -> Jsx.element

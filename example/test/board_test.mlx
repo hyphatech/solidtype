@@ -133,6 +133,28 @@ let () =
                   (Option.value (T.column (T.by_text "Ship it")) ~default:""))
           in
           Js.Promise.resolve Jest.pass);
+      Jest.testPromise
+        "tasks listed are a grid by their place, then by a title pressed"
+        (fun () ->
+          T.render Example.App.make;
+          let user = T.setup () in
+          let* (_ : Dom.element) = T.find_by_role_named "heading" "API" in
+          let* () = T.press user (T.by_text "List") in
+          let* grid = T.find_by_role_named "grid" "Tasks" in
+          let titles () =
+            Array.to_list
+              (Array.map T.text (T.all_within_by_role grid "rowheader"))
+            |> List.filter (fun t ->
+                String.equal t "Ship it" || String.equal t "Write the README")
+          in
+          let by_place = titles () in
+          let* () = T.press user (T.by_role_named "columnheader" "Task") in
+          Js.Promise.resolve
+            Jest.Expect.(
+              expect (by_place, titles ())
+              |> toEqual
+                   ( [ "Write the README"; "Ship it" ],
+                     [ "Ship it"; "Write the README" ] )));
       Jest.testPromise "a title too long is shown on its field" (fun () ->
           T.render Example.App.make;
           let user = T.setup () in

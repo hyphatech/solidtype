@@ -1,0 +1,243 @@
+(* A number stepper as a caller meets it, since it has no twin: its parts'
+   classes for each size, a class given after its own; stepped by its buttons
+   within its range, the button at a bound disabled; reached by Tab at its
+   input, out of sight, which the arrows step and which takes the value's place
+   while text is typed in it; each digit a reel turned to it, a format's symbols
+   between; a value its children draw; and no violation axe finds. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Number_stepper = Solidtype_heroui.Number_stepper
+module Types = Solidtype_kobalte.Types
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+external query_all_js : string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.scope "document"]
+
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
+external disabled : Dom.element -> bool = "disabled" [@@mel.get]
+
+let all selector = Js.Array.from (query_all_js selector)
+
+let one selector =
+  match T.query selector with
+  | Some e -> e
+  | None -> Js.Exn.raiseError ("nothing is " ^ selector)
+
+let slot name = one ("[data-slot=" ^ name ^ "]")
+
+let stepper ?(size = `md) ?min_value ?max_value ?format_options ?on_change
+    ~default_value () =
+  T.render (fun () ->
+      <div>
+        <Number_stepper
+          aria_label="Points"
+          size
+          default_value
+          ?min_value
+          ?max_value
+          ?format_options
+          ?on_change
+          class_="w-fit">
+          <Number_stepper.Group>
+            <Number_stepper.Decrement_button />
+            <Number_stepper.Value />
+            <Number_stepper.Increment_button />
+          </Number_stepper.Group>
+        </Number_stepper>
+        <button>"After"</button>
+      </div>)
+
+external query_in : Dom.element -> string -> Dom.element Js.null
+  = "querySelector"
+[@@mel.send]
+
+(* How far a reel is turned, in numerals: it holds the ten five times over, so
+   each is a fiftieth of its height. *)
+let turn reel =
+  let style = Option.value (T.attribute reel "style") ~default:"" in
+  match Js.String.split ~sep:"(-" style with
+  | [| _; rest |] -> (
+      match Js.String.split ~sep:"%" rest with
+      | [| percent; _ |] -> (
+          match int_of_string_opt percent with Some p -> p / 2 | None -> -1)
+      | _ -> -1)
+  | _ -> -1
+
+let turned_to reel =
+  let t = turn reel in
+  if t < 0 then "?" else string_of_int (t mod 10)
+
+(* What the value shows: each reel's numeral and each symbol, in order. *)
+let shown () =
+  all ".number-stepper__characters > *"
+  |> Array.to_list |> List.rev
+  |> List.map (fun e ->
+      match Js.Null.toOption (query_in e ".number-stepper__reel") with
+      | Some reel -> turned_to reel
+      | None -> T.text_content e)
+  |> String.concat ""
+
+let () =
+  Jest.describe "Number_stepper" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "draws its parts in its classes, sized" (fun () ->
+          stepper ~size:`sm ~default_value:1. ();
+          E.(
+            expect
+              ( T.class_name (slot "number-stepper"),
+                T.class_name (slot "number-stepper-group"),
+                T.class_name (slot "number-stepper-decrement-button"),
+                T.class_name (slot "number-stepper-increment-button"),
+                T.attribute (slot "number-stepper-value") "class",
+                T.class_name (slot "number-stepper-input"),
+                T.attribute (slot "number-stepper-value") "aria-hidden" )
+            |> toEqual
+                 ( "number-stepper w-fit",
+                   "number-stepper__group number-stepper__group--sm",
+                   "number-stepper__decrement-button \
+                    number-stepper__decrement-button--sm",
+                   "number-stepper__increment-button \
+                    number-stepper__increment-button--sm",
+                   Some "number-stepper__value number-stepper__value--sm",
+                   "number-stepper__input",
+                   Some "true" )));
+      Jest.testPromise
+        "steps by its buttons within its range, a button at a bound disabled"
+        (fun () ->
+          let told = ref [] in
+          stepper ~default_value:1. ~min_value:0. ~max_value:2.
+            ~on_change:(fun v -> told := v :: !told)
+            ();
+          let user = T.setup () in
+          let decrement = slot "number-stepper-decrement-button" in
+          let increment = slot "number-stepper-increment-button" in
+          let* () = T.click user decrement in
+          let at_min = (disabled decrement, disabled increment, shown ()) in
+          let* () = T.click user increment in
+          let* () = T.click user increment in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( at_min,
+                  (disabled decrement, disabled increment, shown ()),
+                  List.rev !told )
+              |> toEqual ((true, false, "0"), (false, true, "2"), [ 0.; 1.; 2. ])));
+      Jest.testPromise
+        "is reached by Tab at its input, which the arrows step, its buttons \
+         passed" (fun () ->
+          stepper ~default_value:9. ();
+          let user = T.setup () in
+          let* () = T.tab user in
+          let input = slot "number-stepper-input" in
+          let reached = active == input in
+          let* () = T.keyboard user "{ArrowUp}" in
+          let* () = T.frame () in
+          let stepped = (shown (), T.attribute input "data-editing") in
+          let* () = T.tab user in
+          Js.Promise.resolve
+            E.(
+              expect (reached, stepped, T.text_content active)
+              |> toEqual (true, ("10", None), "After")));
+      Jest.testPromise
+        "shows its input in the value's place while text is typed in it"
+        (fun () ->
+          stepper ~default_value:3. ();
+          let user = T.setup () in
+          let input = slot "number-stepper-input" in
+          T.focus input;
+          let* () = T.keyboard user "{Backspace}12" in
+          let typing = T.attribute input "data-editing" in
+          let* () = T.keyboard user "{Enter}" in
+          let* () = T.frame () in
+          Js.Promise.resolve
+            E.(
+              expect (typing, T.attribute input "data-editing", shown ())
+              |> toEqual (Some "true", None, "12")));
+      Jest.testPromise "rolls a digit's reel to its new numeral, the reel kept"
+        (fun () ->
+          stepper ~default_value:1. ();
+          let reel () = one ".number-stepper__reel" in
+          let before = reel () in
+          let user = T.setup () in
+          let* () = T.click user (slot "number-stepper-increment-button") in
+          Js.Promise.resolve
+            E.(expect (reel () == before, shown ()) |> toEqual (true, "2")));
+      Jest.testPromise
+        "rolls each changed digit up as the value rises, past 9 to 0, and down \
+         as it falls" (fun () ->
+          stepper ~default_value:19. ();
+          let units () =
+            one
+              ".number-stepper__characters > :first-child .number-stepper__reel"
+          in
+          let user = T.setup () in
+          let at_19 = turn (units ()) in
+          let* () = T.click user (slot "number-stepper-increment-button") in
+          let at_20 = turn (units ()) in
+          let* () = T.click user (slot "number-stepper-decrement-button") in
+          let back = turn (units ()) in
+          Js.Promise.resolve
+            E.(
+              expect (at_20 - at_19, back - at_20, shown ())
+              |> toEqual (1, -1, "19")));
+      Jest.testPromise
+        "rolls a digit it gains in from 0, and one it loses out to 0, gone \
+         once it has faded" (fun () ->
+          stepper ~default_value:9. ();
+          let user = T.setup () in
+          let* () = T.click user (slot "number-stepper-increment-button") in
+          let gained = Array.length (all "[data-enter=true]") in
+          let* () = T.frame () in
+          let rolled = shown () in
+          let* () = T.click user (slot "number-stepper-decrement-button") in
+          let losing = (Array.length (all "[data-leave=true]"), shown ()) in
+          let* () = T.wait 950 in
+          Js.Promise.resolve
+            E.(
+              expect (gained, rolled, losing, shown ())
+              |> toEqual (1, "10", (1, "09"), "9")));
+      Jest.testPromise
+        "places each character it loses at once a place further out" (fun () ->
+          stepper ~default_value:1000. ();
+          let user = T.setup () in
+          let* () = T.click user (slot "number-stepper-decrement-button") in
+          Js.Promise.resolve
+            E.(
+              expect
+                (all "[data-leave=true]"
+                |> Array.map (fun e -> T.attribute e "style"))
+              |> toEqual
+                   [|
+                     Some "--number-stepper-away: 0;";
+                     Some "--number-stepper-away: 1;";
+                   |]));
+      Jest.test "shows a format's symbols between its digits" (fun () ->
+          stepper ~default_value:1250.5
+            ~format_options:
+              (Types.NumberFormatOptions.make ~style:`currency ~currency:"USD"
+                 ())
+            ();
+          E.(expect (shown ()) |> toEqual "$1,250.50"));
+      Jest.test "draws a value of its children's" (fun () ->
+          T.render (fun () ->
+              <Number_stepper aria_label="Items" default_value=3.>
+                <Number_stepper.Group>
+                  <Number_stepper.Decrement_button />
+                  <Number_stepper.Value>
+                    (fun shown ->
+                      Jsx.string (Js.Float.toString shown.value ^ " items"))
+                  </Number_stepper.Value>
+                  <Number_stepper.Increment_button />
+                </Number_stepper.Group>
+              </Number_stepper>);
+          E.(
+            expect (T.text_content (slot "number-stepper-value"))
+            |> toEqual "3 items"));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          stepper ~default_value:1. ~min_value:1. ();
+          let* found = T.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))

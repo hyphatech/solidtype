@@ -2,6 +2,9 @@
     expands and collapses its panel, Kobalte's [Accordion], with HeroUI's
     classes from {!Styles.Accordion}.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/accordion.md].
+
     {[
       <Accordion>
         <Accordion.Item id="shipping">

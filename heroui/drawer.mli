@@ -1,6 +1,9 @@
 (** HeroUI's Drawer: Kobalte's [Dialog] sliding in from an edge of the page,
     with HeroUI's classes from {!Styles.Drawer}.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/drawer.md].
+
     {[
       <Drawer>
         <Button variant=`secondary>"Open Drawer"</Button>

@@ -177,6 +177,7 @@ module Portal = struct
   module Props = struct
     external check :
       ?mount:_ Dom.node_like Solidtype.Check.value ->
+      ?ref:(Dom.element -> unit) ->
       children:('f, [ `elements ]) Solidtype.Check.children ->
       unit ->
       unit = "check"
@@ -210,7 +211,9 @@ let backdrop ~slot ~portal_container ~class_ ~style ~ref:given_ref ~dismissable
     in
     let height = viewport_height () in
     <Show when_=(Overlay.present o)>
-      <Portal ?mount=(portal_container ())>
+      <Portal
+        ?mount=(portal_container ())
+        ref=(fun e -> Solidtype_headless.Top_layer.place e)>
         <div
           class_=(class_ ())
           style=(String.concat " "

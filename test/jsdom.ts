@@ -28,6 +28,32 @@ Object.defineProperty(HTMLElement.prototype, "clientHeight", {
     return Number(this.getAttribute("data-client-height") ?? 0);
   },
 });
+// A box is as wide, as far down and as high as a test says by its
+// data-box-width, data-box-top and data-box-height, as a table measures a
+// pinned column's border box and a row a drag passes over, else as jsdom
+// gives it; and an element's content is as wide as its data-scroll-width, as
+// a table's scroller is measured to know whether a pinned column has content
+// beneath it.
+const boundingClientRect = Element.prototype.getBoundingClientRect;
+Element.prototype.getBoundingClientRect = function (this: Element) {
+  const rect = boundingClientRect.call(this);
+  const given = (name: string, otherwise: number) => {
+    const value = this.getAttribute(name);
+    return value === null ? otherwise : Number(value);
+  };
+  return new DOMRect(
+    rect.x,
+    given("data-box-top", rect.y),
+    given("data-box-width", rect.width),
+    given("data-box-height", rect.height),
+  );
+};
+Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+  configurable: true,
+  get(this: HTMLElement) {
+    return Number(this.getAttribute("data-scroll-width") ?? 0);
+  },
+});
 // Nor an IntersectionObserver, by which a load-more sentinel sees it is in
 // view: one that reports nothing stands in, as for a list scrolled nowhere,
 // until a test brings an element into view by its static `intersect`, as a
@@ -131,3 +157,31 @@ Element.prototype.getAnimations ??= () => [];
 Element.prototype.setPointerCapture ??= () => {};
 Element.prototype.releasePointerCapture ??= () => {};
 Element.prototype.hasPointerCapture ??= () => false;
+// Nor the Popover API, by which solidtype-headless's Top_layer draws an
+// overlay above the page: a top layer stands in, in the order elements were
+// shown, each leaving it as it is hidden or leaves the document, and
+// read by a test through the static `HTMLElement.topLayer`, as a browser
+// keeps its own. Showing one already shown, one with no popover attribute,
+// or one not in the document throws, as a browser's does. jsdom's own
+// stylesheet hides a popover not open, and none is ever open to it: one
+// shown is displayed by its style, as a browser displays it.
+const topLayer: HTMLElement[] = [];
+const inTopLayer = () => {
+  for (let i = topLayer.length - 1; i >= 0; i--) if (!topLayer[i]!.isConnected) topLayer.splice(i, 1);
+  return topLayer;
+};
+if (!("showPopover" in HTMLElement.prototype)) {
+  Object.defineProperty(HTMLElement, "topLayer", { get: () => [...inTopLayer()] });
+  HTMLElement.prototype.showPopover = function (this: HTMLElement) {
+    if (!this.hasAttribute("popover")) throw new DOMException("Not a popover", "NotSupportedError");
+    if (!this.isConnected || inTopLayer().includes(this))
+      throw new DOMException("Already shown, or not in the document", "InvalidStateError");
+    topLayer.push(this);
+    this.style.setProperty("display", "block");
+  };
+  HTMLElement.prototype.hidePopover = function (this: HTMLElement) {
+    const i = inTopLayer().indexOf(this);
+    if (i >= 0) topLayer.splice(i, 1);
+    this.style.removeProperty("display");
+  };
+}

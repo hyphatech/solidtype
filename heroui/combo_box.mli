@@ -2,6 +2,9 @@
     {!List_box} of options as it is typed into, to choose one or many of, with
     HeroUI's classes from {!Styles.ComboBox}.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/combo-box.md].
+
     {[
       <Combo_box>
         <Label>"Favorite Animal"</Label>

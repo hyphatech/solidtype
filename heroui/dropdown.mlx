@@ -198,7 +198,7 @@ module Popover = struct
           Overlay.placed_side ~placement:(fun () -> "right") ()
         in
         <Show when_=(Overlay.present o)>
-          <Kobalte.Portal>
+          <Kobalte.Portal ref=(fun e -> Solidtype_headless.Top_layer.place e)>
             <Kobalte.SubContent
               class_=(classes ())
               style=("--trigger-anchor-point: \
@@ -261,7 +261,7 @@ module Popover = struct
             ()
         in
         <Show when_=(Overlay.present o)>
-          <Kobalte.Portal>
+          <Kobalte.Portal ref=(fun e -> Solidtype_headless.Top_layer.place e)>
             <Kobalte.Content
               class_=(classes ())
               style=("--trigger-anchor-point: \

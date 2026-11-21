@@ -1,0 +1,77 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Chip = Solidtype_heroui.Chip
+module Data_grid = Solidtype_heroui.Data_grid
+
+type priority = Low | Medium | High | Urgent
+type task = { id : string; title : string; priority : priority; due : string }
+
+let tasks =
+  [|
+    {
+      id = "1";
+      title = "Renew the SSL certificate";
+      priority = Urgent;
+      due = "2026-11-21";
+    };
+    { id = "2"; title = "Plan the offsite"; priority = Low; due = "2026-12-10" };
+    {
+      id = "3";
+      title = "Review the Q4 budget";
+      priority = High;
+      due = "2026-11-28";
+    };
+    {
+      id = "4";
+      title = "Update the onboarding guide";
+      priority = Medium;
+      due = "2026-12-02";
+    };
+    {
+      id = "5";
+      title = "Fix the export timeout";
+      priority = High;
+      due = "2026-11-24";
+    };
+  |]
+
+let rank = function Low -> 0 | Medium -> 1 | High -> 2 | Urgent -> 3
+
+let priority_name = function
+  | Low -> "Low"
+  | Medium -> "Medium"
+  | High -> "High"
+  | Urgent -> "Urgent"
+
+let priority_color = function
+  | Low -> `default
+  | Medium -> `accent
+  | High -> `warning
+  | Urgent -> `danger
+
+let columns =
+  [|
+    Data_grid.column ~id:"title" ~header:(Text "Task") ~is_row_header:true
+      ~sort:(By_text (fun t -> t.title))
+      (fun t -> Jsx.string (S.get t).title);
+    (* Priorities in their own order, never their names'. *)
+    Data_grid.column ~id:"priority" ~header:(Text "Priority")
+      ~sort:(By (fun a b -> Int.compare (rank a.priority) (rank b.priority)))
+      (fun t ->
+        <Chip color=(priority_color (S.get t).priority) size=`sm variant=`soft>
+          (Jsx.string (priority_name (S.get t).priority))
+        </Chip>);
+    Data_grid.column ~id:"due" ~header:(Text "Due") ~align:`end_
+      ~sort:(By_text (fun t -> t.due))
+      ~cell_class:"tabular-nums text-muted"
+      (fun t -> Jsx.string (S.get t).due);
+  |]
+
+let make () =
+  <Data_grid
+    aria_label="Tasks by priority"
+    rows=tasks
+    row_id=(fun t -> t.id)
+    columns
+    default_sort_descriptor={ column = "priority"; direction = `descending }
+  />

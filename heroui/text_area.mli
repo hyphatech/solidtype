@@ -6,6 +6,9 @@
     the field's value, state, label and description reach, and takes the field's
     variant where it sets none.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/text-area.md].
+
     {[
       <Text_area placeholder="Your message" aria_label="Message" />
     ]} *)

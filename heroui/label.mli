@@ -5,6 +5,9 @@
     the group's label, which names the group, inside a {!Radio_group}, and the
     field's, which names its input, inside a {!Text_field}.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/label.md].
+
     {[
       <Label>"Wi-Fi"</Label>
     ]} *)

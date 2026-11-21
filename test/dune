@@ -10,8 +10,9 @@
 
 ; Every island of the documentation is on one of its pages, every page
 ; of rhp's links to the page of rhp's documentation it follows, and every
-; port's to HeroUI's before its usage; llms.txt lists every page, and a page
-; installs the newest release's plugin.
+; port's to HeroUI's before its usage, and a page installs the newest
+; release's plugin. agents/, llms.txt among it, is held to the pages by `make
+; lint`.
 
 (test
  (name test_docs)
@@ -21,7 +22,6 @@
  (deps
   (glob_files ../docs/islands/*.{ml,mlx})
   (glob_files_rec ../docs/src/content/*.{md,mdx})
-  ../docs/public/llms.txt
   ../CHANGES.md))
 
 ; Its errors are compared as text, so colour stays off even where the

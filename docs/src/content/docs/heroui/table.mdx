@@ -28,6 +28,8 @@ import * as ExEmptyState from "@islands/table_empty_state.jsx";
 import ExEmptyStateCode from "@islands/table_empty_state.mlx?raw";
 import * as ExTailwind from "@islands/table_tailwind.jsx";
 import ExTailwindCode from "@islands/table_tailwind.mlx?raw";
+import * as ExDragAndDrop from "@islands/table_drag_and_drop.jsx";
+import ExDragAndDropCode from "@islands/table_drag_and_drop.mlx?raw";
 import * as Demo from "@islands/table_demo.jsx";
 
 Rows, columns and cells given by data are Solid's `For`, where HeroUI's take
@@ -125,6 +127,18 @@ whether its row holds rows and is expanded, and whether the cell is in the
 tree column; a handler reads the row the cell was drawn in.
 
 <Example code={ExExpandableRowsCode} title="table_expandable_rows.mlx"><ExExpandableRows.make client:visible /></Example>
+
+### Drag and Drop
+
+Give `Table.Content` an `on_reorder` and each row a `Button` with
+`` slot=`drag ``. Enter on it grabs the row, the arrows move it, Enter drops
+it and Escape lets it go; a pointer drags it. `on_reorder` is told the rows
+moved, `keys`, and the row they land beside, `target`, `` `before `` or
+`` `after `` it, as its `position`. A selected row is dragged with the others
+selected. HeroUI's React Table does this with React Aria's `useDragAndDrop`,
+whose keyboard drag moves by Tab.
+
+<Example code={ExDragAndDropCode} title="table_drag_and_drop.mlx"><ExDragAndDrop.make client:visible /></Example>
 
 ### Pagination
 
@@ -238,6 +252,9 @@ flexibility:
   indicator
 - **Resizing**: `[data-resizing="true"]` and `[data-resizable-direction]` on a
   column resizer
+- **Dragging**: `[data-dragging="true"]` on a row dragged (reduced opacity)
+- **Drop position**: `[data-drop-position="before"]` or `"after"` on the row
+  a drop would land beside (a line in the accent on that side)
 - **Tree**: `[data-level]`, `[data-expanded="true"]`,
   `[data-has-child-items="true"]` on a row and its cells,
   `[data-tree-column="true"]` on a cell, and the row's `--table-row-level`
@@ -277,6 +294,8 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 | `defaultExpandedKeys` | `default_expanded_keys` | `string array` | | Its rows' keys expanded at first, kept by itself |
 | `onExpandedChange` | `on_expanded_change` | `string array -> unit` | | Called with the keys expanded |
 | `onRowAction` | `on_row_action` | `string -> unit` | | Called with a row's key as its action runs, after the row's own |
+| `dragAndDropHooks` | `on_reorder` | `Table.reorder -> unit` | | Its rows dragged by a `` slot=`drag `` button, and told where they were dropped |
+| — | `reorder_messages` | `Table.reorder_messages` | React Aria's | What a drag tells a reader |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 
 ### Table.Header

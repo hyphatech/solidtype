@@ -138,7 +138,7 @@ module Popover = struct
     in
     <Surface.Context.Provider value=(S.accessor (fun () -> `default))>
       <Show when_=(Overlay.present o)>
-        <Kobalte.Portal>
+        <Kobalte.Portal ref=(fun e -> Solidtype_headless.Top_layer.place e)>
           <Kobalte.Content
             class_=(after (Styles.ColorPicker.popover p.slots) (S.get class_))
             style=("--trigger-anchor-point: \

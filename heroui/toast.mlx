@@ -997,48 +997,57 @@ module Provider = struct
            <Stack.Provider value=s>
              (match children e with Some el -> el | None -> default_toast e)
            </Stack.Provider>));
-    <Kobalte.Region
-      ?region_id=q.region
-                 (* The port's own hotkey stands in for Kobalte's, which it switches off
+    (* In the top layer and kept on top, the toasts show above any overlay,
+       as HeroUI's styles put its region above an overlay's: once mounted,
+       since the browser places only an element in the document, and Solid
+       gives a ref its element before it is. *)
+    let layer = ref None in
+    S.on_mount (fun () ->
+        Option.iter Solidtype_headless.Top_layer.keep_on_top !layer);
+    <div ref=(fun e -> layer := Some e)>
+      <Kobalte.Region
+        ?region_id=q.region
+                   (* The port's own hotkey stands in for Kobalte's, which it switches off
          with a key no event has: Kobalte takes an empty hotkey for every key,
          and would focus its list on each one pressed. *)
-      hotkey=[| "" |]
-      limit=1e9
-            (* Named as React Aria names its region, by how many toasts it holds,
+        hotkey=[| "" |]
+        limit=1e9
+              (* Named as React Aria names its region, by how many toasts it holds,
          where Kobalte's would name its hotkey, which the port keeps. *)
-      translations=(Types.Toast_Region_Translations.make
-                      ~notifications:(fun _ ->
-                        match List.length (S.get q.entries) with
-                        | 1 -> "1 notification."
-                        | n -> string_of_int n ^ " notifications.")
-                      ())
-      pause_on_interaction=false
-      pause_on_page_idle=false
-      ref=(fun el ->
-            ignore (given_ref el : unit option);
-            watch el)
-      class_=(after
-                (Styles.Toast.region
-                   (Styles.Toast.slots
-                      (Styles.Toast.options ~placement:(S.get placement) ())))
-                (S.get class_))
-             (* Kobalte's region on the top layer asks for the pointer, inline, over
+        translations=(Types.Toast_Region_Translations.make
+                        ~notifications:(fun _ ->
+                          match List.length (S.get q.entries) with
+                          | 1 -> "1 notification."
+                          | n -> string_of_int n ^ " notifications.")
+                        ())
+        pause_on_interaction=false
+        pause_on_page_idle=false
+        ref=(fun el ->
+              ignore (given_ref el : unit option);
+              watch el)
+        class_=(after
+                  (Styles.Toast.region
+                     (Styles.Toast.slots
+                        (Styles.Toast.options ~placement:(S.get placement) ())))
+                  (S.get class_))
+               (* Kobalte's region on the top layer asks for the pointer, inline, over
          HeroUI's region, which lets it through to the page but for its
          toasts. *)
-      style=("pointer-events: none; --gap: "
-            ^ px (S.get gap)
-            ^ "; --placement: "
-            ^ placement_name (S.get placement)
-            ^ "; --scale-factor: "
-            ^ Js.Float.toString (S.get scale_factor)
-            ^ "; --toast-width: " ^ S.get width ^ ";"
-            ^ match S.get style with Some s -> " " ^ s | None -> "")
-      data_expanded=(Jsx.flag (S.get expanded))
-      data_slot="toast-region"
-      props=(Props.others props)>
-      <Kobalte.List
-        style="display: contents; margin: 0; padding: 0; list-style: none;"
-      />
-    </Kobalte.Region>
+        style=("pointer-events: none; --gap: "
+              ^ px (S.get gap)
+              ^ "; --placement: "
+              ^ placement_name (S.get placement)
+              ^ "; --scale-factor: "
+              ^ Js.Float.toString (S.get scale_factor)
+              ^ "; --toast-width: " ^ S.get width ^ ";"
+              ^ match S.get style with Some s -> " " ^ s | None -> "")
+        data_expanded=(Jsx.flag (S.get expanded))
+        data_slot="toast-region"
+        props=(Props.others props)>
+        <Kobalte.List
+          style="display: contents; margin: 0; padding: 0; list-style: none;"
+        />
+      </Kobalte.Region>
+    </div>
   [@@element div]
 end

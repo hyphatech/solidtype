@@ -5,8 +5,17 @@ module Show = Solidtype.Show
 module Chip = Solidtype_heroui.Chip
 module Empty_state = Solidtype_heroui.Empty_state
 module Search_field = Solidtype_heroui.Search_field
+module Segment = Solidtype_heroui.Segment
 module Toast = Solidtype_heroui.Toast
 module Gravity = Solidtype_gravity_icons
+
+(* The tasks' list, loaded once it is first shown, so the board's own page
+   carries none of its grid. *)
+module Listed = struct
+  module Props = Task_list.Props
+
+  let component = S.lazy_ (fun () -> Js.import Task_list.component)
+end
 
 (* What a call came to: the board fetched again and [what] said, or why
    not. *)
@@ -89,6 +98,8 @@ let make () =
           (all_projects ())
   in
   let filter, set_filter = S.create_signal "" in
+  (* The tasks as the board's columns, or as a list. *)
+  let listed, set_listed = S.create_signal false in
   let folded, set_folded = S.create_signal [ Status.Backlog; Done ] in
   let changed what =
     S.refetch task_actions;
@@ -193,6 +204,15 @@ let make () =
             </Chip>)
         </Show.Some>
         <div class_="ms-auto flex items-center gap-2">
+          <Segment
+            aria_label="Show tasks as"
+            size=`sm
+            selected_key=(if S.get listed then "list" else "board")
+            on_selection_change=(fun k ->
+                                  S.set set_listed (String.equal k "list"))>
+            <Segment.Item id="board">"Board"</Segment.Item>
+            <Segment.Item id="list">"List"</Segment.Item>
+          </Segment>
           <Search_field value=(S.get filter) on_change=(S.set set_filter)>
             <Search_field.Group>
               <Search_field.Search_icon />
@@ -218,21 +238,30 @@ let make () =
                             rounded-2xl border border-dashed border-border">
                     "No projects yet. Start one to put tasks on it."
                   </Empty_state>)>
-        <div class_="flex min-h-0 flex-1 gap-3 overflow-x-auto">
-          <For each=(Array.of_list Status.all)>
-            (fun status _ ->
-              <Column
-                status
-                tasks=(in_column status)
-                folded=(List.exists (Status.equal status) (S.get folded))
-                empty=(empty status)
-                on_fold=(fun () -> fold status)
-                on_drop=(dropped status)
-                on_move=move
-                on_remove=remove
-              />)
-          </For>
-        </div>
+        <Show
+          when_=(not (S.get listed))
+          fallback=(<Listed
+                      tasks=(Js.Array.filter
+                               ~f:(matches (S.get filter))
+                               (in_view ()))
+                      projects=(all_projects ())
+                    />)>
+          <div class_="flex min-h-0 flex-1 gap-3 overflow-x-auto">
+            <For each=(Array.of_list Status.all)>
+              (fun status _ ->
+                <Column
+                  status
+                  tasks=(in_column status)
+                  folded=(List.exists (Status.equal status) (S.get folded))
+                  empty=(empty status)
+                  on_fold=(fun () -> fold status)
+                  on_drop=(dropped status)
+                  on_move=move
+                  on_remove=remove
+                />)
+            </For>
+          </div>
+        </Show>
       </Show>
     </main>
     <Toast.Provider placement=`bottom_end />

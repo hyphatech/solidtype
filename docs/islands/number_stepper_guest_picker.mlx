@@ -1,0 +1,39 @@
+module Number_stepper = Solidtype_heroui.Number_stepper
+module Separator = Solidtype_heroui.Separator
+
+let guests =
+  [|
+    ("Adults", "Ages 13 or above");
+    ("Children", {js|Ages 2–12|js});
+    ("Infants", "Under 2");
+    ("Pets", "Bringing a service animal?");
+  |]
+
+let make () =
+  <div class_="flex w-full max-w-sm flex-col">
+    (Solidtype.Jsx.fragment
+       (Array.mapi
+          (fun i (name, ages) ->
+            <div>
+              (if i > 0 then <Separator /> else Solidtype.Jsx.string "")
+              <div class_="flex items-center justify-between py-4">
+                <div class_="flex flex-col">
+                  <span class_="text-sm font-medium">
+                    (Solidtype.Jsx.string name)
+                  </span>
+                  <span class_="text-xs text-muted">
+                    (Solidtype.Jsx.string ages)
+                  </span>
+                </div>
+                <Number_stepper
+                  aria_label=name size=`sm default_value=0. min_value=0.>
+                  <Number_stepper.Group>
+                    <Number_stepper.Decrement_button />
+                    <Number_stepper.Value />
+                    <Number_stepper.Increment_button />
+                  </Number_stepper.Group>
+                </Number_stepper>
+              </div>
+            </div>)
+          guests))
+  </div>

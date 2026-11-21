@@ -1,0 +1,173 @@
+---
+title: NumberStepper
+description: A number between two round buttons, which rolls to each new value.
+---
+
+import Example from "@components/Example.astro";
+import * as Usage from "@islands/number_stepper_usage.jsx";
+import UsageCode from "@islands/number_stepper_usage.mlx?raw";
+import * as GuestPicker from "@islands/number_stepper_guest_picker.jsx";
+import GuestPickerCode from "@islands/number_stepper_guest_picker.mlx?raw";
+import * as Controlled from "@islands/number_stepper_controlled.jsx";
+import ControlledCode from "@islands/number_stepper_controlled.mlx?raw";
+import * as CustomIcons from "@islands/number_stepper_custom_icons.jsx";
+import CustomIconsCode from "@islands/number_stepper_custom_icons.mlx?raw";
+import * as CustomValue from "@islands/number_stepper_custom_value.jsx";
+import CustomValueCode from "@islands/number_stepper_custom_value.mlx?raw";
+import * as Disabled from "@islands/number_stepper_disabled.jsx";
+import DisabledCode from "@islands/number_stepper_disabled.mlx?raw";
+import * as MinMax from "@islands/number_stepper_min_max.jsx";
+import MinMaxCode from "@islands/number_stepper_min_max.mlx?raw";
+import * as ReversedLayout from "@islands/number_stepper_reversed_layout.jsx";
+import ReversedLayoutCode from "@islands/number_stepper_reversed_layout.mlx?raw";
+import * as Sizes from "@islands/number_stepper_sizes.jsx";
+import SizesCode from "@islands/number_stepper_sizes.mlx?raw";
+import * as WithCustomButtons from "@islands/number_stepper_with_custom_buttons.jsx";
+import WithCustomButtonsCode from "@islands/number_stepper_with_custom_buttons.mlx?raw";
+import * as WithFormatOptions from "@islands/number_stepper_with_format_options.jsx";
+import WithFormatOptionsCode from "@islands/number_stepper_with_format_options.mlx?raw";
+import * as WithLabel from "@islands/number_stepper_with_label.jsx";
+import WithLabelCode from "@islands/number_stepper_with_label.mlx?raw";
+import * as WithStep from "@islands/number_stepper_with_step.jsx";
+import WithStepCode from "@islands/number_stepper_with_step.mlx?raw";
+
+A [NumberField](/solidtype/heroui/number-field/) drawn as two round buttons
+around its value, which rolls to each new number. Its value, range, step,
+format and keys are the field's: Tab reaches it, the arrows step it, and text
+typed in it takes the value's place until it is committed. Its look is a
+stylesheet the library ships, imported as
+[Theming](/solidtype/heroui/theming/#setup) shows.
+
+## Usage
+
+<Example code={UsageCode} title="number_stepper_usage.mlx"><Usage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Number_stepper aria_label="Quantity">
+  <Number_stepper.Group>
+    <Number_stepper.Decrement_button />
+    <Number_stepper.Value />
+    <Number_stepper.Increment_button />
+  </Number_stepper.Group>
+</Number_stepper>
+```
+
+## Examples
+
+### Guest Picker
+
+<Example code={GuestPickerCode} title="number_stepper_guest_picker.mlx"><GuestPicker.make client:visible /></Example>
+
+### Controlled
+
+`value` and `on_change` keep the value in the application.
+
+<Example code={ControlledCode} title="number_stepper_controlled.mlx"><Controlled.make client:visible /></Example>
+
+### Custom Icons
+
+A button's children take the place of its plus or minus.
+
+<Example code={CustomIconsCode} title="number_stepper_custom_icons.mlx"><CustomIcons.make client:visible /></Example>
+
+### Custom Value
+
+`Number_stepper.Value` given a function draws the value itself, from what it
+would show.
+
+<Example code={CustomValueCode} title="number_stepper_custom_value.mlx"><CustomValue.make client:visible /></Example>
+
+### Disabled
+
+<Example code={DisabledCode} title="number_stepper_disabled.mlx"><Disabled.make client:visible /></Example>
+
+### Min Max Values
+
+A button is disabled at its bound.
+
+<Example code={MinMaxCode} title="number_stepper_min_max.mlx"><MinMax.make client:visible /></Example>
+
+### Reversed Layout
+
+<Example code={ReversedLayoutCode} title="number_stepper_reversed_layout.mlx"><ReversedLayout.make client:visible /></Example>
+
+### Sizes
+
+<Example code={SizesCode} title="number_stepper_sizes.mlx"><Sizes.make client:visible /></Example>
+
+### With Custom Buttons
+
+A [Button](/solidtype/heroui/button/) given `` slot=`decrement `` or
+`` slot=`increment `` steps the value, as the stepper's own buttons do.
+
+<Example code={WithCustomButtonsCode} title="number_stepper_with_custom_buttons.mlx"><WithCustomButtons.make client:visible /></Example>
+
+### With Format Options
+
+<Example code={WithFormatOptionsCode} title="number_stepper_with_format_options.mlx"><WithFormatOptions.make client:visible /></Example>
+
+### With Label
+
+A [Label](/solidtype/heroui/label/) names it, and a
+[Description](/solidtype/heroui/description/) describes it.
+
+<Example code={WithLabelCode} title="number_stepper_with_label.mlx"><WithLabel.make client:visible /></Example>
+
+### With Step
+
+<Example code={WithStepCode} title="number_stepper_with_step.mlx"><WithStep.make client:visible /></Example>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.number-stepper` - The root
+- `.number-stepper__group`, and its sizes `.number-stepper__group--sm`,
+  `--md`, `--lg` - The pill
+- `.number-stepper__decrement-button`, `.number-stepper__increment-button`,
+  and their sizes - The buttons
+- `.number-stepper__value`, and its sizes - The value
+- `.number-stepper__digit`, `.number-stepper__reel`, `.number-stepper__symbol`
+  - A digit, the reel it rolls on, and a format's symbol
+- `.number-stepper__input` - The field's input, out of sight until text is
+  typed in it
+
+### Interactive States
+
+- **Hovered**: `[data-hovered="true"]` on a button
+- **Pressed**: `[data-pressed="true"]` on a button, which shrinks it
+- **Disabled**: `[data-disabled="true"]` on a button and on the root
+- **Focus visible**: `[data-focus-visible="true"]` on the input, which rings
+  the pill
+- **Typing**: `[data-editing="true"]` on the input
+
+## API Reference
+
+### Number_stepper
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Its size |
+| `value`, `default_value` | `float` | | Its value, controlled or at first |
+| `on_change` | `float -> unit` | | Told each change |
+| `min_value`, `max_value` | `float` | | Its range |
+| `step` | `float` | `1.` | What a button or arrow adds |
+| `format_options` | `NumberFormatOptions.t` | | How its value is shown |
+| `is_disabled`, `is_read_only`, `is_invalid`, `is_required` | `bool` | `false` | Its state |
+| `is_wheel_disabled` | `bool` | `false` | The wheel leaves it alone |
+| `name` | `string` | | Its value's name in a form |
+| `aria_label` | `string` | | What names it, given no `Label` |
+
+### Number_stepper.Value
+
+| Prop | Type | Description |
+|---|---|---|
+| `value` | `float` | Another number than the field's |
+| `format` | `NumberFormatOptions.t` | Another format than the field's |
+| children | `Value.shown -> Jsx.element` | Draws the value itself |
+
+### Number_stepper.Decrement_button, Number_stepper.Increment_button
+
+The field's own buttons: children take the place of the icon.

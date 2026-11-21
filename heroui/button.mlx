@@ -37,6 +37,26 @@ module Chevron = Solidtype.Context.Make_optional (struct
   type t = chevron
 end)
 
+type stepper = {
+  trigger : trigger;
+  label : unit -> string;
+  labelled_by : string -> string option;
+}
+
+type steppers = { increment : stepper; decrement : stepper }
+
+(* What a button with slot=`increment or `decrement steps: the number field
+   it is in, as React Aria's slots give it. *)
+module Step = Solidtype.Context.Make_optional (struct
+  type t = steppers
+end)
+
+(* What a button with slot=`drag drags: the row it is in, as React Aria's
+   drag slot gives it. *)
+module Drag = Solidtype.Context.Make_optional (struct
+  type t = Solidtype_headless.Table.drag_handle
+end)
+
 let no_trigger =
   {
     component = Kobalte.Root.component;
@@ -134,10 +154,18 @@ let%component make
        option) ?(size : [ `sm | `md | `lg ] option) ?(full_width : bool option)
     ?(is_icon_only : bool = false) ?(is_disabled : bool option)
     ?(is_pending : bool = false) ?(id : string option)
-    ?(slot : [ `trigger | `close | `chevron ] option)
+    ?(slot :
+       [ `trigger | `close | `chevron | `drag | `increment | `decrement ] option)
     ?(type_ : Solidtype.Html.Button.type_ = `button) ?(class_ : string option)
     ?(on_click : (Dom.mouseEvent -> unit) option)
     ?(on_focus : (Dom.focusEvent -> unit) option)
+    ?(on_blur : (Dom.focusEvent -> unit) option)
+    ?(on_key_down : (Dom.keyboardEvent -> unit) option)
+    ?(on_pointer_down : (Dom.pointerEvent -> unit) option)
+    ?(on_pointer_move : (Dom.pointerEvent -> unit) option)
+    ?(on_pointer_up : (Dom.pointerEvent -> unit) option)
+    ?(on_pointer_cancel : (Dom.pointerEvent -> unit) option)
+    ?(style : string option)
     ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
     ?(aria_label : string option) ~(children : state Solidtype.Jsx.children)
     ?(as_ :
@@ -162,22 +190,41 @@ let%component make
   let full_width =
     given full_width (fun (g : Button_group.group) -> S.get g.full_width) false
   in
+  let stepper =
+    match (S.get slot, Step.use ()) with
+    | Some `increment, Some s -> Some s.increment
+    | Some `decrement, Some s -> Some s.decrement
+    | Some (`trigger | `close | `chevron | `drag | `increment | `decrement), _
+    | None, _ ->
+        None
+  in
   let trigger =
-    match (S.get slot, Trigger.use ()) with
-    | Some `trigger, t -> t
-    | (None | Some `close | Some `chevron), Some t when not t.needs_slot ->
+    match (S.get slot, Trigger.use (), stepper) with
+    | Some `trigger, t, _ -> t
+    | Some (`increment | `decrement), _, s ->
+        Option.map (fun (s : stepper) -> s.trigger) s
+    | (None | Some `close | Some `chevron | Some `drag), Some t, _
+      when not t.needs_slot ->
         Some t
-    | (None | Some `close | Some `chevron), (Some _ | None) -> None
+    | (None | Some `close | Some `chevron | Some `drag), (Some _ | None), _ ->
+        None
   in
   let closes =
     match S.get slot with
     | Some `close -> Close.use ()
-    | Some (`trigger | `chevron) | None -> None
+    | Some (`trigger | `chevron | `drag | `increment | `decrement) | None ->
+        None
   in
   let chevron =
     match S.get slot with
     | Some `chevron -> Chevron.use ()
-    | Some (`trigger | `close) | None -> None
+    | Some (`trigger | `close | `drag | `increment | `decrement) | None -> None
+  in
+  let drag =
+    match S.get slot with
+    | Some `drag -> Drag.use ()
+    | Some (`trigger | `close | `chevron | `increment | `decrement) | None ->
+        None
   in
   let in_fieldset = Fieldset.disabled () in
   let is_disabled =
@@ -188,6 +235,12 @@ let%component make
         with
         | Some d, _ -> d
         | None, Some part -> part ()
+        (* A drag handle of a table that takes no reorder drags nothing. *)
+        | None, None
+          when match drag with
+               | Some d -> not (S.get d.can_drag)
+               | None -> false ->
+            true
         | None, None -> (
             match
               Option.bind group (fun (g : Button_group.group) ->
@@ -222,10 +275,11 @@ let%component make
   let progress_id = S.create_unique_id () in
   let labelled_by =
     S.accessor (fun () ->
-        match (S.get aria_label, chevron) with
-        | Some _, _ when pending () -> Some (named_by () ^ " " ^ progress_id)
-        | Some _, Some c -> Some (named_by () ^ " " ^ c.labelled_by)
-        | Some _, None | None, _ -> None)
+        match (S.get aria_label, chevron, stepper) with
+        | Some _, _, _ when pending () -> Some (named_by () ^ " " ^ progress_id)
+        | Some _, Some c, _ -> Some (named_by () ^ " " ^ c.labelled_by)
+        | None, _, Some s -> s.labelled_by own_id
+        | Some _, None, _ | None, _, None -> None)
   in
   let i =
     Interaction.create
@@ -269,11 +323,15 @@ let%component make
                  ~full_width:(S.get full_width)
                  ~is_icon_only:(S.get is_icon_only) ?class_:(S.get class_) ()))
     disabled=(S.get is_disabled)
-    ?aria_label=(S.get aria_label)
-    ?id=(match (S.get id, trigger) with
-        | Some given, _ -> Some given
-        | None, None -> Some own_id
-        | None, Some _ -> None)
+    ?aria_label=(match (S.get aria_label, drag, stepper) with
+                | Some given, _, _ -> Some given
+                | None, Some d, _ -> Some (S.get d.label)
+                | None, None, Some s -> Some (s.label ())
+                | None, None, None -> None)
+    ?id=(match (S.get id, trigger, stepper) with
+        | Some given, _, _ -> Some given
+        | None, None, _ | None, Some _, Some _ -> Some own_id
+        | None, Some _, None -> None)
     ?aria_labelledby=(S.get labelled_by)
     ?aria_disabled=(if pending () then Some true else None)
     ?aria_controls=(Option.bind trigger (fun (t : trigger) -> t.controls))
@@ -299,9 +357,56 @@ let%component make
              (function
                | `trigger -> "trigger"
                | `close -> "close"
-               | `chevron -> "chevron")
+               | `chevron -> "chevron"
+               | `drag -> "drag"
+               | `increment -> "increment"
+               | `decrement -> "decrement")
              (S.get slot))
-    ?tabindex=(Option.map (fun _ -> "-1") chevron)
+    ?tabindex=(match (chevron, drag) with
+              | Some _, _ -> Some "-1"
+              (* React Aria's drag button is in the page's order. *)
+              | None, Some _ -> Some "0"
+              | None, None -> None)
+    ?style=(match (drag, S.get style) with
+           (* A touch drags the row rather than scrolling the page. *)
+           | Some _, Some given -> Some ("touch-action: none; " ^ given)
+           | Some _, None -> Some "touch-action: none;"
+           | None, given -> given)
+    on_blur=(fun e ->
+              ignore (on_blur e : unit option);
+              Option.iter
+                (fun (d : Solidtype_headless.Table.drag_handle) -> d.on_blur e)
+                drag)
+    on_key_down=(fun e ->
+                  ignore (on_key_down e : unit option);
+                  Option.iter
+                    (fun (d : Solidtype_headless.Table.drag_handle) ->
+                      d.on_key_down e)
+                    drag)
+    on_pointer_down=(fun e ->
+                      ignore (on_pointer_down e : unit option);
+                      Option.iter
+                        (fun (d : Solidtype_headless.Table.drag_handle) ->
+                          d.on_pointer_down e)
+                        drag)
+    on_pointer_move=(fun e ->
+                      ignore (on_pointer_move e : unit option);
+                      Option.iter
+                        (fun (d : Solidtype_headless.Table.drag_handle) ->
+                          d.on_pointer_move e)
+                        drag)
+    on_pointer_up=(fun e ->
+                    ignore (on_pointer_up e : unit option);
+                    Option.iter
+                      (fun (d : Solidtype_headless.Table.drag_handle) ->
+                        d.on_pointer_up e)
+                      drag)
+    on_pointer_cancel=(fun e ->
+                        ignore (on_pointer_cancel e : unit option);
+                        Option.iter
+                          (fun (d : Solidtype_headless.Table.drag_handle) ->
+                            d.on_pointer_cancel e)
+                          drag)
     on_focus=(fun e ->
                ignore (on_focus e : unit option);
                (* A chevron's press is its row's, which takes the focus, as

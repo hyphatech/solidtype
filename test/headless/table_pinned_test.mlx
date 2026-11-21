@@ -1,0 +1,234 @@
+(* The headless Table's columns pinned to a side and its header kept in view,
+   as a caller meets them: each pinned header and cell sticks at the width of
+   the pinned columns before it, the edge of each side marked, the table
+   marked while content passes beneath a side, and a caller's style kept
+   beside the part's own. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Table = Solidtype_headless.Table
+module E = Jest.Expect
+module H = Harness
+open Harness.Syntax
+
+external set_scroll_left : Dom.element -> float -> unit = "scrollLeft"
+[@@mel.set]
+
+external scroll_event : string -> Dom.event = "Event" [@@mel.new]
+
+external dispatch : Dom.element -> Dom.event -> bool = "dispatchEvent"
+[@@mel.send]
+
+let companies ?(sticky_header = false) () =
+  H.render (fun () ->
+      <div
+        data_testid="scroller"
+        style="overflow: auto"
+        data_client_width="300"
+        data_scroll_width="620">
+        <Table.Root aria_label="Companies" sticky_header>
+          <Table.Header>
+            <Table.Column
+              id="company" is_row_header=true pinned=`start data_box_width="160">
+              "Company"
+            </Table.Column>
+            <Table.Column id="owner" pinned=`start data_box_width="100">
+              "Owner"
+            </Table.Column>
+            <Table.Column id="industry" data_box_width="120">
+              "Industry"
+            </Table.Column>
+            <Table.Column id="site" data_box_width="190">"Site"</Table.Column>
+            <Table.Column id="actions" pinned=`end_ data_box_width="50">
+              "Actions"
+            </Table.Column>
+          </Table.Header>
+          <Table.Body>
+            <Table.Row id="1">
+              <Table.Cell style="color: red">"Acme"</Table.Cell>
+              <Table.Cell>"Kate"</Table.Cell>
+              <Table.Cell>"Retail"</Table.Cell>
+              <Table.Cell>"acme.com"</Table.Cell>
+              <Table.Cell>"..."</Table.Cell>
+            </Table.Row>
+          </Table.Body>
+        </Table.Root>
+      </div>)
+
+external by_test_id : string -> Dom.element = "getByTestId"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
+
+let pins elements =
+  Array.map
+    (fun e ->
+      ( H.attribute e "data-pinned",
+        H.attribute e "data-pinned-edge",
+        H.attribute e "style" ))
+    elements
+
+let table () =
+  match H.all_by_role "grid" with
+  | [| t |] -> t
+  | _ -> Js.Exn.raiseError "no one table"
+
+let detached () =
+  ( H.attribute (table ()) "data-pinned-start-detached",
+    H.attribute (table ()) "data-pinned-end-detached" )
+
+let () =
+  Jest.describe "Table, its columns pinned" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.test "sticks each pinned header and cell beside those before it"
+        (fun () ->
+          companies ();
+          let cells =
+            Array.append (H.all_by_role "rowheader") (H.all_by_role "gridcell")
+          in
+          E.(
+            expect (pins (H.all_by_role "columnheader"), pins cells)
+            |> toEqual
+                 ( [|
+                     ( Some "start",
+                       None,
+                       Some "position: sticky; inset-inline-start: 0px;" );
+                     ( Some "start",
+                       Some "",
+                       Some "position: sticky; inset-inline-start: 160px;" );
+                     (None, None, None);
+                     (None, None, None);
+                     ( Some "end",
+                       Some "",
+                       Some "position: sticky; inset-inline-end: 0px;" );
+                   |],
+                   [|
+                     ( Some "start",
+                       None,
+                       Some
+                         "position: sticky; inset-inline-start: 0px; color: \
+                          red;" );
+                     ( Some "start",
+                       Some "",
+                       Some "position: sticky; inset-inline-start: 160px;" );
+                     (None, None, None);
+                     (None, None, None);
+                     ( Some "end",
+                       Some "",
+                       Some "position: sticky; inset-inline-end: 0px;" );
+                   |] )));
+      Jest.testPromise
+        "marks a side while content passes beneath its pinned columns"
+        (fun () ->
+          companies ();
+          let scroller = by_test_id "scroller" in
+          let at_start = detached () in
+          let scroll_to x =
+            set_scroll_left scroller x;
+            ignore (dispatch scroller (scroll_event "scroll") : bool);
+            H.frame ()
+          in
+          let* () = scroll_to 100. in
+          let between = detached () in
+          let* () = scroll_to 320. in
+          Js.Promise.resolve
+            E.(
+              expect (at_start, between, detached ())
+              |> toEqual ((None, Some ""), (Some "", Some ""), (Some "", None))));
+      Jest.test "keeps its header's cells at the top of what scrolls" (fun () ->
+          companies ~sticky_header:true ();
+          E.(
+            expect
+              ( H.attribute (table ()) "data-sticky-header",
+                Array.map
+                  (fun c -> H.attribute c "style")
+                  (H.all_by_role "columnheader") )
+            |> toEqual
+                 ( Some "",
+                   [|
+                     Some "position: sticky; top: 0px; inset-inline-start: 0px;";
+                     Some
+                       "position: sticky; top: 0px; inset-inline-start: 160px;";
+                     Some "position: sticky; top: 0px;";
+                     Some "position: sticky; top: 0px;";
+                     Some "position: sticky; top: 0px; inset-inline-end: 0px;";
+                   |] )));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          companies ~sticky_header:true ();
+          let* found = H.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))
+
+module Virtualizer = Solidtype_headless.Virtualizer
+
+(* A virtualized part's left, from the style of what places it. *)
+let left_of e =
+  match Js.Null.toOption (H.parent e) with
+  | Some placed ->
+      let style = Option.value (H.attribute placed "style") ~default:"" in
+      let after = Js.String.split ~sep:"left: " style in
+      if Array.length after < 2 then "none"
+      else (Js.String.split ~sep:";" after.(1)).(0)
+  | None -> "unplaced"
+
+let () =
+  Jest.describe "Table, virtualized, its columns pinned" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise "keeps its pinned columns in view as it scrolls across"
+        (fun () ->
+          H.render (fun () ->
+              <Virtualizer
+                layout=(Virtualizer.table_layout ~heading_size:40. ~row_size:40.
+                          ())>
+                <Table.Root
+                  aria_label="Wide"
+                  data_client_height="200"
+                  data_client_width="200"
+                  data_scroll_width="500">
+                  <Table.Header>
+                    <Table.Column
+                      id="name"
+                      is_row_header=true
+                      pinned=`start
+                      width=(Table.Pixels 120.)>
+                      "Name"
+                    </Table.Column>
+                    <Table.Column id="role" width=(Table.Pixels 150.)>
+                      "Role"
+                    </Table.Column>
+                    <Table.Column id="email" width=(Table.Pixels 150.)>
+                      "Email"
+                    </Table.Column>
+                    <Table.Column
+                      id="actions" pinned=`end_ width=(Table.Pixels 80.)>
+                      "Actions"
+                    </Table.Column>
+                  </Table.Header>
+                  <Table.Body>
+                    <Table.Row id="1">
+                      <Table.Cell>"Kate"</Table.Cell>
+                      <Table.Cell>"CEO"</Table.Cell>
+                      <Table.Cell>"kate@acme.com"</Table.Cell>
+                      <Table.Cell>"..."</Table.Cell>
+                    </Table.Row>
+                  </Table.Body>
+                </Table.Root>
+              </Virtualizer>);
+          let lefts () =
+            Array.map left_of
+              [|
+                H.by_text "Name";
+                H.by_text "Kate";
+                H.by_text "CEO";
+                H.by_text "Actions";
+                H.by_text "...";
+              |]
+          in
+          let at_start = lefts () in
+          set_scroll_left (table ()) 100.;
+          ignore (dispatch (table ()) (scroll_event "scroll") : bool);
+          let* () = H.frame () in
+          Js.Promise.resolve
+            E.(
+              expect (at_start, lefts (), detached ())
+              |> toEqual
+                   ( [| "0px"; "0px"; "120px"; "120px"; "120px" |],
+                     [| "100px"; "100px"; "120px"; "220px"; "220px" |],
+                     (Some "", Some "") ))))

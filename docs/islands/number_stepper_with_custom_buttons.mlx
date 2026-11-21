@@ -1,0 +1,39 @@
+module Button = Solidtype_heroui.Button
+module Number_stepper = Solidtype_heroui.Number_stepper
+module Gravity = Solidtype_gravity_icons
+
+let variants =
+  [|
+    (`primary, "primary");
+    (`secondary, "secondary");
+    (`tertiary, "tertiary");
+    (`outline, "outline");
+  |]
+
+let stepper ~track (variant, name) =
+  <div class_="flex flex-col items-center gap-2">
+    <span class_="text-xs text-muted">(Solidtype.Jsx.string name)</span>
+    <Number_stepper
+      aria_label=("Quantity " ^ name) default_value=1. min_value=0.>
+      <Number_stepper.Group
+        class_=(if track then "gap-3" else "gap-3 bg-transparent p-0")>
+        <Button slot=`decrement variant is_icon_only=true size=`sm>
+          <Gravity.Minus />
+        </Button>
+        <Number_stepper.Value />
+        <Button slot=`increment variant is_icon_only=true size=`sm>
+          <Gravity.Plus />
+        </Button>
+      </Number_stepper.Group>
+    </Number_stepper>
+  </div>
+
+let make () =
+  <div class_="grid grid-cols-2 gap-x-12 gap-y-4">
+    (Solidtype.Jsx.fragment
+       (Array.concat
+          (Array.to_list
+             (Array.map
+                (fun v -> [| stepper ~track:true v; stepper ~track:false v |])
+                variants))))
+  </div>

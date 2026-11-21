@@ -4,6 +4,9 @@
     declared as React Aria writes it. Its props are named as HeroUI's
     documentation names them.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/switch.md].
+
     {[
       <Switch default_selected=true>
         <Switch.Content>

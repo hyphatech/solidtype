@@ -164,7 +164,7 @@ string React takes, a hyphen written as an underscore: `` `danger_soft `` is
 | `isDisabled` | `is_disabled` | `bool` | `false` | Whether the button is disabled |
 | `isPending` | `is_pending` | `bool` | `false` | Whether the button is in a loading state: focusable, pressed by nothing, `aria-disabled` |
 | `id` | `id` | `string` | | Its id, which names it with its spinner while it is pending |
-| `slot` | `slot` | `` [ `trigger ] `` | | Makes it the trigger of the part above it, a [`Disclosure.Heading`](/solidtype/heroui/disclosure/)'s |
+| `slot` | `slot` | `` [ `trigger \| `close \| `chevron \| `drag \| `increment \| `decrement ] `` | | Makes it a part of what it is in: the trigger of a [`Disclosure.Heading`](/solidtype/heroui/disclosure/), what closes a [Modal](/solidtype/heroui/modal/)'s dialog, what expands or drags a [Table](/solidtype/heroui/table/)'s row, what steps a [NumberField](/solidtype/heroui/number-field/) or [NumberStepper](/solidtype/heroui/number-stepper/) |
 | `type` | `type_` | `` [ `button \| `submit \| `reset \| `menu ] `` | `` `button `` | The button's type in a form |
 | `aria-label` | `aria_label` | `string` | | Its name where it shows an icon alone |
 | `onPress` | `on_click` | `Dom.mouseEvent -> unit` | | Handler called when the button is pressed, by mouse, touch or keyboard |

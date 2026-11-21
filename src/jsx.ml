@@ -42,8 +42,15 @@ let ref_beside written rest e =
 
 let is_function children = String.equal (Js.typeof children) "function"
 
+external of_thunk : ((unit -> element)[@u]) -> element = "%identity"
+
+(* A function child is drawn by Solid, which calls it where it inserts it: a
+   component's own lazy element, read there, tracks what it reads, and only it
+   is drawn again, never the children it came from, which a read in the
+   caller's scope would make anew. *)
 let draw children state =
-  if is_function children then (as_function children) state [@u]
+  if is_function children then
+    of_thunk (fun[@u] () -> ((as_function children) state [@u]))
   else as_element children
 
 (* A token is an object of its own, told from any other child -- a node, a

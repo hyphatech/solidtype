@@ -3,6 +3,9 @@
     {!Provider}, rendered once at the root of the page, shows the toasts a queue
     holds; {!show} and its kin add, change and close them, from anywhere.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/toast.md].
+
     {[
       <Toast.Provider />
       ...

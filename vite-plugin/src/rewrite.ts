@@ -123,18 +123,32 @@ function attributeName(name: string): t.JSXIdentifier | t.JSXNamespacedName {
     : t.jsxNamespacedName(t.jsxIdentifier(name.slice(0, colon)), t.jsxIdentifier(name.slice(colon + 1)));
 }
 
+// A ref is always a function here, given the element. Solid's compiler reads
+// a ref that is not written as a function as a variable it may assign the
+// element to, which a module's member, an import, refuses; written as an
+// arrow that calls it, it is called, as a TSX author passes a function from
+// another module.
+function refValue(value: t.Expression): t.Expression {
+  if (t.isArrowFunctionExpression(value) || t.isFunctionExpression(value)) return value;
+  const e = t.identifier("solidtype__element");
+  return t.arrowFunctionExpression([e], t.callExpression(value, [e]));
+}
+
 function attribute(node: t.Expression, namespace: string): t.JSXAttribute | t.JSXSpreadAttribute {
   switch (markerOf(node, namespace)) {
     case "s": {
       const [name, value] = argsOf(node, 2) as [t.Expression, t.Expression];
+      const n = stringOf(name);
       const v = t.isStringLiteral(value) && plainAttribute.test(value.value)
         ? t.stringLiteral(value.value)
-        : t.jsxExpressionContainer(value);
-      return t.jsxAttribute(attributeName(stringOf(name)), v);
+        : t.jsxExpressionContainer(n === "ref" ? refValue(value) : value);
+      return t.jsxAttribute(attributeName(n), v);
     }
     case "d": {
       const [name, thunk] = argsOf(node, 2) as [t.Expression, t.Expression];
-      return t.jsxAttribute(attributeName(stringOf(name)), t.jsxExpressionContainer(unwrap(thunk)));
+      const n = stringOf(name);
+      const v = unwrap(thunk);
+      return t.jsxAttribute(attributeName(n), t.jsxExpressionContainer(n === "ref" ? refValue(v) : v));
     }
     case "spread": {
       const [thunk] = argsOf(node, 1) as [t.Expression];

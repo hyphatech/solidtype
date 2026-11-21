@@ -1,0 +1,151 @@
+(* A control inside the headless Table's cell, as a caller meets it: a field
+   that edits keeps every key, Tab and Space among them, a key a control
+   handles is the control's, and the arrows, Home and End from a control move
+   from its cell as they would from the cell. *)
+
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Table = Solidtype_headless.Table
+module E = Jest.Expect
+module H = Harness
+open Harness.Syntax
+
+external value : Dom.element -> string = "value" [@@mel.get]
+
+external prevent_default : Dom.keyboardEvent -> unit = "preventDefault"
+[@@mel.send]
+
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+
+external by_label : string -> Dom.element = "getByLabelText"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
+
+type feature = { id : string; name : string }
+
+let features =
+  [|
+    { id = "1"; name = "Dark mode" };
+    { id = "2"; name = "CSV export" };
+    { id = "3"; name = "Shortcuts" };
+  |]
+
+let flags ?(told = ref [||]) () =
+  H.render (fun () ->
+      <Table.Root
+        aria_label="Feature flags"
+        selection_mode=`multiple
+        on_selection_change=(fun keys -> told := keys)>
+        <Table.Header>
+          <Table.Column is_row_header=true>"Feature"</Table.Column>
+          <Table.Column>"Title"</Table.Column>
+          <Table.Column>"Actions"</Table.Column>
+        </Table.Header>
+        <Table.Body>
+          <For each=features>
+            (fun f _ ->
+              <Table.Row id=f.id>
+                <Table.Cell>(Jsx.string f.name)</Table.Cell>
+                <Table.Cell>
+                  <input aria_label=("Title of " ^ f.name) value=f.name />
+                </Table.Cell>
+                <Table.Cell>
+                  <button
+                    type_=`button
+                    on_key_down=(fun e ->
+                                  if String.equal (key e) "ArrowDown" then
+                                    prevent_default e)>
+                    (Jsx.string ("Edit " ^ f.name))
+                  </button>
+                </Table.Cell>
+              </Table.Row>)
+          </For>
+        </Table.Body>
+      </Table.Root>)
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+
+let where () =
+  Option.value (H.attribute H.focused "role") ~default:(tag_name H.focused)
+  ^ ":" ^ H.text H.focused
+
+let () =
+  Jest.describe "Table, a control in a cell" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise "leaves every key typed in a field to the field"
+        (fun () ->
+          let told = ref [||] in
+          flags ~told ();
+          let field = by_label "Title of Dark mode" in
+          let user = H.setup () in
+          H.focus field;
+          let* () = H.keyboard user "{ArrowDown}{ArrowUp}C{Home}{End} x" in
+          let* () = H.frame () in
+          let kept = (H.focused == field, String.length (value field), !told) in
+          let* () = H.tab user in
+          Js.Promise.resolve
+            E.(
+              expect (kept, where ())
+              |> toEqual
+                   ( (true, String.length "Dark mode" + 3, [||]),
+                     "BUTTON:Edit Dark mode" )));
+      Jest.testPromise "leaves a key a control handles to the control"
+        (fun () ->
+          flags ();
+          let button = H.by_text "Edit Dark mode" in
+          let user = H.setup () in
+          H.focus button;
+          let* () = H.keyboard user "{ArrowDown}" in
+          let* () = H.frame () in
+          Js.Promise.resolve E.(expect (H.focused == button) |> toEqual true));
+      Jest.testPromise "finds no row by a letter typed on a control" (fun () ->
+          flags ();
+          let button = H.by_text "Edit Dark mode" in
+          let user = H.setup () in
+          H.focus button;
+          let* () = H.keyboard user "s" in
+          let* () = H.frame () in
+          Js.Promise.resolve E.(expect (H.focused == button) |> toEqual true));
+      Jest.testPromise "moves by the arrows from a control's cell" (fun () ->
+          flags ();
+          let user = H.setup () in
+          let after start k =
+            H.focus (H.by_text start);
+            let* () = H.keyboard user k in
+            Js.Promise.resolve (where ())
+          in
+          let* back = after "Edit Dark mode" "{ArrowLeft}" in
+          let* above = after "Edit Dark mode" "{ArrowUp}" in
+          let* first = after "Edit Dark mode" "{Home}" in
+          Js.Promise.resolve
+            E.(
+              expect (back, above, first)
+              |> toEqual
+                   ("gridcell:", "columnheader:Actions", "rowheader:Dark mode"))))
+
+type press
+
+external press : ?button:int -> unit -> press = "" [@@mel.obj]
+
+external fire_pointer_down : Dom.element -> press -> bool = "pointerDown"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "fireEvent"]
+
+external fire_mouse_down : Dom.element -> press -> bool = "mouseDown"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "fireEvent"]
+
+external closest_cell : Dom.element -> string -> Dom.element = "closest"
+[@@mel.send]
+
+let () =
+  Jest.describe "Table, a press begun in a cell's control" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.test
+        "moves no focus to the cell, though its mousedown lands there, as \
+         under a menu it opened" (fun () ->
+          flags ();
+          let button = H.by_text "Edit Dark mode" in
+          let cell = closest_cell button "[role=gridcell]" in
+          let (_ : bool) = fire_pointer_down button (press ~button:0 ()) in
+          let landed_on_cell = fire_mouse_down cell (press ~button:0 ()) in
+          let (_ : bool) = fire_pointer_down cell (press ~button:0 ()) in
+          let pressed_on_cell = fire_mouse_down cell (press ~button:0 ()) in
+          E.(expect (landed_on_cell, pressed_on_cell) |> toEqual (false, true))))

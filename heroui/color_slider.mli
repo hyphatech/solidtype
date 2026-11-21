@@ -4,6 +4,9 @@
     and keys: the arrows step the channel, Page Up and Page Down by more, Home
     and End to its ends.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/color-slider.md].
+
     {[
       <Color_slider
         channel=`hue

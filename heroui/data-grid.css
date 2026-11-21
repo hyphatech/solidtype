@@ -1,0 +1,77 @@
+/* Data_grid, in HeroUI's look, which ships no stylesheet for it: Tailwind on
+   HeroUI's tokens, written as HeroUI writes its components' CSS, over its
+   table's, so an application restyles a part by a rule for its class. */
+
+.data-grid {
+  --data-grid-selection-column-width: 40px;
+  --data-grid-drag-handle-column-width: 32px;
+}
+
+/* The grid's own columns: a checkbox each row, and a handle that drags it,
+   each as wide as it says and never narrower, in a table its columns make
+   wider than its scroll container, which squeezes a column to its content. */
+.data-grid__selection-column,
+.data-grid__selection-cell {
+  width: var(--data-grid-selection-column-width);
+  min-width: var(--data-grid-selection-column-width);
+  @apply pe-0;
+}
+
+.data-grid__drag-handle-column,
+.data-grid__drag-handle-cell {
+  width: var(--data-grid-drag-handle-column-width);
+  min-width: var(--data-grid-drag-handle-column-width);
+  @apply px-0;
+}
+
+.data-grid__drag-handle {
+  @apply flex w-full cursor-grab items-center justify-center text-muted outline-none;
+
+  & svg {
+    @apply size-4;
+  }
+
+  &[data-hovered="true"] {
+    @apply text-foreground;
+  }
+
+  &[data-pressed="true"],
+  &[data-dragging="true"] {
+    @apply cursor-grabbing;
+  }
+
+  &[data-focus-visible="true"] {
+    @apply status-focused rounded-sm;
+  }
+}
+
+/* A sorted column's chevron, beside its text, turned for descending. */
+.data-grid__sort-icon {
+  @apply ms-1 inline-flex size-3 align-middle transition-transform duration-100 ease-out;
+
+  &[data-direction="descending"] {
+    @apply rotate-180;
+  }
+}
+
+/* A column's header and cells, aligned as the column says. */
+.data-grid :is(.table__column, .table__cell)[data-align="center"] {
+  @apply text-center;
+}
+
+.data-grid :is(.table__column, .table__cell)[data-align="end"] {
+  @apply text-end;
+}
+
+/* Its cells' content, placed in each row as the grid says. */
+.data-grid[data-vertical-align="top"] .table__cell {
+  @apply align-top;
+}
+
+.data-grid[data-vertical-align="bottom"] .table__cell {
+  @apply align-bottom;
+}
+
+.data-grid__empty-state {
+  @apply flex items-center justify-center py-8;
+}

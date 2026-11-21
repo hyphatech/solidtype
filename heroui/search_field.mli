@@ -4,6 +4,9 @@
     back, as React Aria's does. Its {!Label}, {!Description} and {!Field_error}
     are Kobalte's.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/search-field.md].
+
     {[
       <Search_field on_submit=(fun query -> search query)>
         <Label>"Search"</Label>

@@ -7,6 +7,9 @@
     HeroUI's default: [`primary], [`md], neither full width nor disabled; and it
     is disabled in a disabled {!Fieldset} where neither it nor its group says.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/button.md].
+
     {[
       <Button variant=`ghost size=`sm on_click=(fun _ -> save ())>"Save"</Button>
     ]}
@@ -36,7 +39,18 @@
     Given [slot=`chevron], a button expands and collapses the row of a {!Table}
     it is in, as React Aria's chevron slot does: out of the page's order, its
     press giving the row the focus, and named by its [aria_label] and the row's
-    name. *)
+    name.
+
+    Given [slot=`drag], a button drags the row of a {!Table} it is in, as React
+    Aria's drag slot does: named as the row's handle is unless it is given an
+    [aria_label], disabled while the table takes no [on_reorder], its keys and
+    pointer the row's {!Solidtype_headless.Table.Drag_handle}'s, its handlers
+    called beside them.
+
+    Given [slot=`increment] or [slot=`decrement], a button steps the value of
+    the {!Number_field} it is in up or down, as React Aria's slots do: out of
+    the page's order, disabled where the field's own button would be, and named
+    as it is unless it is given an [aria_label]. *)
 
 module S := Solidtype.Solid
 module Jsx := Solidtype.Jsx
@@ -77,6 +91,51 @@ type chevron = {
 }
 (** What a row of a table gives a button inside it with [slot=`chevron]. *)
 
+type stepper = {
+  trigger : trigger;  (** What the button is drawn as and disabled by. *)
+  label : unit -> string;  (** Its name unless it is given one. *)
+  labelled_by : string -> string option;
+      (** What names it besides, given its own id. *)
+}
+(** What a number field gives a button inside it with [slot=`increment] or
+    [slot=`decrement]. *)
+
+type steppers = { increment : stepper; decrement : stepper }
+
+(** What a number field gives the buttons inside it. *)
+module Step : sig
+  module Provider : sig
+    module Props : sig
+      val check :
+        value:steppers Solidtype.Check.value ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit
+    end
+
+    val component : unit Jsx.component
+  end
+
+  val use : unit -> steppers option
+end
+
+(** What a row of a table gives a button inside it with [slot=`drag]. *)
+module Drag : sig
+  module Provider : sig
+    module Props : sig
+      val check :
+        value:Solidtype_headless.Table.drag_handle Solidtype.Check.value ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit
+    end
+
+    val component : unit Jsx.component
+  end
+
+  val use : unit -> Solidtype_headless.Table.drag_handle option
+end
+
 module Chevron : sig
   module Provider : sig
     module Props : sig
@@ -111,7 +170,7 @@ module Close : sig
   val use : unit -> (unit -> unit) option
 end
 
-(** The {!trigger} a part gives the buttons below it. *)
+(** The {!type-trigger} a part gives the buttons below it. *)
 module Trigger : sig
   module Provider : sig
     module Props : sig
@@ -165,11 +224,20 @@ module Props : sig
     ?is_disabled:bool Solidtype.Check.value ->
     ?is_pending:bool Solidtype.Check.value ->
     ?id:string Solidtype.Check.value ->
-    ?slot:[ `trigger | `close | `chevron ] Solidtype.Check.value ->
+    ?slot:
+      [ `trigger | `close | `chevron | `drag | `increment | `decrement ]
+      Solidtype.Check.value ->
     ?type_:Solidtype.Html.Button.type_ Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     ?on_click:(Dom.mouseEvent -> unit) ->
     ?on_focus:(Dom.focusEvent -> unit) ->
+    ?on_blur:(Dom.focusEvent -> unit) ->
+    ?on_key_down:(Dom.keyboardEvent -> unit) ->
+    ?on_pointer_down:(Dom.pointerEvent -> unit) ->
+    ?on_pointer_move:(Dom.pointerEvent -> unit) ->
+    ?on_pointer_up:(Dom.pointerEvent -> unit) ->
+    ?on_pointer_cancel:(Dom.pointerEvent -> unit) ->
+    ?style:string Solidtype.Check.value ->
     ?ref:(Dom.htmlButtonElement -> unit) ->
     ?aria_label:string Solidtype.Check.value ->
     children:

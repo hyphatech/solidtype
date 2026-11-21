@@ -2,6 +2,9 @@
     HeroUI's classes from {!Styles.Chip}. Text it is given is its label's, as
     HeroUI's own wraps a string or a number.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/chip.md].
+
     {[
       <Chip color=`success variant=`soft>"Shipped"</Chip>
     ]} *)

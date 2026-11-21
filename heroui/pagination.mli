@@ -2,6 +2,9 @@
     button on Kobalte's [Button], with HeroUI's classes from
     {!Styles.Pagination}.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/pagination.md].
+
     {[
       <Pagination>
         <Pagination.Content>

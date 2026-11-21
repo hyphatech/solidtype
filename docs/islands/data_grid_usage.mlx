@@ -1,0 +1,160 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Chip = Solidtype_heroui.Chip
+module Data_grid = Solidtype_heroui.Data_grid
+module Dropdown = Solidtype_heroui.Dropdown
+module Label = Solidtype_heroui.Label
+module Gravity = Solidtype_gravity_icons
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
+
+type status = Succeeded | Processing | Refunded | Failed
+
+type payment = {
+  id : string;
+  customer : string;
+  email : string;
+  status : status;
+  amount : float;
+}
+
+let payments =
+  [|
+    {
+      id = "pay_1N3xDR";
+      customer = "Emma Wilson";
+      email = "emma@example.com";
+      status = Succeeded;
+      amount = 2450.;
+    };
+    {
+      id = "pay_1N3x9M";
+      customer = "Isabella Nguyen";
+      email = "isabella@example.com";
+      status = Succeeded;
+      amount = 899.;
+    };
+    {
+      id = "pay_1N3x8L";
+      customer = "Jackson Lee";
+      email = "jackson@example.com";
+      status = Processing;
+      amount = 320.;
+    };
+    {
+      id = "pay_1N3xCQ";
+      customer = "Liam Johnson";
+      email = "liam@example.com";
+      status = Refunded;
+      amount = 150.;
+    };
+    {
+      id = "pay_1N3x7K";
+      customer = "Olivia Martin";
+      email = "olivia@example.com";
+      status = Succeeded;
+      amount = 1999.;
+    };
+    {
+      id = "pay_1N3xAN";
+      customer = "William Kim";
+      email = "will@example.com";
+      status = Failed;
+      amount = 99.;
+    };
+  |]
+
+let status_name = function
+  | Succeeded -> "Succeeded"
+  | Processing -> "Processing"
+  | Refunded -> "Refunded"
+  | Failed -> "Failed"
+
+let status_color = function
+  | Succeeded -> `success
+  | Processing -> `warning
+  | Refunded -> `default
+  | Failed -> `danger
+
+let actions p =
+  <Dropdown>
+    <Button
+      is_icon_only=true
+      aria_label=("Actions for " ^ (S.get p).customer)
+      size=`sm
+      variant=`tertiary>
+      <Gravity.Ellipsis_vertical class_="size-4" />
+    </Button>
+    <Dropdown.Popover>
+      <Dropdown.Menu on_action=(fun (_ : string) -> ())>
+        <Dropdown.Item id="copy" text_value="Copy payment ID">
+          <Gravity.Copy class_="size-4 shrink-0 text-muted" />
+          <Label>"Copy payment ID"</Label>
+        </Dropdown.Item>
+        <Dropdown.Item id="view" text_value="View details">
+          <Gravity.Eye class_="size-4 shrink-0 text-muted" />
+          <Label>"View details"</Label>
+        </Dropdown.Item>
+        <Dropdown.Item id="edit" text_value="Edit payment">
+          <Gravity.Pencil class_="size-4 shrink-0 text-muted" />
+          <Label>"Edit payment"</Label>
+        </Dropdown.Item>
+        <Dropdown.Item id="delete" text_value="Delete" variant=`danger>
+          <Gravity.Trash_bin class_="size-4 shrink-0 text-danger" />
+          <Label>"Delete"</Label>
+        </Dropdown.Item>
+      </Dropdown.Menu>
+    </Dropdown.Popover>
+  </Dropdown>
+
+let columns money =
+  [|
+    Data_grid.column ~id:"customer" ~header:(Text "Customer")
+      ~is_row_header:true
+      ~sort:(By_text (fun p -> p.customer))
+      (fun p ->
+        <div class_="flex flex-col">
+          <span class_="font-medium">(Jsx.string (S.get p).customer)</span>
+          <span class_="text-xs text-muted">(Jsx.string (S.get p).email)</span>
+        </div>);
+    Data_grid.column ~id:"id" ~header:(Text "Transaction ID")
+      ~cell_class:"font-mono text-xs text-muted" (fun p ->
+        Jsx.string (S.get p).id);
+    Data_grid.column ~id:"status" ~header:(Text "Status")
+      ~sort:(By_text (fun p -> status_name p.status))
+      (fun p ->
+        <Chip
+          color=(status_color (S.get p).status)
+          size=`sm
+          variant=`soft
+          class_="gap-1">
+          <span class_="size-1.5 rounded-full bg-current" />
+          (Jsx.string (status_name (S.get p).status))
+        </Chip>);
+    Data_grid.column ~id:"amount" ~header:(Text "Amount") ~align:`end_
+      ~sort:(By (fun a b -> Float.compare a.amount b.amount))
+      ~cell_class:"tabular-nums"
+      (fun p ->
+        Jsx.string (Types.NumberFormat.format (S.get money) (S.get p).amount));
+    Data_grid.column ~id:"actions"
+      ~header:(Element (fun () -> <span class_="sr-only">"Actions"</span>))
+      ~align:`end_ ~pinned:`end_ ~width:(Pixels 72.) actions;
+  |]
+
+let make () =
+  let money =
+    I18n.create_number_formatter
+      (Types.Either.left
+         (Types.NumberFormatOptions.make ~style:`currency ~currency:"USD" ()))
+  in
+  <Data_grid
+    aria_label="Payments"
+    rows=payments
+    row_id=(fun p -> p.id)
+    columns=(columns money)
+    selection_mode=`multiple
+    show_selection_checkboxes=true
+    default_sort_descriptor={ column = "customer"; direction = `ascending }
+    content_class="min-w-[720px]"
+  />

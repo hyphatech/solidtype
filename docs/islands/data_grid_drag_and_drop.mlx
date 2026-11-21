@@ -1,0 +1,60 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Chip = Solidtype_heroui.Chip
+module Data_grid = Solidtype_heroui.Data_grid
+
+type task = { id : string; title : string; assignee : string; points : int }
+
+let tasks =
+  [|
+    {
+      id = "task-1";
+      title = "Design system audit";
+      assignee = "Kate Moore";
+      points = 5;
+    };
+    {
+      id = "task-2";
+      title = "Billing page redesign";
+      assignee = "John Smith";
+      points = 8;
+    };
+    {
+      id = "task-3";
+      title = "Onboarding emails";
+      assignee = "Sara Johnson";
+      points = 3;
+    };
+    {
+      id = "task-4";
+      title = "API rate limits";
+      assignee = "Michael Brown";
+      points = 5;
+    };
+    {
+      id = "task-5";
+      title = "Dark mode polish";
+      assignee = "Kate Moore";
+      points = 2;
+    };
+  |]
+
+let columns =
+  [|
+    Data_grid.column ~id:"title" ~header:(Text "Task") ~is_row_header:true
+      (fun t -> Jsx.string (S.get t).title);
+    Data_grid.column ~id:"assignee" ~header:(Text "Assignee")
+      ~cell_class:"text-muted" (fun t -> Jsx.string (S.get t).assignee);
+    Data_grid.column ~id:"points" ~header:(Text "Points") ~align:`end_ (fun t ->
+        <Chip size=`sm variant=`soft>(Jsx.int (S.get t).points)</Chip>);
+  |]
+
+let make () =
+  let rows, set_rows = S.create_signal tasks in
+  <Data_grid
+    aria_label="Sprint backlog"
+    rows=(S.get rows)
+    row_id=(fun t -> t.id)
+    columns
+    on_reorder=(fun r -> S.set set_rows r.rows)
+  />

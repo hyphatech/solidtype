@@ -6,6 +6,9 @@
     them, but for [on_click], a click as Kobalte gives it, where HeroUI's is
     [onPress].
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/close-button.md].
+
     {[
       <Close_button on_click=(fun _ -> close ()) />
     ]} *)

@@ -1,6 +1,9 @@
 (** HeroUI's Tooltip: Kobalte's [Tooltip], with HeroUI's classes from
     {!Styles.Tooltip} and its arrow.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/tooltip.md].
+
     {[
       <Tooltip delay_ms=0.>
         <Button variant=`secondary>"Hover me"</Button>

@@ -1,0 +1,210 @@
+/* Number_stepper, in HeroUI's look, which ships no stylesheet for it: Tailwind
+   on HeroUI's tokens, written as HeroUI writes its components' CSS, so an
+   application imports it into the components layer and restyles a part by a
+   rule for its class. */
+
+.number-stepper {
+  @apply flex;
+}
+
+.number-stepper__group {
+  @apply relative inline-flex w-fit items-center rounded-full bg-default p-0.5 text-foreground;
+
+  &:has(> .number-stepper__input[data-focus-visible="true"]) {
+    @apply status-focused;
+  }
+}
+
+.number-stepper__group--sm {
+  --number-stepper-button: --spacing(7);
+}
+
+.number-stepper__group--md {
+  --number-stepper-button: --spacing(8);
+}
+
+.number-stepper__group--lg {
+  --number-stepper-button: --spacing(9);
+  @apply gap-0.5;
+}
+
+.number-stepper__increment-button,
+.number-stepper__decrement-button {
+  @apply flex shrink-0 origin-center items-center justify-center rounded-full bg-surface shadow-surface outline-none select-none no-highlight;
+  width: var(--number-stepper-button);
+  height: var(--number-stepper-button);
+  cursor: var(--cursor-interactive);
+  transition:
+    transform 250ms var(--ease-smooth),
+    background-color 100ms var(--ease-out),
+    box-shadow 100ms var(--ease-out);
+  @apply transform-gpu motion-reduce:transition-none;
+
+  & svg {
+    @apply size-4 shrink-0 text-muted;
+  }
+
+  &:active,
+  &[data-pressed="true"] {
+    @apply will-change-transform;
+    transform: scale(0.98);
+  }
+
+  &:disabled,
+  &[data-disabled="true"] {
+    @apply status-disabled;
+  }
+}
+
+.number-stepper__increment-button--sm,
+.number-stepper__decrement-button--sm {
+  & svg {
+    @apply size-3.5;
+  }
+}
+
+/* Room either side of its digits, so a number of several clears the round
+   buttons, and its sides faded, so a digit coming or going there passes
+   through a soft edge as it does above and below. */
+.number-stepper__value {
+  --number-stepper-edge: --spacing(1);
+  @apply flex h-full items-center justify-center font-semibold tabular-nums;
+  padding-inline: var(--number-stepper-edge);
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--number-stepper-edge),
+    #000 calc(100% - var(--number-stepper-edge)),
+    transparent
+  );
+}
+
+.number-stepper__value--sm {
+  @apply min-w-5 text-xs;
+}
+
+.number-stepper__value--md {
+  @apply min-w-6 text-sm;
+}
+
+.number-stepper__value--lg {
+  @apply min-w-7 text-base;
+}
+
+/* The characters are laid out from the end, as they are counted, but read
+   left to right whatever the page's direction. */
+.number-stepper__characters {
+  @apply relative inline-flex flex-row-reverse leading-none;
+  direction: ltr;
+}
+
+/* A digit shows its line and a fade above and below it, so a numeral
+   rolling in or out passes through a soft edge rather than a cut; each
+   numeral is spaced a fade from the next, so none shows at rest. */
+/* The roll's curve, Number Flow's spring: most of the way at once, then
+   settling. */
+.number-stepper__value {
+  --number-stepper-fade: 0.25em;
+  --number-stepper-spring: linear(0, 0.019 2.25%, 0.066 4.49%, 0.129 6.74%,
+    0.202 8.99%, 0.278 11.24%, 0.354 13.48%, 0.426 15.73%, 0.494 17.98%,
+    0.557 20.22%, 0.614 22.47%, 0.665 24.72%, 0.711 26.97%, 0.751 29.21%,
+    0.786 31.46%, 0.817 33.71%, 0.844 35.96%, 0.867 38.2%, 0.887 40.45%,
+    0.904 42.7%, 0.919 44.94%, 0.931 47.19%, 0.942 49.44%, 0.951 51.69%,
+    0.959 53.93%, 0.965 56.18%, 0.971 58.43%, 0.976 60.67%, 0.98 62.92%,
+    0.983 65.17%, 0.986 67.42%, 0.988 69.66%, 0.99 71.91%, 0.992 74.16%,
+    0.994 77.53%, 0.995 80.9%, 0.996 84.27%, 0.9975 88.76%, 0.9984 94.38%,
+    1);
+}
+
+.number-stepper__digit {
+  @apply inline-block overflow-hidden;
+  height: calc(1lh + 2 * var(--number-stepper-fade));
+  margin-block: calc(-1 * var(--number-stepper-fade));
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 var(--number-stepper-fade),
+    #000 calc(100% - var(--number-stepper-fade)),
+    transparent
+  );
+}
+
+/* A reel of the ten five times over, turned to a digit by its own style. */
+.number-stepper__reel {
+  @apply flex flex-col;
+  transition: transform 900ms var(--number-stepper-spring);
+  @apply motion-reduce:transition-none;
+
+  &[data-settling="true"] {
+    transition: none;
+  }
+}
+
+/* A digit that appears fades in as it rolls from 0; one the number loses
+   leaves the line, beside it, and fades out as it rolls to 0. */
+.number-stepper__digit[data-enter="true"] {
+  animation: number-stepper-appear 450ms ease-out;
+}
+
+:is(.number-stepper__digit, .number-stepper__symbol)[data-leave="true"] {
+  @apply absolute;
+  inset-inline-end: calc(100% + var(--number-stepper-away, 0) * 1ch);
+  animation: number-stepper-disappear 450ms ease-out forwards;
+}
+
+@keyframes number-stepper-appear {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes number-stepper-disappear {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.number-stepper__digit, .number-stepper__symbol)[data-enter],
+  :is(.number-stepper__digit, .number-stepper__symbol)[data-leave] {
+    animation: none;
+  }
+
+  :is(.number-stepper__digit, .number-stepper__symbol)[data-leave="true"] {
+    opacity: 0;
+  }
+}
+
+.number-stepper__numeral {
+  @apply block text-center;
+  height: calc(1lh + 2 * var(--number-stepper-fade));
+  padding-block: var(--number-stepper-fade);
+}
+
+/* The field's input stays out of sight, in the page's order, until text is
+   typed in it, when it takes the value's place. */
+.number-stepper__input {
+  @apply sr-only;
+
+  &[data-editing="true"] {
+    @apply not-sr-only absolute inset-y-0.5 m-0 min-w-0 bg-default text-center font-semibold tabular-nums outline-none;
+    inset-inline: calc(var(--number-stepper-button) + --spacing(0.5));
+  }
+}
+
+.number-stepper__group:has(> .number-stepper__input[data-editing="true"])
+  .number-stepper__value {
+  @apply invisible;
+}
+
+.number-stepper__group--sm > .number-stepper__input {
+  @apply text-xs;
+}
+
+.number-stepper__group--md > .number-stepper__input {
+  @apply text-sm;
+}
+
+.number-stepper__group--lg > .number-stepper__input {
+  @apply text-base;
+}

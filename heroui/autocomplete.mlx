@@ -321,7 +321,7 @@ module Popover = struct
              (S.untrack (fun () ->
                   <Context.Provider value=a>(S.get children)</Context.Provider>))));
     <Show when_=(Overlay.present o)>
-      <Kobalte.Portal>
+      <Kobalte.Portal ref=(fun e -> Solidtype_headless.Top_layer.place e)>
         <Kobalte.Content
           role=`dialog
           tabindex="-1"

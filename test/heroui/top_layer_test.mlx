@@ -1,0 +1,111 @@
+(* Every overlay of the ports in the browser's top layer, so none is drawn
+   under the page: a popover above what the page stacks, one opened in a
+   modal above the modal, and the toasts above both. *)
+
+module Button = Solidtype_heroui.Button
+module Modal = Solidtype_heroui.Modal
+module Popover = Solidtype_heroui.Popover
+module Toast = Solidtype_heroui.Toast
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+external by_text : string -> Dom.element = "getByText"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
+
+external contains_text : Dom.element -> string = "textContent" [@@mel.get]
+
+external query_in : Dom.element -> string -> Dom.element Js.null
+  = "querySelector"
+[@@mel.send]
+
+(* The elements in the top layer, from the first shown; the stand-in in
+   test/jsdom.ts keeps them as a browser does. *)
+external top_layer : Dom.element array = "topLayer" [@@mel.scope "HTMLElement"]
+
+let has text e = Js.String.includes ~search:text (contains_text e)
+
+(* What each element in the top layer holds, from the first shown. *)
+let shown () =
+  Array.map
+    (fun e ->
+      if has "Inside the window" e then "popover in the modal"
+      else if has "The window" e then "modal"
+      else if has "In the popover" e then "popover"
+      else if
+        Option.is_some
+          (Js.Null.toOption (query_in e "[data-slot=toast-region]"))
+      then "toasts"
+      else "something else")
+    top_layer
+
+let page () =
+  T.render (fun () ->
+      <div>
+        <Toast.Provider />
+        <div style="position: sticky; top: 0; z-index: 1;">
+          "A sticky header"
+        </div>
+        <Popover>
+          <Button>"Popover"</Button>
+          <Popover.Content>
+            <Popover.Dialog><p>"In the popover"</p></Popover.Dialog>
+          </Popover.Content>
+        </Popover>
+        <Modal>
+          <Button>"Window"</Button>
+          <Modal.Backdrop>
+            <Modal.Container>
+              <Modal.Dialog>
+                <Modal.Heading>"The window"</Modal.Heading>
+                <Popover>
+                  <Button>"More"</Button>
+                  <Popover.Content>
+                    <Popover.Dialog><p>"Inside the window"</p></Popover.Dialog>
+                  </Popover.Content>
+                </Popover>
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
+        </Modal>
+      </div>)
+
+let settle () = T.wait 20
+
+let () =
+  Jest.describe "Overlays in the top layer" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "keep the toasts on top while nothing else is open"
+        (fun () ->
+          page ();
+          let* () = settle () in
+          Js.Promise.resolve E.(expect (shown ()) |> toEqual [| "toasts" |]));
+      Jest.testPromise "draw a popover above the page, under the toasts"
+        (fun () ->
+          page ();
+          let user = T.setup () in
+          let* () = T.click user (by_text "Popover") in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(expect (shown ()) |> toEqual [| "popover"; "toasts" |]));
+      Jest.testPromise "draw a popover opened in a modal above the modal"
+        (fun () ->
+          page ();
+          let user = T.setup () in
+          let* () = T.click user (by_text "Window") in
+          let* () = settle () in
+          let* () = T.click user (by_text "More") in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect (shown ())
+              |> toEqual [| "modal"; "popover in the modal"; "toasts" |]));
+      Jest.testPromise "take an overlay out of the top layer as it closes"
+        (fun () ->
+          page ();
+          let user = T.setup () in
+          let* () = T.click user (by_text "Popover") in
+          let* () = settle () in
+          let* () = T.keyboard user "{Escape}" in
+          let* () = T.wait 400 in
+          Js.Promise.resolve E.(expect (shown ()) |> toEqual [| "toasts" |])))

@@ -6,3 +6,62 @@
  (_
   (flags
    (:standard -w +a-4-40-41-42-44-45-48-67-70))))
+
+; The documentation for a user's agent, agents/, written from the site's pages
+; by `make agents`: solidtype installs it whole, so $(opam var solidtype:doc)
+; holds llms.txt, each page and the skill. Every other package installs the
+; catalogue alone, its links sent on to solidtype's pages, so whichever
+; package an agent looks in, its llms.txt reaches them.
+
+(install
+ (package solidtype)
+ (section doc)
+ (source_trees
+  (agents as .)))
+
+(rule
+ (with-stdout-to
+  llms-elsewhere.txt
+  (run sed "s|](pages/|](../solidtype/pages/|g" %{dep:agents/llms.txt})))
+
+(install
+ (package solidtype-kobalte)
+ (section doc)
+ (files
+  (llms-elsewhere.txt as llms.txt)))
+
+(install
+ (package solidtype-headless)
+ (section doc)
+ (files
+  (llms-elsewhere.txt as llms.txt)))
+
+(install
+ (package solidtype-heroui)
+ (section doc)
+ (files
+  (llms-elsewhere.txt as llms.txt)))
+
+(install
+ (package solidtype-rhp)
+ (section doc)
+ (files
+  (llms-elsewhere.txt as llms.txt)))
+
+(install
+ (package solidtype-internationalized-date)
+ (section doc)
+ (files
+  (llms-elsewhere.txt as llms.txt)))
+
+(install
+ (package solidtype-gravity-icons)
+ (section doc)
+ (files
+  (llms-elsewhere.txt as llms.txt)))
+
+(install
+ (package ppx_solidtype)
+ (section doc)
+ (files
+  (llms-elsewhere.txt as llms.txt)))

@@ -5,6 +5,9 @@
     that message until the field is changed and then left, as React Aria commits
     a change, or until the errors are given again.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/form.md].
+
     {[
       <Form on_submit=save
         validation_errors=(S.get from_server)>

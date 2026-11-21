@@ -7,6 +7,9 @@
     [Combobox.Input], the combo box's; in either it takes the field's variant
     where it sets none.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/input.md].
+
     {[
       <Input placeholder="Name" aria_label="Name" />
     ]} *)

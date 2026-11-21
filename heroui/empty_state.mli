@@ -2,6 +2,9 @@
     {!Styles.EmptyState}, that a list, a table or a select shows where it has
     nothing to show, and says "No results found" unless it is given children.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/empty-state.md].
+
     {[
       <Empty_state>"No tasks yet"</Empty_state>
     ]}

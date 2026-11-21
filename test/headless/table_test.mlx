@@ -156,6 +156,21 @@ let () =
                      "columnheader:Role",
                      "columnheader:Name",
                      "columnheader:Actions" )));
+      Jest.testPromise "finds a row by its name as it is typed" (fun () ->
+          team ();
+          let user = H.setup () in
+          H.focus (row "Kate Moore");
+          let* () = H.keyboard user "s" in
+          let found = where () in
+          (* A search ends half a second after its last letter. *)
+          let* () = H.wait 600 in
+          let* () = H.keyboard user "jo" in
+          Js.Promise.resolve
+            E.(
+              expect (found, where ())
+              |> toEqual
+                   ( "row:Sara JohnsonCMOEdit Sara Johnson",
+                     "row:John SmithCTOEdit John Smith" )));
       Jest.testPromise "walks its rows in their order after they are sorted"
         (fun () ->
           let shown, set_shown = S.create_signal members in
@@ -906,3 +921,43 @@ let () =
                         left: 0px; width: 400px; height: 40px;",
                      "row:Row 100",
                      "row:Row 1" ))))
+
+let () =
+  Jest.describe "Table, resizable, given a style" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.test "keeps its layout and widths beside the caller's style"
+        (fun () ->
+          H.render (fun () ->
+              <Table.Resizable_container data_client_width="400">
+                <Table.Root aria_label="Resizable" style="color: blue">
+                  <Table.Header>
+                    <Table.Column
+                      id="name"
+                      is_row_header=true
+                      width=(Table.Pixels 160.)
+                      style="color: red">
+                      "Name"
+                    </Table.Column>
+                    <Table.Column id="role">"Role"</Table.Column>
+                  </Table.Header>
+                  <Table.Body>
+                    <Table.Row id="1">
+                      <Table.Cell>"Kate Moore"</Table.Cell>
+                      <Table.Cell>"CEO"</Table.Cell>
+                    </Table.Row>
+                  </Table.Body>
+                </Table.Root>
+              </Table.Resizable_container>);
+          E.(
+            expect
+              ( Array.map (fun t -> H.attribute t "style") (H.all_by_role "grid"),
+                Array.map
+                  (fun c -> H.attribute c "style")
+                  (H.all_by_role "columnheader") )
+            |> toEqual
+                 ( [|
+                     Some
+                       "table-layout: fixed; width: min-content; color: blue;";
+                   |],
+                   [| Some "width: 160px; color: red;"; Some "width: 240px;" |]
+                 ))))

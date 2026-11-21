@@ -2,6 +2,9 @@
     {!Solidtype_headless.Color_picker}, a trigger, and Kobalte's popover, with
     HeroUI's classes from {!Styles.ColorPicker}. Kobalte has no colour picker.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/color-picker.md].
+
     {[
       <Color_picker default_value=(Colors.parse_color "#0485F7")>
         <Color_picker.Trigger>

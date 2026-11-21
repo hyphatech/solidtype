@@ -1,6 +1,8 @@
 (** A plot: a slat for each of its rows, stacked in the chart's band, each in
     its place as the rows change.
 
+    Its page, with its examples: [$(opam var solidtype:doc)/pages/rhp/plot.md].
+
     [<Plot rows=fruits>fruit</Plot>], where [fruits] is an array of records and
     [fruit] a {!Slat.t} of that record: a slat reads only the fields of its
     row's type, and a row changed redraws only what reads it.

@@ -76,7 +76,8 @@ src/api.ml         that client, printed by the command line as dune builds
                    src/, never kept: a route that changes is a front end
                    that stops compiling
 src/app.mlx        the board: its projects and tasks (resources), the
-                   project shown, a Search_field that filters it, and
+                   project shown, a Search_field that filters it, a
+                   Segment that shows the tasks as columns or a list, and
                    Toasts for what happened
 src/sidebar.mlx    the projects to choose, each project's Dropdown that
                    deletes it once an Alert_dialog confirms, and the
@@ -85,6 +86,9 @@ src/column.mlx     a status's tasks and a drop, the first and last
                    folded to a rail
 src/card.mlx       HeroUI's Card with a Dropdown that moves or removes
                    it, its link and labels Chips
+src/task_list.mlx  the tasks as a list, a Data_grid sorted by a column
+                   pressed, by its place in the work at first, loaded by
+                   Solid's lazy once it is first shown
 src/add_*.mlx      Add_task and Add_project, HeroUI's Modal holding its
                    Form, Text_fields and Select, the server's problems
                    shown on the fields they name

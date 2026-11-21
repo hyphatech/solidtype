@@ -17,7 +17,10 @@
     arrow keys move between, each pressed or not. A button sets its own
     [is_disabled] over the group's, [false] in a disabled group too, as HeroUI
     documents. Every button inside it reads the group, not only its own children
-    as in React. *)
+    as in React.
+
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/toggle-button-group.md]. *)
 
 module S := Solidtype.Solid
 module Jsx := Solidtype.Jsx

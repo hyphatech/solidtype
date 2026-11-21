@@ -1,6 +1,9 @@
 (** HeroUI's Separator: Kobalte's [Separator.Root], a line between content, with
     HeroUI's classes from {!Styles.Separator.classes}.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/separator.md].
+
     {[
       <Separator orientation=`vertical variant=`secondary />
     ]}

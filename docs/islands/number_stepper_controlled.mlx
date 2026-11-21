@@ -1,0 +1,21 @@
+module S = Solidtype.Solid
+module Number_stepper = Solidtype_heroui.Number_stepper
+
+let make () =
+  let value, set_value = S.create_signal 5. in
+  <div class_="flex flex-col items-center gap-3">
+    <Number_stepper
+      aria_label="Quantity"
+      value=(S.get value)
+      on_change=(S.set set_value)
+      min_value=0.>
+      <Number_stepper.Group>
+        <Number_stepper.Decrement_button />
+        <Number_stepper.Value />
+        <Number_stepper.Increment_button />
+      </Number_stepper.Group>
+    </Number_stepper>
+    <p class_="text-sm text-muted">
+      (Solidtype.Jsx.string ("Value: " ^ Js.Float.toString (S.get value)))
+    </p>
+  </div>

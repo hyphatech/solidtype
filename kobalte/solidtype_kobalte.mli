@@ -180,6 +180,7 @@ module AlertDialog : sig
         ?mount:Dom.node Solidtype.Check.value ->
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
+        ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
         children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
@@ -1409,6 +1410,7 @@ module Combobox : sig
         ?mount:Dom.node Solidtype.Check.value ->
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
+        ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
         children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
@@ -1754,6 +1756,7 @@ module ContextMenu : sig
         ?mount:Dom.node Solidtype.Check.value ->
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
+        ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
         children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
@@ -1995,6 +1998,7 @@ module Dialog : sig
         ?mount:Dom.node Solidtype.Check.value ->
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
+        ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
         children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
@@ -2231,6 +2235,7 @@ module DropdownMenu : sig
         ?mount:Dom.node Solidtype.Check.value ->
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
+        ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
         children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
@@ -2652,6 +2657,7 @@ module HoverCard : sig
         ?mount:Dom.node Solidtype.Check.value ->
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
+        ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
         children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
@@ -3169,6 +3175,7 @@ module Menubar : sig
         ?mount:Dom.node Solidtype.Check.value ->
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
+        ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
         children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
@@ -3619,6 +3626,7 @@ module NavigationMenu : sig
         ?mount:Dom.node Solidtype.Check.value ->
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
+        ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
         children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
@@ -4129,6 +4137,7 @@ module Popover : sig
         ?mount:Dom.node Solidtype.Check.value ->
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
+        ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
         children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
@@ -4806,6 +4815,7 @@ module Search : sig
         ?mount:Dom.node Solidtype.Check.value ->
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
+        ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
         children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
@@ -5121,7 +5131,7 @@ module SegmentedControl : sig
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
-        ?ref:(Dom.htmlElement, Dom.htmlElement -> unit) Types.Either.t Solidtype.Check.value ->
+        ?ref:(Dom.htmlElement -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
         (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
@@ -5325,6 +5335,7 @@ module Select : sig
         ?mount:Dom.node Solidtype.Check.value ->
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
+        ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
         children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
@@ -6387,6 +6398,7 @@ module Tooltip : sig
         ?mount:Dom.node Solidtype.Check.value ->
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
+        ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
         children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]

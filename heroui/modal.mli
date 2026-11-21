@@ -1,6 +1,9 @@
 (** HeroUI's Modal: Kobalte's [Dialog], with HeroUI's classes from
     {!Styles.Modal}.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/modal.md].
+
     {[
       <Modal>
         <Button variant=`secondary>"Open Modal"</Button>

@@ -6,6 +6,7 @@ module Description = Solidtype_heroui.Description
 module Field_error = Solidtype_heroui.Field_error
 module Form = Solidtype_heroui.Form
 module Label = Solidtype_heroui.Label
+module Button = Solidtype_heroui.Button
 module Number_field = Solidtype_heroui.Number_field
 module E = Jest.Expect
 module T = Testing
@@ -42,6 +43,12 @@ module Twin = struct
 
   external render_of_state : bool -> bool -> bool -> bool -> Dom.element
     = "renderOfState"
+  [@@mel.module "./twins/NumberField.tsx"]
+
+  external render_with_buttons : bool -> Dom.element = "renderWithButtons"
+  [@@mel.module "./twins/NumberField.tsx"]
+
+  external render_named : string -> Dom.element = "renderNamed"
   [@@mel.module "./twins/NumberField.tsx"]
 
   external cleanup : unit -> unit = "cleanup"
@@ -317,8 +324,126 @@ let of_state ?(disabled = false) ?(read_only = false) ?(invalid = false)
   Twin.cleanup ();
   Js.Promise.resolve (solidtype, react)
 
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+external query_in : Dom.element -> string -> Dom.element Js.null
+  = "querySelector"
+[@@mel.send]
+
+(* How [e] is named: its aria-label, and the text of what its aria-labelledby
+   names, each id read in order. *)
+let name_of e =
+  let by =
+    match T.attribute e "aria-labelledby" with
+    | None -> []
+    | Some ids ->
+        String.split_on_char ' ' ids
+        |> List.map (fun id ->
+            match Js.Null.toOption (by_id id) with
+            | Some l when l == e ->
+                Option.value (T.attribute e "aria-label") ~default:""
+            | Some l -> T.text_content l
+            | None -> "<" ^ id ^ " missing>")
+  in
+  (T.attribute e "aria-label", by)
+
+(* How each part in [host] is named. *)
+let names host =
+  [
+    "number-field";
+    "number-field-group";
+    "number-field-decrement-button";
+    "number-field-input";
+    "number-field-increment-button";
+  ]
+  |> List.map (fun slot ->
+      match Js.Null.toOption (query_in host ("[data-slot=" ^ slot ^ "]")) with
+      | Some e -> (slot, name_of e)
+      | None -> (slot, (None, [ "missing" ])))
+
+external button_disabled : Dom.element -> bool = "disabled" [@@mel.get]
+external input_value : Dom.element -> string = "value" [@@mel.get]
+
+(* Its buttons, HeroUI's own given the field's slots, beside React's: how each
+   is named, whether it is in the page's order and disabled, and the value
+   after a press of each, at the minimum and a step above. *)
+let stepped_by_buttons ~named =
+  let read host =
+    let buttons = Js.Array.from (T.query_all_in host "button") in
+    let input () =
+      match Js.Null.toOption (query_in host "input") with
+      | Some i -> input_value i
+      | None -> "none"
+    in
+    let shown () =
+      Array.map
+        (fun b ->
+          ( T.attribute b "slot",
+            T.attribute b "tabindex",
+            button_disabled b,
+            T.class_name b ))
+        buttons
+    in
+    let user = T.setup () in
+    let at_min = shown () in
+    let* () = Twin.step (fun () -> T.click user buttons.(1)) in
+    let* () = Twin.step (fun () -> T.click user buttons.(1)) in
+    let up = (input (), shown ()) in
+    let* () = Twin.step (fun () -> T.click user buttons.(0)) in
+    Js.Promise.resolve (at_min, up, input ())
+  in
+  T.render (fun () ->
+      <Number_field
+        ?aria_label=(if named then Some "Quantity" else None)
+        default_value=0.
+        min_value=0.>
+        (if named then Solidtype.Jsx.string "" else <Label>"Width"</Label>)
+        <Number_field.Group>
+          <Button slot=`decrement is_icon_only=true size=`sm>"-"</Button>
+          <Number_field.Input />
+          <Button slot=`increment is_icon_only=true size=`sm>"+"</Button>
+        </Number_field.Group>
+      </Number_field>);
+  let* solidtype = read T.body in
+  let solidtype_named =
+    Js.Array.from (T.query_all_in T.body "button") |> Array.map name_of
+  in
+  T.cleanup ();
+  let host = Twin.render_with_buttons named in
+  let react_named =
+    Js.Array.from (T.query_all_in host "button") |> Array.map name_of
+  in
+  let* react = read host in
+  Twin.cleanup ();
+  Js.Promise.resolve ((solidtype_named, solidtype), (react_named, react))
+
 let () =
   Jest.describe "Number_field" (fun () ->
+      Jest.testPromise
+        "is stepped by HeroUI's buttons given its slots, as React's" (fun () ->
+          let* solidtype, react = stepped_by_buttons ~named:false in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise
+        "names HeroUI's buttons given its slots by its aria_label, as React's"
+        (fun () ->
+          let* solidtype, react = stepped_by_buttons ~named:true in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.test "names its input and buttons by its aria_label, as React's"
+        (fun () ->
+          T.render (fun () ->
+              <Number_field aria_label="Quantity" default_value=1.>
+                <Number_field.Group>
+                  <Number_field.Decrement_button />
+                  <Number_field.Input />
+                  <Number_field.Increment_button />
+                </Number_field.Group>
+              </Number_field>);
+          let solidtype = names T.body in
+          T.cleanup ();
+          let react = names (Twin.render_named "Quantity") in
+          Twin.cleanup ();
+          E.(expect solidtype |> toEqual react));
       Jest.testPromise "draws its parts' children of their state, as React's"
         (fun () ->
           let* solidtype, react = of_state () in

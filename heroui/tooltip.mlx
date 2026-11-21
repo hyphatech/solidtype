@@ -101,7 +101,7 @@ module Content = struct
     in
     let o = Overlay.create ~is_open:(fun () -> S.get open_) () in
     <Show when_=(Overlay.present o)>
-      <Kobalte.Portal>
+      <Kobalte.Portal ref=(fun e -> Solidtype_headless.Top_layer.place e)>
         <Kobalte.Content
           class_=(after (Styles.Tooltip.base t.slots) (S.get class_))
           style=("--trigger-anchor-point: \

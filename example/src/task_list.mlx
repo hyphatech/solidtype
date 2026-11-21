@@ -1,0 +1,63 @@
+(* The tasks in view as a list: a grid of their titles, places and projects,
+   sorted by a column pressed. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Chip = Solidtype_heroui.Chip
+module Data_grid = Solidtype_heroui.Data_grid
+
+(* A place's rank in the order work goes, which its column sorts by. *)
+let rank (t : Api.task) =
+  let rec find i = function
+    | [] -> i
+    | s :: rest -> if Status.equal s t.status then i else find (i + 1) rest
+  in
+  find 0 Status.all
+
+let project_name projects (t : Api.task) =
+  match
+    Array.find_opt
+      (fun (p : Api.project) -> Float.equal p.id t.project)
+      projects
+  with
+  | Some p -> p.name
+  | None -> ""
+
+let%component make ~(tasks : Api.task array) ~(projects : Api.project array) ()
+    =
+  let columns () =
+    [|
+      Data_grid.column ~id:"title" ~header:(Text "Task") ~is_row_header:true
+        ~sort:(By_text (fun (t : Api.task) -> t.title))
+        (fun t -> Jsx.string (S.get t).title);
+      Data_grid.column ~id:"status" ~header:(Text "Status")
+        ~sort:(By (fun a b -> Int.compare (rank a) (rank b)))
+        (fun t ->
+          <Chip size=`sm variant=`soft>
+            (Jsx.string (Status.label (S.get t).status))
+          </Chip>);
+      Data_grid.column ~id:"project" ~header:(Text "Project")
+        ~sort:(By_text (project_name (S.get projects)))
+        ~cell_class:"text-muted"
+        (fun t -> Jsx.string (project_name (S.get projects) (S.get t)));
+      Data_grid.column ~id:"labels" ~header:(Text "Labels") (fun t ->
+          <span class_="flex flex-wrap gap-1">
+            <For each=(S.get t : Api.task).labels>
+              (fun label _ ->
+                <Chip size=`sm variant=`secondary>(Jsx.string label)</Chip>)
+            </For>
+          </span>);
+    |]
+  in
+  <Data_grid
+    aria_label="Tasks"
+    rows=(S.get tasks)
+    row_id=(fun (t : Api.task) -> Js.Float.toString t.id)
+    columns=(columns ())
+    default_sort_descriptor={ column = "status"; direction = `ascending }
+    sticky_header=true
+    class_="min-h-0 flex-1"
+    scroll_container_class="overflow-auto"
+    empty_state=(<span class_="text-sm text-muted">"No task matches"</span>)
+  />

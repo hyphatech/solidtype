@@ -2,6 +2,9 @@
     that opens from a trigger, with HeroUI's classes from {!Styles.Dropdown},
     {!Styles.MenuItem} and {!Styles.MenuSection}.
 
+    Its page, with its examples:
+    [$(opam var solidtype:doc)/pages/heroui/dropdown.md].
+
     {[
       <Dropdown>
         <Button aria_label="Menu" variant=`secondary>"Actions"</Button>

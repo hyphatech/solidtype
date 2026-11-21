@@ -92,3 +92,8 @@ external all_by_role_named_js : string -> query -> Dom.element array
 [@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
 
 let all_by_role_named role name = all_by_role_named_js role (query ~name ())
+
+(* What a part holds of a role, as a reader finds it there. *)
+external all_within_by_role : Dom.element -> string -> Dom.element array
+  = "queryAllByRole"
+[@@mel.module "@solidjs/testing-library"]
