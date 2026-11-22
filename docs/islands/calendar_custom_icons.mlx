@@ -1,0 +1,43 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Calendar = Solidtype_heroui.Calendar
+
+let make () =
+  <Calendar aria_label="Event date">
+    <Calendar.Header>
+      <Calendar.Heading />
+      <Calendar.Nav_button slot=`previous>
+        <svg
+          height="24"
+          view_box="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6l6 6z"
+            fill="currentColor"
+          />
+        </svg>
+      </Calendar.Nav_button>
+      <Calendar.Nav_button slot=`next>
+        <svg
+          height="24"
+          view_box="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M8.59 16.59L13.17 12L8.59 7.41L10 6l6 6l-6 6z"
+            fill="currentColor"
+          />
+        </svg>
+      </Calendar.Nav_button>
+    </Calendar.Header>
+    <Calendar.Grid>
+      <Calendar.Grid_header>
+        (fun day ->
+          <Calendar.Header_cell>(Jsx.string (S.get day))</Calendar.Header_cell>)
+      </Calendar.Grid_header>
+      <Calendar.Grid_body>
+        (fun date -> <Calendar.Cell date=(S.get date) />)
+      </Calendar.Grid_body>
+    </Calendar.Grid>
+  </Calendar>

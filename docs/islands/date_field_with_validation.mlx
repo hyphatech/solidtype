@@ -1,0 +1,38 @@
+module S = Solidtype.Solid
+module Show = Solidtype.Show
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Label = Solidtype_heroui.Label
+module Date_field = Solidtype_heroui.Date_field
+module D = Solidtype_internationalized_date
+
+let make () =
+  let value, set_value = S.create_signal None in
+  let today = D.today (D.get_local_time_zone ()) in
+  let is_invalid () =
+    match S.get value with
+    | Some d -> D.Types.CalendarDate.compare d today < 0.
+    | None -> false
+  in
+  <div class_="flex flex-col gap-4">
+    <Date_field
+      is_required=true
+      class_="w-[256px]"
+      is_invalid=(is_invalid ())
+      min_value=today
+      name="date"
+      value=(Js.Nullable.fromOption (S.get value))
+      on_change=(S.set set_value)>
+      <Label>"Date"</Label>
+      <Date_field.Group>
+        <Date_field.Input>
+          (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+        </Date_field.Input>
+      </Date_field.Group>
+      <Show
+        when_=(is_invalid ())
+        fallback=(<Description>"Enter a date from today onwards"</Description>)>
+        <Field_error>"Date must be today or in the future"</Field_error>
+      </Show>
+    </Date_field>
+  </div>

@@ -366,6 +366,53 @@ external time_field : Dom.htmlDivElement -> time_field_props -> unit
   = "timeField"
 [@@mel.module "./react/heroui.tsx"]
 
+type date_field_props
+
+external date_field_props :
+  variant:string -> is_disabled:bool -> unit -> date_field_props = ""
+[@@mel.obj]
+
+external date_field : Dom.htmlDivElement -> date_field_props -> unit
+  = "dateField"
+[@@mel.module "./react/heroui.tsx"]
+
+type date_picker_props
+
+external date_picker_props : is_disabled:bool -> unit -> date_picker_props = ""
+[@@mel.obj]
+
+external date_picker : Dom.htmlDivElement -> date_picker_props -> unit
+  = "datePicker"
+[@@mel.module "./react/heroui.tsx"]
+
+type date_range_picker_props
+
+external date_range_picker_props :
+  is_disabled:bool -> unit -> date_range_picker_props = ""
+[@@mel.obj]
+
+external date_range_picker :
+  Dom.htmlDivElement -> date_range_picker_props -> unit = "dateRangePicker"
+[@@mel.module "./react/heroui.tsx"]
+
+type range_calendar_props
+
+external range_calendar_props : is_disabled:bool -> unit -> range_calendar_props
+  = ""
+[@@mel.obj]
+
+external range_calendar : Dom.htmlDivElement -> range_calendar_props -> unit
+  = "rangeCalendar"
+[@@mel.module "./react/heroui.tsx"]
+
+type calendar_props
+
+external calendar_props : is_disabled:bool -> unit -> calendar_props = ""
+[@@mel.obj]
+
+external calendar : Dom.htmlDivElement -> calendar_props -> unit = "calendar"
+[@@mel.module "./react/heroui.tsx"]
+
 type progress_circle_props
 
 external progress_circle_props :

@@ -177,10 +177,12 @@ type column = {
     [ResizableTableContainer] does: the table is laid out at a fixed width, each
     column as its [width], or [default_width] until it is resized, says, by
     CSS's flex algorithm, never narrower than its [min_width], 75 pixels by
-    default, nor wider than its [max_width]. A resize calls [on_resize_start],
-    then [on_resize] at each step and [on_resize_end], each with every column's
-    size by its [id]: those before it in pixels as they are, it its new width,
-    and those after it as their own. *)
+    default, nor wider than its [max_width]. A virtualized table inside it is as
+    wide as it is, and scrolls across its columns itself, so its pinned columns
+    stay in view. A resize calls [on_resize_start], then [on_resize] at each
+    step and [on_resize_end], each with every column's size by its [id]: those
+    before it in pixels as they are, it its new width, and those after it as
+    their own. *)
 module Resizable_container : sig
   module Props : sig
     type t

@@ -1,0 +1,85 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+module Tooltip = Solidtype_heroui.Tooltip
+module Date_field = Solidtype_heroui.Date_field
+module D = Solidtype_internationalized_date
+module Gravity = Solidtype_gravity_icons
+
+let granularities =
+  [|
+    (`day, "day", "Day");
+    (`hour, "hour", "Hour");
+    (`minute, "minute", "Minute");
+    (`second, "second", "Second");
+  |]
+
+let make () =
+  let granularity, set_granularity = S.create_signal `day in
+  let id () =
+    match S.get granularity with
+    | `day -> "day"
+    | `hour -> "hour"
+    | `minute -> "minute"
+    | `second -> "second"
+  in
+  <div class_="flex gap-4">
+    <Date_field.Zoned
+      class_="w-[256px]"
+      default_value=(D.parse_zoned_date_time
+                       "2025-02-03T08:45:00[America/Los_Angeles]" ())
+      placeholder_value=(D.parse_zoned_date_time
+                           "2025-02-03T00:00:00[America/Los_Angeles]" ())
+      granularity=(S.get granularity)
+      name="granularity-date">
+      <Label>"Appointment Date"</Label>
+      <Date_field.Group>
+        <Date_field.Input>
+          (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+        </Date_field.Input>
+      </Date_field.Group>
+    </Date_field.Zoned>
+    <div class_="flex flex-col gap-1">
+      <div class_="flex items-center gap-2">
+        <Label>"Granularity"</Label>
+        <Tooltip delay_ms=0.>
+          <Tooltip.Trigger aria_label="Granularity information">
+            <Gravity.Circle_question class_="size-4 text-muted" />
+          </Tooltip.Trigger>
+          <Tooltip.Content placement=`bottom>
+            <p>
+              "Determines the smallest unit displayed in the date picker. By \
+               default, this is \"day\" for dates, and \"minute\" for times."
+            </p>
+          </Tooltip.Content>
+        </Tooltip>
+      </div>
+      <Select
+        class_="w-[110px]"
+        placeholder="Select granularity"
+        value=[| id () |]
+        variant=`secondary
+        on_change=(fun ids ->
+                    match
+                      Array.find_opt
+                        (fun (_, id, _) -> Array.exists (String.equal id) ids)
+                        granularities
+                    with
+                    | Some (g, _, _) -> S.set set_granularity g
+                    | None -> ())>
+        <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+        <Select.Popover>
+          <List_box>
+            <Solidtype.For each=granularities>
+              (fun (_, id, label) _ ->
+                <List_box.Item id text_value=label>
+                  (Jsx.string label) <List_box.Item_indicator />
+                </List_box.Item>)
+            </Solidtype.For>
+          </List_box>
+        </Select.Popover>
+      </Select>
+    </div>
+  </div>

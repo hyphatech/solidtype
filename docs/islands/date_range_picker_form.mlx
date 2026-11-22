@@ -1,0 +1,99 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Date_field = Solidtype_heroui.Date_field
+module Date_range_picker = Solidtype_heroui.Date_range_picker
+module Label = Solidtype_heroui.Label
+module Range_calendar = Solidtype_heroui.Range_calendar
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module Description = Solidtype_heroui.Description
+module Button = Solidtype_heroui.Button
+module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
+
+external set_timeout : (unit -> unit) -> int -> unit = "setTimeout"
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+let make () =
+  let value, set_value = S.create_signal None in
+  let submitting, set_submitting = S.create_signal false in
+  let current = D.today (D.get_local_time_zone ()) in
+  let is_invalid () =
+    match S.get value with
+    | Some ({ start; end_ } : Date.t Date_range_picker.range) ->
+        Date.compare start current < 0. || Date.compare end_ start < 0.
+    | None -> false
+  in
+  let submit e =
+    prevent_default e;
+    if Option.is_some (S.get value) && not (is_invalid ()) then (
+      S.set set_submitting true;
+      set_timeout
+        (fun () ->
+          S.set set_value None;
+          S.set set_submitting false)
+        1200)
+  in
+  <Form class_="flex w-80 flex-col gap-3" on_submit=submit>
+    <Date_range_picker
+      is_required=true
+      end_name="tripEndDate"
+      is_invalid=(is_invalid ())
+      min_value=current
+      start_name="tripStartDate"
+      value=(Js.Nullable.fromOption (S.get value))
+      on_change=(S.set set_value)>
+      <Label>"Trip dates"</Label>
+      <Date_field.Group full_width=true>
+        <Date_field.Input slot="start">
+          (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+        </Date_field.Input>
+        <Date_range_picker.Range_separator />
+        <Date_field.Input slot="end">
+          (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+        </Date_field.Input>
+        <Date_field.Suffix>
+          <Date_range_picker.Trigger>
+            <Date_range_picker.Trigger_indicator />
+          </Date_range_picker.Trigger>
+        </Date_field.Suffix>
+      </Date_field.Group>
+      (if is_invalid () then
+         <Field_error>"Please choose a valid range in the future."</Field_error>
+       else
+         <Description>"Select your check-in and check-out dates."</Description>)
+      <Date_range_picker.Popover>
+        <Range_calendar aria_label="Trip dates">
+          <Range_calendar.Header>
+            <Range_calendar.Year_picker_trigger>
+              <Range_calendar.Year_picker_trigger_heading />
+              <Range_calendar.Year_picker_trigger_indicator />
+            </Range_calendar.Year_picker_trigger>
+            <Range_calendar.Nav_button slot=`previous />
+            <Range_calendar.Nav_button slot=`next />
+          </Range_calendar.Header>
+          <Range_calendar.Grid>
+            <Range_calendar.Grid_header>
+              (fun day ->
+                <Range_calendar.Header_cell>
+                  (Jsx.string (S.get day))
+                </Range_calendar.Header_cell>)
+            </Range_calendar.Grid_header>
+            <Range_calendar.Grid_body>
+              (fun date -> <Range_calendar.Cell date=(S.get date) />)
+            </Range_calendar.Grid_body>
+          </Range_calendar.Grid>
+          <Range_calendar.Year_picker_grid>
+            <Range_calendar.Year_picker_grid_body />
+          </Range_calendar.Year_picker_grid>
+        </Range_calendar>
+      </Date_range_picker.Popover>
+    </Date_range_picker>
+    <Button
+      class_="w-full"
+      is_disabled=(Option.is_none (S.get value) || is_invalid ())
+      is_pending=(S.get submitting)
+      type_=`submit>
+      (Jsx.string (if S.get submitting then "Submitting..." else "Submit"))
+    </Button>
+  </Form>

@@ -1,0 +1,238 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Range_calendar = Solidtype_heroui.Range_calendar
+module Date_field = Solidtype_heroui.Date_field
+module Date_range_picker = Solidtype_heroui.Date_range_picker
+module Separator = Solidtype_heroui.Separator
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+module Switch = Solidtype_heroui.Switch
+module Time_field = Solidtype_heroui.Time_field
+module D = Solidtype_internationalized_date
+
+type granularity = [ `day | `hour | `minute | `second ]
+
+let granularities : (string * string * granularity) array =
+  [|
+    ("day", "Day", `day);
+    ("hour", "Hour", `hour);
+    ("minute", "Minute", `minute);
+    ("second", "Second", `second);
+  |]
+
+let hour_cycles = [| ("12", "12-hour", `h12); ("24", "24-hour", `h24) |]
+
+let calendar () =
+  <Range_calendar aria_label="Trip dates" class_="w-full">
+    <Range_calendar.Header>
+      <Range_calendar.Year_picker_trigger>
+        <Range_calendar.Year_picker_trigger_heading />
+        <Range_calendar.Year_picker_trigger_indicator />
+      </Range_calendar.Year_picker_trigger>
+      <Range_calendar.Nav_button slot=`previous />
+      <Range_calendar.Nav_button slot=`next />
+    </Range_calendar.Header>
+    <Range_calendar.Grid>
+      <Range_calendar.Grid_header>
+        (fun day ->
+          <Range_calendar.Header_cell>
+            (Jsx.string (S.get day))
+          </Range_calendar.Header_cell>)
+      </Range_calendar.Grid_header>
+      <Range_calendar.Grid_body>
+        (fun date -> <Range_calendar.Cell date=(S.get date) />)
+      </Range_calendar.Grid_body>
+    </Range_calendar.Grid>
+    <Range_calendar.Year_picker_grid>
+      <Range_calendar.Year_picker_grid_body />
+    </Range_calendar.Year_picker_grid>
+  </Range_calendar>
+
+let group () =
+  <Date_field.Group>
+    <Date_field.Input slot="start">
+      (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+    </Date_field.Input>
+    <Date_range_picker.Range_separator />
+    <Date_field.Input slot="end">
+      (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+    </Date_field.Input>
+    <Date_field.Suffix>
+      <Date_range_picker.Trigger>
+        <Date_range_picker.Trigger_indicator />
+      </Date_range_picker.Trigger>
+    </Date_field.Suffix>
+  </Date_field.Group>
+
+let choice ~label ~options ~value ~on_change =
+  <Select
+    class_="w-[120px]"
+    variant=`secondary
+    value=[| value () |]
+    on_change=(fun ids -> match ids with [| id |] -> on_change id | _ -> ())>
+    <Label>(Jsx.string label)</Label>
+    <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+    <Select.Popover>
+      <List_box>
+        <Solidtype.For each=options>
+          (fun (id, name) _ ->
+            <List_box.Item id text_value=name>
+              (Jsx.string name) <List_box.Item_indicator />
+            </List_box.Item>)
+        </Solidtype.For>
+      </List_box>
+    </Select.Popover>
+  </Select>
+
+let switch ~on ~set text =
+  <Switch is_selected=(on ()) on_change=set>
+    <Switch.Content>
+      <Switch.Control><Switch.Thumb /></Switch.Control> (Jsx.string text)
+    </Switch.Content>
+  </Switch>
+
+(* The range as a short date range, its times left out. *)
+let selected (r : D.Types.ZonedDateTime.t Date_range_picker.range option) =
+  match r with
+  | Some { start; end_ } ->
+      Js.String.concat
+        ~other:
+          (D.Types.DateFormatter.format_range
+             (D.Types.DateFormatter.make "en-GB"
+                ~options:
+                  (D.Types.DateTimeFormatOptions.make ~day:"numeric"
+                     ~month:"short" ~year:"numeric" ())
+                ())
+             (D.Types.ZonedDateTime.to_date start ())
+             (D.Types.ZonedDateTime.to_date end_ ()))
+        "Selected: "
+  | None -> "Selected: No date selected"
+
+let make () =
+  let granularity, set_granularity = S.create_signal (`minute : granularity) in
+  let hour_cycle, set_hour_cycle = S.create_signal `h12 in
+  let hide_time_zone, set_hide_time_zone = S.create_signal false in
+  let leading_zeros, set_leading_zeros = S.create_signal false in
+  let zone = D.get_local_time_zone () in
+  let at time = D.parse_zoned_date_time (time ^ "[" ^ zone ^ "]") () in
+  let time_granularity () =
+    match S.get granularity with
+    | `day -> None
+    | (`hour | `minute | `second) as g -> Some g
+  in
+  let time_field ~label ~name ~value ~set =
+    <div class_="flex items-center justify-between">
+      <Label>(Jsx.string label)</Label>
+      <Time_field.Zoned
+        aria_label=label
+        ?granularity=(time_granularity ())
+        hide_time_zone=(S.get hide_time_zone)
+        hour_cycle=(S.get hour_cycle)
+        name
+        placeholder_value=(at "2026-02-03T08:45:00")
+        should_force_leading_zeros=(S.get leading_zeros)
+        value=(Js.Nullable.fromOption (value ()))
+        on_change=(Option.iter set)>
+        <Time_field.Group variant=`secondary>
+          <Time_field.Input>
+            (fun segment -> <Time_field.Segment segment=(S.get segment) />)
+          </Time_field.Input>
+        </Time_field.Group>
+      </Time_field.Zoned>
+    </div>
+  in
+  <div class_="flex w-full flex-col gap-4">
+    (match S.get granularity with
+    | `day ->
+        <Date_range_picker
+          class_="w-max min-w-80"
+          default_value={
+                          start = D.parse_date "2025-02-03";
+                          end_ = D.parse_date "2025-02-10";
+                        }
+          end_name="endDate"
+          should_force_leading_zeros=(S.get leading_zeros)
+          start_name="startDate">
+          <Label>"Date range"</Label>
+          (group ())
+          <Date_range_picker.Popover
+            class_="flex w-full max-w-63 flex-col gap-3">
+            (calendar ())
+          </Date_range_picker.Popover>
+        </Date_range_picker>
+    | `hour | `minute | `second ->
+        <Date_range_picker.Zoned
+          class_="w-max min-w-80"
+          default_value={
+                          start = at "2026-02-03T08:45:00";
+                          end_ = at "2026-02-10T18:45:00";
+                        }
+          placeholder_value=(at "2026-02-03T08:45:00")
+          end_name="endDate"
+          granularity=(S.get granularity)
+          hide_time_zone=(S.get hide_time_zone)
+          hour_cycle=(S.get hour_cycle)
+          should_force_leading_zeros=(S.get leading_zeros)
+          start_name="startDate">
+          (fun (picker : D.Types.ZonedDateTime.t Date_range_picker.state) ->
+            Jsx.fragment
+              [|
+                <Label>"Date range"</Label>;
+                group ();
+                <Date_range_picker.Popover
+                  class_="flex w-full max-w-63 flex-col gap-3">
+                  (calendar ())
+                  <div class_="flex flex-col gap-3">
+                    (time_field ~label:"Start Time" ~name:"startTime"
+                       ~value:(fun () -> fst (S.get picker.state.time_range))
+                       ~set:(picker.state.set_time `start))
+                    (time_field ~label:"End Time" ~name:"endTime"
+                       ~value:(fun () -> snd (S.get picker.state.time_range))
+                       ~set:(picker.state.set_time `end_))
+                  </div>
+                  <span class_="mt-1 text-xs text-muted">
+                    (Jsx.string (selected (S.get picker.state.range)))
+                  </span>
+                </Date_range_picker.Popover>;
+              |])
+        </Date_range_picker.Zoned>)
+    <Separator class_="my-5" />
+    <Label class_="text-xs font-medium text-muted">"Format Options"</Label>
+    <div class_="flex flex-wrap gap-4">
+      <div class_="flex flex-col gap-1">
+        (choice ~label:"Granularity"
+           ~options:(Array.map (fun (id, name, _) -> (id, name)) granularities)
+           ~value:(fun () ->
+             match S.get granularity with
+             | `day -> "day"
+             | `hour -> "hour"
+             | `minute -> "minute"
+             | `second -> "second")
+           ~on_change:(fun id ->
+             Array.iter
+               (fun (i, _, g) ->
+                 if String.equal i id then S.set set_granularity g)
+               granularities))
+      </div>
+      <div class_="flex flex-col gap-1">
+        (choice ~label:"Hour cycle"
+           ~options:(Array.map (fun (id, name, _) -> (id, name)) hour_cycles)
+           ~value:(fun () ->
+             match S.get hour_cycle with `h12 -> "12" | `h24 -> "24")
+           ~on_change:(fun id ->
+             Array.iter
+               (fun (i, _, c) ->
+                 if String.equal i id then S.set set_hour_cycle c)
+               hour_cycles))
+      </div>
+    </div>
+    <div class_="flex min-w-[529px] flex-col gap-2">
+      (switch
+         ~on:(fun () -> S.get hide_time_zone)
+         ~set:(S.set set_hide_time_zone) "Hide timezone")
+      (switch
+         ~on:(fun () -> S.get leading_zeros)
+         ~set:(S.set set_leading_zeros) "Force leading zeros")
+    </div>
+  </div>

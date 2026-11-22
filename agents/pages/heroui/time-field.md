@@ -6,6 +6,10 @@ Its value is a `Time` of `solidtype-internationalized-date`, made by
 `Time.make ~hour:14 ~minute:30 ()` or `parse_time "14:30"`; a time on a date
 is `Time_field.Date_time`'s, and a time in a zone `Time_field.Zoned`'s.
 
+Its clock is `en-GB`'s, 24 hours, whatever the browser reads, unless an
+`I18n.I18nProvider` names another locale: `<I18n.I18nProvider locale="en-US">`
+gives a 12-hour clock. React's follows the browser.
+
 Original HeroUI documentation: [TimeField](https://heroui.com/en/docs/react/components/time-field).
 
 ## Usage

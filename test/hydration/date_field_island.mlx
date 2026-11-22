@@ -1,0 +1,14 @@
+(* A HeroUI DateField given its value, in the locale the page is read in. *)
+
+module Date_field = Solidtype_heroui.Date_field
+module Date = Solidtype_internationalized_date.Types.CalendarDate
+
+let make () =
+  <Date_field aria_label="Date" default_value=(Date.make 2026 11 21)>
+    <Date_field.Group>
+      <Date_field.Input>
+        (fun segment ->
+          <Date_field.Segment segment=(Solidtype.Solid.get segment) />)
+      </Date_field.Input>
+    </Date_field.Group>
+  </Date_field>

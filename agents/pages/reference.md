@@ -58,9 +58,16 @@ bun add $(opam show solidtype-rhp --field x-npm-depends)
 
 - [`Solidtype_headless`](https://hyphatech.github.io/solidtype/reference/solidtype-headless/Solidtype_headless/index.html)
   -- the components Kobalte lacks, one module each:
-  [`Table`](https://hyphatech.github.io/solidtype/reference/solidtype-headless/Solidtype_headless/Table/index.html),
+  [`Calendar`](https://hyphatech.github.io/solidtype/reference/solidtype-headless/Solidtype_headless/Calendar/index.html),
+  [`Color_picker`](https://hyphatech.github.io/solidtype/reference/solidtype-headless/Solidtype_headless/Color_picker/index.html),
   [`Color_swatch_picker`](https://hyphatech.github.io/solidtype/reference/solidtype-headless/Solidtype_headless/Color_swatch_picker/index.html),
+  [`Data_grid`](https://hyphatech.github.io/solidtype/reference/solidtype-headless/Solidtype_headless/Data_grid/index.html),
+  [`Date_field`](https://hyphatech.github.io/solidtype/reference/solidtype-headless/Solidtype_headless/Date_field/index.html),
+  [`Date_picker`](https://hyphatech.github.io/solidtype/reference/solidtype-headless/Solidtype_headless/Date_picker/index.html),
   [`Load_more_sentinel`](https://hyphatech.github.io/solidtype/reference/solidtype-headless/Solidtype_headless/Load_more_sentinel/index.html),
+  [`Table`](https://hyphatech.github.io/solidtype/reference/solidtype-headless/Solidtype_headless/Table/index.html),
+  [`Tag_group`](https://hyphatech.github.io/solidtype/reference/solidtype-headless/Solidtype_headless/Tag_group/index.html),
+  [`Top_layer`](https://hyphatech.github.io/solidtype/reference/solidtype-headless/Solidtype_headless/Top_layer/index.html),
   [`Virtualizer`](https://hyphatech.github.io/solidtype/reference/solidtype-headless/Solidtype_headless/Virtualizer/index.html);
   and Kobalte's own, fixed:
   [`Color_area`](https://hyphatech.github.io/solidtype/reference/solidtype-headless/Solidtype_headless/Color_area/index.html),

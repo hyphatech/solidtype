@@ -1,0 +1,65 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Calendar = Solidtype_heroui.Calendar
+module Date_field = Solidtype_heroui.Date_field
+module Date_picker = Solidtype_heroui.Date_picker
+module Label = Solidtype_heroui.Label
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module Field_error = Solidtype_heroui.Field_error
+
+let make () =
+  let value, set_value = S.create_signal None in
+  let current = D.today (D.get_local_time_zone ()) in
+  let is_invalid () =
+    match S.get value with
+    | Some v -> Date.compare v current < 0.
+    | None -> false
+  in
+  <Date_picker
+    is_required=true
+    class_="w-72"
+    is_invalid=(is_invalid ())
+    min_value=current
+    name="date"
+    value=(Js.Nullable.fromOption (S.get value))
+    on_change=(S.set set_value)>
+    <Label>"Appointment date"</Label>
+    <Date_field.Group full_width=true>
+      <Date_field.Input>
+        (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+      </Date_field.Input>
+      <Date_field.Suffix>
+        <Date_picker.Trigger>
+          <Date_picker.Trigger_indicator />
+        </Date_picker.Trigger>
+      </Date_field.Suffix>
+    </Date_field.Group>
+    <Field_error>"Date must be today or in the future."</Field_error>
+    <Date_picker.Popover>
+      <Calendar aria_label="Event date">
+        <Calendar.Header>
+          <Calendar.Year_picker_trigger>
+            <Calendar.Year_picker_trigger_heading />
+            <Calendar.Year_picker_trigger_indicator />
+          </Calendar.Year_picker_trigger>
+          <Calendar.Nav_button slot=`previous />
+          <Calendar.Nav_button slot=`next />
+        </Calendar.Header>
+        <Calendar.Grid>
+          <Calendar.Grid_header>
+            (fun day ->
+              <Calendar.Header_cell>
+                (Jsx.string (S.get day))
+              </Calendar.Header_cell>)
+          </Calendar.Grid_header>
+          <Calendar.Grid_body>
+            (fun date -> <Calendar.Cell date=(S.get date) />)
+          </Calendar.Grid_body>
+        </Calendar.Grid>
+        <Calendar.Year_picker_grid>
+          <Calendar.Year_picker_grid_body />
+        </Calendar.Year_picker_grid>
+      </Calendar>
+    </Date_picker.Popover>
+  </Date_picker>

@@ -17,6 +17,7 @@ shows it beside the same component in React.
 | [Breadcrumbs](breadcrumbs.md) | ported: the last item the page, prerendered so too, disabled whole or an item at a time, a separator of its own, an item's press told by its id |
 | [Button](button.md) | ported: variants, sizes, full width, icon only, disabled |
 | [ButtonGroup](button-group.md) | ported: variants, sizes, orientations, full width, disabled, separator |
+| [Calendar](calendar.md) | ported: one date or several, controlled or kept, the focused date controlled or kept, in the locale's order, first day and calendar; moved through by the keys and paged by its buttons, a page or a unit at a time; a month, weeks or days shown, several months side by side, a fixed number of weeks; min and max and unavailable days, disabled, read-only, invalid; its year picker; cell indicators, custom navigation icons |
 | [Card](card.md) | ported: variants, header, title, description, content, footer, as a surface |
 | [Checkbox](checkbox.md) | ported: variants, selected, indeterminate, disabled, invalid, interaction state |
 | [CheckboxGroup](checkbox-group.md) | ported: values controlled or kept, variants, disabled, invalid, read-only, required, its label and descriptions |
@@ -29,6 +30,9 @@ shows it beside the same component in React.
 | [ColorSwatch](color-swatch.md) | ported: sizes, shapes, a colour less than opaque over a checkerboard, its name given or Kobalte's, style |
 | [ColorSwatchPicker](color-swatch-picker.md) | ported: a palette chosen from by a press or the keys, in a grid by where each swatch is or a stack, value controlled or kept, sizes, variants, layouts, disabled swatches, the checkmark or an indicator given, black over a light colour |
 | [ComboBox](combo-box.md) | ported: one or many chosen, controlled or kept, its text controlled or kept, filtered as typed or by a filter given, opened by focus, typing or only its trigger, custom values, its list a ListBox, sections, disabled options, its value listed, variants, full width, disabled, read-only, label, description and error, a form sent its ids or its text, its list's empty state while nothing matches |
+| [DateField](date-field.md) | ported: a date, a date with a time and one in a zone, each given back as its kind, in the reader's locale's order and calendar; typed, stepped by the keys, erased, a date that is none made one as focus leaves; value controlled or kept, placeholder, granularity, hour cycle, leading zeros, its zone shown or hidden, min and max and unavailable days, variants, full width, prefix and suffix, disabled, read-only, required, invalid, label, description and error, a form sent its value whole |
+| [DatePicker](date-picker.md) | ported: a date field whose trigger opens a calendar in a popover, of a date, a date with a time or one in a zone, the time kept as a day is chosen and drawn in the popover from its state; controlled or kept, open controlled or kept, closed on a day chosen unless not; disabled, read-only, required, invalid and validated in a form; a custom indicator, render functions, international calendars |
+| [DateRangePicker](date-range-picker.md) | ported: a date field's group of a start and an end, whose trigger opens a range calendar in a popover, of dates, dates with times or ones in a zone, the times kept and drawn in the popover from its state; a range told once both ends are there, invalid with its end before its start; controlled or kept, open controlled or kept; disabled, read-only, required, invalid and validated in a form, each end sent by its name; a custom indicator, render functions, international calendars |
 | [Description](description.md) | ported: standalone, and a radio group's, a radio's or a text field's |
 | [Disclosure](disclosure.md) | ported: expanded controlled or kept, disabled, its own trigger or a button given its slot, indicator, content animated by its height and found by find in page |
 | [DisclosureGroup](disclosure-group.md) | ported: one or several expanded, controlled or kept, disabled with a disclosure's own, navigation by previous and next |
@@ -53,6 +57,7 @@ shows it beside the same component in React.
 | [ProgressBar](progress-bar.md) | ported: value within a range, indeterminate, colors, sizes, output, format options |
 | [ProgressCircle](progress-circle.md) | ported: value within a range, indeterminate, colors, sizes, format options, a circle of any size its arc measured on its own radius |
 | [Radio Group](radio-group.md) | ported: variants, orientations, controlled, disabled, invalid, descriptions, interaction state |
+| [RangeCalendar](range-calendar.md) | ported: a range begun by a press or Enter and shown to the day hovered or focused, ended by a second; chosen by a drag, an end moved by one; let go by Escape, and ended as `commit_behavior` says; reaching no further than an unavailable day unless non-contiguous, its predicate given the range's anchor; controlled or kept, min and max, disabled, read-only, invalid; weeks or days shown, several months side by side; its year picker; cell indicators |
 | [ScrollShadow](scroll-shadow.md) | ported: orientations, sizes, offset, visibility given or measured, hidden scrollbar |
 | [SearchField](search-field.md) | ported: query controlled or kept, cleared by Escape or its button, submitted by Enter, variants, disabled, invalid |
 | [Select](select.md) | ported: one or many chosen, controlled or kept, its list a ListBox, placeholder, value drawn as the option or by a function, clear button and Backspace, variants, full width, disabled, disabled options, sections, open controlled or kept, label, description and error, a form's errors; required, its error the application's to show, as a text field's |
@@ -77,13 +82,13 @@ shows it beside the same component in React.
 
 ## Not yet ported
 
-These 7 components of HeroUI 3.2 are not ported yet; each name links to
+These 2 components of HeroUI 3.2 are not ported yet; each name links to
 HeroUI's own page. What a ported component does not do yet is in its row
 above and on its page.
 
 | Group | Components |
 |---|---|
-| Not yet ported | [Calendar](https://heroui.com/en/docs/react/components/calendar), [DateField](https://heroui.com/en/docs/react/components/date-field), [DatePicker](https://heroui.com/en/docs/react/components/date-picker), [DateRangePicker](https://heroui.com/en/docs/react/components/date-range-picker), [InputOTP](https://heroui.com/en/docs/react/components/input-otp), [RangeCalendar](https://heroui.com/en/docs/react/components/range-calendar), [Toolbar](https://heroui.com/en/docs/react/components/toolbar) |
+| Not yet ported | [InputOTP](https://heroui.com/en/docs/react/components/input-otp), [Toolbar](https://heroui.com/en/docs/react/components/toolbar) |
 
 ## Beyond HeroUI's set
 

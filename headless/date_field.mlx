@@ -1,0 +1,3393 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Index = Solidtype.Index
+module D = Solidtype_internationalized_date
+module Dt = D.Types
+module I18n = Solidtype_kobalte.I18n
+module K = Solidtype_kobalte.Types
+module Spin = Solidtype_kobalte.SpinButton
+
+(* Any element as the element it is, which DOM's every element is. *)
+external as_element : _ Dom.element_like -> Dom.element = "%identity"
+external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+external focus : _ Dom.element_like -> unit = "focus" [@@mel.send]
+
+external contains : _ Dom.element_like -> Dom.element -> bool = "contains"
+[@@mel.send]
+
+external query_all :
+  _ Dom.element_like -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external closest : _ Dom.element_like -> string -> Dom.element Js.null
+  = "closest"
+[@@mel.send]
+
+external listen : Dom.element -> string -> (Dom.event -> unit) -> unit
+  = "addEventListener"
+[@@mel.send]
+
+external unlisten : Dom.element -> string -> (Dom.event -> unit) -> unit
+  = "removeEventListener"
+[@@mel.send]
+
+external document_listen : string -> (Dom.event -> unit) -> unit
+  = "addEventListener"
+[@@mel.scope "document"]
+
+external document_unlisten : string -> (Dom.event -> unit) -> unit
+  = "removeEventListener"
+[@@mel.scope "document"]
+
+type rect
+
+external rect : Dom.element -> rect = "getBoundingClientRect" [@@mel.send]
+external rect_left : rect -> float = "left" [@@mel.get]
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external alt : Dom.keyboardEvent -> bool = "altKey" [@@mel.get]
+external ctrl : Dom.keyboardEvent -> bool = "ctrlKey" [@@mel.get]
+external meta : Dom.keyboardEvent -> bool = "metaKey" [@@mel.get]
+external shift : Dom.keyboardEvent -> bool = "shiftKey" [@@mel.get]
+external key_target : Dom.keyboardEvent -> Dom.element = "target" [@@mel.get]
+external prevent_key : Dom.keyboardEvent -> unit = "preventDefault" [@@mel.send]
+external stop_key : Dom.keyboardEvent -> unit = "stopPropagation" [@@mel.send]
+external input_type : Dom.inputEvent -> string = "inputType" [@@mel.get]
+external input_data : Dom.inputEvent -> string Js.Null.t = "data" [@@mel.get]
+external prevent_input : Dom.inputEvent -> unit = "preventDefault" [@@mel.send]
+external pointer_type : Dom.pointerEvent -> string = "pointerType" [@@mel.get]
+
+external prevent_pointer : Dom.pointerEvent -> unit = "preventDefault"
+[@@mel.send]
+
+external stop_pointer : Dom.pointerEvent -> unit = "stopPropagation"
+[@@mel.send]
+
+external stop_mouse : Dom.mouseEvent -> unit = "stopPropagation" [@@mel.send]
+
+external related : Dom.focusEvent -> Dom.element Js.null = "relatedTarget"
+[@@mel.get]
+
+external text_content : Dom.element -> string = "textContent" [@@mel.get]
+
+external set_text_content : Dom.element -> string -> unit = "textContent"
+[@@mel.set]
+
+type selection
+
+external selection : unit -> selection Js.null = "getSelection"
+[@@mel.scope "window"]
+
+external collapse : selection -> Dom.element -> unit = "collapse" [@@mel.send]
+external anchor : selection -> Dom.element Js.null = "anchorNode" [@@mel.get]
+
+type navigator
+
+(* The browser's navigator, which a server has none of. *)
+external navigator : navigator Js.Undefined.t = "navigator"
+[@@mel.scope "globalThis"]
+
+external platform : navigator -> string = "platform" [@@mel.get]
+external touch_points : navigator -> int = "maxTouchPoints" [@@mel.get]
+
+(* Intl's number format for a locale the field reads, which may not yet be
+   Kobalte's. *)
+external number_format : string -> K.NumberFormatOptions.t -> K.NumberFormat.t
+  = "NumberFormat"
+[@@mel.new] [@@mel.scope "Intl"]
+
+(* Intl's names of a date's fields, as Intl.DisplayNames gives them. *)
+type display_names
+type display_names_options
+
+external display_names_options :
+  type_:(string[@mel.as "type"]) -> unit -> display_names_options = ""
+[@@mel.obj]
+
+external display_names : string -> display_names_options -> display_names
+  = "DisplayNames"
+[@@mel.new] [@@mel.scope "Intl"]
+
+external display_name : display_names -> string -> string Js.Undefined.t = "of"
+[@@mel.send]
+
+(* A format's part as Intl names it, which names kinds the binding's part does
+   not: relatedYear, yearName. *)
+external part_type : Dt.DateTimeFormatPart.t -> string = "type" [@@mel.get]
+
+type segment_type =
+  [ `era
+  | `year
+  | `month
+  | `day
+  | `hour
+  | `minute
+  | `second
+  | `dayPeriod
+  | `timeZoneName
+  | `literal ]
+
+type segment = {
+  type_ : segment_type;
+  text : string;
+  value : int option;
+  min_value : int option;
+  max_value : int option;
+  is_placeholder : bool;
+  placeholder : string;
+  is_editable : bool;
+}
+
+type translations = {
+  selected_date_description : string -> string;
+  start_date : string;
+  end_date : string;
+  selected_range_description : string -> string -> string;
+}
+
+let english =
+  {
+    selected_date_description = (fun d -> "Selected Date: " ^ d);
+    start_date = "Start Date";
+    end_date = "End Date";
+    selected_range_description =
+      (fun s e -> "Selected Range: " ^ s ^ " to " ^ e);
+  }
+
+type 'v range = { start : 'v; end_ : 'v }
+
+type field = {
+  segments : segment array S.accessor;
+  is_disabled : bool S.accessor;
+  is_read_only : bool S.accessor;
+  is_required : bool S.accessor;
+  is_invalid : bool S.accessor;
+  labelled_by : string option S.accessor;
+  described_by : string option S.accessor;
+}
+
+(* Kobalte's state, an attribute present and empty, or none. *)
+let state on = if on then Jsx.data "" else Jsx.flag false
+
+(* A part of a date a segment edits. *)
+type part =
+  [ `era | `year | `month | `day | `hour | `dayPeriod | `minute | `second ]
+
+type cycle = [ `h11 | `h12 | `h23 | `h24 ]
+
+(* An hour of the day on a clock, and whether it is after noon where the clock
+   has two halves, as React Stately's IncompleteDate turns them. *)
+let to_clock hour (cycle : cycle) =
+  let period = Some (if hour >= 12 then 1 else 0) in
+  match cycle with
+  | `h11 -> (period, if hour >= 12 then hour - 12 else hour)
+  | `h12 ->
+      (period, if hour = 0 then 12 else if hour > 12 then hour - 12 else hour)
+  | `h23 -> (None, hour)
+  | `h24 -> (None, hour + 1)
+
+let of_clock hour period (cycle : cycle) =
+  match cycle with
+  | `h11 -> if period = 1 then hour + 12 else hour
+  | `h12 ->
+      let hour = if hour = 12 then 0 else hour in
+      if period = 1 then hour + 12 else hour
+  | `h23 -> hour
+  | `h24 -> hour - 1
+
+let twelve (cycle : cycle) =
+  match cycle with `h11 | `h12 -> true | `h23 | `h24 -> false
+
+(* A date as the field edits it, each part none until it is given: React
+   Stately's IncompleteDate, its hour on the field's clock. *)
+type parts = {
+  era : string option;
+  year : int option;
+  month : int option;
+  day : int option;
+  hour : int option;
+  day_period : int option;
+  minute : int option;
+  second : int option;
+  millisecond : int option;
+  offset : int option;
+}
+
+let none =
+  {
+    era = None;
+    year = None;
+    month = None;
+    day = None;
+    hour = None;
+    day_period = None;
+    minute = None;
+    second = None;
+    millisecond = None;
+    offset = None;
+  }
+
+(* Every part of a value, the time's zero on a date alone. *)
+type whole = {
+  w_era : string;
+  w_year : int;
+  w_month : int;
+  w_day : int;
+  w_hour : int;
+  w_minute : int;
+  w_second : int;
+  w_millisecond : int;
+}
+
+(* What the field reads and writes of a kind of value. *)
+type 'v kind = {
+  read : 'v -> whole;
+  timed : bool;
+  offset : 'v -> int option;
+  write : 'v -> whole -> 'v;  (** Its parts set, constrained to a date. *)
+  shift : 'v -> int -> 'v;  (** Moved by milliseconds. *)
+  zone : 'v -> string option;
+  calendar : 'v -> Dt.Calendar.t;
+  convert : 'v -> Dt.Calendar.t -> 'v;
+  to_date : 'v -> string -> Js.Date.t;
+  compare : 'v -> 'v -> float;
+  to_string : 'v -> string;
+  cycle_hour : ('v -> int -> twelve:bool -> 'v) option;
+      (** The hour stepped by its zone's rules. *)
+}
+
+let date_kind : Dt.CalendarDate.t kind =
+  let module V = Dt.CalendarDate in
+  {
+    read =
+      (fun v ->
+        {
+          w_era = V.era v;
+          w_year = V.year v;
+          w_month = V.month v;
+          w_day = V.day v;
+          w_hour = 0;
+          w_minute = 0;
+          w_second = 0;
+          w_millisecond = 0;
+        });
+    timed = false;
+    offset = (fun _ -> None);
+    write =
+      (fun v w ->
+        V.set v
+          (Dt.DateFields.make ~era:w.w_era ~year:w.w_year ~month:w.w_month
+             ~day:w.w_day ()));
+    shift = (fun v _ -> v);
+    zone = (fun _ -> None);
+    calendar = V.calendar;
+    convert = D.to_calendar;
+    to_date = V.to_date;
+    compare = V.compare;
+    to_string = (fun v -> V.to_string v ());
+    cycle_hour = None;
+  }
+
+let time_fields w =
+  Dt.ZonedDateTime_Set.make ~era:w.w_era ~year:w.w_year ~month:w.w_month
+    ~day:w.w_day ~hour:w.w_hour ~minute:w.w_minute ~second:w.w_second
+    ~millisecond:w.w_millisecond ()
+
+let date_time_kind : Dt.CalendarDateTime.t kind =
+  let module V = Dt.CalendarDateTime in
+  {
+    read =
+      (fun v ->
+        {
+          w_era = V.era v;
+          w_year = V.year v;
+          w_month = V.month v;
+          w_day = V.day v;
+          w_hour = V.hour v;
+          w_minute = V.minute v;
+          w_second = V.second v;
+          w_millisecond = V.millisecond v;
+        });
+    timed = true;
+    offset = (fun _ -> None);
+    write = (fun v w -> V.set v (time_fields w));
+    shift = (fun v _ -> v);
+    zone = (fun _ -> None);
+    calendar = V.calendar;
+    convert = D.to_calendar;
+    to_date = (fun v zone -> V.to_date v zone ());
+    compare = V.compare;
+    to_string = (fun v -> V.to_string v ());
+    cycle_hour = None;
+  }
+
+let zoned_kind : Dt.ZonedDateTime.t kind =
+  let module V = Dt.ZonedDateTime in
+  {
+    read =
+      (fun v ->
+        {
+          w_era = V.era v;
+          w_year = V.year v;
+          w_month = V.month v;
+          w_day = V.day v;
+          w_hour = V.hour v;
+          w_minute = V.minute v;
+          w_second = V.second v;
+          w_millisecond = V.millisecond v;
+        });
+    timed = true;
+    offset = (fun v -> Some (V.offset v));
+    (* A time its zone's clocks skip is the one after it: [`compatible] reads
+       every time so, and never throws. *)
+    write = (fun v w -> V.set v (time_fields w) ~disambiguation:`compatible ());
+    shift = (fun v ms -> V.add v (Dt.DateTimeDuration.make ~milliseconds:ms ()));
+    zone = (fun v -> Some (V.time_zone v));
+    calendar = V.calendar;
+    convert = D.to_calendar;
+    to_date = (fun v _ -> V.to_date v ());
+    compare = V.compare;
+    to_string = (fun v -> V.to_string v ());
+    cycle_hour =
+      Some
+        (fun v amount ~twelve ->
+          V.cycle v `hour amount
+            ~options:
+              (Dt.CycleTimeOptions.make
+                 ~hour_cycle:(if twelve then 12 else 24)
+                 ~round:false ())
+            ());
+  }
+
+let parts_of (kind : _ kind) cycle v =
+  let w = kind.read v in
+  let day_period, hour =
+    if kind.timed then
+      let period, hour = to_clock w.w_hour cycle in
+      (period, Some hour)
+    else (None, None)
+  in
+  {
+    era = Some w.w_era;
+    year = Some w.w_year;
+    month = Some w.w_month;
+    day = Some w.w_day;
+    hour;
+    day_period;
+    minute = (if kind.timed then Some w.w_minute else None);
+    second = (if kind.timed then Some w.w_second else None);
+    millisecond = (if kind.timed then Some w.w_millisecond else None);
+    offset = kind.offset v;
+  }
+
+let has (p : parts) (part : part) =
+  match part with
+  | `era -> Option.is_some p.era
+  | `year -> Option.is_some p.year
+  | `month -> Option.is_some p.month
+  | `day -> Option.is_some p.day
+  | `hour -> Option.is_some p.hour
+  | `dayPeriod -> Option.is_some p.day_period
+  | `minute -> Option.is_some p.minute
+  | `second -> Option.is_some p.second
+
+let same (a : part) (b : part) =
+  match (a, b) with
+  | `era, `era
+  | `year, `year
+  | `month, `month
+  | `day, `day
+  | `hour, `hour
+  | `dayPeriod, `dayPeriod
+  | `minute, `minute
+  | `second, `second ->
+      true
+  | _ -> false
+
+let complete p parts = List.for_all (has p) parts
+let cleared p parts = not (List.exists (has p) parts)
+
+(* The date [p] makes on [base], each part it lacks [base]'s, a zoned value
+   kept at the offset it was typed at. *)
+let to_value (kind : 'v kind) cycle (p : parts) (base : 'v) : 'v =
+  let b = kind.read base in
+  let get o d = Option.value o ~default:d in
+  let hour =
+    match p.hour with
+    | Some h -> of_clock h (get p.day_period 0) cycle
+    | None when kind.timed && twelve cycle ->
+        if Option.equal Int.equal p.day_period (Some 1) then 12 else 0
+    | None -> b.w_hour
+  in
+  let v =
+    kind.write base
+      {
+        w_era = get p.era b.w_era;
+        w_year = get p.year b.w_year;
+        w_month = get p.month b.w_month;
+        w_day = get p.day b.w_day;
+        w_hour = (if kind.timed then hour else b.w_hour);
+        w_minute = get p.minute b.w_minute;
+        w_second = get p.second b.w_second;
+        w_millisecond = get p.millisecond b.w_millisecond;
+      }
+  in
+  match (kind.offset v, p.offset) with
+  | Some now, Some typed when now <> typed -> kind.shift v (now - typed)
+  | _ -> v
+
+(* Whether [v] is the date [p] says, each part of [parts] alike. *)
+let matches (kind : 'v kind) cycle (p : parts) (v : 'v) parts =
+  let w = kind.read v in
+  List.for_all
+    (fun (part : part) ->
+      match part with
+      | `hour | `dayPeriod ->
+          let period, hour = to_clock w.w_hour cycle in
+          Option.equal Int.equal p.day_period period
+          && Option.equal Int.equal p.hour (Some hour)
+      | `era -> Option.equal String.equal p.era (Some w.w_era)
+      | `year -> Option.equal Int.equal p.year (Some w.w_year)
+      | `month -> Option.equal Int.equal p.month (Some w.w_month)
+      | `day -> Option.equal Int.equal p.day (Some w.w_day)
+      | `minute -> Option.equal Int.equal p.minute (Some w.w_minute)
+      | `second -> Option.equal Int.equal p.second (Some w.w_second))
+    parts
+
+(* A part's least and greatest, and where it stands. *)
+let limits calendar cycle (p : parts) (part : part) =
+  match part with
+  | `era ->
+      let eras = Dt.Calendar.get_eras calendar () in
+      let at =
+        match p.era with
+        | Some e -> Js.Array.findIndex ~f:(String.equal e) eras
+        | None -> Array.length eras - 1
+      in
+      (Some at, 0, Array.length eras - 1)
+  | `year -> (p.year, 1, 9999)
+  | `month -> (p.month, 1, Dt.Calendar.get_maximum_months_in_year calendar ())
+  | `day -> (p.day, 1, Dt.Calendar.get_maximum_days_in_month calendar ())
+  | `dayPeriod -> (p.day_period, 0, 1)
+  | `hour -> (
+      match (cycle : cycle) with
+      | `h12 -> (p.hour, 1, 12)
+      | `h11 -> (p.hour, 0, 11)
+      | `h23 | `h24 -> (p.hour, 0, 23))
+  | `minute -> (p.minute, 0, 59)
+  | `second -> (p.second, 0, 59)
+
+let cycle_value value amount least greatest ~round =
+  if round then
+    let value =
+      value + if amount > 0 then 1 else if amount < 0 then -1 else 0
+    in
+    let value = if value < least then greatest else value in
+    let step = abs amount in
+    let value =
+      if amount > 0 then
+        int_of_float (Float.ceil (float_of_int value /. float_of_int step))
+        * step
+      else
+        int_of_float (Float.floor (float_of_int value /. float_of_int step))
+        * step
+    in
+    if value > greatest then least else value
+  else
+    let value = value + amount in
+    if value < least then greatest - (least - value - 1)
+    else if value > greatest then least + (value - greatest - 1)
+    else value
+
+(* [p] with [part] set; an hour set takes its half of the day from the
+   placeholder where it has none, a year its era. *)
+let set (kind : 'v kind) cycle (p : parts) (part : part) value
+    ~(placeholder : 'v) =
+  let w = kind.read placeholder in
+  let p = match part with `second -> p | _ -> { p with offset = None } in
+  match part with
+  | `era -> p
+  | `year ->
+      {
+        p with
+        year = Some value;
+        era = (match p.era with Some e -> Some e | None -> Some w.w_era);
+      }
+  | `month -> { p with month = Some value }
+  | `day -> { p with day = Some value }
+  | `hour ->
+      {
+        p with
+        hour = Some value;
+        day_period =
+          (match p.day_period with
+          | Some d -> Some d
+          | None when kind.timed -> fst (to_clock w.w_hour cycle)
+          | None -> None);
+      }
+  | `dayPeriod -> { p with day_period = Some value }
+  | `minute -> { p with minute = Some value }
+  | `second -> { p with second = Some value }
+
+let clear (p : parts) (part : part) =
+  let p = { p with offset = None } in
+  match part with
+  | `era -> { p with era = None }
+  | `year -> { p with year = None; era = None }
+  | `month -> { p with month = None }
+  | `day -> { p with day = None }
+  | `hour -> { p with hour = None }
+  | `dayPeriod -> { p with day_period = None }
+  | `minute -> { p with minute = None }
+  | `second -> { p with second = None }
+
+(* [p] with [part] stepped by [amount], as React Stately's IncompleteDate
+   cycles it: a part with none takes the placeholder's. *)
+let step (kind : 'v kind) calendar cycle (p : parts) (part : part) amount
+    ~(placeholder : 'v) ~shown =
+  let w = kind.read placeholder in
+  match part with
+  | (`year | `month | `day | `hour | `minute | `second) when not (has p part)
+    -> (
+      match part with
+      | `hour ->
+          let period, hour = to_clock w.w_hour cycle in
+          { p with hour = Some hour; day_period = period }
+      | `year ->
+          {
+            p with
+            year = Some w.w_year;
+            era = (match p.era with Some e -> Some e | None -> Some w.w_era);
+          }
+      | `month -> { p with month = Some w.w_month }
+      | `day -> { p with day = Some w.w_day }
+      | `minute -> { p with minute = Some w.w_minute }
+      | `second -> { p with second = Some w.w_second }
+      | `era | `dayPeriod -> p)
+  | `era ->
+      let eras = Dt.Calendar.get_eras calendar () in
+      let at =
+        match p.era with
+        | Some e -> Js.Array.findIndex ~f:(String.equal e) eras
+        | None -> -1
+      in
+      let at = cycle_value at amount 0 (Array.length eras - 1) ~round:false in
+      { p with era = Some eras.(at) }
+  | `year ->
+      (* A CalendarDate steps the year, so 1 AD steps back to 1 BC. *)
+      let era = Option.value p.era ~default:w.w_era in
+      let date =
+        Dt.CalendarDate.set
+          (D.to_calendar (Dt.CalendarDate.make 1 1 1) calendar)
+          (Dt.DateFields.make ~era
+             ~year:(Option.value p.year ~default:w.w_year)
+             ~month:(Option.value p.month ~default:1)
+             ~day:(Option.value p.day ~default:1)
+             ())
+      in
+      let date =
+        Dt.CalendarDate.cycle date `year amount
+          ~options:(Dt.CycleOptions.make ~round:true ())
+          ()
+      in
+      {
+        p with
+        era = Some (Dt.CalendarDate.era date);
+        year = Some (Dt.CalendarDate.year date);
+      }
+  | `month ->
+      {
+        p with
+        month =
+          Some
+            (cycle_value
+               (Option.value p.month ~default:1)
+               amount 1
+               (Dt.Calendar.get_maximum_months_in_year calendar ())
+               ~round:false);
+      }
+  | `day ->
+      {
+        p with
+        day =
+          Some
+            (cycle_value
+               (Option.value p.day ~default:1)
+               amount 1
+               (Dt.Calendar.get_maximum_days_in_month calendar ())
+               ~round:false);
+      }
+  | `hour -> (
+      let dated =
+        List.exists
+          (fun (s : part) ->
+            match s with `year | `month | `day -> true | _ -> false)
+          shown
+      in
+      let whole_date = has p `year && has p `month && has p `day in
+      match kind.cycle_hour with
+      | Some cycle_hour when (not dated) || whole_date ->
+          let v = to_value kind cycle p placeholder in
+          let v = cycle_hour v amount ~twelve:(twelve cycle) in
+          let period, hour = to_clock (kind.read v).w_hour cycle in
+          {
+            p with
+            hour = Some hour;
+            day_period = period;
+            offset = kind.offset v;
+          }
+      | Some _ | None ->
+          let _, least, greatest = limits calendar cycle p `hour in
+          {
+            p with
+            hour =
+              Some
+                (cycle_value
+                   (Option.value p.hour ~default:0)
+                   amount least greatest ~round:false);
+            day_period =
+              (match p.day_period with
+              | Some d -> Some d
+              | None -> fst (to_clock w.w_hour cycle));
+          })
+  | `dayPeriod ->
+      {
+        p with
+        day_period =
+          Some
+            (cycle_value
+               (Option.value p.day_period ~default:0)
+               amount 0 1 ~round:false);
+      }
+  | `minute ->
+      {
+        p with
+        minute =
+          Some
+            (cycle_value
+               (Option.value p.minute ~default:0)
+               amount 0 59 ~round:true);
+      }
+  | `second ->
+      {
+        p with
+        second =
+          Some
+            (cycle_value
+               (Option.value p.second ~default:0)
+               amount 0 59 ~round:true);
+      }
+
+(* How far Page Up and Page Down step a part, as React Stately's do. *)
+let page (part : part) =
+  match part with
+  | `year -> 5
+  | `month -> 2
+  | `day -> 7
+  | `hour -> 2
+  | `minute | `second -> 15
+  | `era | `dayPeriod -> 1
+
+(* What a date's segment shows while it has no part, by the reader's language,
+   as Chrome and Firefox write a date input's: React Stately's table. *)
+let placeholders =
+  [
+    ("ach", ("mwaka", "dwe", "nino"));
+    ("af", ("jjjj", "mm", "dd"));
+    ("am", ({js|ዓዓዓዓ|js}, {js|ሚሜ|js}, {js|ቀቀ|js}));
+    ("an", ("aaaa", "mm", "dd"));
+    ("ar", ({js|سنة|js}, {js|شهر|js}, {js|يوم|js}));
+    ("ast", ("aaaa", "mm", "dd"));
+    ("az", ("iiii", "aa", "gg"));
+    ("be", ({js|гггг|js}, {js|мм|js}, {js|дд|js}));
+    ("bg", ({js|гггг|js}, {js|мм|js}, {js|дд|js}));
+    ("bn", ("yyyy", {js|মিমি|js}, "dd"));
+    ("br", ("bbbb", "mm", "dd"));
+    ("bs", ("gggg", "mm", "dd"));
+    ("ca", ("aaaa", "mm", "dd"));
+    ("cak", ("jjjj", "ii", "q'q'"));
+    ("ckb", ({js|ساڵ|js}, {js|مانگ|js}, {js|ڕۆژ|js}));
+    ("cs", ("rrrr", "mm", "dd"));
+    ("cy", ("bbbb", "mm", "dd"));
+    ("da", ({js|åååå|js}, "mm", "dd"));
+    ("de", ("jjjj", "mm", "tt"));
+    ("dsb", ("llll", "mm", {js|źź|js}));
+    ("el", ({js|εεεε|js}, {js|μμ|js}, {js|ηη|js}));
+    ("en", ("yyyy", "mm", "dd"));
+    ("eo", ("jjjj", "mm", "tt"));
+    ("es", ("aaaa", "mm", "dd"));
+    ("et", ("aaaa", "kk", "pp"));
+    ("eu", ("uuuu", "hh", "ee"));
+    ("fa", ({js|سال|js}, {js|ماه|js}, {js|روز|js}));
+    ("ff", ("hhhh", "ll", {js|ññ|js}));
+    ("fi", ("vvvv", "kk", "pp"));
+    ("fr", ("aaaa", "mm", "jj"));
+    ("fy", ("jjjj", "mm", "dd"));
+    ("ga", ("bbbb", "mm", "ll"));
+    ("gd", ("bbbb", "mm", "ll"));
+    ("gl", ("aaaa", "mm", "dd"));
+    ("he", ({js|שנה|js}, {js|חודש|js}, {js|יום|js}));
+    ("hr", ("gggg", "mm", "dd"));
+    ("hsb", ("llll", "mm", "dd"));
+    ("hu", ({js|éééé|js}, "hh", "nn"));
+    ("ia", ("aaaa", "mm", "dd"));
+    ("id", ("tttt", "bb", "hh"));
+    ("is", ({js|áááá|js}, "mm", "dd"));
+    ("it", ("aaaa", "mm", "gg"));
+    ("ja", ({js|年|js}, {js|月|js}, {js|日|js}));
+    ("ka", ({js|წწწწ|js}, {js|თთ|js}, {js|რრ|js}));
+    ("kk", ({js|жжжж|js}, {js|аа|js}, {js|кк|js}));
+    ("kn", ({js|ವವವವ|js}, {js|ಮಿಮೀ|js}, {js|ದಿದಿ|js}));
+    ("ko", ({js|연도|js}, {js|월|js}, {js|일|js}));
+    ("lb", ("jjjj", "mm", "dd"));
+    ("lo", ({js|ປປປປ|js}, {js|ດດ|js}, {js|ວວ|js}));
+    ("lt", ("mmmm", "mm", "dd"));
+    ("lv", ("gggg", "mm", "dd"));
+    ("meh", ("aaaa", "mm", "dd"));
+    ("ml", ({js|വർഷം|js}, {js|മാസം|js}, {js|തീയതി|js}));
+    ("ms", ("tttt", "mm", "hh"));
+    ("nb", ({js|åååå|js}, "mm", "dd"));
+    ("nl", ("jjjj", "mm", "dd"));
+    ("nn", ({js|åååå|js}, "mm", "dd"));
+    ("no", ({js|åååå|js}, "mm", "dd"));
+    ("oc", ("aaaa", "mm", "jj"));
+    ("pl", ("rrrr", "mm", "dd"));
+    ("pt", ("aaaa", "mm", "dd"));
+    ("rm", ("oooo", "mm", "dd"));
+    ("ro", ("aaaa", "ll", "zz"));
+    ("ru", ({js|гггг|js}, {js|мм|js}, {js|дд|js}));
+    ("sc", ("aaaa", "mm", "dd"));
+    ("scn", ("aaaa", "mm", "jj"));
+    ("sk", ("rrrr", "mm", "dd"));
+    ("sl", ("llll", "mm", "dd"));
+    ("sr", ({js|гггг|js}, {js|мм|js}, {js|дд|js}));
+    ("sr-Latn", ("gggg", "mm", "dd"));
+    ("sv", ({js|åååå|js}, "mm", "dd"));
+    ("szl", ("rrrr", "mm", "dd"));
+    ("tg", ({js|сссс|js}, {js|мм|js}, {js|рр|js}));
+    ("th", ({js|ปปปป|js}, {js|ดด|js}, {js|วว|js}));
+    ("tr", ("yyyy", "aa", "gg"));
+    ("uk", ({js|рррр|js}, {js|мм|js}, {js|дд|js}));
+    ("zh-CN", ({js|年|js}, {js|月|js}, {js|日|js}));
+    ("zh-TW", ({js|年|js}, {js|月|js}, {js|日|js}));
+  ]
+
+let locale_language locale =
+  match String.index_opt locale '-' with
+  | Some i -> String.sub locale 0 i
+  | None -> locale
+
+(* A locale's entry of [table]: its own, else its language's, else the first
+   of its language, else [default], as \@internationalized/string finds a
+   locale's strings. *)
+let localized table locale ~default =
+  match List.assoc_opt locale table with
+  | Some p -> p
+  | None -> (
+      let language = locale_language locale in
+      match List.assoc_opt language table with
+      | Some p -> p
+      | None -> (
+          let prefix = language ^ "-" in
+          let n = String.length prefix in
+          match
+            List.find_opt
+              (fun (k, _) ->
+                String.length k > n && String.equal (String.sub k 0 n) prefix)
+              table
+          with
+          | Some (_, p) -> p
+          | None -> default))
+
+(* What a field tells a reader in each language React Aria's speaks. *)
+let translated =
+  [
+    ( "ar-AE",
+      {
+        selected_date_description = (fun d -> {js|تاريخ محدد: |js} ^ d);
+        start_date = {js|تاريخ البدء|js};
+        end_date = {js|تاريخ الانتهاء|js};
+        selected_range_description =
+          (fun s e -> {js|المدى الزمني المحدد: |js} ^ s ^ {js| إلى |js} ^ e);
+      } );
+    ( "bg-BG",
+      {
+        selected_date_description = (fun d -> {js|Избрана дата: |js} ^ d);
+        start_date = {js|Начална дата|js};
+        end_date = {js|Крайна дата|js};
+        selected_range_description =
+          (fun s e -> {js|Избран диапазон: |js} ^ s ^ {js| до |js} ^ e);
+      } );
+    ( "cs-CZ",
+      {
+        selected_date_description = (fun d -> {js|Vybrané datum: |js} ^ d);
+        start_date = {js|Počáteční datum|js};
+        end_date = {js|Konečné datum|js};
+        selected_range_description =
+          (fun s e -> {js|Vybrané období: |js} ^ s ^ {js| až |js} ^ e);
+      } );
+    ( "da-DK",
+      {
+        selected_date_description = (fun d -> "Valgt dato: " ^ d);
+        start_date = "Startdato";
+        end_date = "Slutdato";
+        selected_range_description =
+          (fun s e -> "Valgt interval: " ^ s ^ " til " ^ e);
+      } );
+    ( "de-DE",
+      {
+        selected_date_description = (fun d -> {js|Ausgewähltes Datum: |js} ^ d);
+        start_date = "Startdatum";
+        end_date = "Enddatum";
+        selected_range_description =
+          (fun s e -> {js|Ausgewählter Bereich: |js} ^ s ^ " bis " ^ e);
+      } );
+    ( "el-GR",
+      {
+        selected_date_description =
+          (fun d -> {js|Επιλεγμένη ημερομηνία: |js} ^ d);
+        start_date = {js|Ημερομηνία έναρξης|js};
+        end_date = {js|Ημερομηνία λήξης|js};
+        selected_range_description =
+          (fun s e -> {js|Επιλεγμένο εύρος: |js} ^ s ^ {js| έως |js} ^ e);
+      } );
+    ( "en-US",
+      {
+        selected_date_description = (fun d -> "Selected Date: " ^ d);
+        start_date = "Start Date";
+        end_date = "End Date";
+        selected_range_description =
+          (fun s e -> "Selected Range: " ^ s ^ " to " ^ e);
+      } );
+    ( "es-ES",
+      {
+        selected_date_description = (fun d -> "Fecha seleccionada: " ^ d);
+        start_date = "Fecha de inicio";
+        end_date = "Fecha final";
+        selected_range_description =
+          (fun s e -> "Rango seleccionado: " ^ s ^ " a " ^ e);
+      } );
+    ( "et-EE",
+      {
+        selected_date_description = (fun d -> {js|Valitud kuupäev: |js} ^ d);
+        start_date = {js|Alguskuupäev|js};
+        end_date = {js|Lõppkuupäev|js};
+        selected_range_description =
+          (fun s e -> "Valitud vahemik: " ^ s ^ " kuni " ^ e);
+      } );
+    ( "fi-FI",
+      {
+        selected_date_description = (fun d -> {js|Valittu päivämäärä: |js} ^ d);
+        start_date = {js|Alkamispäivä|js};
+        end_date = {js|Päättymispäivä|js};
+        selected_range_description =
+          (fun s e -> {js|Valittu aikaväli: |js} ^ s ^ {js| – |js} ^ e);
+      } );
+    ( "fr-FR",
+      {
+        selected_date_description = (fun d -> {js|Date sélectionnée : |js} ^ d);
+        start_date = {js|Date de début|js};
+        end_date = "Date de fin";
+        selected_range_description =
+          (fun s e -> {js|Plage sélectionnée : |js} ^ s ^ " au " ^ e);
+      } );
+    ( "he-IL",
+      {
+        selected_date_description = (fun d -> {js|תאריך נבחר: |js} ^ d);
+        start_date = {js|תאריך התחלה|js};
+        end_date = {js|תאריך סיום|js};
+        selected_range_description =
+          (fun s e -> {js|טווח נבחר: |js} ^ s ^ {js| עד |js} ^ e);
+      } );
+    ( "hr-HR",
+      {
+        selected_date_description = (fun d -> "Odabrani datum: " ^ d);
+        start_date = {js|Datum početka|js};
+        end_date = {js|Datum završetka|js};
+        selected_range_description =
+          (fun s e -> "Odabrani raspon: " ^ s ^ " do " ^ e);
+      } );
+    ( "hu-HU",
+      {
+        selected_date_description = (fun d -> {js|Kijelölt dátum: |js} ^ d);
+        start_date = {js|Kezdő dátum|js};
+        end_date = {js|Befejező dátum|js};
+        selected_range_description =
+          (fun s e -> {js|Kijelölt tartomány: |js} ^ s ^ {js|–|js} ^ e);
+      } );
+    ( "it-IT",
+      {
+        selected_date_description = (fun d -> "Data selezionata: " ^ d);
+        start_date = "Data iniziale";
+        end_date = "Data finale";
+        selected_range_description =
+          (fun s e -> "Intervallo selezionato: da " ^ s ^ " a " ^ e);
+      } );
+    ( "ja-JP",
+      {
+        selected_date_description = (fun d -> {js|選択した日付 : |js} ^ d);
+        start_date = {js|開始日|js};
+        end_date = {js|終了日|js};
+        selected_range_description =
+          (fun s e -> {js|選択範囲 : |js} ^ s ^ {js| から |js} ^ e);
+      } );
+    ( "ko-KR",
+      {
+        selected_date_description = (fun d -> {js|선택 일자: |js} ^ d);
+        start_date = {js|시작일|js};
+        end_date = {js|종료일|js};
+        selected_range_description =
+          (fun s e -> {js|선택 범위: |js} ^ s ^ " ~ " ^ e);
+      } );
+    ( "lt-LT",
+      {
+        selected_date_description = (fun d -> "Pasirinkta data: " ^ d);
+        start_date = {js|Pradžios data|js};
+        end_date = "Pabaigos data";
+        selected_range_description =
+          (fun s e -> "Pasirinktas intervalas: nuo " ^ s ^ " iki " ^ e);
+      } );
+    ( "lv-LV",
+      {
+        selected_date_description = (fun d -> {js|Atlasītais datums: |js} ^ d);
+        start_date = {js|Sākuma datums|js};
+        end_date = "Beigu datums";
+        selected_range_description =
+          (fun s e ->
+            {js|Atlasītais diapazons: no |js} ^ s ^ {js| līdz |js} ^ e);
+      } );
+    ( "nb-NO",
+      {
+        selected_date_description = (fun d -> "Valgt dato: " ^ d);
+        start_date = "Startdato";
+        end_date = "Sluttdato";
+        selected_range_description =
+          (fun s e -> {js|Valgt område: |js} ^ s ^ " til " ^ e);
+      } );
+    ( "nl-NL",
+      {
+        selected_date_description = (fun d -> "Geselecteerde datum: " ^ d);
+        start_date = "Startdatum";
+        end_date = "Einddatum";
+        selected_range_description =
+          (fun s e -> "Geselecteerd bereik: " ^ s ^ " tot " ^ e);
+      } );
+    ( "pl-PL",
+      {
+        selected_date_description = (fun d -> "Wybrana data: " ^ d);
+        start_date = {js|Data początkowa|js};
+        end_date = {js|Data końcowa|js};
+        selected_range_description =
+          (fun s e -> "Wybrany zakres: " ^ s ^ " do " ^ e);
+      } );
+    ( "pt-BR",
+      {
+        selected_date_description = (fun d -> "Data selecionada: " ^ d);
+        start_date = "Data inicial";
+        end_date = "Data final";
+        selected_range_description =
+          (fun s e -> "Intervalo selecionado: " ^ s ^ " a " ^ e);
+      } );
+    ( "pt-PT",
+      {
+        selected_date_description = (fun d -> "Data selecionada: " ^ d);
+        start_date = {js|Data de Início|js};
+        end_date = {js|Data de Término|js};
+        selected_range_description =
+          (fun s e -> "Intervalo selecionado: " ^ s ^ " a " ^ e);
+      } );
+    ( "ro-RO",
+      {
+        selected_date_description = (fun d -> {js|Dată selectată: |js} ^ d);
+        start_date = {js|Dată început|js};
+        end_date = {js|Dată final|js};
+        selected_range_description =
+          (fun s e -> "Interval selectat: de la " ^ s ^ {js| până la |js} ^ e);
+      } );
+    ( "ru-RU",
+      {
+        selected_date_description = (fun d -> {js|Выбранная дата: |js} ^ d);
+        start_date = {js|Дата начала|js};
+        end_date = {js|Дата окончания|js};
+        selected_range_description =
+          (fun s e -> {js|Выбранный диапазон: с |js} ^ s ^ {js| по |js} ^ e);
+      } );
+    ( "sk-SK",
+      {
+        selected_date_description = (fun d -> {js|Vybratý dátum: |js} ^ d);
+        start_date = {js|Dátum začatia|js};
+        end_date = {js|Dátum ukončenia|js};
+        selected_range_description =
+          (fun s e -> {js|Vybratý rozsah: od |js} ^ s ^ " do " ^ e);
+      } );
+    ( "sl-SI",
+      {
+        selected_date_description = (fun d -> "Izbrani datum: " ^ d);
+        start_date = {js|Datum začetka|js};
+        end_date = "Datum konca";
+        selected_range_description =
+          (fun s e -> {js|Izbrano območje: |js} ^ s ^ " do " ^ e);
+      } );
+    ( "sr-SP",
+      {
+        selected_date_description = (fun d -> "Izabrani datum: " ^ d);
+        start_date = {js|Datum početka|js};
+        end_date = {js|Datum završetka|js};
+        selected_range_description =
+          (fun s e -> "Izabrani opseg: od " ^ s ^ " do " ^ e);
+      } );
+    ( "sv-SE",
+      {
+        selected_date_description = (fun d -> "Valt datum: " ^ d);
+        start_date = "Startdatum";
+        end_date = "Slutdatum";
+        selected_range_description =
+          (fun s e -> "Valt intervall: " ^ s ^ " till " ^ e);
+      } );
+    ( "tr-TR",
+      {
+        selected_date_description = (fun d -> {js|Seçilen Tarih: |js} ^ d);
+        start_date = {js|Başlangıç Tarihi|js};
+        end_date = {js|Bitiş Tarihi|js};
+        selected_range_description =
+          (fun s e -> {js|Seçilen Aralık: |js} ^ s ^ " - " ^ e);
+      } );
+    ( "uk-UA",
+      {
+        selected_date_description = (fun d -> {js|Вибрана дата: |js} ^ d);
+        start_date = {js|Дата початку|js};
+        end_date = {js|Дата завершення|js};
+        selected_range_description =
+          (fun s e -> {js|Вибраний діапазон: |js} ^ s ^ {js| — |js} ^ e);
+      } );
+    ( "zh-CN",
+      {
+        selected_date_description = (fun d -> {js|选定的日期：|js} ^ d);
+        start_date = {js|开始日期|js};
+        end_date = {js|结束日期|js};
+        selected_range_description =
+          (fun s e -> {js|选定的范围：|js} ^ s ^ {js| 至 |js} ^ e);
+      } );
+    ( "zh-TW",
+      {
+        selected_date_description = (fun d -> {js|選定的日期：|js} ^ d);
+        start_date = {js|開始日期|js};
+        end_date = {js|結束日期|js};
+        selected_range_description =
+          (fun s e -> {js|選定的範圍：|js} ^ s ^ {js| 至 |js} ^ e);
+      } );
+  ]
+
+let translations_for locale = localized translated locale ~default:english
+
+let placeholders_of locale =
+  localized placeholders locale ~default:("yyyy", "mm", "dd")
+
+(* What a reader is told of a segment with no part, by the reader's language:
+   React Aria's spin button's word. *)
+let empties =
+  [
+    ("ar-AE", {js|فارغ|js});
+    ("bg-BG", {js|Изпразни|js});
+    ("cs-CZ", {js|Prázdné|js});
+    ("da-DK", "Tom");
+    ("de-DE", "Leer");
+    ("el-GR", {js|Άδειο|js});
+    ("en-US", "Empty");
+    ("es-ES", {js|Vacío|js});
+    ("et-EE", {js|Tühjenda|js});
+    ("fi-FI", {js|Tyhjä|js});
+    ("fr-FR", "Vide");
+    ("he-IL", {js|ריק|js});
+    ("hr-HR", "Prazno");
+    ("hu-HU", {js|Üres|js});
+    ("it-IT", "Vuoto");
+    ("ja-JP", {js|空|js});
+    ("ko-KR", {js|비어 있음|js});
+    ("lt-LT", {js|Tuščias|js});
+    ("lv-LV", {js|Tukšs|js});
+    ("nb-NO", "Tom");
+    ("nl-NL", "Leeg");
+    ("pl-PL", "Pusty");
+    ("pt-BR", "Vazio");
+    ("pt-PT", "Vazio");
+    ("ro-RO", "Gol");
+    ("ru-RU", {js|Не заполнено|js});
+    ("sk-SK", {js|Prázdne|js});
+    ("sl-SI", "Prazen");
+    ("sr-SP", "Prazno");
+    ("sv-SE", "Tomt");
+    ("tr-TR", {js|Boş|js});
+    ("uk-UA", {js|Пусто|js});
+    ("zh-CN", {js|空|js});
+    ("zh-TW", {js|空白|js});
+  ]
+
+let empty_of locale = localized empties locale ~default:"Empty"
+
+let placeholder_of locale (t : segment_type) shown =
+  let year, month, day = placeholders_of locale in
+  match t with
+  | `era | `dayPeriod -> shown
+  | `year -> year
+  | `month -> month
+  | `day -> day
+  | `hour | `minute | `second | `timeZoneName | `literal -> {js|––|js}
+
+let part_of (t : segment_type) : part option =
+  match t with
+  | `era -> Some `era
+  | `year -> Some `year
+  | `month -> Some `month
+  | `day -> Some `day
+  | `hour -> Some `hour
+  | `dayPeriod -> Some `dayPeriod
+  | `minute -> Some `minute
+  | `second -> Some `second
+  | `timeZoneName | `literal -> None
+
+let segment_type_of = function
+  | "era" -> `era
+  | "year" | "relatedYear" -> `year
+  | "month" -> `month
+  | "day" -> `day
+  | "hour" -> `hour
+  | "minute" -> `minute
+  | "second" -> `second
+  | "dayPeriod" | "dayperiod" -> `dayPeriod
+  | "timeZoneName" -> `timeZoneName
+  | _ -> `literal
+
+let literal text =
+  {
+    type_ = `literal;
+    text;
+    value = None;
+    min_value = None;
+    max_value = None;
+    is_placeholder = false;
+    placeholder = "";
+    is_editable = false;
+  }
+
+(* Whether the page runs on iOS, whose VoiceOver cannot focus a spin button. *)
+let ios () =
+  match Js.Undefined.toOption navigator with
+  | None -> false
+  | Some n -> (
+      match platform n with
+      | "iPhone" | "iPad" | "iPod" -> true
+      | "MacIntel" -> touch_points n > 1
+      | _ -> false)
+
+(* What the field's parts read of it, beyond what a style reads. *)
+type inner = {
+  public : field;
+  confirm : unit -> unit;
+  set_root : Dom.element -> unit;
+  hidden : unit -> Jsx.element;
+  spoken : (Dt.DateFormatter.t * Js.Date.t) option S.accessor;
+  own_described_by : string option S.accessor;
+  locale : string S.accessor;
+  direction : [ `ltr | `rtl ] S.accessor;
+  cycle : cycle S.accessor;
+  date : Js.Date.t S.accessor;
+  time_zone : string S.accessor;
+  calendar : Dt.Calendar.t S.accessor;
+  set_part : part -> int -> unit;
+  set_era : string -> unit;
+  clear_part : part -> unit;
+  step_part : part -> int -> unit;
+  to_least : part -> unit;
+  to_greatest : part -> unit;
+  set_input : Dom.element option -> unit;
+  input : Dom.element option S.accessor;
+  label_id : string;
+  label_here : unit -> unit;
+  description_id : string;
+  description_here : unit -> unit;
+  error_id : string;
+  error_here : unit -> unit;
+  aria_label : string option S.accessor;
+  labelled_by : string option S.accessor;
+  described_by : string option S.accessor;
+  input_role : [ `group | `presentation ] S.accessor;
+}
+
+module Field_context = Solidtype.Context.Make_optional (struct
+  type t = inner
+end)
+
+(* A range's two fields, which an Input names by its slot. *)
+module Slots_context = Solidtype.Context.Make_optional (struct
+  type t = (string * inner) list
+end)
+
+let within part =
+  match Field_context.use () with
+  | Some f -> f
+  | None -> invalid_arg (part ^ " is used inside a Date_field root")
+
+module Context = struct
+  let use () = (within "Date_field.Context.use").public
+end
+
+(* An id on the page while the part that carries it is: a part counts itself
+   in as it is made and out as it goes. *)
+let named id =
+  let count, set_count = S.create_signal 0 in
+  let here () =
+    S.set set_count (S.get count + 1);
+    S.on_cleanup (fun () -> S.set set_count (S.get count - 1))
+  in
+  (here, fun () -> if S.get count > 0 then Some id else None)
+
+(* The segments Tab reaches, in the page's order. *)
+let focusable input =
+  Js.Array.from (query_all input "[data-type][tabindex=\"0\"]")
+
+let focus_first input =
+  match focusable input with [||] -> () | all -> focus all.(0)
+
+let index_of all e = Js.Array.findIndex ~f:(fun s -> s == e) all
+
+(* The segment after the one focused, or before it. *)
+let focus_by input amount =
+  let all = focusable input in
+  match Js.Null.toOption active with
+  | Some a ->
+      let at = index_of all a in
+      let next = at + amount in
+      if at >= 0 && next >= 0 && next < Array.length all then (
+        focus all.(next);
+        true)
+      else false
+  | None -> false
+
+(* The segment nearest [from] on the side [sign] says, by where each is
+   drawn, as React Aria moves through a right-to-left field. *)
+let focus_beside input (from : Dom.element) sign =
+  let x = rect_left (rect from) in
+  let nearest =
+    Array.fold_left
+      (fun best s ->
+        let d = rect_left (rect s) -. x in
+        if d *. sign > 0. then
+          match best with
+          | Some (_, bd) when Float.abs bd <= Float.abs d -> best
+          | Some _ | None -> Some (s, d)
+        else best)
+      None (focusable input)
+  in
+  match nearest with Some (s, _) -> focus s | None -> ()
+
+(* The first segment with no part of those that end the field, or its last,
+   as a press on the field outside a segment focuses. *)
+let focus_last input =
+  let all = focusable input in
+  let n = Array.length all in
+  if n > 0 then
+    let rec back i =
+      if
+        i > 0
+        && Option.is_some
+             (Js.Null.toOption (closest all.(i - 1) "[data-placeholder]"))
+        && Option.is_some
+             (Js.Null.toOption (closest all.(i) "[data-placeholder]"))
+      then back (i - 1)
+      else i
+    in
+    focus all.(back (n - 1))
+
+let format_options ~granularity ~time_zone ~hide_time_zone ~hour_cycle ~show_era
+    ~leading_zeros ?(month = "numeric") () =
+  let two = leading_zeros in
+  let until =
+    match granularity with
+    | `day -> 2
+    | `hour -> 3
+    | `minute -> 4
+    | `second -> 5
+  in
+  (* Each key's place among a format's, from the year to the second. *)
+  let shown k =
+    let at =
+      match k with
+      | `year -> 0
+      | `month -> 1
+      | `day -> 2
+      | `hour -> 3
+      | `minute -> 4
+      | `second -> 5
+    in
+    at <= until
+  in
+  let pick k numeric = if shown k then Some numeric else None in
+  let timed = until >= 3 in
+  Dt.DateTimeFormatOptions.make ?year:(pick `year "numeric")
+    ?month:
+      (pick `month
+         (if String.equal month "numeric" && two then "2-digit" else month))
+    ?day:(pick `day (if two then "2-digit" else "numeric"))
+    ?hour:(pick `hour (if two then "2-digit" else "numeric"))
+    ?minute:(pick `minute "2-digit") ?second:(pick `second "2-digit")
+    ?hour12:
+      (Option.map
+         (fun (c : [ `h12 | `h24 ]) ->
+           match c with `h12 -> true | `h24 -> false)
+         hour_cycle)
+    ~time_zone:(Option.value time_zone ~default:"UTC")
+    ?time_zone_name:
+      (match time_zone with
+      | Some _ when timed && not hide_time_zone -> Some `short
+      | Some _ | None -> None)
+    ?era:(if show_era then Some `short else None)
+    ()
+
+(* A field of any kind of value: what each root is, given its kind. *)
+let field (type v) ~(kind : v kind) ~(value : v Js.Nullable.t option S.accessor)
+    ~(default_value : v option) ~(on_change : v option -> unit)
+    ~(placeholder_value : v option S.accessor)
+    ~(today : string -> Dt.Calendar.t -> v) ~(min_value : v option S.accessor)
+    ~(max_value : v option S.accessor)
+    ~(is_date_unavailable : (v -> bool) option S.accessor)
+    ~(granularity : [ `day | `hour | `minute | `second ] S.accessor)
+    ~(hour_cycle : [ `h12 | `h24 ] option S.accessor)
+    ~(hide_time_zone : bool S.accessor) ~(leading_zeros : bool S.accessor)
+    ~(is_required : bool S.accessor) ~(is_invalid : bool S.accessor)
+    ~(is_disabled : bool S.accessor) ~(is_read_only : bool S.accessor)
+    ~(name : string option S.accessor) ~(auto_focus : bool)
+    ~(aria_label : string option S.accessor)
+    ~(aria_labelledby : string option S.accessor)
+    ~(aria_describedby : string option S.accessor)
+    ~(input_role : [ `group | `presentation ] S.accessor)
+    ~(translations : translations option S.accessor) ~(draw : inner -> 'r) : 'r
+    =
+  let i18n = I18n.use_locale () in
+  (* A provider's locale, or en-GB, day before month as most of the world
+     writes a date, never the browser's: Kobalte gives a provider's own locale
+     each time it is asked, and where there is none a new one, the
+     browser's. *)
+  let provided = I18n.use_locale () == i18n in
+  let locale =
+    S.accessor (fun () ->
+        if provided then K.I18n_UseLocale.locale i18n () else "en-GB")
+  in
+  let direction =
+    S.accessor (fun () -> I18n.get_reading_direction (S.get locale))
+  in
+  let translations =
+    S.accessor (fun () ->
+        match S.get translations with
+        | Some t -> t
+        | None -> translations_for (S.get locale))
+  in
+  (* The locale's calendar and clock, or the clock [hour_cycle] asks for. *)
+  let resolved =
+    S.create_memo (fun () ->
+        Dt.DateFormatter.resolved_options
+          (Dt.DateFormatter.make (S.get locale)
+             ~options:
+               (Dt.DateTimeFormatOptions.make ~date_style:`short
+                  ~time_style:`short
+                  ?hour12:
+                    (Option.map
+                       (fun (c : [ `h12 | `h24 ]) ->
+                         match c with `h12 -> true | `h24 -> false)
+                       (S.get hour_cycle))
+                  ())
+             ())
+          ())
+  in
+  let calendar =
+    S.create_memo (fun () ->
+        D.create_calendar
+          (Dt.ResolvedDateTimeFormatOptions.calendar (S.get resolved)))
+  in
+  let cycle =
+    S.create_memo (fun () ->
+        match Dt.ResolvedDateTimeFormatOptions.hour_cycle (S.get resolved) with
+        | Some c -> (c :> cycle)
+        | None -> (
+            match S.get hour_cycle with
+            | Some `h12 -> `h12
+            | Some `h24 | None -> `h23))
+  in
+  (* The value, given or kept. *)
+  let kept, set_kept = S.create_signal default_value in
+  let controlled () = Option.is_some (S.get value) in
+  let current =
+    S.create_memo (fun () ->
+        match S.get value with
+        | Some v -> Js.Nullable.toOption v
+        | None -> S.get kept)
+  in
+  let set_value v =
+    if not (controlled ()) then S.set set_kept v;
+    on_change v
+  in
+  (* What a value given is written in: its own calendar, or the placeholder's,
+     else the Gregorian. *)
+  let own_calendar () =
+    match (S.get current, S.get placeholder_value) with
+    | Some v, _ | None, Some v -> kind.calendar v
+    | None, None -> D.create_calendar "gregory"
+  in
+  let zone () =
+    match (S.get current, S.get placeholder_value) with
+    | Some v, _ | None, Some v -> kind.zone v
+    | None, None -> None
+  in
+  let time_zone =
+    S.accessor (fun () -> Option.value (zone ()) ~default:"UTC")
+  in
+  let in_calendar v = kind.convert v (S.get calendar) in
+  let calendar_value =
+    S.create_memo (fun () -> Option.map in_calendar (S.get current))
+  in
+  let placeholder =
+    S.create_memo (fun () ->
+        match S.get placeholder_value with
+        | Some p -> in_calendar p
+        | None -> today (D.get_local_time_zone ()) (S.get calendar))
+  in
+  let base () =
+    match S.get calendar_value with Some v -> v | None -> S.get placeholder
+  in
+  (* A date partly typed, or not yet a date, the field's alone until it is
+     one; reset as the value is given again. *)
+  let typed, set_typed = S.create_signal None in
+  S.create_effect (fun () ->
+      ignore (S.get calendar_value : v option);
+      ignore (S.get cycle : cycle);
+      S.set set_typed None);
+  let shown =
+    S.create_memo (fun () ->
+        match S.get typed with
+        | Some p -> p
+        | None -> (
+            match S.get calendar_value with
+            | Some v -> parts_of kind (S.get cycle) v
+            | None -> none))
+  in
+  let show_era () =
+    String.equal (Dt.Calendar.identifier (S.get calendar)) "gregory"
+    && Option.equal String.equal (S.get shown).era (Some "BC")
+  in
+  let shown_parts =
+    S.create_memo (fun () : part list ->
+        let all : part list =
+          [ `era; `year; `month; `day; `hour ]
+          @ (if twelve (S.get cycle) then [ `dayPeriod ] else [])
+          @ [ `minute; `second ]
+        in
+        let last : part =
+          match S.get granularity with
+          | `day -> `day
+          | `hour -> if twelve (S.get cycle) then `dayPeriod else `hour
+          | `minute -> `minute
+          | `second -> `second
+        in
+        let rec until = function
+          | [] -> []
+          | p :: rest -> if same p last then [ p ] else p :: until rest
+        in
+        until all)
+  in
+  let options ?month () =
+    format_options ~granularity:(S.get granularity) ~time_zone:(zone ())
+      ~hide_time_zone:(S.get hide_time_zone) ~hour_cycle:(S.get hour_cycle)
+      ~show_era:(show_era ()) ~leading_zeros:(S.get leading_zeros) ?month ()
+  in
+  let formatter =
+    S.create_memo (fun () ->
+        Dt.DateFormatter.make (S.get locale) ~options:(options ()) ())
+  in
+  let format_resolved =
+    S.create_memo (fun () ->
+        Dt.DateFormatter.resolved_options (S.get formatter) ())
+  in
+  let date =
+    S.create_memo (fun () ->
+        kind.to_date
+          (to_value kind (S.get cycle) (S.get shown) (base ()))
+          (S.get time_zone))
+  in
+  let plain =
+    S.create_memo (fun () ->
+        number_format (S.get locale)
+          (K.NumberFormatOptions.make ~use_grouping:(K.Either.right false) ()))
+  in
+  let two_digit =
+    S.create_memo (fun () ->
+        number_format (S.get locale)
+          (K.NumberFormatOptions.make ~use_grouping:(K.Either.right false)
+             ~minimum_integer_digits:2. ()))
+  in
+  let segments =
+    S.create_memo (fun () ->
+        let p = S.get shown in
+        let cal = S.get calendar and cycle = S.get cycle in
+        let opts = S.get format_resolved in
+        let two t =
+          let o =
+            match t with
+            | `year -> Dt.ResolvedDateTimeFormatOptions.year opts
+            | `month -> Dt.ResolvedDateTimeFormatOptions.month opts
+            | `day -> Dt.ResolvedDateTimeFormatOptions.day opts
+            | `hour -> Dt.ResolvedDateTimeFormatOptions.hour opts
+          in
+          Option.equal String.equal o (Some "2-digit")
+        in
+        let number t n =
+          K.NumberFormat.format
+            (S.get (if two t then two_digit else plain))
+            (float_of_int n)
+        in
+        let granularity_type : segment_type =
+          match S.get granularity with
+          | `day -> `day
+          | `hour -> `hour
+          | `minute -> `minute
+          | `second -> `second
+        in
+        Dt.DateFormatter.format_to_parts (S.get formatter) (S.get date)
+        |> Array.to_list
+        |> List.concat_map (fun part ->
+            let t = segment_type_of (part_type part) in
+            let written = Dt.DateTimeFormatPart.value part in
+            let written =
+              match t with
+              | `year -> number `year (Option.value p.year ~default:0)
+              | `month -> number `month (Option.value p.month ~default:0)
+              | `day -> number `day (Option.value p.day ~default:0)
+              | `hour -> number `hour (Option.value p.hour ~default:0)
+              | `era | `minute | `second | `dayPeriod | `timeZoneName | `literal
+                ->
+                  written
+            in
+            let s =
+              match part_of t with
+              | None -> { (literal written) with type_ = t; placeholder = "" }
+              | Some part ->
+                  let value, least, greatest = limits cal cycle p part in
+                  let empty = not (has p part) in
+                  let ph = placeholder_of (S.get locale) t written in
+                  {
+                    type_ = t;
+                    text = (if empty then ph else written);
+                    value;
+                    min_value = Some least;
+                    max_value = Some greatest;
+                    is_placeholder = empty;
+                    placeholder = ph;
+                    is_editable =
+                      (match part with
+                      | `era -> Array.length (Dt.Calendar.get_eras cal ()) > 1
+                      | `year | `month | `day | `hour | `dayPeriod | `minute
+                      | `second ->
+                          true);
+                  }
+            in
+            (* React Aria isolates a time's digits, from the hour to its last
+               part, so they read left to right in any language. *)
+            match (t, granularity_type) with
+            | `hour, `hour -> [ literal {js|⁦|js}; s; literal {js|⁩|js} ]
+            | `hour, _ -> [ literal {js|⁦|js}; s ]
+            | `minute, `minute | `second, `second -> [ s; literal {js|⁩|js} ]
+            | _ -> [ s ])
+        |> Array.of_list)
+  in
+  (* A change of the parts: a value once they make a date, which differs from
+     the one it has; else the field's own. *)
+  let change (p : parts) =
+    if not (S.get is_disabled || S.get is_read_only) then
+      let parts = S.get shown_parts in
+      if cleared p parts then (
+        S.set set_typed None;
+        if Option.is_some (S.get current) then set_value None)
+      else if complete p parts then
+        let v = to_value kind (S.get cycle) p (base ()) in
+        if matches kind (S.get cycle) p v parts then (
+          let v = kind.convert v (own_calendar ()) in
+          match S.get current with
+          | Some c when Float.equal (kind.compare v c) 0. ->
+              S.set set_typed (Some p)
+          | Some _ | None ->
+              S.set set_typed None;
+              set_value (Some v))
+        else S.set set_typed (Some p)
+      else S.set set_typed (Some p)
+  in
+  (* As focus leaves the field, a whole date that is not one is made one. *)
+  let confirm () =
+    if not (S.get is_disabled || S.get is_read_only) then
+      let p = S.get shown in
+      if complete p (S.get shown_parts) then (
+        let v =
+          kind.convert
+            (to_value kind (S.get cycle) p (base ()))
+            (own_calendar ())
+        in
+        S.set set_typed None;
+        match S.get current with
+        | Some c when Float.equal (kind.compare v c) 0. -> ()
+        | Some _ | None -> set_value (Some v))
+  in
+  let invalid =
+    S.create_memo (fun () ->
+        S.get is_invalid
+        ||
+        match S.get current with
+        | None -> false
+        | Some v -> (
+            (match S.get min_value with
+              | Some m -> kind.compare v m < 0.
+              | None -> false)
+            || (match S.get max_value with
+              | Some m -> kind.compare v m > 0.
+              | None -> false)
+            ||
+            match S.get is_date_unavailable with
+            | Some f -> f v
+            | None -> false))
+  in
+  let input, set_input = S.create_signal None in
+  let label_id = S.create_unique_id () in
+  let description_id = S.create_unique_id () in
+  let error_id = S.create_unique_id () in
+  let value_id = S.create_unique_id () in
+  let label_here, labelled = named label_id in
+  let description_here, described = named description_id in
+  let error_here, errored = named error_id in
+  let ids l =
+    match List.filter_map Fun.id l with
+    | [] -> None
+    | some -> Some (String.concat " " some)
+  in
+  (* The value as a reader is told it, its month in words. *)
+  let spoken =
+    S.create_memo (fun () ->
+        match S.get calendar_value with
+        | None -> None
+        | Some _ ->
+            Some
+              ( Dt.DateFormatter.make (S.get locale)
+                  ~options:(options ~month:"long" ()) (),
+                S.get date ))
+  in
+  let value_text =
+    S.create_memo (fun () ->
+        Option.map
+          (fun (format, d) ->
+            (S.get translations).selected_date_description
+              (Dt.DateFormatter.format format d))
+          (S.get spoken))
+  in
+  let labelled_by =
+    S.accessor (fun () -> ids [ labelled (); S.get aria_labelledby ])
+  in
+  let described_by =
+    S.accessor (fun () ->
+        ids [ described (); errored (); S.get aria_describedby ])
+  in
+  let root, set_root = S.create_signal None in
+  let f =
+    {
+      public =
+        {
+          segments;
+          is_disabled;
+          is_read_only;
+          is_required;
+          is_invalid = invalid;
+          labelled_by;
+          described_by =
+            S.accessor (fun () ->
+                match (S.get value_text, S.get described_by) with
+                | Some _, Some d -> Some (value_id ^ " " ^ d)
+                | Some _, None -> Some value_id
+                | None, d -> d);
+        };
+      input_role;
+      confirm;
+      spoken;
+      own_described_by = described_by;
+      set_root = (fun e -> S.set set_root (Some e));
+      hidden =
+        (fun () ->
+          Jsx.fragment
+            [|
+              <Solidtype.Show.Some some=(S.get value_text)>
+                (fun text ->
+                  <span id=value_id style="display: none">
+                    (Jsx.string (S.get text))
+                  </span>)
+              </Solidtype.Show.Some>;
+              <input
+                type_="hidden"
+                ?name=(S.get name)
+                value=(match S.get current with
+                      | Some v -> kind.to_string v
+                      | None -> "")
+                disabled=(S.get is_disabled)
+              />;
+            |]);
+      locale;
+      direction;
+      cycle;
+      date;
+      time_zone;
+      calendar;
+      set_part =
+        (fun part n ->
+          change
+            (set kind (S.get cycle) (S.get shown) part n
+               ~placeholder:(S.get placeholder)));
+      set_era =
+        (fun e -> change { (S.get shown) with era = Some e; offset = None });
+      clear_part = (fun part -> change (clear (S.get shown) part));
+      step_part =
+        (fun part amount ->
+          change
+            (step kind (S.get calendar) (S.get cycle) (S.get shown) part amount
+               ~placeholder:(S.get placeholder) ~shown:(S.get shown_parts)));
+      to_least =
+        (fun part ->
+          let _, least, _ =
+            limits (S.get calendar) (S.get cycle) (S.get shown) part
+          in
+          let least =
+            match (part, S.get cycle) with `hour, `h12 -> 12 | _ -> least
+          in
+          change
+            (match part with
+            | `era ->
+                {
+                  (S.get shown) with
+                  era = Some (Dt.Calendar.get_eras (S.get calendar) ()).(least);
+                }
+            | _ ->
+                set kind (S.get cycle) (S.get shown) part least
+                  ~placeholder:(S.get placeholder)));
+      to_greatest =
+        (fun part ->
+          let _, _, greatest =
+            limits (S.get calendar) (S.get cycle) (S.get shown) part
+          in
+          let greatest =
+            match (part, S.get cycle) with `hour, `h12 -> 11 | _ -> greatest
+          in
+          change
+            (match part with
+            | `era ->
+                {
+                  (S.get shown) with
+                  era =
+                    Some (Dt.Calendar.get_eras (S.get calendar) ()).(greatest);
+                }
+            | _ ->
+                set kind (S.get cycle) (S.get shown) part greatest
+                  ~placeholder:(S.get placeholder)));
+      set_input = S.set set_input;
+      input;
+      label_id;
+      label_here;
+      description_id;
+      description_here;
+      error_id;
+      error_here;
+      aria_label;
+      labelled_by;
+      described_by;
+    }
+  in
+  S.on_mount (fun () ->
+      (if auto_focus then
+         match S.get input with Some i -> focus_first i | None -> ());
+      (* A form reset gives the field its first value back, as Kobalte's
+         fields take it. *)
+      match
+        Option.bind (S.get root) (fun r -> Js.Null.toOption (closest r "form"))
+      with
+      | Some form ->
+          let reset (_ : Dom.event) =
+            S.set set_typed None;
+            if not (controlled ()) then S.set set_kept default_value;
+            on_change default_value
+          in
+          listen form "reset" reset;
+          S.on_cleanup (fun () -> unlisten form "reset" reset)
+      | None -> ());
+  draw f
+
+(* A field's root: a [<div>] around its parts, which confirms a date typed
+   whole as the focus leaves it. *)
+let draw_root ~others ~children (f : inner) =
+  let root = ref None in
+  <Field_context.Provider value=f>
+    <div
+      ref=(fun e ->
+            let e = as_element e in
+            root := Some e;
+            f.set_root e)
+      on_focus_out=(fun e ->
+                     match (Js.Null.toOption (related e), !root) with
+                     | Some to_, Some r when contains r to_ -> ()
+                     | _ -> f.confirm ())
+      data_invalid=(state (S.get f.public.is_invalid))
+      data_disabled=(state (S.get f.public.is_disabled))
+      data_readonly=(state (S.get f.public.is_read_only))
+      data_required=(state (S.get f.public.is_required))
+      ?as_=(S.drawn_as others)
+      props=(S.undrawn others)>
+      (children ()) (f.hidden ())
+    </div>
+  </Field_context.Provider>
+
+(* The props every root takes beside its value. *)
+module Common = struct
+  type t
+  type predicate
+
+  external should_force_leading_zeros : t -> bool option
+    = "shouldForceLeadingZeros"
+  [@@mel.get]
+
+  external is_required : t -> bool option = "isRequired" [@@mel.get]
+  external is_invalid : t -> bool option = "isInvalid" [@@mel.get]
+  external is_disabled : t -> bool option = "isDisabled" [@@mel.get]
+  external is_read_only : t -> bool option = "isReadOnly" [@@mel.get]
+  external name : t -> string option = "name" [@@mel.get]
+  external auto_focus : t -> bool option = "autoFocus" [@@mel.get]
+  external aria_label : t -> string option = "aria-label" [@@mel.get]
+  external aria_labelledby : t -> string option = "aria-labelledby" [@@mel.get]
+
+  external aria_describedby : t -> string option = "aria-describedby"
+  [@@mel.get]
+
+  external translations : t -> translations option = "translations" [@@mel.get]
+  external children : t -> Jsx.element = "children" [@@mel.get]
+
+  external granularity : t -> [ `day | `hour | `minute | `second ] option
+    = "granularity"
+  [@@mel.get]
+
+  external hour_cycle : t -> [ `h12 | `h24 ] option = "hourCycle" [@@mel.get]
+  external hide_time_zone : t -> bool option = "hideTimeZone" [@@mel.get]
+
+  external input_role : t -> [ `group | `presentation ] option = "inputRole"
+  [@@mel.get]
+
+  (* The props a root takes for itself; the rest it passes on. *)
+  let own =
+    [|
+      "value";
+      "defaultValue";
+      "onChange";
+      "placeholderValue";
+      "minValue";
+      "maxValue";
+      "isDateUnavailable";
+      "granularity";
+      "hourCycle";
+      "hideTimeZone";
+      "shouldForceLeadingZeros";
+      "isRequired";
+      "isInvalid";
+      "isDisabled";
+      "isReadOnly";
+      "name";
+      "autoFocus";
+      "aria-label";
+      "aria-labelledby";
+      "aria-describedby";
+      "translations";
+      "inputRole";
+      "children";
+    |]
+
+  external start_name : t -> string option = "startName" [@@mel.get]
+  external end_name : t -> string option = "endName" [@@mel.get]
+
+  let flag get props =
+    S.accessor (fun () -> Option.value (get props) ~default:false)
+
+  let make (type v) ~(kind : v kind) ~value ~default_value ~on_change
+      ~placeholder_value ~today ~min_value ~max_value ~is_date_unavailable
+      ~(granularity : [ `day | `hour | `minute | `second ] S.accessor)
+      (props : t) ~others =
+    field ~kind ~value ~default_value ~on_change ~placeholder_value ~today
+      ~min_value ~max_value ~is_date_unavailable ~granularity
+      ~hour_cycle:(S.accessor (fun () -> hour_cycle props))
+      ~hide_time_zone:(flag hide_time_zone props)
+      ~leading_zeros:(flag should_force_leading_zeros props)
+      ~is_required:(flag is_required props) ~is_invalid:(flag is_invalid props)
+      ~is_disabled:(flag is_disabled props)
+      ~is_read_only:(flag is_read_only props)
+      ~name:(S.accessor (fun () -> name props))
+      ~auto_focus:
+        (S.untrack (fun () -> Option.value (auto_focus props) ~default:false))
+      ~aria_label:(S.accessor (fun () -> aria_label props))
+      ~aria_labelledby:(S.accessor (fun () -> aria_labelledby props))
+      ~aria_describedby:(S.accessor (fun () -> aria_describedby props))
+      ~input_role:
+        (S.accessor (fun () -> Option.value (input_role props) ~default:`group))
+      ~translations:(S.accessor (fun () -> translations props))
+      ~draw:(draw_root ~others ~children:(fun () -> children props))
+end
+
+(* What a root does of a value it is given: a value given, an empty one
+   [Js.Nullable.null], or none, the root keeping its own. *)
+let given value props = S.accessor (fun () -> value props)
+
+(* Two dates as a reader is told them, split at the last literal their
+   formatted range shares, as React Aria tells a range. *)
+let told_range format a b =
+  match Dt.DateFormatter.format_range_to_parts format a b with
+  | exception Js.Exn.Error _ ->
+      (Dt.DateFormatter.format format a, Dt.DateFormatter.format format b)
+  | parts ->
+      let separator = ref (-1) in
+      (try
+         Array.iteri
+           (fun i p ->
+             match
+               (Dt.DateRangeFormatPart.source p, Dt.DateRangeFormatPart.type_ p)
+             with
+             | `shared, `literal -> separator := i
+             | `endRange, _ -> raise Exit
+             | _ -> ())
+           parts
+       with Exit -> ());
+      let first = Buffer.create 16 and last = Buffer.create 16 in
+      Array.iteri
+        (fun i p ->
+          if i < !separator then
+            Buffer.add_string first (Dt.DateRangeFormatPart.value p)
+          else if i > !separator then
+            Buffer.add_string last (Dt.DateRangeFormatPart.value p))
+        parts;
+      (Buffer.contents first, Buffer.contents last)
+
+(* A range's two fields under one root, as React Stately's range picker keeps
+   them: each its end of the range, the range told once both are there and
+   [None] as one is erased, invalid together, and described as a range. *)
+let range_field (type v) ~(kind : v kind)
+    ~(value : v range Js.Nullable.t option S.accessor)
+    ~(default_value : v range option) ~(on_change : v range option -> unit)
+    ~(placeholder_value : v option S.accessor)
+    ~(today : string -> Dt.Calendar.t -> v) ~(min_value : v option S.accessor)
+    ~(max_value : v option S.accessor)
+    ~(is_date_unavailable : (v -> bool) option S.accessor)
+    ~(granularity : [ `day | `hour | `minute | `second ] S.accessor)
+    (props : Common.t) ~others =
+  let i18n = I18n.use_locale () in
+  let provided = I18n.use_locale () == i18n in
+  let locale =
+    S.accessor (fun () ->
+        if provided then K.I18n_UseLocale.locale i18n () else "en-GB")
+  in
+  let words () =
+    match Common.translations props with
+    | Some t -> t
+    | None -> translations_for (S.get locale)
+  in
+  let ends = function
+    | Some r -> (Some r.start, Some r.end_)
+    | None -> (None, None)
+  in
+  let partial, set_partial = S.create_signal (ends default_value) in
+  let shown =
+    S.create_memo (fun () ->
+        match S.get value with
+        | Some n -> (
+            match Js.Nullable.toOption n with
+            | Some r -> (Some r.start, Some r.end_)
+            | None -> (
+                (* A range controlled empty forgets one typed whole. *)
+                match S.get partial with
+                | Some _, Some _ -> (None, None)
+                | p -> p))
+        | None -> S.get partial)
+  in
+  let set (s, e) =
+    let was = S.untrack (fun () -> S.get shown) in
+    S.set set_partial (s, e);
+    match ((s, e), was) with
+    | (Some start, Some end_), _ -> on_change (Some { start; end_ })
+    | _, (Some _, Some _) -> on_change None
+    | _, _ -> ()
+  in
+  let out v =
+    (match S.get min_value with
+      | Some m -> kind.compare v m < 0.
+      | None -> false)
+    || (match S.get max_value with
+      | Some m -> kind.compare v m > 0.
+      | None -> false)
+    || match S.get is_date_unavailable with Some f -> f v | None -> false
+  in
+  let invalid =
+    S.create_memo (fun () ->
+        Option.value (Common.is_invalid props) ~default:false
+        ||
+        match S.get shown with
+        | Some s, Some e -> kind.compare e s < 0. || out s || out e
+        | Some v, None | None, Some v -> out v
+        | None, None -> false)
+  in
+  let flag get =
+    S.accessor (fun () -> Option.value (get props) ~default:false)
+  in
+  let range_id = S.create_unique_id () in
+  let engine ~name ~label ~labelled_by ~described_by ~auto_focus ~pick ~put =
+    field ~kind
+      ~value:
+        (S.accessor (fun () ->
+             Some (Js.Nullable.fromOption (pick (S.get shown)))))
+      ~default_value:None
+      ~on_change:(fun v -> put v (S.untrack (fun () -> S.get shown)))
+      ~placeholder_value ~today ~min_value ~max_value ~is_date_unavailable
+      ~granularity
+      ~hour_cycle:(S.accessor (fun () -> Common.hour_cycle props))
+      ~hide_time_zone:(flag Common.hide_time_zone)
+      ~leading_zeros:(flag Common.should_force_leading_zeros)
+      ~is_required:(flag Common.is_required) ~is_invalid:invalid
+      ~is_disabled:(flag Common.is_disabled)
+      ~is_read_only:(flag Common.is_read_only) ~name ~auto_focus
+      ~aria_label:(S.accessor (fun () -> Some (label (words ()))))
+      ~aria_labelledby:labelled_by ~aria_describedby:described_by
+      ~input_role:(S.accessor (fun () -> `presentation))
+      ~translations:(S.accessor (fun () -> Common.translations props))
+      ~draw:(fun f -> f)
+  in
+  let joined l =
+    match List.filter_map Fun.id l with
+    | [] -> None
+    | some -> Some (String.concat " " some)
+  in
+  let description, set_description = S.create_signal None in
+  let described_by own =
+    S.accessor (fun () ->
+        joined [ Option.map (fun _ -> range_id) (S.get description); S.get own ])
+  in
+  let start =
+    engine
+      ~name:(S.accessor (fun () -> Common.start_name props))
+      ~label:(fun w -> w.start_date)
+      ~labelled_by:(S.accessor (fun () -> Common.aria_labelledby props))
+      ~described_by:
+        (described_by (S.accessor (fun () -> Common.aria_describedby props)))
+      ~auto_focus:
+        (S.untrack (fun () ->
+             Option.value (Common.auto_focus props) ~default:false))
+      ~pick:fst
+      ~put:(fun v (_, e) -> set (v, e))
+  in
+  let end_ =
+    engine
+      ~name:(S.accessor (fun () -> Common.end_name props))
+      ~label:(fun w -> w.end_date)
+      ~labelled_by:start.labelled_by
+      ~described_by:(described_by start.own_described_by)
+      ~auto_focus:false ~pick:snd
+      ~put:(fun v (s, _) -> set (s, v))
+  in
+  S.create_computed (fun () ->
+      S.set set_description
+        (match (S.get start.spoken, S.get end_.spoken) with
+        | Some (format, a), Some (_, b) ->
+            let first, last = told_range format a b in
+            Some ((words ()).selected_range_description first last)
+        | _ -> None));
+  (* The parts above the fields -- the label, the description, a group and
+     a picker's trigger -- read the range: named as its label names it,
+     described by the range and its description, invalid as it is. *)
+  let whole =
+    {
+      start with
+      public =
+        {
+          start.public with
+          is_invalid = invalid;
+          labelled_by = start.labelled_by;
+          described_by = described_by start.own_described_by;
+        };
+    }
+  in
+  <Field_context.Provider value=whole>
+    <Slots_context.Provider value=[ ("start", start); ("end", end_) ]>
+      <div
+        data_invalid=(state (S.get invalid))
+        data_disabled=(state (S.get start.public.is_disabled))
+        data_readonly=(state (S.get start.public.is_read_only))
+        data_required=(state (S.get start.public.is_required))
+        ?as_=(S.drawn_as others)
+        props=(S.undrawn others)>
+        (Common.children props)
+        <Solidtype.Show.Some some=(S.get description)>
+          (fun text ->
+            <span id=range_id style="display: none">
+              (Jsx.string (S.get text))
+            </span>)
+        </Solidtype.Show.Some>
+        (start.hidden ())
+        (end_.hidden ())
+      </div>
+    </Slots_context.Provider>
+  </Field_context.Provider>
+
+module Root = struct
+  module V = Dt.CalendarDate
+
+  module Props = struct
+    type t = Common.t
+
+    external check :
+      ?value:V.t Js.Nullable.t Solidtype.Check.value ->
+      ?default_value:V.t Solidtype.Check.value ->
+      ?on_change:(V.t option -> unit) ->
+      ?placeholder_value:V.t Solidtype.Check.value ->
+      ?min_value:V.t Solidtype.Check.value ->
+      ?max_value:V.t Solidtype.Check.value ->
+      ?is_date_unavailable:(V.t -> bool) ->
+      ?should_force_leading_zeros:bool Solidtype.Check.value ->
+      ?is_required:bool Solidtype.Check.value ->
+      ?is_invalid:bool Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?is_read_only:bool Solidtype.Check.value ->
+      ?name:string Solidtype.Check.value ->
+      ?auto_focus:bool Solidtype.Check.value ->
+      ?aria_label:string Solidtype.Check.value ->
+      ?aria_labelledby:string Solidtype.Check.value ->
+      ?aria_describedby:string Solidtype.Check.value ->
+      ?translations:translations Solidtype.Check.value ->
+      ?input_role:[ `group | `presentation ] Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> V.t Js.Nullable.t option = "value" [@@mel.get]
+    external default_value : t -> V.t option = "defaultValue" [@@mel.get]
+
+    external on_change : t -> ((V.t option -> unit)[@u]) option = "onChange"
+    [@@mel.get]
+
+    external placeholder_value : t -> V.t option = "placeholderValue"
+    [@@mel.get]
+
+    external min_value : t -> V.t option = "minValue" [@@mel.get]
+    external max_value : t -> V.t option = "maxValue" [@@mel.get]
+
+    external unavailable_given : t -> Common.predicate option
+      = "isDateUnavailable"
+    [@@mel.get]
+
+    external is_date_unavailable : t -> V.t -> bool = "isDateUnavailable"
+    [@@mel.send]
+  end
+
+  let make (props : Props.t) =
+    Common.make ~kind:date_kind ~value:(given Props.value props)
+      ~default_value:(S.untrack (fun () -> Props.default_value props))
+      ~on_change:(fun v -> Jsx.call (Props.on_change props) v)
+      ~placeholder_value:(given Props.placeholder_value props)
+      ~today:(fun zone calendar -> D.to_calendar (D.today zone) calendar)
+      ~min_value:(given Props.min_value props)
+      ~max_value:(given Props.max_value props)
+      ~is_date_unavailable:
+        (S.accessor (fun () ->
+             Option.map
+               (fun _ v -> Props.is_date_unavailable props v)
+               (Props.unavailable_given props)))
+      ~granularity:(S.accessor (fun () -> `day))
+      props ~others:(S.omit props Common.own)
+
+  let component = Jsx.component make
+end
+
+module Root_date_time = struct
+  module V = Dt.CalendarDateTime
+
+  module Props = struct
+    type t = Common.t
+
+    external check :
+      ?value:V.t Js.Nullable.t Solidtype.Check.value ->
+      ?default_value:V.t Solidtype.Check.value ->
+      ?on_change:(V.t option -> unit) ->
+      ?placeholder_value:V.t Solidtype.Check.value ->
+      ?min_value:V.t Solidtype.Check.value ->
+      ?max_value:V.t Solidtype.Check.value ->
+      ?is_date_unavailable:(V.t -> bool) ->
+      ?granularity:[ `day | `hour | `minute | `second ] Solidtype.Check.value ->
+      ?hour_cycle:[ `h12 | `h24 ] Solidtype.Check.value ->
+      ?should_force_leading_zeros:bool Solidtype.Check.value ->
+      ?is_required:bool Solidtype.Check.value ->
+      ?is_invalid:bool Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?is_read_only:bool Solidtype.Check.value ->
+      ?name:string Solidtype.Check.value ->
+      ?auto_focus:bool Solidtype.Check.value ->
+      ?aria_label:string Solidtype.Check.value ->
+      ?aria_labelledby:string Solidtype.Check.value ->
+      ?aria_describedby:string Solidtype.Check.value ->
+      ?translations:translations Solidtype.Check.value ->
+      ?input_role:[ `group | `presentation ] Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> V.t Js.Nullable.t option = "value" [@@mel.get]
+    external default_value : t -> V.t option = "defaultValue" [@@mel.get]
+
+    external on_change : t -> ((V.t option -> unit)[@u]) option = "onChange"
+    [@@mel.get]
+
+    external placeholder_value : t -> V.t option = "placeholderValue"
+    [@@mel.get]
+
+    external min_value : t -> V.t option = "minValue" [@@mel.get]
+    external max_value : t -> V.t option = "maxValue" [@@mel.get]
+
+    external unavailable_given : t -> Common.predicate option
+      = "isDateUnavailable"
+    [@@mel.get]
+
+    external is_date_unavailable : t -> V.t -> bool = "isDateUnavailable"
+    [@@mel.send]
+  end
+
+  let make (props : Props.t) =
+    Common.make ~kind:date_time_kind ~value:(given Props.value props)
+      ~default_value:(S.untrack (fun () -> Props.default_value props))
+      ~on_change:(fun v -> Jsx.call (Props.on_change props) v)
+      ~placeholder_value:(given Props.placeholder_value props)
+      ~today:(fun zone calendar ->
+        D.to_calendar (D.to_calendar_date_time (D.today zone) ()) calendar)
+      ~min_value:(given Props.min_value props)
+      ~max_value:(given Props.max_value props)
+      ~is_date_unavailable:
+        (S.accessor (fun () ->
+             Option.map
+               (fun _ v -> Props.is_date_unavailable props v)
+               (Props.unavailable_given props)))
+      ~granularity:
+        (S.accessor (fun () ->
+             Option.value (Common.granularity props) ~default:`minute))
+      props ~others:(S.omit props Common.own)
+
+  let component = Jsx.component make
+end
+
+module Root_zoned = struct
+  module V = Dt.ZonedDateTime
+
+  module Props = struct
+    type t = Common.t
+
+    external check :
+      ?value:V.t Js.Nullable.t Solidtype.Check.value ->
+      ?default_value:V.t Solidtype.Check.value ->
+      ?on_change:(V.t option -> unit) ->
+      placeholder_value:V.t Solidtype.Check.value ->
+      ?min_value:V.t Solidtype.Check.value ->
+      ?max_value:V.t Solidtype.Check.value ->
+      ?is_date_unavailable:(V.t -> bool) ->
+      ?granularity:[ `day | `hour | `minute | `second ] Solidtype.Check.value ->
+      ?hour_cycle:[ `h12 | `h24 ] Solidtype.Check.value ->
+      ?hide_time_zone:bool Solidtype.Check.value ->
+      ?should_force_leading_zeros:bool Solidtype.Check.value ->
+      ?is_required:bool Solidtype.Check.value ->
+      ?is_invalid:bool Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?is_read_only:bool Solidtype.Check.value ->
+      ?name:string Solidtype.Check.value ->
+      ?auto_focus:bool Solidtype.Check.value ->
+      ?aria_label:string Solidtype.Check.value ->
+      ?aria_labelledby:string Solidtype.Check.value ->
+      ?aria_describedby:string Solidtype.Check.value ->
+      ?translations:translations Solidtype.Check.value ->
+      ?input_role:[ `group | `presentation ] Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> V.t Js.Nullable.t option = "value" [@@mel.get]
+    external default_value : t -> V.t option = "defaultValue" [@@mel.get]
+
+    external on_change : t -> ((V.t option -> unit)[@u]) option = "onChange"
+    [@@mel.get]
+
+    external placeholder_value : t -> V.t = "placeholderValue" [@@mel.get]
+    external min_value : t -> V.t option = "minValue" [@@mel.get]
+    external max_value : t -> V.t option = "maxValue" [@@mel.get]
+
+    external unavailable_given : t -> Common.predicate option
+      = "isDateUnavailable"
+    [@@mel.get]
+
+    external is_date_unavailable : t -> V.t -> bool = "isDateUnavailable"
+    [@@mel.send]
+  end
+
+  let make (props : Props.t) =
+    Common.make ~kind:zoned_kind ~value:(given Props.value props)
+      ~default_value:(S.untrack (fun () -> Props.default_value props))
+      ~on_change:(fun v -> Jsx.call (Props.on_change props) v)
+      ~placeholder_value:
+        (S.accessor (fun () -> Some (Props.placeholder_value props)))
+      ~today:(fun _ _ -> Props.placeholder_value props)
+      ~min_value:(given Props.min_value props)
+      ~max_value:(given Props.max_value props)
+      ~is_date_unavailable:
+        (S.accessor (fun () ->
+             Option.map
+               (fun _ v -> Props.is_date_unavailable props v)
+               (Props.unavailable_given props)))
+      ~granularity:
+        (S.accessor (fun () ->
+             Option.value (Common.granularity props) ~default:`minute))
+      props ~others:(S.omit props Common.own)
+
+  let component = Jsx.component make
+end
+
+(* A part that names the field's input by its id: a label, a description, an
+   error, each a [<span>]. *)
+module Named = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Span.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external children : t -> Jsx.element = "children" [@@mel.get]
+
+    external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
+    [@@mel.get]
+  end
+
+  (* Its id is the one the input names, so a caller's is left out. *)
+  let make ~id ~here ?on_click (props : Props.t) =
+    here ();
+    <span
+      id
+      on_click=(fun e ->
+                 Jsx.call (Props.on_click props) e;
+                 match on_click with Some f -> f () | None -> ())
+      ?as_=(S.drawn_as props)
+      props=(S.undrawn (S.omit props [| "children"; "id"; "onClick" |]))>
+      (Props.children props)
+    </span>
+end
+
+module Root_range = struct
+  module V = Dt.CalendarDate
+
+  module Props = struct
+    type t = Common.t
+
+    external check :
+      ?value:V.t range Js.Nullable.t Solidtype.Check.value ->
+      ?default_value:V.t range Solidtype.Check.value ->
+      ?on_change:(V.t range option -> unit) ->
+      ?start_name:string Solidtype.Check.value ->
+      ?end_name:string Solidtype.Check.value ->
+      ?placeholder_value:V.t Solidtype.Check.value ->
+      ?min_value:V.t Solidtype.Check.value ->
+      ?max_value:V.t Solidtype.Check.value ->
+      ?is_date_unavailable:(V.t -> bool) ->
+      ?should_force_leading_zeros:bool Solidtype.Check.value ->
+      ?is_required:bool Solidtype.Check.value ->
+      ?is_invalid:bool Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?is_read_only:bool Solidtype.Check.value ->
+      ?auto_focus:bool Solidtype.Check.value ->
+      ?aria_labelledby:string Solidtype.Check.value ->
+      ?aria_describedby:string Solidtype.Check.value ->
+      ?translations:translations Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> V.t range Js.Nullable.t option = "value" [@@mel.get]
+    external default_value : t -> V.t range option = "defaultValue" [@@mel.get]
+
+    external on_change : t -> ((V.t range option -> unit)[@u]) option
+      = "onChange"
+    [@@mel.get]
+
+    external placeholder_value : t -> V.t option = "placeholderValue"
+    [@@mel.get]
+
+    external min_value : t -> V.t option = "minValue" [@@mel.get]
+    external max_value : t -> V.t option = "maxValue" [@@mel.get]
+
+    external unavailable_given : t -> Common.predicate option
+      = "isDateUnavailable"
+    [@@mel.get]
+
+    external is_date_unavailable : t -> V.t -> bool = "isDateUnavailable"
+    [@@mel.send]
+  end
+
+  let make (props : Props.t) =
+    range_field ~kind:date_kind ~value:(given Props.value props)
+      ~default_value:(S.untrack (fun () -> Props.default_value props))
+      ~on_change:(fun v -> Jsx.call (Props.on_change props) v)
+      ~placeholder_value:(given Props.placeholder_value props)
+      ~today:(fun zone calendar -> D.to_calendar (D.today zone) calendar)
+      ~min_value:(given Props.min_value props)
+      ~max_value:(given Props.max_value props)
+      ~is_date_unavailable:
+        (S.accessor (fun () ->
+             Option.map
+               (fun _ v -> Props.is_date_unavailable props v)
+               (Props.unavailable_given props)))
+      ~granularity:(S.accessor (fun () -> `day))
+      props
+      ~others:
+        (S.omit props (Array.append Common.own [| "startName"; "endName" |]))
+
+  let component = Jsx.component make
+end
+
+module Root_range_date_time = struct
+  module V = Dt.CalendarDateTime
+
+  module Props = struct
+    type t = Common.t
+
+    external check :
+      ?value:V.t range Js.Nullable.t Solidtype.Check.value ->
+      ?default_value:V.t range Solidtype.Check.value ->
+      ?on_change:(V.t range option -> unit) ->
+      ?start_name:string Solidtype.Check.value ->
+      ?end_name:string Solidtype.Check.value ->
+      ?placeholder_value:V.t Solidtype.Check.value ->
+      ?granularity:[ `day | `hour | `minute | `second ] Solidtype.Check.value ->
+      ?hour_cycle:[ `h12 | `h24 ] Solidtype.Check.value ->
+      ?min_value:V.t Solidtype.Check.value ->
+      ?max_value:V.t Solidtype.Check.value ->
+      ?is_date_unavailable:(V.t -> bool) ->
+      ?should_force_leading_zeros:bool Solidtype.Check.value ->
+      ?is_required:bool Solidtype.Check.value ->
+      ?is_invalid:bool Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?is_read_only:bool Solidtype.Check.value ->
+      ?auto_focus:bool Solidtype.Check.value ->
+      ?aria_labelledby:string Solidtype.Check.value ->
+      ?aria_describedby:string Solidtype.Check.value ->
+      ?translations:translations Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> V.t range Js.Nullable.t option = "value" [@@mel.get]
+    external default_value : t -> V.t range option = "defaultValue" [@@mel.get]
+
+    external on_change : t -> ((V.t range option -> unit)[@u]) option
+      = "onChange"
+    [@@mel.get]
+
+    external placeholder_value : t -> V.t option = "placeholderValue"
+    [@@mel.get]
+
+    external min_value : t -> V.t option = "minValue" [@@mel.get]
+    external max_value : t -> V.t option = "maxValue" [@@mel.get]
+
+    external unavailable_given : t -> Common.predicate option
+      = "isDateUnavailable"
+    [@@mel.get]
+
+    external is_date_unavailable : t -> V.t -> bool = "isDateUnavailable"
+    [@@mel.send]
+  end
+
+  let make (props : Props.t) =
+    range_field ~kind:date_time_kind ~value:(given Props.value props)
+      ~default_value:(S.untrack (fun () -> Props.default_value props))
+      ~on_change:(fun v -> Jsx.call (Props.on_change props) v)
+      ~placeholder_value:(given Props.placeholder_value props)
+      ~today:(fun zone calendar ->
+        D.to_calendar (D.to_calendar_date_time (D.today zone) ()) calendar)
+      ~min_value:(given Props.min_value props)
+      ~max_value:(given Props.max_value props)
+      ~is_date_unavailable:
+        (S.accessor (fun () ->
+             Option.map
+               (fun _ v -> Props.is_date_unavailable props v)
+               (Props.unavailable_given props)))
+      ~granularity:
+        (S.accessor (fun () ->
+             Option.value (Common.granularity props) ~default:`minute))
+      props
+      ~others:
+        (S.omit props (Array.append Common.own [| "startName"; "endName" |]))
+
+  let component = Jsx.component make
+end
+
+module Root_range_zoned = struct
+  module V = Dt.ZonedDateTime
+
+  module Props = struct
+    type t = Common.t
+
+    external check :
+      ?value:V.t range Js.Nullable.t Solidtype.Check.value ->
+      ?default_value:V.t range Solidtype.Check.value ->
+      ?on_change:(V.t range option -> unit) ->
+      ?start_name:string Solidtype.Check.value ->
+      ?end_name:string Solidtype.Check.value ->
+      placeholder_value:V.t Solidtype.Check.value ->
+      ?granularity:[ `day | `hour | `minute | `second ] Solidtype.Check.value ->
+      ?hour_cycle:[ `h12 | `h24 ] Solidtype.Check.value ->
+      ?hide_time_zone:bool Solidtype.Check.value ->
+      ?min_value:V.t Solidtype.Check.value ->
+      ?max_value:V.t Solidtype.Check.value ->
+      ?is_date_unavailable:(V.t -> bool) ->
+      ?should_force_leading_zeros:bool Solidtype.Check.value ->
+      ?is_required:bool Solidtype.Check.value ->
+      ?is_invalid:bool Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?is_read_only:bool Solidtype.Check.value ->
+      ?auto_focus:bool Solidtype.Check.value ->
+      ?aria_labelledby:string Solidtype.Check.value ->
+      ?aria_describedby:string Solidtype.Check.value ->
+      ?translations:translations Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> V.t range Js.Nullable.t option = "value" [@@mel.get]
+    external default_value : t -> V.t range option = "defaultValue" [@@mel.get]
+
+    external on_change : t -> ((V.t range option -> unit)[@u]) option
+      = "onChange"
+    [@@mel.get]
+
+    external placeholder_value : t -> V.t = "placeholderValue" [@@mel.get]
+    external min_value : t -> V.t option = "minValue" [@@mel.get]
+    external max_value : t -> V.t option = "maxValue" [@@mel.get]
+
+    external unavailable_given : t -> Common.predicate option
+      = "isDateUnavailable"
+    [@@mel.get]
+
+    external is_date_unavailable : t -> V.t -> bool = "isDateUnavailable"
+    [@@mel.send]
+  end
+
+  let make (props : Props.t) =
+    range_field ~kind:zoned_kind ~value:(given Props.value props)
+      ~default_value:(S.untrack (fun () -> Props.default_value props))
+      ~on_change:(fun v -> Jsx.call (Props.on_change props) v)
+      ~placeholder_value:
+        (S.accessor (fun () -> Some (Props.placeholder_value props)))
+      ~today:(fun _ _ -> Props.placeholder_value props)
+      ~min_value:(given Props.min_value props)
+      ~max_value:(given Props.max_value props)
+      ~is_date_unavailable:
+        (S.accessor (fun () ->
+             Option.map
+               (fun _ v -> Props.is_date_unavailable props v)
+               (Props.unavailable_given props)))
+      ~granularity:
+        (S.accessor (fun () ->
+             Option.value (Common.granularity props) ~default:`minute))
+      props
+      ~others:
+        (S.omit props (Array.append Common.own [| "startName"; "endName" |]))
+
+  let component = Jsx.component make
+end
+
+module Label = struct
+  module Props = Named.Props
+
+  let make props =
+    let f = within "Date_field.Label" in
+    Named.make ~id:f.label_id ~here:f.label_here
+      ~on_click:(fun () ->
+        match S.get f.input with Some i -> focus_first i | None -> ())
+      props
+
+  let component = Jsx.component make
+end
+
+module Description = struct
+  module Props = Named.Props
+
+  let make props =
+    let f = within "Date_field.Description" in
+    Named.make ~id:f.description_id ~here:f.description_here props
+
+  let component = Jsx.component make
+end
+
+module Error_message = struct
+  module Props = Named.Props
+
+  let make props =
+    let f = within "Date_field.Error_message" in
+    Named.make ~id:f.error_id ~here:f.error_here props
+
+  let component = Jsx.component make
+end
+
+module Input = struct
+  module Props = struct
+    type t
+
+    external check :
+      children:
+        ( segment Solidtype.Solid.accessor -> Solidtype.Jsx.element,
+          [ `render ] )
+        Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (unit -> unit) Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    (* Its children, a function each segment is drawn by, called as Kobalte's
+       time field calls its own: once a segment, inside Index, where a thunk
+       would be called again each time Index gives its list anew. *)
+    external draw : t -> segment S.accessor -> Jsx.element = "children"
+    [@@mel.send]
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
+    external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyDown"
+    [@@mel.get]
+
+    external on_pointer_down : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerDown"
+    [@@mel.get]
+
+    external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
+    [@@mel.get]
+
+    external style : t -> string option = "style" [@@mel.get]
+    external slot : t -> string option = "slot" [@@mel.get]
+
+    external on_focus_out : t -> ((Dom.focusEvent -> unit)[@u]) option
+      = "onFocusOut"
+    [@@mel.get]
+  end
+
+  let own =
+    [|
+      "children";
+      "ref";
+      "onKeyDown";
+      "onPointerDown";
+      "onClick";
+      "style";
+      "onFocusOut";
+    |]
+
+  let make (props : Props.t) =
+    (* An input given a slot, ["start"] or ["end"], is that field of a range;
+       it confirms its date as the focus leaves it, as a root does. *)
+    let slotted =
+      match (Props.slot props, Slots_context.use ()) with
+      | Some name, Some slots -> List.assoc_opt name slots
+      | _ -> None
+    in
+    let f =
+      match slotted with Some f -> f | None -> within "Date_field.Input"
+    in
+    let element = ref None in
+    let move (e : Dom.keyboardEvent) ~right =
+      match !element with
+      | None -> ()
+      | Some input -> (
+          prevent_key e;
+          match S.get f.direction with
+          | `ltr -> ignore (focus_by input (if right then 1 else -1) : bool)
+          | `rtl ->
+              focus_beside input (key_target e) (if right then 1. else -1.))
+    in
+    let pressed_by_touch = ref false in
+    <Field_context.Provider value=f>
+      <div
+        role=(S.get f.input_role :> Solidtype.Html.Div.role)
+        ref=(fun e ->
+              element := Some (as_element e);
+              f.set_input (Some (as_element e));
+              if Option.is_some slotted then f.set_root (as_element e);
+              Jsx.call (Props.ref props) e)
+        ?aria_label=(match S.get f.input_role with
+                    | `group -> S.get f.aria_label
+                    | `presentation -> None)
+        ?aria_labelledby=(S.get f.labelled_by)
+        ?aria_describedby=(S.get f.public.described_by)
+        ?aria_disabled=(match S.get f.input_role with
+                       | `group when S.get f.public.is_disabled -> Some true
+                       | `group | `presentation -> None)
+        style=("unicode-bidi: isolate;"
+              ^ match Props.style props with Some s -> " " ^ s | None -> "")
+        data_invalid=(state (S.get f.public.is_invalid))
+        data_disabled=(state (S.get f.public.is_disabled))
+        on_key_down=(fun e ->
+                      Jsx.call (Props.on_key_down props) e;
+                      if not (alt e || ctrl e || meta e || shift e) then
+                        match key e with
+                        | "ArrowLeft" -> move e ~right:false
+                        | "ArrowRight" -> move e ~right:true
+                        | _ -> ())
+        on_pointer_down=(fun e ->
+                          Jsx.call (Props.on_pointer_down props) e;
+                          pressed_by_touch :=
+                            not (String.equal (pointer_type e) "mouse");
+                          if not !pressed_by_touch then (
+                            prevent_pointer e;
+                            Option.iter focus_last !element))
+        on_focus_out=(fun e ->
+                       Jsx.call (Props.on_focus_out props) e;
+                       match
+                         (slotted, Js.Null.toOption (related e), !element)
+                       with
+                       | Some f, Some to_, Some i when not (contains i to_) ->
+                           f.confirm ()
+                       | Some f, None, _ -> f.confirm ()
+                       | (Some _ | None), _, _ -> ())
+        on_click=(fun e ->
+                   Jsx.call (Props.on_click props) e;
+                   if !pressed_by_touch then (
+                     pressed_by_touch := false;
+                     Option.iter focus_last !element))
+        ?as_=(S.drawn_as props)
+        props=(S.undrawn (S.omit props own))>
+        <Index each=(S.get f.public.segments)>
+          (fun segment _ -> Props.draw props segment)
+        </Index>
+      </div>
+    </Field_context.Provider>
+
+  let component = Jsx.component make
+end
+
+module Segment = struct
+  module Props = struct
+    type t
+
+    external check :
+      segment:segment Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external segment : t -> segment = "segment" [@@mel.get]
+    external children : t -> Jsx.element option = "children" [@@mel.get]
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
+    external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyDown"
+    [@@mel.get]
+
+    external on_before_input : t -> ((Dom.inputEvent -> unit)[@u]) option
+      = "onBeforeInput"
+    [@@mel.get]
+
+    external on_input : t -> ((Dom.inputEvent -> unit)[@u]) option = "onInput"
+    [@@mel.get]
+
+    external on_focus : t -> ((Dom.focusEvent -> unit)[@u]) option = "onFocus"
+    [@@mel.get]
+
+    external on_blur : t -> ((Dom.focusEvent -> unit)[@u]) option = "onBlur"
+    [@@mel.get]
+
+    external on_pointer_down : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerDown"
+    [@@mel.get]
+
+    external on_mouse_down : t -> ((Dom.mouseEvent -> unit)[@u]) option
+      = "onMouseDown"
+    [@@mel.get]
+
+    external style : t -> string option = "style" [@@mel.get]
+  end
+
+  let own =
+    [|
+      "segment";
+      "children";
+      "ref";
+      "onKeyDown";
+      "onBeforeInput";
+      "onInput";
+      "onFocus";
+      "onBlur";
+      "onPointerDown";
+      "onMouseDown";
+      "style";
+    |]
+
+  (* The digit a key is, in Latin digits or the locale's. *)
+  let digit ~locale_digits k =
+    match k with
+    | "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ->
+        Some (Char.code k.[0] - Char.code '0')
+    | _ -> (
+        match Js.Array.findIndex ~f:(String.equal k) locale_digits with
+        | -1 -> None
+        | d -> Some d)
+
+  (* What a string of typed digits makes, if each is one. *)
+  let number ~locale_digits text =
+    match Js.String.split ~sep:"" text with
+    | [||] -> None
+    | chars ->
+        Array.fold_left
+          (fun acc c ->
+            match (acc, digit ~locale_digits c) with
+            | Some n, Some d -> Some ((n * 10) + d)
+            | _ -> None)
+          (Some 0) chars
+
+  (* What precedes the names it has in common, so a calendar whose eras are
+     ERA0 and ERA1 lets a reader type 0 and 1. *)
+  let common_prefix names =
+    match Array.of_list (List.sort String.compare names) with
+    | [||] -> 0
+    | sorted ->
+        let first = sorted.(0) and last = sorted.(Array.length sorted - 1) in
+        let n = min (String.length first) (String.length last) in
+        let rec go i =
+          if i < n && first.[i] = last.[i] then go (i + 1) else i
+        in
+        go 0
+
+  let make (props : Props.t) =
+    let f = within "Date_field.Segment" in
+    let entered = ref "" in
+    let element = ref None in
+    let composition = ref "" in
+    let filter =
+      I18n.create_filter
+        ~options:(K.CollatorOptions.make ~sensitivity:`base ())
+        ()
+    in
+    let plain =
+      S.create_memo (fun () ->
+          number_format (S.get f.locale)
+            (K.NumberFormatOptions.make ~use_grouping:(K.Either.right false) ()))
+    in
+    let locale_digits =
+      S.create_memo (fun () ->
+          Array.init 10 (fun d ->
+              K.NumberFormat.format (S.get plain) (float_of_int d)))
+    in
+    let seg () = Props.segment props in
+    let part () = part_of (seg ()).type_ in
+    let editable () =
+      (not (S.get f.public.is_disabled))
+      && (not (S.get f.public.is_read_only))
+      && (seg ()).is_editable
+    in
+    let formatter options =
+      Dt.DateFormatter.make (S.get f.locale) ~options ()
+    in
+    (* The day's halves as the locale names them, to type AM or PM by. *)
+    let halves =
+      S.create_memo (fun () ->
+          let format =
+            formatter
+              (Dt.DateTimeFormatOptions.make ~hour:"numeric" ~hour12:true ())
+          in
+          let half hours =
+            Dt.DateFormatter.format_to_parts format
+              (Js.Date.make ~year:2000. ~month:0. ~date:1. ~hours ~minutes:0. ())
+            |> Js.Array.find ~f:(fun p ->
+                String.equal (part_type p) "dayPeriod")
+            |> Option.map Dt.DateTimeFormatPart.value
+            |> Option.value ~default:""
+          in
+          (half 0., half 12.))
+    in
+    (* The calendar's eras and the names a reader types them by. *)
+    let eras =
+      S.create_memo (fun () ->
+          match (seg ()).type_ with
+          | `era ->
+              let format =
+                formatter
+                  (Dt.DateTimeFormatOptions.make ~year:"numeric" ~era:`narrow
+                     ~time_zone:"UTC" ())
+              in
+              let first =
+                D.to_calendar (Dt.CalendarDate.make 1 1 1) (S.get f.calendar)
+              in
+              let named =
+                Array.map
+                  (fun era ->
+                    let date =
+                      Dt.CalendarDate.set first
+                        (Dt.DateFields.make ~era ~year:1 ~month:1 ~day:1 ())
+                    in
+                    let parts =
+                      Dt.DateFormatter.format_to_parts format
+                        (Dt.CalendarDate.to_date date "UTC")
+                    in
+                    ( era,
+                      match
+                        Js.Array.find
+                          ~f:(fun p -> String.equal (part_type p) "era")
+                          parts
+                      with
+                      | Some p -> Dt.DateTimeFormatPart.value p
+                      | None -> era ))
+                  (Dt.Calendar.get_eras (S.get f.calendar) ())
+              in
+              let cut = common_prefix (Array.to_list (Array.map snd named)) in
+              Array.map
+                (fun (era, name) ->
+                  (era, String.sub name cut (String.length name - cut)))
+                named
+          | `year | `month | `day | `hour | `minute | `second | `dayPeriod
+          | `timeZoneName | `literal ->
+              [||])
+    in
+    let starts_with name typed = K.Filter.starts_with filter name typed in
+    let next () =
+      Option.iter (fun i -> ignore (focus_by i 1 : bool)) (S.get f.input)
+    in
+    let previous () =
+      Option.iter (fun i -> ignore (focus_by i (-1) : bool)) (S.get f.input)
+    in
+    let erase () =
+      let s = seg () in
+      if String.equal s.text s.placeholder then previous ();
+      match part () with
+      | None -> ()
+      | Some p -> (
+          match (number ~locale_digits:(S.get locale_digits) s.text, p) with
+          | Some _, (`year | `month | `day | `hour | `minute | `second)
+            when (not (S.get f.public.is_read_only)) && not s.is_placeholder
+            -> (
+              let rest = String.sub s.text 0 (String.length s.text - 1) in
+              let parsed = number ~locale_digits:(S.get locale_digits) rest in
+              match parsed with
+              | None | Some 0 ->
+                  f.clear_part p;
+                  entered := ""
+              | Some n ->
+                  f.set_part p n;
+                  entered := rest)
+          | _, (`dayPeriod | `era) -> f.clear_part p
+          | _ -> ())
+    in
+    let typed k =
+      if not (S.get f.public.is_disabled || S.get f.public.is_read_only) then
+        let s = seg () in
+        match part () with
+        | None -> ()
+        | Some `dayPeriod ->
+            let am, pm = S.get halves in
+            if starts_with am k then (
+              f.set_part `dayPeriod 0;
+              next ())
+            else if starts_with pm k then (
+              f.set_part `dayPeriod 1;
+              next ())
+        | Some `era -> (
+            match
+              Js.Array.find
+                ~f:(fun (_, name) -> starts_with name k)
+                (S.get eras)
+            with
+            | Some (era, _) ->
+                f.set_era era;
+                next ()
+            | None -> ())
+        | Some ((`year | `month | `day | `hour | `minute | `second) as p) -> (
+            let text = !entered ^ k in
+            let digits = S.get locale_digits in
+            match number ~locale_digits:digits text with
+            | None -> ()
+            | Some n ->
+                let greatest = Option.value s.max_value ~default:max_int in
+                let value =
+                  if n > greatest then
+                    Option.value (number ~locale_digits:digits k) ~default:n
+                  else n
+                in
+                f.set_part p value;
+                if
+                  n * 10 > greatest
+                  || String.length text
+                     >= String.length (string_of_int greatest)
+                then (
+                  entered := "";
+                  next ())
+                else entered := text)
+    in
+    (* What a reader is told of the segment's value: a month by its number and
+       its name, an hour with its half of the day. *)
+    let spoken () =
+      let s = seg () in
+      if s.is_placeholder then ""
+      else
+        match s.type_ with
+        | `month ->
+            let name =
+              Dt.DateFormatter.format
+                (formatter
+                   (Dt.DateTimeFormatOptions.make ~month:"long"
+                      ~time_zone:(S.get f.time_zone) ()))
+                (S.get f.date)
+            in
+            if String.equal name s.text then name
+            else s.text ^ {js| – |js} ^ name
+        | `hour ->
+            Dt.DateFormatter.format
+              (formatter
+                 (Dt.DateTimeFormatOptions.make ~hour:"numeric"
+                    ~hour12:(twelve (S.get f.cycle))
+                    ~time_zone:(S.get f.time_zone) ()))
+              (S.get f.date)
+        | `era | `year | `day | `minute | `second | `dayPeriod | `timeZoneName
+        | `literal ->
+            s.text
+    in
+    let names =
+      S.create_memo (fun () ->
+          match
+            display_names (S.get f.locale)
+              (display_names_options ~type_:"dateTimeField" ())
+          with
+          | names -> Some names
+          | exception Js.Exn.Error _ -> None)
+    in
+    let english_name (t : segment_type) =
+      match t with
+      | `era -> "era"
+      | `year -> "year"
+      | `month -> "month"
+      | `day -> "day"
+      | `hour -> "hour"
+      | `minute -> "minute"
+      | `second -> "second"
+      | `dayPeriod -> "AM/PM"
+      | `timeZoneName -> "time zone"
+      | `literal -> ""
+    in
+    let name () =
+      let t = (seg ()).type_ in
+      let field =
+        match t with
+        | `dayPeriod -> "dayPeriod"
+        | `timeZoneName -> "timeZoneName"
+        | _ -> english_name t
+      in
+      match S.get names with
+      | Some n -> (
+          match Js.Undefined.toOption (display_name n field) with
+          | Some name -> name
+          | None -> english_name t)
+      | None -> english_name t
+    in
+    let id = S.create_unique_id () in
+    let first_editable () =
+      Js.Array.findIndex ~f:(fun s -> s.is_editable) (S.get f.public.segments)
+    in
+    let described () =
+      if S.get f.public.is_invalid then S.get f.described_by
+      else
+        let segments = S.get f.public.segments in
+        let at = first_editable () in
+        if at >= 0 && segments.(at) == seg () then S.get f.described_by
+        else None
+    in
+    let selected (_ : Dom.event) =
+      match (Js.Null.toOption (selection ()), !element) with
+      | Some sel, Some e -> (
+          match (Js.Null.toOption (anchor sel), Js.Null.toOption active) with
+          | Some a, Some focused when focused == e && contains e a ->
+              collapse sel e
+          | _ -> ())
+      | _ -> ()
+    in
+    let listening = ref false in
+    (* A segment drawn on a server was never on a page, and touches nothing
+       of one as it goes. *)
+    S.on_cleanup (fun () ->
+        match !element with
+        | None -> ()
+        | Some e -> (
+            if !listening then document_unlisten "selectionchange" selected;
+            (* A focused segment taken off the page gives the focus to the one
+               before it, or after it. *)
+            match (S.get f.input, Js.Null.toOption active) with
+            | Some input, Some a when a == e ->
+                let all = focusable input in
+                let at = index_of all e in
+                let rest = Js.Array.filter ~f:(fun s -> s != e) all in
+                let target = if at > 0 then at - 1 else 0 in
+                if target < Array.length rest then focus rest.(target)
+            | _ -> ()));
+    let style () =
+      let own =
+        "caret-color: transparent;"
+        ^
+        match S.get f.direction with
+        | `rtl -> (
+            "unicode-bidi: embed;"
+            ^
+            match (seg ()).type_ with
+            | `year | `month | `day | `hour | `minute | `second ->
+                " direction: ltr;"
+            | `era | `dayPeriod | `timeZoneName | `literal -> "")
+        | `ltr -> ""
+      in
+      match Props.style props with Some s -> own ^ " " ^ s | None -> own
+    in
+    let text () =
+      match Props.children props with
+      | Some c -> c
+      | None -> Jsx.string (seg ()).text
+    in
+    let literal () =
+      match (seg ()).type_ with `literal -> true | _ -> false
+    in
+    let zone () =
+      match (seg ()).type_ with `timeZoneName -> true | _ -> false
+    in
+    let drawn () =
+      if zone () then
+        (* A zone's name is what a reader reaches and nothing edits: React
+           Aria's read-only textbox, no spin button. *)
+        <div
+          role=`textbox
+          id
+          ref=(fun e ->
+                element := Some (as_element e);
+                Jsx.call (Props.ref props) e)
+          aria_readonly=true
+          aria_label=(name ()
+                     ^ (match S.get f.aria_label with
+                       | Some l -> ", " ^ l
+                       | None -> "")
+                     ^
+                     match S.get f.labelled_by with
+                     | Some _ -> ", "
+                     | None -> "")
+          ?aria_labelledby=(Option.map
+                              (fun l -> id ^ " " ^ l)
+                              (S.get f.labelled_by))
+          ?aria_describedby=(described ())
+          data_type="timeZoneName"
+          ?tabindex=(if S.get f.public.is_disabled then None else Some "0")
+          style=(style ())
+          on_key_down=(fun e -> Jsx.call (Props.on_key_down props) e)
+          on_focus=(fun e -> Jsx.call (Props.on_focus props) e)
+          on_blur=(fun e -> Jsx.call (Props.on_blur props) e)
+          on_pointer_down=(fun e ->
+                            Jsx.call (Props.on_pointer_down props) e;
+                            stop_pointer e)
+          on_mouse_down=(fun e ->
+                          Jsx.call (Props.on_mouse_down props) e;
+                          stop_mouse e)
+          ?as_=(S.drawn_as props)
+          props=(S.undrawn (S.omit props own))>
+          (text ())
+        </div>
+      else if literal () then
+        <div
+          aria_hidden=true
+          data_type="literal"
+          ref=(fun e -> Jsx.call (Props.ref props) e)
+          ?as_=(S.drawn_as props)
+          props=(S.undrawn (S.omit props own))>
+          (text ())
+        </div>
+      else
+        (* VoiceOver on iOS cannot focus a spin button. *)
+        let textbox () = ios () in
+        <Spin.Root
+          translations=(K.ColorChannelField_Root_Translations.make
+                          ~empty:(empty_of (S.get f.locale))
+                          ())
+          ?value=(if textbox () then None
+                  else
+                    Option.map
+                      (fun v -> K.Either.right (float_of_int v))
+                      (seg ()).value)
+          ?text_value=(if textbox () then None else Some (spoken ()))
+          ?min_value=(if textbox () then None
+                      else Option.map float_of_int (seg ()).min_value)
+          ?max_value=(if textbox () then None
+                      else Option.map float_of_int (seg ()).max_value)
+          validation_state=(if S.get f.public.is_invalid then `invalid
+                            else `valid)
+          required=(S.get f.public.is_required)
+          disabled=(S.get f.public.is_disabled)
+          read_only=(S.get f.public.is_read_only || not (seg ()).is_editable)
+          on_increment=(fun () ->
+                         entered := "";
+                         Option.iter (fun p -> f.step_part p 1) (part ()))
+          on_decrement=(fun () ->
+                         entered := "";
+                         Option.iter (fun p -> f.step_part p (-1)) (part ()))
+          on_increment_page=(fun () ->
+                              entered := "";
+                              Option.iter
+                                (fun p -> f.step_part p (page p))
+                                (part ()))
+          on_decrement_page=(fun () ->
+                              entered := "";
+                              Option.iter
+                                (fun p -> f.step_part p (-page p))
+                                (part ()))
+          on_decrement_to_min=(fun () ->
+                                entered := "";
+                                Option.iter f.to_least (part ()))
+          on_increment_to_max=(fun () ->
+                                entered := "";
+                                Option.iter f.to_greatest (part ()))
+          id
+          ref=(fun e ->
+                element := Some (as_element e);
+                Jsx.call (Props.ref props) e)
+          ?role=(if textbox () then Some `textbox else None)
+          aria_label=(name ()
+                     ^ (match S.get f.aria_label with
+                       | Some l -> ", " ^ l
+                       | None -> "")
+                     ^
+                     match S.get f.labelled_by with
+                     | Some _ -> ", "
+                     | None -> "")
+          ?aria_labelledby=(Option.map
+                              (fun l -> id ^ " " ^ l)
+                              (S.get f.labelled_by))
+          ?aria_describedby=(described ())
+          data_placeholder=(state (seg ()).is_placeholder)
+          data_type=(Jsx.data
+                       (match (seg ()).type_ with
+                       | `era -> "era"
+                       | `year -> "year"
+                       | `month -> "month"
+                       | `day -> "day"
+                       | `hour -> "hour"
+                       | `minute -> "minute"
+                       | `second -> "second"
+                       | `dayPeriod -> "dayPeriod"
+                       | `timeZoneName -> "timeZoneName"
+                       | `literal -> "literal"))
+          content_editable=(if editable () then "true" else "false")
+          ?spellcheck=(if editable () then Some false else None)
+          ?autocorrect=(if editable () then Some `off else None)
+          ?enterkeyhint=(if editable () then Some "next" else None)
+          ?inputmode=(match (seg ()).type_ with
+                     | (`year | `month | `day | `hour | `minute | `second)
+                       when editable () ->
+                         Some `numeric
+                     | _ -> None)
+          ?tabindex=(if S.get f.public.is_disabled then None else Some "0")
+          style=(style ())
+          on_key_down=(fun e ->
+                        Jsx.call (Props.on_key_down props) e;
+                        if not (ctrl e || meta e || alt e || shift e) then
+                          match key e with
+                          | "Backspace" | "Delete" ->
+                              prevent_key e;
+                              stop_key e;
+                              erase ()
+                          | _ -> ()
+                        else if String.equal (key e) "a" && (ctrl e || meta e)
+                        then prevent_key e)
+          on_before_input=(fun e ->
+                            Jsx.call (Props.on_before_input props) e;
+                            prevent_input e;
+                            match input_type e with
+                            | "deleteContentBackward" | "deleteContentForward"
+                              ->
+                                if not (S.get f.public.is_read_only) then
+                                  erase ()
+                            | "insertCompositionText" -> (
+                                match !element with
+                                | Some el ->
+                                    composition := text_content el;
+                                    set_text_content el (text_content el)
+                                | None -> ())
+                            | _ -> (
+                                match Js.Null.toOption (input_data e) with
+                                | Some data -> typed data
+                                | None -> ()))
+          on_input=(fun e ->
+                     Jsx.call (Props.on_input props) e;
+                     match
+                       (input_type e, !element, Js.Null.toOption (input_data e))
+                     with
+                     | "insertCompositionText", Some el, Some data ->
+                         set_text_content el !composition;
+                         let am, pm = S.get halves in
+                         if starts_with am data || starts_with pm data then
+                           typed data
+                     | _ -> ())
+          on_focus=(fun e ->
+                     Jsx.call (Props.on_focus props) e;
+                     entered := "";
+                     listening := true;
+                     document_listen "selectionchange" selected;
+                     match (Js.Null.toOption (selection ()), !element) with
+                     | Some sel, Some el -> collapse sel el
+                     | _ -> ())
+          on_blur=(fun e ->
+                    Jsx.call (Props.on_blur props) e;
+                    listening := false;
+                    document_unlisten "selectionchange" selected)
+          on_pointer_down=(fun e ->
+                            Jsx.call (Props.on_pointer_down props) e;
+                            stop_pointer e)
+          on_mouse_down=(fun e ->
+                          Jsx.call (Props.on_mouse_down props) e;
+                          stop_mouse e)
+          ?as_=(S.drawn_as props)
+          props=(S.undrawn (S.omit props own))>
+          (text ())
+        </Spin.Root>
+    in
+    (* A position's segment can become another kind, a literal a part, as its
+       field's granularity or locale changes. *)
+    (* What element the segment is: a position's segment can become another
+       kind as its field's granularity or locale changes. *)
+    let element_kind () =
+      if zone () then "zone" else if literal () then "literal" else "part"
+    in
+    (* Each kind is made once, untracked, so a change of the segment's text
+       updates the element focus is in rather than making another. *)
+    <Solidtype.Show.Keyed some=(Some (element_kind ()))>
+      (fun _ -> S.untrack drawn)
+    </Solidtype.Show.Keyed>
+
+  let component = Jsx.component make
+end

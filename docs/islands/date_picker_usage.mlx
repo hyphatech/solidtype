@@ -1,0 +1,47 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Calendar = Solidtype_heroui.Calendar
+module Date_field = Solidtype_heroui.Date_field
+module Date_picker = Solidtype_heroui.Date_picker
+module Label = Solidtype_heroui.Label
+
+let make () =
+  <Date_picker class_="w-72" name="date">
+    <Label>"Date"</Label>
+    <Date_field.Group full_width=true>
+      <Date_field.Input>
+        (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+      </Date_field.Input>
+      <Date_field.Suffix>
+        <Date_picker.Trigger>
+          <Date_picker.Trigger_indicator />
+        </Date_picker.Trigger>
+      </Date_field.Suffix>
+    </Date_field.Group>
+    <Date_picker.Popover>
+      <Calendar aria_label="Event date">
+        <Calendar.Header>
+          <Calendar.Year_picker_trigger>
+            <Calendar.Year_picker_trigger_heading />
+            <Calendar.Year_picker_trigger_indicator />
+          </Calendar.Year_picker_trigger>
+          <Calendar.Nav_button slot=`previous />
+          <Calendar.Nav_button slot=`next />
+        </Calendar.Header>
+        <Calendar.Grid>
+          <Calendar.Grid_header>
+            (fun day ->
+              <Calendar.Header_cell>
+                (Jsx.string (S.get day))
+              </Calendar.Header_cell>)
+          </Calendar.Grid_header>
+          <Calendar.Grid_body>
+            (fun date -> <Calendar.Cell date=(S.get date) />)
+          </Calendar.Grid_body>
+        </Calendar.Grid>
+        <Calendar.Year_picker_grid>
+          <Calendar.Year_picker_grid_body />
+        </Calendar.Year_picker_grid>
+      </Calendar>
+    </Date_picker.Popover>
+  </Date_picker>

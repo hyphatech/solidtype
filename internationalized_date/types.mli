@@ -7,7 +7,7 @@
 (* Members of different JavaScript kinds, each as it is. *)
 type ('a, 'b) either
 type 'k t_value
-type t_resolved_date_time_format_options
+
 type t_date_formatter
 type t_calendar
 type t_zoned_date_time = [ `zoned_date_time ] t_value
@@ -17,6 +17,7 @@ type t_required_date_time_duration
 type t_time = [ `time ] t_value
 type t_date_time_format_part
 type t_date_range_format_part
+type t_resolved_date_time_format_options
 type t_date_time_format_options
 type t_date_time_duration
 type t_zoned_date_time_set
@@ -39,11 +40,6 @@ end
    satisfy, takes, as the kinds it names. *)
 module Value : sig
   type 'k t = 'k t_value
-end
-
-(* The standard library's ResolvedDateTimeFormatOptions, opaque. *)
-module ResolvedDateTimeFormatOptions : sig
-  type t = t_resolved_date_time_format_options
 end
 
 (** A wrapper around Intl.DateTimeFormat that fixes various browser bugs, and polyfills new features. *)
@@ -245,6 +241,31 @@ module DateRangeFormatPart : sig
   external make : source:([ `startRange | `endRange | `shared ] [@mel.as "source"]) -> type_:([ `era | `year | `month | `day | `hour | `minute | `second | `dayPeriod | `literal | `timeZoneName | `weekday | `unknown | `fractionalSecond ] [@mel.as "type"]) -> value:(string [@mel.as "value"]) -> unit -> t = "" [@@mel.obj]
 end
 
+module ResolvedDateTimeFormatOptions : sig
+  type t = t_resolved_date_time_format_options
+  external locale : t -> string = "locale" [@@mel.get]
+  external calendar : t -> string = "calendar" [@@mel.get]
+  external numbering_system : t -> string = "numberingSystem" [@@mel.get]
+  external time_zone : t -> string = "timeZone" [@@mel.get]
+  external hour12 : t -> bool option = "hour12" [@@mel.get]
+  external weekday : t -> string option = "weekday" [@@mel.get]
+  external era : t -> string option = "era" [@@mel.get]
+  external year : t -> string option = "year" [@@mel.get]
+  external month : t -> string option = "month" [@@mel.get]
+  external day : t -> string option = "day" [@@mel.get]
+  external hour : t -> string option = "hour" [@@mel.get]
+  external minute : t -> string option = "minute" [@@mel.get]
+  external second : t -> string option = "second" [@@mel.get]
+  external time_zone_name : t -> string option = "timeZoneName" [@@mel.get]
+  external format_matcher : t -> string option = "formatMatcher" [@@mel.get]
+  external date_style : t -> [ `full | `long | `medium | `short ] option = "dateStyle" [@@mel.get]
+  external time_style : t -> [ `full | `long | `medium | `short ] option = "timeStyle" [@@mel.get]
+  external hour_cycle : t -> [ `h11 | `h12 | `h23 | `h24 ] option = "hourCycle" [@@mel.get]
+  external day_period : t -> [ `long | `short | `narrow ] option = "dayPeriod" [@@mel.get]
+  external fractional_second_digits : t -> int option = "fractionalSecondDigits" [@@mel.get]
+  external make : locale:(string [@mel.as "locale"]) -> calendar:(string [@mel.as "calendar"]) -> numbering_system:(string [@mel.as "numberingSystem"]) -> time_zone:(string [@mel.as "timeZone"]) -> ?hour12:(bool [@mel.as "hour12"]) -> ?weekday:(string [@mel.as "weekday"]) -> ?era:(string [@mel.as "era"]) -> ?year:(string [@mel.as "year"]) -> ?month:(string [@mel.as "month"]) -> ?day:(string [@mel.as "day"]) -> ?hour:(string [@mel.as "hour"]) -> ?minute:(string [@mel.as "minute"]) -> ?second:(string [@mel.as "second"]) -> ?time_zone_name:(string [@mel.as "timeZoneName"]) -> ?format_matcher:(string [@mel.as "formatMatcher"]) -> ?date_style:([ `full | `long | `medium | `short ] [@mel.as "dateStyle"]) -> ?time_style:([ `full | `long | `medium | `short ] [@mel.as "timeStyle"]) -> ?hour_cycle:([ `h11 | `h12 | `h23 | `h24 ] [@mel.as "hourCycle"]) -> ?day_period:([ `long | `short | `narrow ] [@mel.as "dayPeriod"]) -> ?fractional_second_digits:(int [@mel.as "fractionalSecondDigits"]) -> unit -> t = "" [@@mel.obj]
+end
+
 module DateTimeFormatOptions : sig
   type t = t_date_time_format_options
   external locale_matcher : t -> string option = "localeMatcher" [@@mel.get]
@@ -263,11 +284,11 @@ module DateTimeFormatOptions : sig
   external calendar : t -> string option = "calendar" [@@mel.get]
   external day_period : t -> [ `long | `short | `narrow ] option = "dayPeriod" [@@mel.get]
   external numbering_system : t -> string option = "numberingSystem" [@@mel.get]
-  external date_style : t -> [ `long | `short | `full | `medium ] option = "dateStyle" [@@mel.get]
-  external time_style : t -> [ `long | `short | `full | `medium ] option = "timeStyle" [@@mel.get]
+  external date_style : t -> [ `full | `long | `medium | `short ] option = "dateStyle" [@@mel.get]
+  external time_style : t -> [ `full | `long | `medium | `short ] option = "timeStyle" [@@mel.get]
   external hour_cycle : t -> [ `h11 | `h12 | `h23 | `h24 ] option = "hourCycle" [@@mel.get]
   external fractional_second_digits : t -> int option = "fractionalSecondDigits" [@@mel.get]
-  external make : ?locale_matcher:(string [@mel.as "localeMatcher"]) -> ?weekday:([ `long | `short | `narrow ] [@mel.as "weekday"]) -> ?era:([ `long | `short | `narrow ] [@mel.as "era"]) -> ?year:(string [@mel.as "year"]) -> ?month:(string [@mel.as "month"]) -> ?day:(string [@mel.as "day"]) -> ?hour:(string [@mel.as "hour"]) -> ?minute:(string [@mel.as "minute"]) -> ?second:(string [@mel.as "second"]) -> ?time_zone_name:([ `long | `short | `shortOffset | `longOffset | `shortGeneric | `longGeneric ] [@mel.as "timeZoneName"]) -> ?format_matcher:(string [@mel.as "formatMatcher"]) -> ?hour12:(bool [@mel.as "hour12"]) -> ?time_zone:(string [@mel.as "timeZone"]) -> ?calendar:(string [@mel.as "calendar"]) -> ?day_period:([ `long | `short | `narrow ] [@mel.as "dayPeriod"]) -> ?numbering_system:(string [@mel.as "numberingSystem"]) -> ?date_style:([ `long | `short | `full | `medium ] [@mel.as "dateStyle"]) -> ?time_style:([ `long | `short | `full | `medium ] [@mel.as "timeStyle"]) -> ?hour_cycle:([ `h11 | `h12 | `h23 | `h24 ] [@mel.as "hourCycle"]) -> ?fractional_second_digits:(int [@mel.as "fractionalSecondDigits"]) -> unit -> t = "" [@@mel.obj]
+  external make : ?locale_matcher:(string [@mel.as "localeMatcher"]) -> ?weekday:([ `long | `short | `narrow ] [@mel.as "weekday"]) -> ?era:([ `long | `short | `narrow ] [@mel.as "era"]) -> ?year:(string [@mel.as "year"]) -> ?month:(string [@mel.as "month"]) -> ?day:(string [@mel.as "day"]) -> ?hour:(string [@mel.as "hour"]) -> ?minute:(string [@mel.as "minute"]) -> ?second:(string [@mel.as "second"]) -> ?time_zone_name:([ `long | `short | `shortOffset | `longOffset | `shortGeneric | `longGeneric ] [@mel.as "timeZoneName"]) -> ?format_matcher:(string [@mel.as "formatMatcher"]) -> ?hour12:(bool [@mel.as "hour12"]) -> ?time_zone:(string [@mel.as "timeZone"]) -> ?calendar:(string [@mel.as "calendar"]) -> ?day_period:([ `long | `short | `narrow ] [@mel.as "dayPeriod"]) -> ?numbering_system:(string [@mel.as "numberingSystem"]) -> ?date_style:([ `full | `long | `medium | `short ] [@mel.as "dateStyle"]) -> ?time_style:([ `full | `long | `medium | `short ] [@mel.as "timeStyle"]) -> ?hour_cycle:([ `h11 | `h12 | `h23 | `h24 ] [@mel.as "hourCycle"]) -> ?fractional_second_digits:(int [@mel.as "fractionalSecondDigits"]) -> unit -> t = "" [@@mel.obj]
 end
 
 (** Represents an amount of time with both date and time components, for use when performing

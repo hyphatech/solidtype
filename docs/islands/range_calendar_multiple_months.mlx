@@ -1,0 +1,50 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Range_calendar = Solidtype_heroui.Range_calendar
+
+let make () =
+  <Range_calendar
+    aria_label="Trip dates"
+    class_="@container-normal w-full max-w-none overflow-x-auto"
+    visible_duration=(Range_calendar.Months 2)>
+    <div class_="mx-auto flex w-max gap-8">
+      <div class_="w-64">
+        <Range_calendar.Header>
+          <Range_calendar.Nav_button slot=`previous />
+          <Range_calendar.Heading class_="flex-none" />
+          <div class_="size-6" />
+        </Range_calendar.Header>
+        <Range_calendar.Grid>
+          <Range_calendar.Grid_header>
+            (fun day ->
+              <Range_calendar.Header_cell>
+                (Jsx.string (S.get day))
+              </Range_calendar.Header_cell>)
+          </Range_calendar.Grid_header>
+          <Range_calendar.Grid_body>
+            (fun date -> <Range_calendar.Cell date=(S.get date) />)
+          </Range_calendar.Grid_body>
+        </Range_calendar.Grid>
+      </div>
+      <div class_="w-64">
+        <Range_calendar.Header>
+          <div class_="size-6" />
+          <Range_calendar.Heading
+            class_="flex-none" offset=(Range_calendar.Months 1)
+          />
+          <Range_calendar.Nav_button slot=`next />
+        </Range_calendar.Header>
+        <Range_calendar.Grid offset=(Range_calendar.Months 1)>
+          <Range_calendar.Grid_header>
+            (fun day ->
+              <Range_calendar.Header_cell>
+                (Jsx.string (S.get day))
+              </Range_calendar.Header_cell>)
+          </Range_calendar.Grid_header>
+          <Range_calendar.Grid_body>
+            (fun date -> <Range_calendar.Cell date=(S.get date) />)
+          </Range_calendar.Grid_body>
+        </Range_calendar.Grid>
+      </div>
+    </div>
+  </Range_calendar>

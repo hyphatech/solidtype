@@ -1,0 +1,70 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Calendar = Solidtype_heroui.Calendar
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module Button = Solidtype_heroui.Button
+
+let booked_dates = [ 5; 6; 12; 13; 14; 20 ]
+let weekend date = D.is_weekend date "en-GB"
+
+let make () =
+  let selected, set_selected = S.create_signal None in
+  let is_date_unavailable date =
+    weekend date || List.mem (Date.day date) booked_dates
+  in
+  <div class_="flex flex-col items-center gap-4">
+    <Calendar
+      aria_label="Booking date"
+      is_date_unavailable
+      min_value=(D.today (D.get_local_time_zone ()))
+      value=(Js.Nullable.fromOption (S.get selected))
+      on_change=(fun d -> S.set set_selected (Some d))>
+      <Calendar.Header>
+        <Calendar.Heading />
+        <Calendar.Nav_button slot=`previous />
+        <Calendar.Nav_button slot=`next />
+      </Calendar.Header>
+      <Calendar.Grid>
+        <Calendar.Grid_header>
+          (fun day ->
+            <Calendar.Header_cell>
+              (Jsx.string (S.get day))
+            </Calendar.Header_cell>)
+        </Calendar.Grid_header>
+        <Calendar.Grid_body>
+          (fun date ->
+            <Calendar.Cell date=(S.get date)>
+              (fun (cell : Calendar.cell) ->
+                let d = S.get date in
+                Jsx.fragment
+                  [|
+                    Jsx.string (S.get cell.formatted_date);
+                    (if
+                       (not (S.get cell.is_unavailable))
+                       && (not (weekend d))
+                       && List.mem (Date.day d) booked_dates
+                     then <Calendar.Cell_indicator />
+                     else Jsx.nothing);
+                  |])
+            </Calendar.Cell>)
+        </Calendar.Grid_body>
+      </Calendar.Grid>
+    </Calendar>
+    <div class_="flex flex-col gap-2 text-center">
+      <div class_="flex items-center justify-center gap-4 text-xs text-muted">
+        <span class_="flex items-center gap-1">
+          <span class_="size-2 rounded-full bg-muted" /> "Has bookings"
+        </span>
+        <span class_="flex items-center gap-1">
+          <span class_="size-2 rounded-full bg-default" /> "Weekend/Unavailable"
+        </span>
+      </div>
+      <Solidtype.Show.Some some=(S.get selected)>
+        (fun d ->
+          <Button size=`sm variant=`primary>
+            (Jsx.string ("Book " ^ Date.to_string (S.get d) ()))
+          </Button>)
+      </Solidtype.Show.Some>
+    </div>
+  </div>

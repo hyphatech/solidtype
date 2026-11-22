@@ -1,0 +1,82 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Button_group = Solidtype_heroui.Button_group
+module Calendar = Solidtype_heroui.Calendar
+module Description = Solidtype_heroui.Description
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+
+let today () = D.today (D.get_local_time_zone ())
+
+(* The start of the week holding [d], Monday first, as en-GB counts. *)
+let start_of_week d =
+  Date.subtract d
+    (D.Types.DateDuration.make ~days:(D.get_day_of_week d "en-GB" ()) ())
+
+let start_of_month d = Date.set d (D.Types.DateFields.make ~day:1 ())
+
+let make () =
+  let value, set_value = S.create_signal None in
+  let focused, set_focused = S.create_signal (D.parse_date "2025-12-25") in
+  let choose d =
+    S.set set_value (Some d);
+    S.set set_focused d
+  in
+  <div class_="flex flex-col items-center gap-4">
+    <Button_group full_width=true size=`sm variant=`tertiary>
+      <Button on_click=(fun _ -> choose (today ()))>"Today"</Button>
+      <Button on_click=(fun _ -> choose (start_of_week (today ())))>
+        "Week"
+      </Button>
+      <Button on_click=(fun _ -> choose (start_of_month (today ())))>
+        "Month"
+      </Button>
+    </Button_group>
+    <Calendar
+      aria_label="Event date"
+      focused_value=(S.get focused)
+      value=(Js.Nullable.fromOption (S.get value))
+      on_change=(fun d -> S.set set_value (Some d))
+      on_focus_change=(S.set set_focused)>
+      <Calendar.Header>
+        <Calendar.Heading />
+        <Calendar.Nav_button slot=`previous />
+        <Calendar.Nav_button slot=`next />
+      </Calendar.Header>
+      <Calendar.Grid>
+        <Calendar.Grid_header>
+          (fun day ->
+            <Calendar.Header_cell>
+              (Jsx.string (S.get day))
+            </Calendar.Header_cell>)
+        </Calendar.Grid_header>
+        <Calendar.Grid_body>
+          (fun date -> <Calendar.Cell date=(S.get date) />)
+        </Calendar.Grid_body>
+      </Calendar.Grid>
+    </Calendar>
+    <Description class_="text-center">
+      (Jsx.string
+         ("Selected date: "
+         ^
+         match S.get value with
+         | Some d -> Date.to_string d ()
+         | None -> "(none)"))
+    </Description>
+    <div class_="flex gap-2">
+      <Button size=`sm variant=`secondary on_click=(fun _ -> choose (today ()))>
+        "Set Today"
+      </Button>
+      <Button
+        size=`sm
+        variant=`secondary
+        on_click=(fun _ -> choose (D.parse_date "2025-12-25"))>
+        "Set Christmas"
+      </Button>
+      <Button
+        size=`sm variant=`tertiary on_click=(fun _ -> S.set set_value None)>
+        "Clear"
+      </Button>
+    </div>
+  </div>

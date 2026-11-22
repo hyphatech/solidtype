@@ -1,0 +1,15 @@
+module S = Solidtype.Solid
+module Label = Solidtype_heroui.Label
+module Date_field = Solidtype_heroui.Date_field
+
+let make () =
+  <Date_field class_="w-64" name="due-date">
+    <Label>"Due date"</Label>
+    <Date_field.Group
+      class_="rounded-xl border border-border/80 bg-default shadow-sm"
+      variant=`secondary>
+      <Date_field.Input>
+        (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+      </Date_field.Input>
+    </Date_field.Group>
+  </Date_field>

@@ -157,6 +157,8 @@
   (solidtype
    (= :version))
   (solidtype-kobalte
+   (= :version))
+  (solidtype-internationalized-date
    (= :version))))
 
 (package

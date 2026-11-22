@@ -1,0 +1,62 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Calendar = Solidtype_heroui.Calendar
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+
+let options =
+  [|
+    ("1", "1 day");
+    ("5", "5 days");
+    ("7", "7 days");
+    ("8", "8 days");
+    ("10", "10 days");
+    ("14", "14 days");
+    ("21", "21 days");
+  |]
+
+let make () =
+  let count, set_count = S.create_signal 5 in
+  <div class_="flex flex-col items-center gap-6">
+    <Select
+      class_="w-40"
+      value=[| string_of_int (S.get count) |]
+      on_change=(fun ids ->
+                  match ids with
+                  | [| id |] ->
+                      Option.iter (S.set set_count) (int_of_string_opt id)
+                  | _ -> ())>
+      <Label>"Visible days"</Label>
+      <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+      <Select.Popover>
+        <List_box>
+          <Solidtype.For each=options>
+            (fun (id, name) _ ->
+              <List_box.Item id text_value=name>
+                (Jsx.string name) <List_box.Item_indicator />
+              </List_box.Item>)
+          </Solidtype.For>
+        </List_box>
+      </Select.Popover>
+    </Select>
+    <Calendar
+      aria_label="Day view" visible_duration=(Calendar.Days (S.get count))>
+      <Calendar.Header>
+        <Calendar.Heading />
+        <Calendar.Nav_button slot=`previous />
+        <Calendar.Nav_button slot=`next />
+      </Calendar.Header>
+      <Calendar.Grid>
+        <Calendar.Grid_header>
+          (fun day ->
+            <Calendar.Header_cell>
+              (Jsx.string (S.get day))
+            </Calendar.Header_cell>)
+        </Calendar.Grid_header>
+        <Calendar.Grid_body>
+          (fun date -> <Calendar.Cell date=(S.get date) />)
+        </Calendar.Grid_body>
+      </Calendar.Grid>
+    </Calendar>
+  </div>

@@ -9,6 +9,7 @@
   solidtype
   solidtype-kobalte
   solidtype-headless
+  solidtype-internationalized-date
   melange-jest.jest
   melange.dom)
  (preprocess

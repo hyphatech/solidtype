@@ -75,8 +75,12 @@ external pointer_action : keys:string -> target:Dom.element -> pointer_action
   = ""
 [@@mel.obj]
 
+external move_to : target:Dom.element -> pointer_action = "" [@@mel.obj]
+
 external pointer : user -> pointer_action array -> unit Js.Promise.t = "pointer"
 [@@mel.send]
+
+external hover : user -> Dom.element -> unit Js.Promise.t = "hover" [@@mel.send]
 
 (* A wait as long as a touch is held. *)
 let sleep ms = wait ms

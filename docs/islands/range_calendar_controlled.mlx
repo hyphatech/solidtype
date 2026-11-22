@@ -1,0 +1,105 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Range_calendar = Solidtype_heroui.Range_calendar
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module Description = Solidtype_heroui.Description
+module Button = Solidtype_heroui.Button
+module Button_group = Solidtype_heroui.Button_group
+
+let today () = D.today (D.get_local_time_zone ())
+
+(* The start of the week holding [d], Monday first, as en-GB counts. *)
+let start_of_week d =
+  Date.subtract d
+    (D.Types.DateDuration.make ~days:(D.get_day_of_week d "en-GB" ()) ())
+
+let start_of_month d = Date.set d (D.Types.DateFields.make ~day:1 ())
+
+let make () =
+  let value, set_value = S.create_signal None in
+  let focused, set_focused = S.create_signal (D.parse_date "2025-12-25") in
+  let set_range start end_ =
+    S.set set_value (Some { Range_calendar.start; end_ });
+    S.set set_focused start
+  in
+  <div class_="flex flex-col items-center gap-4">
+    <Button_group variant=`tertiary>
+      <Button on_click=(fun _ -> S.set set_focused (today ()))>
+        "This week"
+      </Button>
+      <Button
+        on_click=(fun _ ->
+                     S.set set_focused
+                       (start_of_week
+                          (Date.add (today ())
+                             (D.Types.DateDuration.make ~weeks:1 ()))))>
+        "Next week"
+      </Button>
+      <Button
+        on_click=(fun _ ->
+                     S.set set_focused
+                       (start_of_month
+                          (Date.add (today ())
+                             (D.Types.DateDuration.make ~months:1 ()))))>
+        "Next month"
+      </Button>
+    </Button_group>
+    <Range_calendar
+      aria_label="Trip dates"
+      first_day_of_week=`mon
+      focused_value=(S.get focused)
+      value=(Js.Nullable.fromOption (S.get value))
+      on_change=(S.set set_value)
+      on_focus_change=(S.set set_focused)>
+      <Range_calendar.Header>
+        <Range_calendar.Heading />
+        <Range_calendar.Nav_button slot=`previous />
+        <Range_calendar.Nav_button slot=`next />
+      </Range_calendar.Header>
+      <Range_calendar.Grid>
+        <Range_calendar.Grid_header>
+          (fun day ->
+            <Range_calendar.Header_cell>
+              (Jsx.string (S.get day))
+            </Range_calendar.Header_cell>)
+        </Range_calendar.Grid_header>
+        <Range_calendar.Grid_body>
+          (fun date -> <Range_calendar.Cell date=(S.get date) />)
+        </Range_calendar.Grid_body>
+      </Range_calendar.Grid>
+    </Range_calendar>
+    <Description class_="text-center">
+      (Jsx.string
+         ("Selected range: "
+         ^
+         match S.get value with
+         | Some r ->
+             Date.to_string r.start () ^ " -> " ^ Date.to_string r.end_ ()
+         | None -> "(none)"))
+    </Description>
+    <div class_="flex gap-2">
+      <Button
+        size=`sm
+        variant=`secondary
+        on_click=(fun _ ->
+                     let start = today () in
+                     set_range start
+                       (Date.add start (D.Types.DateDuration.make ~days:6 ())))>
+        "Set 1 week"
+      </Button>
+      <Button
+        size=`sm
+        variant=`secondary
+        on_click=(fun _ ->
+                     set_range
+                       (D.parse_date "2025-12-20")
+                       (D.parse_date "2025-12-31"))>
+        "Set Holidays"
+      </Button>
+      <Button
+        size=`sm variant=`tertiary on_click=(fun _ -> S.set set_value None)>
+        "Clear"
+      </Button>
+    </div>
+  </div>

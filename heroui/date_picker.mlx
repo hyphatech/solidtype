@@ -1,0 +1,423 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Headless = Solidtype_headless.Date_picker
+module D = Solidtype_internationalized_date
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+(* A picker's look: the name its slots take and HeroUI's class for each part,
+   a date picker's or a range picker's, which share their parts. *)
+type look = {
+  name : string;
+  base : string;
+  trigger : string;
+  trigger_indicator : string;
+  popover : string;
+}
+
+let date_look =
+  let slots = Styles.DatePicker.slots (Styles.DatePicker.options ()) in
+  {
+    name = "date-picker";
+    base = Styles.DatePicker.base slots;
+    trigger = Styles.DatePicker.trigger slots;
+    trigger_indicator = Styles.DatePicker.trigger_indicator slots;
+    popover = Styles.DatePicker.popover slots;
+  }
+
+let range_look =
+  let slots =
+    Styles.DateRangePicker.slots (Styles.DateRangePicker.options ())
+  in
+  {
+    name = "date-range-picker";
+    base = Styles.DateRangePicker.base slots;
+    trigger = Styles.DateRangePicker.trigger slots;
+    trigger_indicator = Styles.DateRangePicker.trigger_indicator slots;
+    popover = Styles.DateRangePicker.popover slots;
+  }
+
+module Look_context = Solidtype.Context.Make_optional (struct
+  type t = look
+end)
+
+let look () = Option.value (Look_context.use ()) ~default:date_look
+
+let in_range_look draw =
+  <Look_context.Provider value=range_look>(draw ())</Look_context.Provider>
+
+type 'v state = {
+  state : 'v Headless.state;
+  is_disabled : bool S.accessor;
+  is_invalid : bool S.accessor;
+  is_read_only : bool S.accessor;
+  is_required : bool S.accessor;
+  is_open : bool S.accessor;
+}
+
+module Date_root = struct
+  module V = D.Types.CalendarDate
+
+  let%component make ?(value : V.t Js.Nullable.t option)
+      ?(default_value : V.t option) ?(on_change : (V.t option -> unit) option)
+      ?(placeholder_value : V.t option) ?(min_value : V.t option)
+      ?(max_value : V.t option) ?(is_date_unavailable : (V.t -> bool) option)
+      ?(should_force_leading_zeros : bool option) ?(is_required : bool = false)
+      ?(is_invalid : bool = false) ?(is_disabled : bool = false)
+      ?(is_read_only : bool = false) ?(name : string option)
+      ?(auto_focus : bool option) ?(aria_label : string option)
+      ?(is_open : bool option) ?(default_open : bool option)
+      ?(on_open_change : (bool -> unit) option)
+      ?(should_close_on_select : bool option)
+      ?(first_day_of_week : Solidtype_headless.Calendar.day_of_week option)
+      ?(page_behavior : [ `visible | `single ] option) ?(class_ : string option)
+      ?(on_blur : (Dom.focusEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : V.t state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> V.t state -> Solidtype.Jsx.element) option)
+      () =
+    let r =
+      Date_field.root ~kind:{ compare = V.compare } ~value ~default_value
+        ~on_change ~min_value ~max_value ~is_date_unavailable
+        ~is_invalid:(fun () -> S.get is_invalid)
+        ~name:(fun () -> S.get name)
+        ~on_blur
+    in
+    let state picker =
+      {
+        state = picker;
+        is_disabled;
+        is_invalid = r.invalid;
+        is_read_only;
+        is_required;
+        is_open = picker.is_open;
+      }
+    in
+    <Headless.Root
+      value=(Js.Nullable.fromOption (S.get r.current))
+      ?default_value=(S.get default_value)
+      on_change=r.change
+      ?placeholder_value=(S.get placeholder_value)
+      ?min_value=(S.get min_value)
+      ?max_value=(S.get max_value)
+      is_date_unavailable=(fun d ->
+                            Option.value (is_date_unavailable d) ~default:false)
+      ?should_force_leading_zeros=(S.get should_force_leading_zeros)
+      is_required=(S.get is_required)
+      is_invalid=(S.get r.invalid)
+      is_disabled=(S.get is_disabled)
+      is_read_only=(S.get is_read_only)
+      ?name=(S.get name)
+      ?auto_focus=(S.get auto_focus)
+      ?aria_label=(S.get aria_label)
+      ?is_open=(S.get is_open)
+      ?default_open=(S.get default_open)
+      on_open_change=(fun o -> ignore (on_open_change o : unit option))
+      ?should_close_on_select=(S.get should_close_on_select)
+      ?first_day_of_week=(S.get first_day_of_week)
+      ?page_behavior=(S.get page_behavior)
+      class_=(after date_look.base (S.get class_))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            r.in_form.root e)
+      on_focus_out=r.leave
+      data_slot="date-picker"
+      data_invalid=(Jsx.flag (S.get r.invalid))
+      data_disabled=(Jsx.flag (S.get is_disabled))
+      data_readonly=(Jsx.flag (S.get is_read_only))
+      data_required=(Jsx.flag (S.get is_required))
+      ?as_=(Option.map (fun f p picker -> f p (state picker)) (S.get as_))
+      props=(Props.others props)>
+      (fun (picker : V.t Headless.state) ->
+        <Field_error.Message.Provider value=r.in_form.error>
+          (Date_field.fields (fun () ->
+               Jsx.draw (S.get children) (state picker)))
+        </Field_error.Message.Provider>)
+    </Headless.Root>
+  [@@element div]
+end
+
+module Date_time = struct
+  module V = D.Types.CalendarDateTime
+
+  let%component make ?(value : V.t Js.Nullable.t option)
+      ?(default_value : V.t option) ?(on_change : (V.t option -> unit) option)
+      ?(placeholder_value : V.t option)
+      ?(granularity : [ `day | `hour | `minute | `second ] option)
+      ?(hour_cycle : [ `h12 | `h24 ] option) ?(min_value : V.t option)
+      ?(max_value : V.t option) ?(is_date_unavailable : (V.t -> bool) option)
+      ?(should_force_leading_zeros : bool option) ?(is_required : bool = false)
+      ?(is_invalid : bool = false) ?(is_disabled : bool = false)
+      ?(is_read_only : bool = false) ?(name : string option)
+      ?(auto_focus : bool option) ?(aria_label : string option)
+      ?(is_open : bool option) ?(default_open : bool option)
+      ?(on_open_change : (bool -> unit) option)
+      ?(should_close_on_select : bool option)
+      ?(first_day_of_week : Solidtype_headless.Calendar.day_of_week option)
+      ?(page_behavior : [ `visible | `single ] option) ?(class_ : string option)
+      ?(on_blur : (Dom.focusEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : V.t state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> V.t state -> Solidtype.Jsx.element) option)
+      () =
+    let r =
+      Date_field.root ~kind:{ compare = V.compare } ~value ~default_value
+        ~on_change ~min_value ~max_value ~is_date_unavailable
+        ~is_invalid:(fun () -> S.get is_invalid)
+        ~name:(fun () -> S.get name)
+        ~on_blur
+    in
+    let state picker =
+      {
+        state = picker;
+        is_disabled;
+        is_invalid = r.invalid;
+        is_read_only;
+        is_required;
+        is_open = picker.is_open;
+      }
+    in
+    <Headless.Root_date_time
+      value=(Js.Nullable.fromOption (S.get r.current))
+      ?default_value=(S.get default_value)
+      on_change=r.change
+      ?placeholder_value=(S.get placeholder_value)
+      ?granularity=(S.get granularity)
+      ?hour_cycle=(S.get hour_cycle)
+      ?min_value=(S.get min_value)
+      ?max_value=(S.get max_value)
+      is_date_unavailable=(fun d ->
+                            Option.value (is_date_unavailable d) ~default:false)
+      ?should_force_leading_zeros=(S.get should_force_leading_zeros)
+      is_required=(S.get is_required)
+      is_invalid=(S.get r.invalid)
+      is_disabled=(S.get is_disabled)
+      is_read_only=(S.get is_read_only)
+      ?name=(S.get name)
+      ?auto_focus=(S.get auto_focus)
+      ?aria_label=(S.get aria_label)
+      ?is_open=(S.get is_open)
+      ?default_open=(S.get default_open)
+      on_open_change=(fun o -> ignore (on_open_change o : unit option))
+      ?should_close_on_select=(S.get should_close_on_select)
+      ?first_day_of_week=(S.get first_day_of_week)
+      ?page_behavior=(S.get page_behavior)
+      class_=(after date_look.base (S.get class_))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            r.in_form.root e)
+      on_focus_out=r.leave
+      data_slot="date-picker"
+      data_invalid=(Jsx.flag (S.get r.invalid))
+      data_disabled=(Jsx.flag (S.get is_disabled))
+      data_readonly=(Jsx.flag (S.get is_read_only))
+      data_required=(Jsx.flag (S.get is_required))
+      ?as_=(Option.map (fun f p picker -> f p (state picker)) (S.get as_))
+      props=(Props.others props)>
+      (fun (picker : V.t Headless.state) ->
+        <Field_error.Message.Provider value=r.in_form.error>
+          (Date_field.fields (fun () ->
+               Jsx.draw (S.get children) (state picker)))
+        </Field_error.Message.Provider>)
+    </Headless.Root_date_time>
+  [@@element div]
+end
+
+module Zoned = struct
+  module V = D.Types.ZonedDateTime
+
+  let%component make ?(value : V.t Js.Nullable.t option)
+      ?(default_value : V.t option) ?(on_change : (V.t option -> unit) option)
+      ~(placeholder_value : V.t)
+      ?(granularity : [ `day | `hour | `minute | `second ] option)
+      ?(hour_cycle : [ `h12 | `h24 ] option) ?(hide_time_zone : bool option)
+      ?(min_value : V.t option) ?(max_value : V.t option)
+      ?(is_date_unavailable : (V.t -> bool) option)
+      ?(should_force_leading_zeros : bool option) ?(is_required : bool = false)
+      ?(is_invalid : bool = false) ?(is_disabled : bool = false)
+      ?(is_read_only : bool = false) ?(name : string option)
+      ?(auto_focus : bool option) ?(aria_label : string option)
+      ?(is_open : bool option) ?(default_open : bool option)
+      ?(on_open_change : (bool -> unit) option)
+      ?(should_close_on_select : bool option)
+      ?(first_day_of_week : Solidtype_headless.Calendar.day_of_week option)
+      ?(page_behavior : [ `visible | `single ] option) ?(class_ : string option)
+      ?(on_blur : (Dom.focusEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : V.t state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> V.t state -> Solidtype.Jsx.element) option)
+      () =
+    let r =
+      Date_field.root ~kind:{ compare = V.compare } ~value ~default_value
+        ~on_change ~min_value ~max_value ~is_date_unavailable
+        ~is_invalid:(fun () -> S.get is_invalid)
+        ~name:(fun () -> S.get name)
+        ~on_blur
+    in
+    let state picker =
+      {
+        state = picker;
+        is_disabled;
+        is_invalid = r.invalid;
+        is_read_only;
+        is_required;
+        is_open = picker.is_open;
+      }
+    in
+    <Headless.Root_zoned
+      value=(Js.Nullable.fromOption (S.get r.current))
+      ?default_value=(S.get default_value)
+      on_change=r.change
+      placeholder_value=(S.get placeholder_value)
+      ?granularity=(S.get granularity)
+      ?hour_cycle=(S.get hour_cycle)
+      ?hide_time_zone=(S.get hide_time_zone)
+      ?min_value=(S.get min_value)
+      ?max_value=(S.get max_value)
+      is_date_unavailable=(fun d ->
+                            Option.value (is_date_unavailable d) ~default:false)
+      ?should_force_leading_zeros=(S.get should_force_leading_zeros)
+      is_required=(S.get is_required)
+      is_invalid=(S.get r.invalid)
+      is_disabled=(S.get is_disabled)
+      is_read_only=(S.get is_read_only)
+      ?name=(S.get name)
+      ?auto_focus=(S.get auto_focus)
+      ?aria_label=(S.get aria_label)
+      ?is_open=(S.get is_open)
+      ?default_open=(S.get default_open)
+      on_open_change=(fun o -> ignore (on_open_change o : unit option))
+      ?should_close_on_select=(S.get should_close_on_select)
+      ?first_day_of_week=(S.get first_day_of_week)
+      ?page_behavior=(S.get page_behavior)
+      class_=(after date_look.base (S.get class_))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            r.in_form.root e)
+      on_focus_out=r.leave
+      data_slot="date-picker"
+      data_invalid=(Jsx.flag (S.get r.invalid))
+      data_disabled=(Jsx.flag (S.get is_disabled))
+      data_readonly=(Jsx.flag (S.get is_read_only))
+      data_required=(Jsx.flag (S.get is_required))
+      ?as_=(Option.map (fun f p picker -> f p (state picker)) (S.get as_))
+      props=(Props.others props)>
+      (fun (picker : V.t Headless.state) ->
+        <Field_error.Message.Provider value=r.in_form.error>
+          (Date_field.fields (fun () ->
+               Jsx.draw (S.get children) (state picker)))
+        </Field_error.Message.Provider>)
+    </Headless.Root_zoned>
+  [@@element div]
+end
+
+include Date_root
+
+module Trigger = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.element)
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option) () =
+    let p = Headless.Context.use () in
+    let l = look () in
+    let disabled () = S.get p.is_disabled || S.get p.is_read_only in
+    let i = Interaction.create ~disabled () in
+    <Headless.Trigger
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
+      class_=(after l.trigger (S.get class_))
+      data_slot=(Jsx.data (l.name ^ "-trigger"))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_pressed=(Jsx.flag (Interaction.pressed i || S.get p.is_open))
+      data_focused=(Jsx.flag (Interaction.focused i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(Jsx.flag (disabled ()))
+      ?tabindex=(if disabled () then None else Some "0")
+      props=(Props.others props)>
+      (S.get children)
+    </Headless.Trigger>
+  [@@element button]
+end
+
+module Trigger_indicator = struct
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
+      () =
+    <span
+      aria_hidden=true
+      class_=(after (look ()).trigger_indicator (S.get class_))
+      data_slot=(Jsx.data ((look ()).name ^ "-trigger-indicator"))
+      props=(Props.others props)>
+      (match S.get children with
+      | Some c -> c
+      | None ->
+          <svg
+            aria_hidden=true
+            fill="none"
+            height="1em"
+            role=`presentation
+            view_box="0 0 13 14"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              clip_rule="evenodd"
+              d="M3.75 4.5A.75.75 0 0 1 3 3.75v-.748a1.5 1.5 0 0 0-1.5 \
+                 1.5v1h10v-1a1.5 1.5 0 0 0-1.5-1.5v.75a.75.75 0 1 1-1.5 \
+                 0v-.75h-4v.747a.75.75 0 0 1-.75.75ZM8.5 1.501h-4V.75a.75.75 0 \
+                 0 0-1.5 0v.752a3 3 0 0 0-3 3v6a3 3 0 0 0 3 3h7a3 3 0 0 0 \
+                 3-3v-6a3 3 0 0 0-3-3v-.75a.75.75 0 0 0-1.5 0v.75Zm-7 \
+                 5.5v3.5a1.5 1.5 0 0 0 1.5 1.5h7a1.5 1.5 0 0 0 \
+                 1.5-1.5v-3.5h-10Z"
+              fill="currentColor"
+              fill_rule="evenodd"
+            />
+          </svg>)
+    </span>
+  [@@element span]
+end
+
+module Popover = struct
+  let%component make ?(placement : [ `top | `bottom | `left | `right ] option)
+      ?(offset : float option) ?(class_ : string option)
+      ?(style : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : Jsx.element) () =
+    let p = Headless.Context.use () in
+    let l = look () in
+    let o = Overlay.create ~is_open:(fun () -> S.get p.is_open) () in
+    let kobalte_placement () =
+      match Option.value (S.get placement) ~default:`bottom with
+      | `top -> "top"
+      | `bottom -> "bottom"
+      | `left -> "left"
+      | `right -> "right"
+    in
+    let side, watch_side =
+      Overlay.placed_side ~placement:kobalte_placement ()
+    in
+    <Surface.Context.Provider value=(S.accessor (fun () -> `default))>
+      <Headless.Content
+        placement=(kobalte_placement ())
+        ?offset=(S.get offset)
+        kept=(Overlay.present o)
+        class_=(after l.popover (S.get class_))
+        style=("--trigger-width: var(--kb-popper-anchor-width); \
+                --trigger-anchor-point: \
+                var(--kb-popover-content-transform-origin);"
+              ^ match S.get style with Some s -> " " ^ s | None -> "")
+        ref=(fun e ->
+              ignore (given_ref e : unit option);
+              Overlay.watch o e;
+              watch_side e)
+        data_slot=(Jsx.data (l.name ^ "-popover"))
+        data_placement=(Jsx.data (S.get side))
+        data_entering=(Jsx.flag (Overlay.entering o))
+        data_exiting=(Jsx.flag (Overlay.exiting o))
+        props=(Props.others props)>
+        (S.get children)
+      </Headless.Content>
+    </Surface.Context.Provider>
+  [@@element div]
+end

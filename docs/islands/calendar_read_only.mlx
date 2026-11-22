@@ -1,0 +1,32 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Calendar = Solidtype_heroui.Calendar
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module Description = Solidtype_heroui.Description
+
+let make () =
+  <div class_="flex flex-col items-center gap-4">
+    <Calendar
+      is_read_only=true
+      aria_label="Event date"
+      default_value=(D.today (D.get_local_time_zone ()))>
+      <Calendar.Header>
+        <Calendar.Heading />
+        <Calendar.Nav_button slot=`previous />
+        <Calendar.Nav_button slot=`next />
+      </Calendar.Header>
+      <Calendar.Grid>
+        <Calendar.Grid_header>
+          (fun day ->
+            <Calendar.Header_cell>
+              (Jsx.string (S.get day))
+            </Calendar.Header_cell>)
+        </Calendar.Grid_header>
+        <Calendar.Grid_body>
+          (fun date -> <Calendar.Cell date=(S.get date) />)
+        </Calendar.Grid_body>
+      </Calendar.Grid>
+    </Calendar>
+    <Description class_="text-center">"Calendar is read-only"</Description>
+  </div>

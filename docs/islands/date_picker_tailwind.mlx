@@ -1,0 +1,52 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Calendar = Solidtype_heroui.Calendar
+module Date_field = Solidtype_heroui.Date_field
+module Date_picker = Solidtype_heroui.Date_picker
+module Label = Solidtype_heroui.Label
+
+let make () =
+  <Date_picker class_="w-72" name="event-date">
+    <Label>"Event date"</Label>
+    <Date_field.Group
+      full_width=true
+      class_="rounded-xl border border-border/80 bg-default shadow-sm"
+      variant=`secondary>
+      <Date_field.Input>
+        (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+      </Date_field.Input>
+      <Date_field.Suffix>
+        <Date_picker.Trigger class_="text-muted">
+          <Date_picker.Trigger_indicator />
+        </Date_picker.Trigger>
+      </Date_field.Suffix>
+    </Date_field.Group>
+    <Date_picker.Popover class_="border border-border/80 shadow-sm">
+      <Calendar aria_label="Event date" class_="rounded-2xl bg-surface p-2">
+        <Calendar.Header>
+          <Calendar.Heading class_="font-medium text-foreground" />
+          <Calendar.Nav_button
+            class_="text-muted hover:bg-default" slot=`previous
+          />
+          <Calendar.Nav_button class_="text-muted hover:bg-default" slot=`next
+          />
+        </Calendar.Header>
+        <Calendar.Grid>
+          <Calendar.Grid_header>
+            (fun day ->
+              <Calendar.Header_cell class_="text-xs text-muted">
+                (Jsx.string (S.get day))
+              </Calendar.Header_cell>)
+          </Calendar.Grid_header>
+          <Calendar.Grid_body>
+            (fun date ->
+              <Calendar.Cell
+                class_="rounded-lg data-[selected=true]:bg-accent \
+                        data-[selected=true]:text-accent-foreground"
+                date=(S.get date)
+              />)
+          </Calendar.Grid_body>
+        </Calendar.Grid>
+      </Calendar>
+    </Date_picker.Popover>
+  </Date_picker>

@@ -1,0 +1,29 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Range_calendar = Solidtype_heroui.Range_calendar
+
+let make () =
+  <Range_calendar aria_label="Trip dates">
+    <Range_calendar.Header>
+      <Range_calendar.Year_picker_trigger>
+        <Range_calendar.Year_picker_trigger_heading />
+        <Range_calendar.Year_picker_trigger_indicator />
+      </Range_calendar.Year_picker_trigger>
+      <Range_calendar.Nav_button slot=`previous />
+      <Range_calendar.Nav_button slot=`next />
+    </Range_calendar.Header>
+    <Range_calendar.Grid>
+      <Range_calendar.Grid_header>
+        (fun day ->
+          <Range_calendar.Header_cell>
+            (Jsx.string (S.get day))
+          </Range_calendar.Header_cell>)
+      </Range_calendar.Grid_header>
+      <Range_calendar.Grid_body>
+        (fun date -> <Range_calendar.Cell date=(S.get date) />)
+      </Range_calendar.Grid_body>
+    </Range_calendar.Grid>
+    <Range_calendar.Year_picker_grid>
+      <Range_calendar.Year_picker_grid_body />
+    </Range_calendar.Year_picker_grid>
+  </Range_calendar>

@@ -1,0 +1,244 @@
+(* The headless Calendar as a caller meets it: a month's grid in the locale's
+   order, its weeks starting on the locale's day, named by its label and the
+   month; a date chosen by a press or the keys, the focus moved by the arrows
+   and paged by the keys and the buttons; days out of its range disabled and
+   unavailable ones never chosen; several dates chosen and one chosen again
+   left; a week's view; read-only; and no violation axe finds. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Calendar = Solidtype_headless.Calendar
+module I18n = Solidtype_kobalte.I18n
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module E = Jest.Expect
+module H = Harness
+open Harness.Syntax
+
+external query : Dom.element -> string -> Dom.element Js.null = "querySelector"
+[@@mel.send]
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+let all selector = Js.Array.from (query_all H.body selector)
+
+let one selector =
+  match Js.Null.toOption (query H.body selector) with
+  | Some e -> e
+  | None -> Js.Exn.raiseError ("no " ^ selector)
+
+let heading () = H.text (one "h2[aria-hidden]")
+
+let names () =
+  Array.map H.text (all "thead th") |> Array.to_list |> String.concat " "
+
+(* The button of the day of the shown month numbered [n]. *)
+let day n =
+  match
+    Js.Array.find
+      ~f:(fun b ->
+        String.equal (H.text b) (string_of_int n)
+        && Option.is_none (H.attribute b "data-outside-month"))
+      (all "[role=gridcell] > [role=button]")
+  with
+  | Some b -> b
+  | None -> Js.Exn.raiseError ("no day " ^ string_of_int n)
+
+let inside () =
+  Jsx.fragment
+    [|
+      <Calendar.Heading />;
+      <Calendar.Previous>"<"</Calendar.Previous>;
+      <Calendar.Next>">"</Calendar.Next>;
+      <Calendar.Grid>
+        <Calendar.Grid_header>
+          (fun name ->
+            <Calendar.Header_cell>
+              (Jsx.string (S.get name))
+            </Calendar.Header_cell>)
+        </Calendar.Grid_header>
+        <Calendar.Grid_body>
+          (fun date -> <Calendar.Cell date=(S.get date) />)
+        </Calendar.Grid_body>
+      </Calendar.Grid>;
+    |]
+
+let told_of = function
+  | [] -> "none"
+  | dates -> String.concat "," (List.map (fun d -> Date.to_string d ()) dates)
+
+let calendar ?(locale = "en-US") ?min_value ?max_value ?is_date_unavailable
+    ?is_read_only ?visible_duration ?weeks_in_month ?(told = ref []) () =
+  H.render (fun () ->
+      <I18n.I18nProvider locale>
+        <Calendar.Root
+          aria_label="Event date"
+          default_focused_value=(Date.make 2026 11 21)
+          ?min_value
+          ?max_value
+          ?is_date_unavailable
+          ?is_read_only
+          ?visible_duration
+          ?weeks_in_month
+          on_change=(fun d -> told := Date.to_string d () :: !told)>
+          (inside ())
+        </Calendar.Root>
+      </I18n.I18nProvider>)
+
+let () =
+  Jest.describe "Calendar" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.test "shows a month, named by its label and the month" (fun () ->
+          calendar ();
+          let root = one "[role=application]" in
+          E.(
+            expect
+              ( heading (),
+                H.attribute root "aria-label",
+                H.attribute (one "[role=grid]") "aria-label",
+                names (),
+                Array.length (all "tbody tr"),
+                H.attribute (day 21) "tabindex",
+                H.attribute (day 20) "tabindex",
+                H.attribute (day 21) "aria-label" )
+            |> toEqual
+                 ( "November 2026",
+                   Some "Event date, November 2026",
+                   Some "Event date, November 2026",
+                   "S M T W T F S",
+                   5,
+                   Some "0",
+                   Some "-1",
+                   Some "Saturday, November 21, 2026" )));
+      Jest.test "starts its weeks on Monday where no provider names a locale"
+        (fun () ->
+          H.render (fun () ->
+              <Calendar.Root
+                aria_label="Event date"
+                default_focused_value=(Date.make 2026 11 21)>
+                (inside ())
+              </Calendar.Root>);
+          E.(expect (names ()) |> toEqual "M T W T F S S"));
+      Jest.testPromise "chooses a date by a press" (fun () ->
+          let told = ref [] in
+          calendar ~told ();
+          let user = H.setup () in
+          let* () = H.click user (day 3) in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( !told,
+                  H.attribute (day 3) "data-selected",
+                  H.attribute (day 3) "aria-label",
+                  H.attribute H.focused "aria-label" )
+              |> toEqual
+                   ( [ "2026-11-03" ],
+                     Some "",
+                     Some "Tuesday, November 3, 2026 selected",
+                     Some "Tuesday, November 3, 2026 selected" )));
+      Jest.testPromise "moves the focus by the keys and chooses by Enter"
+        (fun () ->
+          let told = ref [] in
+          calendar ~told ();
+          let user = H.setup () in
+          let* () = H.click user (day 21) in
+          let* () = H.keyboard user "{ArrowRight}{ArrowDown}" in
+          let moved = H.text H.focused in
+          let* () = H.keyboard user "{PageDown}" in
+          let paged = (heading (), H.text H.focused) in
+          let* () = H.keyboard user "{Home}" in
+          let home = H.text H.focused in
+          let* () = H.keyboard user "{Enter}" in
+          Js.Promise.resolve
+            E.(
+              expect (moved, paged, home, !told)
+              |> toEqual
+                   ( "29",
+                     ("December 2026", "29"),
+                     "1",
+                     [ "2026-12-01"; "2026-11-21" ] )));
+      Jest.testPromise "pages by its buttons, disabled at its range's ends"
+        (fun () ->
+          calendar ~min_value:(Date.make 2026 11 10)
+            ~max_value:(Date.make 2026 12 20) ();
+          let user = H.setup () in
+          let previous = one "button[aria-label=Previous]" in
+          let next = one "button[aria-label=Next]:not([tabindex])" in
+          let at_start =
+            (H.attribute previous "disabled", H.attribute next "disabled")
+          in
+          let* () = H.click user next in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( at_start,
+                  (heading (), H.attribute next "disabled"),
+                  H.attribute (day 21) "aria-disabled" )
+              |> toEqual
+                   ((Some "", None), ("December 2026", Some ""), Some "true")));
+      Jest.testPromise "focuses an unavailable day pressed, never choosing it"
+        (fun () ->
+          let told = ref [] in
+          calendar ~told ~is_date_unavailable:(fun d -> Date.day d = 3) ();
+          let user = H.setup () in
+          let* () = H.click user (day 3) in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( !told,
+                  H.attribute (day 3) "data-unavailable",
+                  H.attribute H.focused "aria-label" )
+              |> toEqual ([], Some "", Some "Tuesday, November 3, 2026")));
+      Jest.testPromise "keeps its value while read-only" (fun () ->
+          let told = ref [] in
+          calendar ~told ~is_read_only:true ();
+          let user = H.setup () in
+          let* () = H.click user (day 3) in
+          Js.Promise.resolve
+            E.(
+              expect (!told, H.attribute H.focused "aria-label")
+              |> toEqual ([], Some "Tuesday, November 3, 2026")));
+      Jest.test "shows six weeks given them, and a week given a week's view"
+        (fun () ->
+          calendar ~weeks_in_month:6 ();
+          let six = Array.length (all "tbody tr") in
+          H.cleanup ();
+          calendar ~visible_duration:(Calendar.Weeks 1) ();
+          E.(
+            expect (six, Array.length (all "tbody td"), heading ())
+            |> toEqual (6, 7, {js|November 15 – 21, 2026|js})));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          calendar ();
+          let* found = H.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))
+
+let () =
+  Jest.describe "Calendar, of several dates" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise "adds a date chosen and leaves one chosen again"
+        (fun () ->
+          let told = ref [] in
+          H.render (fun () ->
+              <I18n.I18nProvider locale="en-US">
+                <Calendar.Root_multiple
+                  aria_label="Event dates"
+                  default_focused_value=(Date.make 2026 11 21)
+                  on_change=(fun ds ->
+                              told := told_of (Array.to_list ds) :: !told)>
+                  (inside ())
+                </Calendar.Root_multiple>
+              </I18n.I18nProvider>);
+          let user = H.setup () in
+          let* () = H.click user (day 3) in
+          let* () = H.click user (day 9) in
+          let* () = H.click user (day 3) in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( List.rev !told,
+                  H.attribute (one "[role=grid]") "aria-multiselectable" )
+              |> toEqual
+                   ( [ "2026-11-03"; "2026-11-03,2026-11-09"; "2026-11-09" ],
+                     Some "true" ))))

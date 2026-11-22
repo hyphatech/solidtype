@@ -1,0 +1,297 @@
+(* HeroUI's DateRangePicker on the headless range picker, beside the same
+   picker in React: every part -- its label, the field's group, its two
+   inputs and their segments, the separator, the trigger and its icon, its
+   description, and the popover and the range calendar in it -- at rest,
+   opened by its trigger, a range chosen by two presses, and opened again and
+   closed by Escape; disabled, read-only, required and invalid, and its end
+   before its start. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Range_calendar = Solidtype_heroui.Range_calendar
+module Date_field = Solidtype_heroui.Date_field
+module Date_range_picker = Solidtype_heroui.Date_range_picker
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module I18n = Solidtype_kobalte.I18n
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type day
+
+external day :
+  year:int -> month:int -> day:int -> ?hour:int -> ?minute:int -> unit -> day
+  = ""
+[@@mel.obj]
+
+type props
+
+external props :
+  locale:string ->
+  ?default_value:(day array[@mel.as "defaultValue"]) ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?is_read_only:(bool[@mel.as "isReadOnly"]) ->
+  ?is_required:(bool[@mel.as "isRequired"]) ->
+  ?is_invalid:(bool[@mel.as "isInvalid"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> ((string -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/DateRangePicker.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/DateRangePicker.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/DateRangePicker.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+(* What HeroUI's styles read of a part and what a reader reaches. Ids, and
+   what refers to them, are left out. *)
+let state =
+  [
+    "data-slot";
+    "class";
+    "role";
+    "aria-label";
+    "aria-hidden";
+    "aria-haspopup";
+    "aria-expanded";
+    "aria-selected";
+    "aria-disabled";
+    "aria-invalid";
+    "aria-readonly";
+    "aria-required";
+    "tabindex";
+    "disabled";
+    "type";
+    "data-open";
+    "data-pressed";
+    "data-selected";
+    "data-today";
+    "data-selection-start";
+    "data-selection-end";
+    "data-placeholder";
+    "data-disabled";
+    "data-invalid";
+    "data-readonly";
+    "data-required";
+  ]
+
+let shown () =
+  Js.Array.from
+    (query_all T.body
+       "[data-slot], [role=dialog], [role=spinbutton], [role=gridcell]")
+  |> Array.map (fun e ->
+      String.concat " "
+        (List.filter_map
+           (fun name ->
+             match T.attribute e name with
+             | Some "" | None -> None
+             | Some v -> Some (name ^ "=" ^ v))
+           state)
+      ^
+      match T.attribute e "role" with
+      | Some ("spinbutton" | "button") -> " " ^ text e
+      | Some _ | None -> "")
+
+let first selector =
+  match Js.Array.from (query_all T.body selector) with
+  | [||] -> Js.Exn.raiseError ("no " ^ selector)
+  | all -> all.(0)
+
+let cell n =
+  match
+    Js.Array.from
+      (query_all T.body
+         "[role=dialog] \
+          [data-slot=range-calendar-cell]:not([data-outside-month])")
+    |> Js.Array.find ~f:(fun e -> String.equal (text e) (string_of_int n))
+  with
+  | Some e -> e
+  | None -> Js.Exn.raiseError ("no day " ^ string_of_int n)
+
+let walk ~step told =
+  let user = T.setup () in
+  let at_rest = shown () in
+  let* () =
+    step (fun () ->
+        T.click user (first "[data-slot=date-range-picker-trigger]"))
+  in
+  let* () = T.frame () in
+  let opened = shown () in
+  if Array.length (Js.Array.from (query_all T.body "[role=dialog]")) = 0 then
+    Js.Promise.resolve [ at_rest; opened ]
+  else
+    let* () = step (fun () -> T.click user (cell 9)) in
+    let* () = step (fun () -> T.click user (cell 12)) in
+    let* () = T.frame () in
+    let chosen = Array.append (shown ()) [| !told |] in
+    let* () =
+      step (fun () ->
+          T.click user (first "[data-slot=date-range-picker-trigger]"))
+    in
+    let* () = T.frame () in
+    let* () = step (fun () -> T.keyboard user "{Escape}") in
+    let* () = T.frame () in
+    Js.Promise.resolve [ at_rest; opened; chosen; shown () ]
+
+let both ?(locale = "en-US")
+    ?(default_value : ((int * int * int) * (int * int * int)) option)
+    ?is_disabled ?is_read_only ?is_required ?is_invalid () =
+  let told = ref "" in
+  let ymd (y, m, d) = Date.make y m d in
+  T.render (fun () ->
+      <I18n.I18nProvider locale>
+        <Date_range_picker
+          class_="w-80"
+          start_name="startDate"
+          end_name="endDate"
+          ?default_value=(Option.map
+                            (fun (a, b) ->
+                              ({ start = ymd a; end_ = ymd b }
+                                : Date.t Date_range_picker.range))
+                            default_value)
+          ?is_disabled
+          ?is_read_only
+          ?is_required
+          ?is_invalid
+          on_change=(fun v ->
+                      told :=
+                        match v with
+                        | Some { start; end_ } ->
+                            Date.to_string start () ^ ".."
+                            ^ Date.to_string end_ ()
+                        | None -> "none")>
+          <Label>"Trip dates"</Label>
+          <Date_field.Group full_width=true>
+            <Date_field.Input slot="start">
+              (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+            </Date_field.Input>
+            <Date_range_picker.Range_separator />
+            <Date_field.Input slot="end">
+              (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+            </Date_field.Input>
+            <Date_field.Suffix>
+              <Date_range_picker.Trigger>
+                <Date_range_picker.Trigger_indicator />
+              </Date_range_picker.Trigger>
+            </Date_field.Suffix>
+          </Date_field.Group>
+          <Description>"When you travel"</Description>
+          <Date_range_picker.Popover>
+            <Range_calendar aria_label="Trip dates">
+              <Range_calendar.Header>
+                <Range_calendar.Heading />
+                <Range_calendar.Nav_button slot=`previous />
+                <Range_calendar.Nav_button slot=`next />
+              </Range_calendar.Header>
+              <Range_calendar.Grid>
+                <Range_calendar.Grid_header>
+                  (fun d ->
+                    <Range_calendar.Header_cell>
+                      (Jsx.string (S.get d))
+                    </Range_calendar.Header_cell>)
+                </Range_calendar.Grid_header>
+                <Range_calendar.Grid_body>
+                  (fun d -> <Range_calendar.Cell date=(S.get d) />)
+                </Range_calendar.Grid_body>
+              </Range_calendar.Grid>
+            </Range_calendar>
+          </Date_range_picker.Popover>
+        </Date_range_picker>
+      </I18n.I18nProvider>);
+  let* solidtype = walk ~step:(fun action -> action ()) told in
+  T.cleanup ();
+  let told' = ref "" in
+  let as_day (y, m, d) = day ~year:y ~month:m ~day:d () in
+  let _host =
+    Twin.render
+      (props ~locale
+         ?default_value:
+           (Option.map (fun (a, b) -> [| as_day a; as_day b |]) default_value)
+         ?is_disabled ?is_read_only ?is_required ?is_invalid ())
+      (fun iso -> told' := iso)
+  in
+  let* react = walk ~step:Twin.step told' in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+(* React's shows a range given reversed as invalid only once a value is
+   committed; the port shows it at once, as its date field shows a value out
+   of its range. *)
+let same_but_invalid_at_once (solidtype, react) =
+  let valid =
+    List.map
+      (Array.map (fun line ->
+           Js.String.replaceByRe ~regexp:[%re "/ (aria|data)-invalid=true/g"]
+             ~replacement:"" line))
+  in
+  let marked lines =
+    Array.exists
+      (fun line -> Js.String.includes ~search:"data-invalid=true" line)
+      lines
+  in
+  Js.Promise.resolve
+    E.(
+      expect (valid solidtype, marked (List.hd solidtype))
+      |> toEqual (valid react, true))
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Date_range_picker" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "is every part, opened and a range chosen, as React's is"
+        (fun () ->
+          let* r = both ~default_value:((2026, 11, 21), (2026, 11, 23)) () in
+          same r);
+      Jest.testPromise "opens empty on today, as React's does" (fun () ->
+          let* r = both () in
+          same r);
+      Jest.testPromise "is in another locale's order, as React's is" (fun () ->
+          let* r =
+            both ~locale:"de-DE"
+              ~default_value:((2026, 11, 21), (2026, 11, 23))
+              ()
+          in
+          same r);
+      Jest.testPromise "is disabled, as React's is" (fun () ->
+          let* r =
+            both ~is_disabled:true
+              ~default_value:((2026, 11, 21), (2026, 11, 23))
+              ()
+          in
+          same r);
+      Jest.testPromise "is read-only, as React's is" (fun () ->
+          let* r =
+            both ~is_read_only:true
+              ~default_value:((2026, 11, 21), (2026, 11, 23))
+              ()
+          in
+          same r);
+      Jest.testPromise "is invalid at once with its end before its start"
+        (fun () ->
+          let* r = both ~default_value:((2026, 11, 23), (2026, 11, 21)) () in
+          same_but_invalid_at_once r);
+      Jest.testPromise "is required and invalid, as React's is" (fun () ->
+          let* r =
+            both ~is_required:true ~is_invalid:true
+              ~default_value:((2026, 11, 21), (2026, 11, 23))
+              ()
+          in
+          same r))

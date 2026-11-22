@@ -76,6 +76,11 @@ module Tabs = H.Tabs
 module Text_area = H.Text_area
 module Text_field = H.Text_field
 module Time_field = H.Time_field
+module Date_field = H.Date_field
+module Calendar = H.Calendar
+module Range_calendar = H.Range_calendar
+module Date_picker = H.Date_picker
+module Date_range_picker = H.Date_range_picker
 module Toast = H.Toast
 module Toggle_button = H.Toggle_button
 module Toggle_button_group = H.Toggle_button_group
@@ -2920,6 +2925,560 @@ let () =
                             <Label>"Time"</Label>
                           </Time_field.Zoned>
                         </div>
+                        <Date_field
+                          ?as_=(drawn "Date_field" "div" ())
+                          data_testid="Date_field"
+                          class_="given-class"
+                          title="Date_field"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Date_field" e)
+                          on_key_down=(fun e -> heard "Date_field" e)>
+                          <Label>"Date"</Label>
+                          <Date_field.Group
+                            ?as_=(drawn "Date_field.Group" "div" ())
+                            data_testid="Date_field.Group"
+                            class_="given-class"
+                            title="Date_field.Group"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Date_field.Group" e)
+                            on_key_down=(fun e -> heard "Date_field.Group" e)>
+                            <Date_field.Prefix
+                              ?as_=(drawn "Date_field.Prefix" "div" ())
+                              data_testid="Date_field.Prefix"
+                              class_="given-class"
+                              title="Date_field.Prefix"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Date_field.Prefix" e)
+                              on_key_down=(fun e -> heard "Date_field.Prefix" e)>
+                              "at"
+                            </Date_field.Prefix>
+                            <Date_field.Input
+                              ?as_=(drawn "Date_field.Input" "div" ())
+                              data_testid="Date_field.Input"
+                              class_="given-class"
+                              title="Date_field.Input"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Date_field.Input" e)
+                              on_key_down=(fun e -> heard "Date_field.Input" e)>
+                              (fun segment ->
+                                <Date_field.Segment
+                                  ?as_=(drawn "Date_field.Segment" "div" ())
+                                  data_testid="Date_field.Segment"
+                                  class_="given-class"
+                                  title="Date_field.Segment"
+                                  style="--part: 1"
+                                  ref=(fun e -> seen "Date_field.Segment" e)
+                                  on_key_down=(fun e ->
+                                                heard "Date_field.Segment" e)
+                                  segment=(Solidtype.Solid.get segment)
+                                />)
+                            </Date_field.Input>
+                            <Date_field.Input_container
+                              ?as_=(drawn "Date_field.Input_container" "div" ())
+                              data_testid="Date_field.Input_container"
+                              class_="given-class"
+                              title="Date_field.Input_container"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Date_field.Input_container" e)
+                              on_key_down=(fun e ->
+                                            heard "Date_field.Input_container" e)>
+                              "to"
+                            </Date_field.Input_container>
+                            <Date_field.Suffix
+                              ?as_=(drawn "Date_field.Suffix" "div" ())
+                              data_testid="Date_field.Suffix"
+                              class_="given-class"
+                              title="Date_field.Suffix"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Date_field.Suffix" e)
+                              on_key_down=(fun e -> heard "Date_field.Suffix" e)>
+                              "UTC"
+                            </Date_field.Suffix>
+                          </Date_field.Group>
+                        </Date_field>
+                        <div id="date-on-date">
+                          <Date_field.Date_time
+                            ?as_=(drawn "Date_field.Date_time" "div" ())
+                            data_testid="Date_field.Date_time"
+                            class_="given-class"
+                            title="Date_field.Date_time"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Date_field.Date_time" e)
+                            on_key_down=(fun e ->
+                                          heard "Date_field.Date_time" e)
+                            placeholder_value=(Date.Types.CalendarDateTime.make
+                                                 2026 10 30 ())>
+                            <Label>"Date"</Label>
+                          </Date_field.Date_time>
+                        </div>
+                        <div id="date-in-zone">
+                          <Date_field.Zoned
+                            ?as_=(drawn "Date_field.Zoned" "div" ())
+                            data_testid="Date_field.Zoned"
+                            class_="given-class"
+                            title="Date_field.Zoned"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Date_field.Zoned" e)
+                            on_key_down=(fun e -> heard "Date_field.Zoned" e)
+                            placeholder_value=(Date.now "Europe/Kyiv")>
+                            <Label>"Date"</Label>
+                          </Date_field.Zoned>
+                        </div>
+                        <Calendar
+                          ?as_=(drawn "Calendar" "div" ())
+                          data_testid="Calendar"
+                          class_="given-class"
+                          title="Calendar"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Calendar" e)
+                          on_key_down=(fun e -> heard "Calendar" e)
+                          aria_label="Calendar"
+                          default_focused_value=(Date.Types.CalendarDate.make
+                                                   2026 11 21)>
+                          <Calendar.Header
+                            ?as_=(drawn "Calendar.Header" "header" ())
+                            data_testid="Calendar.Header"
+                            class_="given-class"
+                            title="Calendar.Header"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Calendar.Header" e)
+                            on_key_down=(fun e -> heard "Calendar.Header" e)>
+                            <Calendar.Year_picker_trigger
+                              ?as_=(drawn "Calendar.Year_picker_trigger"
+                                      "button" ())
+                              data_testid="Calendar.Year_picker_trigger"
+                              class_="given-class"
+                              title="Calendar.Year_picker_trigger"
+                              style="--part: 1"
+                              ref=(fun e ->
+                                    seen "Calendar.Year_picker_trigger" e)
+                              on_key_down=(fun e ->
+                                            heard "Calendar.Year_picker_trigger"
+                                              e)>
+                              <Calendar.Year_picker_trigger_heading
+                                ?as_=(drawn
+                                        "Calendar.Year_picker_trigger_heading"
+                                        "span" ())
+                                data_testid="Calendar.Year_picker_trigger_heading"
+                                class_="given-class"
+                                title="Calendar.Year_picker_trigger_heading"
+                                style="--part: 1"
+                                ref=(fun e ->
+                                      seen
+                                        "Calendar.Year_picker_trigger_heading" e)
+                                on_key_down=(fun e ->
+                                              heard
+                                                "Calendar.Year_picker_trigger_heading"
+                                                e)
+                              />
+                              <Calendar.Year_picker_trigger_indicator
+                                ?as_=(drawn
+                                        "Calendar.Year_picker_trigger_indicator"
+                                        "span" ())
+                                data_testid="Calendar.Year_picker_trigger_indicator"
+                                class_="given-class"
+                                title="Calendar.Year_picker_trigger_indicator"
+                                style="--part: 1"
+                                ref=(fun e ->
+                                      seen
+                                        "Calendar.Year_picker_trigger_indicator"
+                                        e)
+                                on_key_down=(fun e ->
+                                              heard
+                                                "Calendar.Year_picker_trigger_indicator"
+                                                e)
+                              />
+                            </Calendar.Year_picker_trigger>
+                            <Calendar.Heading
+                              ?as_=(drawn "Calendar.Heading" "h2" ())
+                              data_testid="Calendar.Heading"
+                              class_="given-class"
+                              title="Calendar.Heading"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Calendar.Heading" e)
+                              on_key_down=(fun e -> heard "Calendar.Heading" e)
+                            />
+                            <Calendar.Nav_button
+                              ?as_=(drawn "Calendar.Nav_button" "button" ())
+                              data_testid="Calendar.Nav_button"
+                              class_="given-class"
+                              title="Calendar.Nav_button"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Calendar.Nav_button" e)
+                              on_key_down=(fun e ->
+                                            heard "Calendar.Nav_button" e)
+                              slot=`previous
+                            />
+                          </Calendar.Header>
+                          <Calendar.Grid
+                            ?as_=(drawn "Calendar.Grid" "table" ())
+                            data_testid="Calendar.Grid"
+                            class_="given-class"
+                            title="Calendar.Grid"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Calendar.Grid" e)
+                            on_key_down=(fun e -> heard "Calendar.Grid" e)>
+                            <Calendar.Grid_header
+                              ?as_=(drawn "Calendar.Grid_header" "thead" ())
+                              data_testid="Calendar.Grid_header"
+                              class_="given-class"
+                              title="Calendar.Grid_header"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Calendar.Grid_header" e)
+                              on_key_down=(fun e ->
+                                            heard "Calendar.Grid_header" e)>
+                              (fun d ->
+                                <Calendar.Header_cell
+                                  ?as_=(drawn "Calendar.Header_cell" "th" ())
+                                  data_testid="Calendar.Header_cell"
+                                  class_="given-class"
+                                  title="Calendar.Header_cell"
+                                  style="--part: 1"
+                                  ref=(fun e -> seen "Calendar.Header_cell" e)
+                                  on_key_down=(fun e ->
+                                                heard "Calendar.Header_cell" e)>
+                                  (Solidtype.Jsx.string (Solidtype.Solid.get d))
+                                </Calendar.Header_cell>)
+                            </Calendar.Grid_header>
+                            <Calendar.Grid_body
+                              ?as_=(drawn "Calendar.Grid_body" "tbody" ())
+                              data_testid="Calendar.Grid_body"
+                              class_="given-class"
+                              title="Calendar.Grid_body"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Calendar.Grid_body" e)
+                              on_key_down=(fun e ->
+                                            heard "Calendar.Grid_body" e)>
+                              (fun d ->
+                                <Calendar.Cell
+                                  ?as_=(drawn "Calendar.Cell" "div" ())
+                                  data_testid="Calendar.Cell"
+                                  class_="given-class"
+                                  title="Calendar.Cell"
+                                  style="--part: 1"
+                                  ref=(fun e -> seen "Calendar.Cell" e)
+                                  on_key_down=(fun e -> heard "Calendar.Cell" e)
+                                  date=(Solidtype.Solid.get d)>
+                                  <Calendar.Cell_indicator
+                                    ?as_=(drawn "Calendar.Cell_indicator" "span"
+                                            ())
+                                    data_testid="Calendar.Cell_indicator"
+                                    class_="given-class"
+                                    title="Calendar.Cell_indicator"
+                                    style="--part: 1"
+                                    ref=(fun e ->
+                                          seen "Calendar.Cell_indicator" e)
+                                    on_key_down=(fun e ->
+                                                  heard
+                                                    "Calendar.Cell_indicator" e)
+                                  />
+                                </Calendar.Cell>)
+                            </Calendar.Grid_body>
+                          </Calendar.Grid>
+                          <Calendar.Year_picker_grid
+                            ?as_=(drawn "Calendar.Year_picker_grid" "div" ())
+                            data_testid="Calendar.Year_picker_grid"
+                            class_="given-class"
+                            title="Calendar.Year_picker_grid"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Calendar.Year_picker_grid" e)
+                            on_key_down=(fun e ->
+                                          heard "Calendar.Year_picker_grid" e)>
+                            <Calendar.Year_picker_grid_body>
+                              (fun (y : Calendar.year) ->
+                                <Calendar.Year_picker_cell
+                                  ?as_=(drawn "Calendar.Year_picker_cell"
+                                          "button" ())
+                                  data_testid="Calendar.Year_picker_cell"
+                                  class_="given-class"
+                                  title="Calendar.Year_picker_cell"
+                                  style="--part: 1"
+                                  ref=(fun e ->
+                                        seen "Calendar.Year_picker_cell" e)
+                                  on_key_down=(fun e ->
+                                                heard
+                                                  "Calendar.Year_picker_cell" e)
+                                  year=y.year
+                                />)
+                            </Calendar.Year_picker_grid_body>
+                          </Calendar.Year_picker_grid>
+                        </Calendar>
+                        <div id="date-picker">
+                          <Date_picker
+                            ?as_=(drawn "Date_picker" "div" ())
+                            data_testid="Date_picker"
+                            class_="given-class"
+                            title="Date_picker"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Date_picker" e)
+                            on_key_down=(fun e -> heard "Date_picker" e)
+                            default_value=(Date.Types.CalendarDate.make 2026 11
+                                             21)
+                            default_open=true>
+                            <Label>"Date"</Label>
+                            <Date_field.Group>
+                              <Date_field.Input>
+                                (fun segment ->
+                                  <Date_field.Segment
+                                    segment=(Solidtype.Solid.get segment)
+                                  />)
+                              </Date_field.Input>
+                              <Date_picker.Trigger
+                                ?as_=(drawn "Date_picker.Trigger" "button" ())
+                                data_testid="Date_picker.Trigger"
+                                class_="given-class"
+                                title="Date_picker.Trigger"
+                                style="--part: 1"
+                                ref=(fun e -> seen "Date_picker.Trigger" e)
+                                on_key_down=(fun e ->
+                                              heard "Date_picker.Trigger" e)>
+                                <Date_picker.Trigger_indicator
+                                  ?as_=(drawn "Date_picker.Trigger_indicator"
+                                          "span" ())
+                                  data_testid="Date_picker.Trigger_indicator"
+                                  class_="given-class"
+                                  title="Date_picker.Trigger_indicator"
+                                  style="--part: 1"
+                                  ref=(fun e ->
+                                        seen "Date_picker.Trigger_indicator" e)
+                                  on_key_down=(fun e ->
+                                                heard
+                                                  "Date_picker.Trigger_indicator"
+                                                  e)
+                                />
+                              </Date_picker.Trigger>
+                            </Date_field.Group>
+                            <Date_picker.Popover
+                              ?as_=(drawn "Date_picker.Popover" "div" ())
+                              data_testid="Date_picker.Popover"
+                              class_="given-class"
+                              title="Date_picker.Popover"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Date_picker.Popover" e)
+                              on_key_down=(fun e ->
+                                            heard "Date_picker.Popover" e)>
+                              <Calendar aria_label="Picked">
+                                <Calendar.Grid>
+                                  <Calendar.Grid_body>
+                                    (fun d ->
+                                      <Calendar.Cell
+                                        date=(Solidtype.Solid.get d)
+                                      />)
+                                  </Calendar.Grid_body>
+                                </Calendar.Grid>
+                              </Calendar>
+                            </Date_picker.Popover>
+                          </Date_picker>
+                        </div>
+                        <div id="date-range-picker">
+                          <Date_range_picker
+                            ?as_=(drawn "Date_range_picker" "div" ())
+                            data_testid="Date_range_picker"
+                            class_="given-class"
+                            title="Date_range_picker"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Date_range_picker" e)
+                            on_key_down=(fun e -> heard "Date_range_picker" e)>
+                            <Label>"Trip"</Label>
+                            <Date_field.Group>
+                              <Date_field.Input slot="start">
+                                (fun segment ->
+                                  <Date_field.Segment
+                                    segment=(Solidtype.Solid.get segment)
+                                  />)
+                              </Date_field.Input>
+                              <Date_range_picker.Range_separator
+                                ?as_=(drawn "Date_range_picker.Range_separator"
+                                        "span" ())
+                                data_testid="Date_range_picker.Range_separator"
+                                class_="given-class"
+                                title="Date_range_picker.Range_separator"
+                                style="--part: 1"
+                                ref=(fun e ->
+                                      seen "Date_range_picker.Range_separator" e)
+                                on_key_down=(fun e ->
+                                              heard
+                                                "Date_range_picker.Range_separator"
+                                                e)
+                              />
+                              <Date_field.Input slot="end">
+                                (fun segment ->
+                                  <Date_field.Segment
+                                    segment=(Solidtype.Solid.get segment)
+                                  />)
+                              </Date_field.Input>
+                              <Date_range_picker.Trigger
+                                ?as_=(drawn "Date_range_picker.Trigger" "button"
+                                        ())
+                                data_testid="Date_range_picker.Trigger"
+                                class_="given-class"
+                                title="Date_range_picker.Trigger"
+                                style="--part: 1"
+                                ref=(fun e ->
+                                      seen "Date_range_picker.Trigger" e)
+                                on_key_down=(fun e ->
+                                              heard "Date_range_picker.Trigger"
+                                                e)>
+                                <Date_range_picker.Trigger_indicator
+                                  ?as_=(drawn
+                                          "Date_range_picker.Trigger_indicator"
+                                          "span" ())
+                                  data_testid="Date_range_picker.Trigger_indicator"
+                                  class_="given-class"
+                                  title="Date_range_picker.Trigger_indicator"
+                                  style="--part: 1"
+                                  ref=(fun e ->
+                                        seen
+                                          "Date_range_picker.Trigger_indicator"
+                                          e)
+                                  on_key_down=(fun e ->
+                                                heard
+                                                  "Date_range_picker.Trigger_indicator"
+                                                  e)
+                                />
+                              </Date_range_picker.Trigger>
+                            </Date_field.Group>
+                            <Date_range_picker.Popover>
+                              <Range_calendar aria_label="Trip">
+                                <Range_calendar.Grid>
+                                  <Range_calendar.Grid_body>
+                                    (fun d ->
+                                      <Range_calendar.Cell
+                                        date=(Solidtype.Solid.get d)
+                                      />)
+                                  </Range_calendar.Grid_body>
+                                </Range_calendar.Grid>
+                              </Range_calendar>
+                            </Date_range_picker.Popover>
+                          </Date_range_picker>
+                        </div>
+                        <div id="range-calendar">
+                          <Range_calendar
+                            ?as_=(drawn "Range_calendar" "div" ())
+                            data_testid="Range_calendar"
+                            class_="given-class"
+                            title="Range_calendar"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Range_calendar" e)
+                            on_key_down=(fun e -> heard "Range_calendar" e)
+                            aria_label="Range calendar"
+                            default_focused_value=(Date.Types.CalendarDate.make
+                                                     2026 11 21)>
+                            <Range_calendar.Header
+                              ?as_=(drawn "Range_calendar.Header" "header" ())
+                              data_testid="Range_calendar.Header"
+                              class_="given-class"
+                              title="Range_calendar.Header"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Range_calendar.Header" e)
+                              on_key_down=(fun e ->
+                                            heard "Range_calendar.Header" e)>
+                              <Range_calendar.Heading
+                                ?as_=(drawn "Range_calendar.Heading" "h2" ())
+                                data_testid="Range_calendar.Heading"
+                                class_="given-class"
+                                title="Range_calendar.Heading"
+                                style="--part: 1"
+                                ref=(fun e -> seen "Range_calendar.Heading" e)
+                                on_key_down=(fun e ->
+                                              heard "Range_calendar.Heading" e)
+                              />
+                              <Range_calendar.Nav_button
+                                ?as_=(drawn "Range_calendar.Nav_button" "button"
+                                        ())
+                                data_testid="Range_calendar.Nav_button"
+                                class_="given-class"
+                                title="Range_calendar.Nav_button"
+                                style="--part: 1"
+                                ref=(fun e ->
+                                      seen "Range_calendar.Nav_button" e)
+                                on_key_down=(fun e ->
+                                              heard "Range_calendar.Nav_button"
+                                                e)
+                                slot=`previous
+                              />
+                            </Range_calendar.Header>
+                            <Range_calendar.Grid
+                              ?as_=(drawn "Range_calendar.Grid" "table" ())
+                              data_testid="Range_calendar.Grid"
+                              class_="given-class"
+                              title="Range_calendar.Grid"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Range_calendar.Grid" e)
+                              on_key_down=(fun e ->
+                                            heard "Range_calendar.Grid" e)>
+                              <Range_calendar.Grid_header
+                                ?as_=(drawn "Range_calendar.Grid_header" "thead"
+                                        ())
+                                data_testid="Range_calendar.Grid_header"
+                                class_="given-class"
+                                title="Range_calendar.Grid_header"
+                                style="--part: 1"
+                                ref=(fun e ->
+                                      seen "Range_calendar.Grid_header" e)
+                                on_key_down=(fun e ->
+                                              heard "Range_calendar.Grid_header"
+                                                e)>
+                                (fun d ->
+                                  <Range_calendar.Header_cell
+                                    ?as_=(drawn "Range_calendar.Header_cell"
+                                            "th" ())
+                                    data_testid="Range_calendar.Header_cell"
+                                    class_="given-class"
+                                    title="Range_calendar.Header_cell"
+                                    style="--part: 1"
+                                    ref=(fun e ->
+                                          seen "Range_calendar.Header_cell" e)
+                                    on_key_down=(fun e ->
+                                                  heard
+                                                    "Range_calendar.Header_cell"
+                                                    e)>
+                                    (Solidtype.Jsx.string
+                                       (Solidtype.Solid.get d))
+                                  </Range_calendar.Header_cell>)
+                              </Range_calendar.Grid_header>
+                              <Range_calendar.Grid_body
+                                ?as_=(drawn "Range_calendar.Grid_body" "tbody"
+                                        ())
+                                data_testid="Range_calendar.Grid_body"
+                                class_="given-class"
+                                title="Range_calendar.Grid_body"
+                                style="--part: 1"
+                                ref=(fun e -> seen "Range_calendar.Grid_body" e)
+                                on_key_down=(fun e ->
+                                              heard "Range_calendar.Grid_body" e)>
+                                (fun d ->
+                                  <Range_calendar.Cell
+                                    ?as_=(drawn "Range_calendar.Cell" "div" ())
+                                    data_testid="Range_calendar.Cell"
+                                    class_="given-class"
+                                    title="Range_calendar.Cell"
+                                    style="--part: 1"
+                                    ref=(fun e -> seen "Range_calendar.Cell" e)
+                                    on_key_down=(fun e ->
+                                                  heard "Range_calendar.Cell" e)
+                                    date=(Solidtype.Solid.get d)>
+                                    <Range_calendar.Cell_indicator
+                                      ?as_=(drawn
+                                              "Range_calendar.Cell_indicator"
+                                              "span" ())
+                                      data_testid="Range_calendar.Cell_indicator"
+                                      class_="given-class"
+                                      title="Range_calendar.Cell_indicator"
+                                      style="--part: 1"
+                                      ref=(fun e ->
+                                            seen "Range_calendar.Cell_indicator"
+                                              e)
+                                      on_key_down=(fun e ->
+                                                    heard
+                                                      "Range_calendar.Cell_indicator"
+                                                      e)
+                                    />
+                                  </Range_calendar.Cell>)
+                              </Range_calendar.Grid_body>
+                            </Range_calendar.Grid>
+                          </Range_calendar>
+                        </div>
                       </Fieldset.Group>
                       <Fieldset.Actions
                         ?as_=(drawn "Fieldset.Actions" "div" ())
@@ -2986,6 +3545,89 @@ let () =
                        ("Slider.Track", "[data-slot=slider-track]");
                        ("Slider.Fill", "[data-slot=slider-fill]");
                        ("Slider.Thumb", "[data-slot=slider-thumb]");
+                       ("Calendar", "[data-slot=calendar]");
+                       ("Calendar.Header", "[data-slot=calendar-header]");
+                       ("Calendar.Heading", "[data-slot=calendar-heading]");
+                       ("Calendar.Nav_button", "[data-slot=calendar-nav-button]");
+                       ( "Calendar.Year_picker_trigger",
+                         "[data-slot=calendar-year-picker-trigger]" );
+                       ( "Calendar.Year_picker_trigger_heading",
+                         "[data-slot=calendar-year-picker-trigger-heading]" );
+                       ( "Calendar.Year_picker_trigger_indicator",
+                         "[data-slot=calendar-year-picker-trigger-indicator]" );
+                       ("Calendar.Grid", "[data-slot=calendar-grid]");
+                       ( "Calendar.Grid_header",
+                         "[data-slot=calendar-grid-header]" );
+                       ( "Calendar.Header_cell",
+                         "[data-slot=calendar-header-cell]" );
+                       ("Calendar.Grid_body", "[data-slot=calendar-grid-body]");
+                       ("Calendar.Cell", "[data-slot=calendar-cell]");
+                       ( "Calendar.Cell_indicator",
+                         "[data-slot=calendar-cell-indicator]" );
+                       ( "Calendar.Year_picker_grid",
+                         "[data-slot=calendar-year-picker-grid]" );
+                       ( "Calendar.Year_picker_cell",
+                         "[data-slot=calendar-year-picker-year-cell]" );
+                       ( "Range_calendar",
+                         "#range-calendar [data-slot=range-calendar]" );
+                       ( "Range_calendar.Header",
+                         "#range-calendar [data-slot=range-calendar-header]" );
+                       ( "Range_calendar.Heading",
+                         "#range-calendar [data-slot=range-calendar-heading]" );
+                       ( "Range_calendar.Nav_button",
+                         "#range-calendar [data-slot=range-calendar-nav-button]"
+                       );
+                       ( "Range_calendar.Grid",
+                         "#range-calendar [data-slot=range-calendar-grid]" );
+                       ( "Range_calendar.Grid_header",
+                         "#range-calendar \
+                          [data-slot=range-calendar-grid-header]" );
+                       ( "Range_calendar.Header_cell",
+                         "#range-calendar \
+                          [data-slot=range-calendar-header-cell]" );
+                       ( "Range_calendar.Grid_body",
+                         "#range-calendar [data-slot=range-calendar-grid-body]"
+                       );
+                       ( "Range_calendar.Cell",
+                         "#range-calendar [data-slot=range-calendar-cell]" );
+                       ( "Range_calendar.Cell_indicator",
+                         "#range-calendar \
+                          [data-slot=range-calendar-cell-indicator]" );
+                       ("Date_picker", "[data-slot=date-picker]");
+                       ("Date_picker.Trigger", "[data-slot=date-picker-trigger]");
+                       ( "Date_picker.Trigger_indicator",
+                         "[data-slot=date-picker-trigger-indicator]" );
+                       ("Date_picker.Popover", "[data-slot=date-picker-popover]");
+                       ("Date_range_picker", "[data-slot=date-range-picker]");
+                       ( "Date_range_picker.Range_separator",
+                         "[data-slot=date-range-picker-range-separator]" );
+                       ( "Date_range_picker.Trigger",
+                         "[data-slot=date-range-picker-trigger]" );
+                       ( "Date_range_picker.Trigger_indicator",
+                         "[data-slot=date-range-picker-trigger-indicator]" );
+                       ("Date_field", "[data-slot=date-field]");
+                       ( "Date_field.Group",
+                         "[data-slot=date-field] [data-slot=date-input-group]"
+                       );
+                       ( "Date_field.Prefix",
+                         "[data-slot=date-field] \
+                          [data-slot=date-input-group-prefix]" );
+                       ( "Date_field.Input",
+                         "[data-slot=date-field] \
+                          [data-slot=date-input-group-input]" );
+                       ( "Date_field.Input_container",
+                         "[data-slot=date-field] \
+                          [data-slot=date-input-group-input-container]" );
+                       ( "Date_field.Segment",
+                         "[data-slot=date-field] \
+                          [data-slot=date-input-group-segment]" );
+                       ( "Date_field.Suffix",
+                         "[data-slot=date-field] \
+                          [data-slot=date-input-group-suffix]" );
+                       ( "Date_field.Date_time",
+                         "#date-on-date [data-slot=date-field]" );
+                       ( "Date_field.Zoned",
+                         "#date-in-zone [data-slot=date-field]" );
                        ("Time_field", "[data-slot=time-field]");
                        ("Time_field.Group", "[data-slot=date-input-group]");
                        ( "Time_field.Prefix",

@@ -1,0 +1,48 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Range_calendar = Solidtype_heroui.Range_calendar
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module Description = Solidtype_heroui.Description
+
+let make () =
+  let now = D.today (D.get_local_time_zone ()) in
+  let after n = Date.add now (D.Types.DateDuration.make ~days:n ()) in
+  let value, set_value =
+    S.create_signal { Range_calendar.start = after 6; end_ = after 14 }
+  in
+  let too_long () =
+    let r = S.get value in
+    Date.compare r.end_ r.start > 7.
+  in
+  <div class_="flex flex-col items-center gap-4">
+    <Range_calendar
+      aria_label="Trip dates"
+      first_day_of_week=`mon
+      is_invalid=(too_long ())
+      value=(Js.Nullable.return (S.get value))
+      on_change=(Option.iter (S.set set_value))>
+      <Range_calendar.Header>
+        <Range_calendar.Heading />
+        <Range_calendar.Nav_button slot=`previous />
+        <Range_calendar.Nav_button slot=`next />
+      </Range_calendar.Header>
+      <Range_calendar.Grid>
+        <Range_calendar.Grid_header>
+          (fun day ->
+            <Range_calendar.Header_cell>
+              (Jsx.string (S.get day))
+            </Range_calendar.Header_cell>)
+        </Range_calendar.Grid_header>
+        <Range_calendar.Grid_body>
+          (fun date -> <Range_calendar.Cell date=(S.get date) />)
+        </Range_calendar.Grid_body>
+      </Range_calendar.Grid>
+    </Range_calendar>
+    (if too_long () then
+       <p class_="text-sm text-danger">"Maximum stay duration is 1 week"</p>
+     else
+       <Description class_="text-center">
+         "Select a stay of up to 7 days"
+       </Description>)
+  </div>

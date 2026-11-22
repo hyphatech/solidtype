@@ -1,0 +1,88 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Date_field = Solidtype_heroui.Date_field
+module Date_range_picker = Solidtype_heroui.Date_range_picker
+module Label = Solidtype_heroui.Label
+module Range_calendar = Solidtype_heroui.Range_calendar
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module Description = Solidtype_heroui.Description
+module Button = Solidtype_heroui.Button
+
+let days n = D.Types.DateDuration.make ~days:n ()
+
+let from_today n =
+  let start = D.today (D.get_local_time_zone ()) in
+  { Date_range_picker.start; end_ = Date.add start (days n) }
+
+let make () =
+  let value, set_value = S.create_signal (Some (from_today 4)) in
+  <div class_="flex w-80 flex-col gap-4">
+    <Date_range_picker
+      end_name="endDate"
+      start_name="startDate"
+      value=(Js.Nullable.fromOption (S.get value))
+      on_change=(S.set set_value)>
+      <Label>"Trip dates"</Label>
+      <Date_field.Group full_width=true>
+        <Date_field.Input slot="start">
+          (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+        </Date_field.Input>
+        <Date_range_picker.Range_separator />
+        <Date_field.Input slot="end">
+          (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+        </Date_field.Input>
+        <Date_field.Suffix>
+          <Date_range_picker.Trigger>
+            <Date_range_picker.Trigger_indicator />
+          </Date_range_picker.Trigger>
+        </Date_field.Suffix>
+      </Date_field.Group>
+      <Date_range_picker.Popover>
+        <Range_calendar aria_label="Trip dates">
+          <Range_calendar.Header>
+            <Range_calendar.Year_picker_trigger>
+              <Range_calendar.Year_picker_trigger_heading />
+              <Range_calendar.Year_picker_trigger_indicator />
+            </Range_calendar.Year_picker_trigger>
+            <Range_calendar.Nav_button slot=`previous />
+            <Range_calendar.Nav_button slot=`next />
+          </Range_calendar.Header>
+          <Range_calendar.Grid>
+            <Range_calendar.Grid_header>
+              (fun day ->
+                <Range_calendar.Header_cell>
+                  (Jsx.string (S.get day))
+                </Range_calendar.Header_cell>)
+            </Range_calendar.Grid_header>
+            <Range_calendar.Grid_body>
+              (fun date -> <Range_calendar.Cell date=(S.get date) />)
+            </Range_calendar.Grid_body>
+          </Range_calendar.Grid>
+          <Range_calendar.Year_picker_grid>
+            <Range_calendar.Year_picker_grid_body />
+          </Range_calendar.Year_picker_grid>
+        </Range_calendar>
+      </Date_range_picker.Popover>
+    </Date_range_picker>
+    <Description>
+      (Jsx.string "Current value: ")
+      ((fun r ->
+         Jsx.string
+           (match r with
+           | Some ({ start; end_ } : Date.t Date_range_picker.range) ->
+               Date.to_string start () ^ " -> " ^ Date.to_string end_ ()
+           | None -> "(empty)"))
+         (S.get value))
+    </Description>
+    <div class_="flex gap-2">
+      <Button
+        variant=`tertiary
+        on_click=(fun _ -> S.set set_value (Some (from_today 6)))>
+        "Set week"
+      </Button>
+      <Button variant=`tertiary on_click=(fun _ -> S.set set_value None)>
+        "Clear"
+      </Button>
+    </div>
+  </div>

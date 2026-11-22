@@ -2126,9 +2126,12 @@ module Root = struct
                               | `single | `none -> None)
         tabindex=(tabindex (S.get (Selectable_list.tab_index list)))
         ?style=(with_style
-                  (match sizing with
-                  | Some _ -> Some "table-layout: fixed; width: min-content;"
-                  | None -> None)
+                  (* A virtualized table is what scrolls across, so it keeps
+                     its container's width rather than its columns'. *)
+                  (match (sizing, virtualized) with
+                  | Some _, None ->
+                      Some "table-layout: fixed; width: min-content;"
+                  | Some _, Some _ | None, _ -> None)
                   (Props.style props))
         data_sticky_header=(marked (S.get sticky_header))
         data_pinned_start_detached=(marked

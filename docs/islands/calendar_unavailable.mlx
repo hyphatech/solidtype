@@ -1,0 +1,32 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Calendar = Solidtype_heroui.Calendar
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module Description = Solidtype_heroui.Description
+
+(* Saturdays and Sundays, as most of the world's weekend falls. *)
+let is_date_unavailable date = D.is_weekend date "en-GB"
+
+let make () =
+  <div class_="flex flex-col items-center gap-4">
+    <Calendar aria_label="Appointment date" is_date_unavailable>
+      <Calendar.Header>
+        <Calendar.Heading />
+        <Calendar.Nav_button slot=`previous />
+        <Calendar.Nav_button slot=`next />
+      </Calendar.Header>
+      <Calendar.Grid>
+        <Calendar.Grid_header>
+          (fun day ->
+            <Calendar.Header_cell>
+              (Jsx.string (S.get day))
+            </Calendar.Header_cell>)
+        </Calendar.Grid_header>
+        <Calendar.Grid_body>
+          (fun date -> <Calendar.Cell date=(S.get date) />)
+        </Calendar.Grid_body>
+      </Calendar.Grid>
+    </Calendar>
+    <Description class_="text-center">"Weekends are unavailable"</Description>
+  </div>

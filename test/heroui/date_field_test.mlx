@@ -1,0 +1,469 @@
+(* HeroUI's DateField on the headless field, beside the same field in React:
+   every part -- its label, group, input, each segment and the literals between
+   them, a zoned value's zone, its description and error -- at rest, typed
+   into, and in each state, in the reader's locale and another; and what a
+   form is sent of each kind of value. *)
+
+module S = Solidtype.Solid
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Label = Solidtype_heroui.Label
+module Date_field = Solidtype_heroui.Date_field
+module I18n = Solidtype_kobalte.I18n
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module Date_time = D.Types.CalendarDateTime
+module Zoned = D.Types.ZonedDateTime
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+let kyiv = "Europe/Kyiv"
+
+type day
+
+external day :
+  year:int -> month:int -> day:int -> ?hour:int -> ?minute:int -> unit -> day
+  = ""
+[@@mel.obj]
+
+type props
+
+external props :
+  ?kind:string ->
+  ?time_zone:(string[@mel.as "timeZone"]) ->
+  ?default_value:(day[@mel.as "defaultValue"]) ->
+  ?placeholder_value:(day[@mel.as "placeholderValue"]) ->
+  ?min_value:(day[@mel.as "minValue"]) ->
+  ?locale:string ->
+  ?granularity:string ->
+  ?hour_cycle:(int[@mel.as "hourCycle"]) ->
+  ?hide_time_zone:(bool[@mel.as "hideTimeZone"]) ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?is_invalid:(bool[@mel.as "isInvalid"]) ->
+  ?is_required:(bool[@mel.as "isRequired"]) ->
+  ?is_read_only:(bool[@mel.as "isReadOnly"]) ->
+  ?variant:string ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> ((string -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/DateField.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/DateField.tsx"]
+
+  external render_of_state : bool -> bool -> bool -> bool -> Dom.element
+    = "renderOfState"
+  [@@mel.module "./twins/DateField.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/DateField.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+external parent : Dom.element -> Dom.element Js.null = "parentElement"
+[@@mel.get]
+
+external input_value : Dom.element -> string = "value" [@@mel.get]
+
+(* What HeroUI's styles read of a part and what a reader reaches: its state as
+   React Aria writes it, its role, its value as a spin button tells it, and
+   its text. Ids, and what refers to them, are left out. *)
+let state =
+  [
+    "data-slot";
+    "class";
+    "role";
+    "data-type";
+    "data-placeholder";
+    "data-invalid";
+    "data-disabled";
+    "data-required";
+    "data-readonly";
+    "data-focused";
+    "data-focus-within";
+    "aria-hidden";
+    "aria-readonly";
+    "aria-invalid";
+    "aria-required";
+    "aria-disabled";
+    "aria-label";
+    "aria-valuenow";
+    "aria-valuetext";
+    "aria-valuemin";
+    "aria-valuemax";
+    "contenteditable";
+    "inputmode";
+    "tabindex";
+  ]
+
+let shown host =
+  Js.Array.from (query_all host "[data-slot], [data-type]")
+  |> Array.map (fun e ->
+      String.concat " "
+        (List.filter_map
+           (fun name ->
+             (* Kobalte's own state, present and empty, which no style of
+                HeroUI's reads. *)
+             match T.attribute e name with
+             | Some "" | None -> None
+             | Some v -> Some (name ^ "=" ^ v))
+           state)
+      ^
+      match T.attribute e "data-type" with
+      | Some _ -> " " ^ text e
+      | None -> "")
+
+let segment host kind =
+  match
+    Js.Array.from (query_all host ("[data-type=" ^ kind ^ "]")) |> Array.to_list
+  with
+  | e :: _ -> e
+  | [] -> Js.Exn.raiseError ("no " ^ kind ^ " segment")
+
+(* The field shown, then its month and day typed, then its year. *)
+let walk ~step host told =
+  let user = T.setup () in
+  let at_rest = shown host in
+  let* () =
+    step (fun () ->
+        let* () = T.click user (segment host "month") in
+        T.keyboard user "1121")
+  in
+  let typed = (shown host, !told) in
+  let* () = step (fun () -> T.keyboard user "2026") in
+  Js.Promise.resolve (at_rest, typed, (shown host, !told))
+
+type kind = On_day | With_time | In_kyiv
+
+let inside ?variant () =
+  Solidtype.Jsx.(
+    fragment
+      [|
+        <Label>"Date"</Label>;
+        <Date_field.Group ?variant>
+          <Date_field.Input>
+            (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+          </Date_field.Input>
+        </Date_field.Group>;
+        <Description>"When it starts."</Description>;
+        <Field_error>"Pick a date."</Field_error>;
+      |])
+
+let tell told = function Some s -> told := s | None -> told := "none"
+
+let both ?(kind = On_day) ?default_value ?min_value ?(locale = "en-US")
+    ?granularity ?hour_cycle ?hide_time_zone ?is_disabled ?is_invalid
+    ?is_required ?is_read_only ?variant () =
+  let told = ref "" in
+  let at (y, m, d) = Date.make y m d in
+  let at_time (y, m, d) = Date_time.make y m d ~hour:9 ~minute:30 () in
+  let zoned (y, m, d) = D.to_zoned (at_time (y, m, d)) kyiv () in
+  let field () =
+    match kind with
+    | On_day ->
+        <Date_field
+          ?default_value=(Option.map at default_value)
+          ?min_value=(Option.map at min_value)
+          ?is_disabled
+          ?is_invalid
+          ?is_required
+          ?is_read_only
+          name="date"
+          class_="w-64"
+          on_change=(fun v ->
+                      tell told (Option.map (fun d -> Date.to_string d ()) v))>
+          (inside ?variant ())
+        </Date_field>
+    | With_time ->
+        <Date_field.Date_time
+          ?default_value=(Option.map at_time default_value)
+          placeholder_value=(at_time (2026, 1, 1))
+          ?granularity
+          ?hour_cycle
+          ?is_disabled
+          ?is_invalid
+          ?is_required
+          ?is_read_only
+          name="date"
+          class_="w-64"
+          on_change=(fun v ->
+                      tell told
+                        (Option.map (fun d -> Date_time.to_string d ()) v))>
+          (inside ?variant ())
+        </Date_field.Date_time>
+    | In_kyiv ->
+        <Date_field.Zoned
+          ?default_value=(Option.map zoned default_value)
+          placeholder_value=(zoned (2026, 3, 29))
+          ?granularity
+          ?hour_cycle
+          ?hide_time_zone
+          ?is_disabled
+          ?is_invalid
+          ?is_required
+          ?is_read_only
+          name="date"
+          class_="w-64"
+          on_change=(fun v ->
+                      tell told (Option.map (fun d -> Zoned.to_string d ()) v))>
+          (inside ?variant ())
+        </Date_field.Zoned>
+  in
+  T.render (fun () -> <I18n.I18nProvider locale>(field ())</I18n.I18nProvider>);
+  let host =
+    match T.query "[data-slot=date-field]" with
+    | Some e -> Option.value (Js.Null.toOption (parent e)) ~default:T.body
+    | None -> T.body
+  in
+  let* solidtype = walk ~step:(fun action -> action ()) host told in
+  T.cleanup ();
+  let told' = ref "" in
+  let day_of ?time (y, m, d) =
+    match time with
+    | Some () -> day ~year:y ~month:m ~day:d ~hour:9 ~minute:30 ()
+    | None -> day ~year:y ~month:m ~day:d ()
+  in
+  let time =
+    match kind with On_day -> None | With_time | In_kyiv -> Some ()
+  in
+  let host =
+    Twin.render
+      (props
+         ~kind:
+           (match kind with
+           | On_day -> "date"
+           | With_time -> "dateTime"
+           | In_kyiv -> "zoned")
+         ?time_zone:
+           (match kind with In_kyiv -> Some kyiv | On_day | With_time -> None)
+         ?default_value:(Option.map (day_of ?time) default_value)
+         ?placeholder_value:
+           (match kind with
+           | In_kyiv -> Some (day_of ?time (2026, 3, 29))
+           | With_time -> Some (day_of ?time (2026, 1, 1))
+           | On_day -> None)
+         ?min_value:(Option.map (day_of ?time) min_value)
+         ~locale
+         ?granularity:
+           (Option.map
+              (function
+                | `day -> "day"
+                | `hour -> "hour"
+                | `minute -> "minute"
+                | `second -> "second")
+              granularity)
+         ?hour_cycle:
+           (Option.map (function `h12 -> 12 | `h24 -> 24) hour_cycle)
+         ?hide_time_zone ?is_disabled ?is_invalid ?is_required ?is_read_only
+         ?variant:
+           (Option.map
+              (function `primary -> "primary" | `secondary -> "secondary")
+              variant)
+         ())
+      (fun iso -> told' := iso)
+  in
+  let* react = walk ~step:Twin.step host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+(* A field whose root and group draw their children of their state, as
+   words. *)
+let draw_of_state ~disabled ~read_only ~invalid ~required =
+  let words name flags =
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
+    </span>
+  in
+  T.render (fun () ->
+      <Date_field
+        aria_label="Field"
+        is_disabled=disabled
+        is_read_only=read_only
+        is_invalid=invalid
+        is_required=required>
+        (fun r ->
+          Solidtype.Jsx.fragment
+            [|
+              words "field"
+                [
+                  ("disabled", r.is_disabled);
+                  ("invalid", r.is_invalid);
+                  ("read-only", r.is_read_only);
+                  ("required", r.is_required);
+                ];
+              <Date_field.Group>
+                (fun g ->
+                  Solidtype.Jsx.fragment
+                    [|
+                      words "group"
+                        [
+                          ("hovered", g.is_hovered);
+                          ("focus-within", g.is_focus_within);
+                          ("focus-visible", g.is_focus_visible);
+                          ("disabled", g.is_disabled);
+                          ("invalid", g.is_invalid);
+                        ];
+                      <Date_field.Input>
+                        (fun segment ->
+                          <Date_field.Segment segment=(S.get segment) />)
+                      </Date_field.Input>;
+                    |])
+              </Date_field.Group>;
+            |])
+      </Date_field>)
+
+(* What it writes, beside React's, then a glance at its group. *)
+let of_state ?(disabled = false) ?(read_only = false) ?(invalid = false)
+    ?(required = false) () =
+  draw_of_state ~disabled ~read_only ~invalid ~required;
+  let* solidtype =
+    T.glance ~read:T.words_shown ~step:Twin.step (T.slot "date-input-group")
+  in
+  T.cleanup ();
+  let* react =
+    T.glance ~read:T.words_shown ~step:Twin.step
+      (Twin.render_of_state disabled read_only invalid required)
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let () =
+  Jest.describe "Date_field" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "draws its parts' children of their state, as React's"
+        (fun () ->
+          let* solidtype, react = of_state () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its parts' children of their state while disabled"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:true () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise
+        "draws its parts' children of their state, read-only, invalid, required"
+        (fun () ->
+          let* solidtype, react =
+            of_state ~read_only:true ~invalid:true ~required:true ()
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is every part, typed into, as React's is" (fun () ->
+          let* r = both () in
+          same r);
+      Jest.testPromise "shows its value, as React's does" (fun () ->
+          let* r = both ~default_value:(2026, 3, 9) () in
+          same r);
+      Jest.testPromise "is in another locale's order, as React's is" (fun () ->
+          let* r = both ~locale:"de-DE" () in
+          same r);
+      Jest.testPromise "is invalid before its least date, as React's is"
+        (fun () ->
+          let* r =
+            both ~default_value:(2026, 1, 1) ~min_value:(2026, 6, 1) ()
+          in
+          same r);
+      Jest.testPromise "is invalid and required, as React's is" (fun () ->
+          let* r = both ~is_invalid:true ~is_required:true () in
+          same r);
+      Jest.testPromise "is disabled, as React's is" (fun () ->
+          let* r = both ~is_disabled:true ~default_value:(2026, 3, 9) () in
+          same r);
+      Jest.testPromise "is read-only, as React's is" (fun () ->
+          let* r = both ~is_read_only:true ~default_value:(2026, 3, 9) () in
+          same r);
+      Jest.testPromise "is secondary, as React's is" (fun () ->
+          let* r = both ~variant:`secondary () in
+          same r);
+      Jest.testPromise "keeps a date's time, as React's does" (fun () ->
+          let* r = both ~kind:With_time ~default_value:(2026, 3, 9) () in
+          same r);
+      Jest.testPromise "is typed to a time, as React's is" (fun () ->
+          let* r = both ~kind:With_time () in
+          same r);
+      Jest.testPromise "is on a 24-hour clock to the second, as React's is"
+        (fun () ->
+          let* r =
+            both ~kind:With_time ~hour_cycle:`h24 ~granularity:`second ()
+          in
+          same r);
+      Jest.testPromise "shows a zoned date's zone, as React's does" (fun () ->
+          let* r = both ~kind:In_kyiv ~default_value:(2026, 3, 9) () in
+          same r);
+      Jest.testPromise "hides its zone, as React's does" (fun () ->
+          let* r =
+            both ~kind:In_kyiv ~hide_time_zone:true ~default_value:(2026, 3, 9)
+              ()
+          in
+          same r);
+      Jest.test "tells it is left once focus leaves it" (fun () ->
+          let solidtype =
+            T.blurs ~root:"[data-slot=date-field]" (fun on_blur ->
+                T.render (fun () ->
+                    <Date_field on_blur>(inside ())</Date_field>))
+          in
+          E.(expect solidtype |> toEqual 1)))
+
+let sent () =
+  match T.query "input[name=date]" with
+  | Some input -> input_value input
+  | None -> Js.Exn.raiseError "no input named date"
+
+let () =
+  Jest.describe "Date_field, its value" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is sent to a form as @internationalized/date writes it"
+        (fun () ->
+          let sent_of field =
+            T.render field;
+            let v = sent () in
+            T.cleanup ();
+            v
+          in
+          let on_day =
+            sent_of (fun () ->
+                <Date_field name="date" default_value=(Date.make 2026 11 21)>
+                  (inside ())
+                </Date_field>)
+          in
+          let with_time =
+            sent_of (fun () ->
+                <Date_field.Date_time
+                  name="date"
+                  default_value=(Date_time.make 2026 11 21 ~hour:9 ~minute:30 ())>
+                  (inside ())
+                </Date_field.Date_time>)
+          in
+          let in_kyiv =
+            let v =
+              D.to_zoned
+                (Date_time.make 2026 11 21 ~hour:9 ~minute:30 ())
+                kyiv ()
+            in
+            sent_of (fun () ->
+                <Date_field.Zoned
+                  name="date" default_value=v placeholder_value=v>
+                  (inside ())
+                </Date_field.Zoned>)
+          in
+          let empty =
+            sent_of (fun () -> <Date_field name="date">(inside ())</Date_field>)
+          in
+          E.(
+            expect (on_day, with_time, in_kyiv, empty)
+            |> toEqual
+                 ( "2026-11-21",
+                   "2026-11-21T09:30:00",
+                   "2026-11-21T09:30:00+02:00[Europe/Kyiv]",
+                   "" ))))

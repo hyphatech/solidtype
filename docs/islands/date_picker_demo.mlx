@@ -1,0 +1,65 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Calendar = Solidtype_heroui.Calendar
+module Date_field = Solidtype_heroui.Date_field
+module Date_picker = Solidtype_heroui.Date_picker
+module Label = Solidtype_heroui.Label
+module I18n = Solidtype_kobalte.I18n
+module Toggle = Controls.Toggle
+module D = Solidtype_internationalized_date
+
+let make () =
+  let disabled, set_disabled = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Toggle
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=date-picker]"
+      solidtype=(<I18n.I18nProvider locale="en-US">
+                   <Date_picker
+                     class_="w-72"
+                     name="date"
+                     is_disabled=(S.get disabled)
+                     default_value=(D.parse_date "2026-11-21")>
+                     <Label>"Date"</Label>
+                     <Date_field.Group full_width=true>
+                       <Date_field.Input>
+                         (fun segment ->
+                           <Date_field.Segment segment=(S.get segment) />)
+                       </Date_field.Input>
+                       <Date_field.Suffix>
+                         <Date_picker.Trigger>
+                           <Date_picker.Trigger_indicator />
+                         </Date_picker.Trigger>
+                       </Date_field.Suffix>
+                     </Date_field.Group>
+                     <Date_picker.Popover>
+                       <Calendar aria_label="Event date">
+                         <Calendar.Header>
+                           <Calendar.Heading />
+                           <Calendar.Nav_button slot=`previous />
+                           <Calendar.Nav_button slot=`next />
+                         </Calendar.Header>
+                         <Calendar.Grid>
+                           <Calendar.Grid_header>
+                             (fun day ->
+                               <Calendar.Header_cell>
+                                 (Jsx.string (S.get day))
+                               </Calendar.Header_cell>)
+                           </Calendar.Grid_header>
+                           <Calendar.Grid_body>
+                             (fun date -> <Calendar.Cell date=(S.get date) />)
+                           </Calendar.Grid_body>
+                         </Calendar.Grid>
+                       </Calendar>
+                     </Date_picker.Popover>
+                   </Date_picker>
+                 </I18n.I18nProvider>)
+      react=(fun host ->
+              Heroui_react.date_picker host
+                (Heroui_react.date_picker_props ~is_disabled:(S.get disabled) ()))
+    />
+  </section>

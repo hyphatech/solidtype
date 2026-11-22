@@ -1,0 +1,183 @@
+---
+title: DatePicker
+description: Composable date picker built on React Aria DatePicker with DateField and Calendar composition parts.
+---
+
+import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/date_picker_usage.jsx";
+import ExUsageCode from "@islands/date_picker_usage.mlx?raw";
+import * as ExDisabled from "@islands/date_picker_disabled.jsx";
+import ExDisabledCode from "@islands/date_picker_disabled.mlx?raw";
+import * as ExControlled from "@islands/date_picker_controlled.jsx";
+import ExControlledCode from "@islands/date_picker_controlled.mlx?raw";
+import * as ExValidation from "@islands/date_picker_validation.jsx";
+import ExValidationCode from "@islands/date_picker_validation.mlx?raw";
+import * as ExFormatOptions from "@islands/date_picker_format_options.jsx";
+import ExFormatOptionsCode from "@islands/date_picker_format_options.mlx?raw";
+import * as ExForm from "@islands/date_picker_form.jsx";
+import ExFormCode from "@islands/date_picker_form.mlx?raw";
+import * as ExCustomIndicator from "@islands/date_picker_custom_indicator.jsx";
+import ExCustomIndicatorCode from "@islands/date_picker_custom_indicator.mlx?raw";
+import * as ExRenderFunction from "@islands/date_picker_render_function.jsx";
+import ExRenderFunctionCode from "@islands/date_picker_render_function.mlx?raw";
+import * as ExInternational from "@islands/date_picker_international.jsx";
+import ExInternationalCode from "@islands/date_picker_international.mlx?raw";
+import * as ExTailwind from "@islands/date_picker_tailwind.jsx";
+import ExTailwindCode from "@islands/date_picker_tailwind.mlx?raw";
+import * as Demo from "@islands/date_picker_demo.jsx";
+
+Its value is a `CalendarDate` of `solidtype-internationalized-date`, as a
+[DateField](/solidtype/heroui/date-field/)'s is; a date with a time is
+`Date_picker.Date_time`'s, and one in a zone `Date_picker.Zoned`'s. The
+[Calendar](/solidtype/heroui/calendar/) in its popover takes its date, its
+range and its state.
+
+Its segments are in `en-GB`'s order, day before month, whatever the browser
+reads, unless an `I18n.I18nProvider` names another locale. React's follows
+the browser.
+
+Original HeroUI documentation: [DatePicker](https://heroui.com/en/docs/react/components/date-picker).
+
+## Usage
+
+<Example code={ExUsageCode} title="date_picker_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI DatePicker twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two pickers:
+a marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Anatomy
+
+`Date_picker` is composed as HeroUI's is: a `Date_field.Group` of the field's
+input, the trigger in its `Date_field.Suffix`, and a `Calendar` in the
+popover.
+
+```ocaml
+<Date_picker>
+  <Label />
+  <Date_field.Group>
+    <Date_field.Input>
+      (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+    </Date_field.Input>
+    <Date_field.Suffix>
+      <Date_picker.Trigger><Date_picker.Trigger_indicator /></Date_picker.Trigger>
+    </Date_field.Suffix>
+  </Date_field.Group>
+  <Date_picker.Popover>
+    <Calendar aria_label="Choose date"> ... </Calendar>
+  </Date_picker.Popover>
+</Date_picker>
+```
+
+## Examples
+
+### Disabled
+
+<Example code={ExDisabledCode} title="date_picker_disabled.mlx"><ExDisabled.make client:visible /></Example>
+
+### Controlled
+
+<Example code={ExControlledCode} title="date_picker_controlled.mlx"><ExControlled.make client:visible /></Example>
+
+### Validation
+
+<Example code={ExValidationCode} title="date_picker_validation.mlx"><ExValidation.make client:visible /></Example>
+
+### Format Options
+
+Control how a picker's value is shown with `granularity`, `hour_cycle`,
+`hide_time_zone` and `should_force_leading_zeros`. Its children may be a
+function of its state, whose `state.time_value` and `state.set_time_value`
+draw a `Time_field` in the popover.
+
+<Example code={ExFormatOptionsCode} title="date_picker_format_options.mlx"><ExFormatOptions.make client:visible /></Example>
+
+### Form Example
+
+<Example code={ExFormCode} title="date_picker_form.mlx"><ExForm.make client:visible /></Example>
+
+### Custom Indicator
+
+`Date_picker.Trigger_indicator` draws HeroUI's calendar icon unless given
+children.
+
+<Example code={ExCustomIndicatorCode} title="date_picker_custom_indicator.mlx"><ExCustomIndicator.make client:visible /></Example>
+
+### Render Function
+
+<Example code={ExRenderFunctionCode} title="date_picker_render_function.mlx"><ExRenderFunction.make client:visible /></Example>
+
+### International Calendar
+
+An `I18n.I18nProvider` locale with a calendar extension shows that calendar;
+`on_change` gives a date in the calendar of the value given, else the
+Gregorian.
+
+<Example code={ExInternationalCode} title="date_picker_international.mlx"><ExInternational.make client:visible /></Example>
+
+## Customization
+
+### Tailwind CSS
+
+<Example code={ExTailwindCode} title="date_picker_tailwind.mlx"><ExTailwind.make client:visible /></Example>
+
+## Styling Reference
+
+HeroUI follows [BEM](https://bem.info/en/methodology/) naming for reusable
+customization.
+
+### CSS Classes
+
+- `.date-picker` - Root wrapper.
+- `.date-picker__trigger` - Trigger part that opens the popover.
+- `.date-picker__trigger-indicator` - Default or custom indicator slot.
+- `.date-picker__popover` - Popover content wrapper.
+
+### Interactive States
+
+- **Open**: `[data-pressed="true"]` on the trigger, `[data-open="true"]` on the root.
+- **Disabled**: `[data-disabled="true"]` on the trigger.
+- **Focus visible**: `[data-focus-visible="true"]` on the trigger.
+- **Hover**: `[data-hovered="true"]` on the trigger.
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Date_picker
+
+It takes every prop a [DateField](/solidtype/heroui/date-field/) takes, and:
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `value` | `value` | `CalendarDate.t Js.Nullable.t` | | Controlled selected date; null controls it empty |
+| `defaultValue` | `default_value` | `CalendarDate.t` | | Default selected value in uncontrolled mode |
+| `onChange` | `on_change` | `CalendarDate.t option -> unit` | | Called when the selected date changes |
+| `isOpen` | `is_open` | `bool` | | Controlled popover open state |
+| `defaultOpen` | `default_open` | `bool` | `false` | Initial popover open state |
+| `onOpenChange` | `on_open_change` | `bool -> unit` | | Called when the popover opens or closes |
+| `shouldCloseOnSelect` | `should_close_on_select` | `bool` | `true` | Whether choosing a day closes the popover |
+| `firstDayOfWeek` | `first_day_of_week` | `` [ `sun \| `mon \| ... ] `` | the locale's | The calendar's first day of the week |
+| `pageBehavior` | `page_behavior` | `` [ `visible \| `single ] `` | `` `visible `` | How the calendar pages |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Disables date selection and the trigger |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Marks the field as invalid |
+| `minValue` | `min_value` | `CalendarDate.t` | | Minimum selectable date |
+| `maxValue` | `max_value` | `CalendarDate.t` | | Maximum selectable date |
+| `name` | `name` | `string` | | Name used for form submission |
+| `children` | children | elements, or `state -> Jsx.element` | | Composed content or a function of its state |
+| `render` | `as_` | `Html.Div.props -> state -> Jsx.element` | | Draws the root as another element |
+
+### Composition Parts
+
+| React | solidtype | Description |
+|---|---|---|
+| `DatePicker.Root` | `Date_picker` | Root date picker container and state owner |
+| `DatePicker.Trigger` | `Date_picker.Trigger` | Trigger button, usually inside `Date_field.Suffix` |
+| `DatePicker.TriggerIndicator` | `Date_picker.Trigger_indicator` | Indicator slot with the default calendar icon |
+| `DatePicker.Popover` | `Date_picker.Popover` | Popover wrapper for `Calendar` content; `placement` and `offset` |

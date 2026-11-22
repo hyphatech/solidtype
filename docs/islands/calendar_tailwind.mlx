@@ -1,0 +1,52 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Calendar = Solidtype_heroui.Calendar
+
+let make () =
+  <Calendar
+    aria_label="Custom styled calendar"
+    class_="w-63 rounded-2xl border border-border/80 bg-surface p-3 shadow-sm \
+            ring-1 ring-accent/5 dark:border-border/90 dark:ring-accent/10">
+    <Calendar.Header class_="px-0.5 pb-4">
+      <Calendar.Heading class_="text-sm font-medium text-foreground" />
+      <Calendar.Nav_button
+        class_="text-accent-soft-foreground hover:bg-default \
+                hover:text-accent-soft-foreground active:scale-95"
+        slot=`previous
+      />
+      <Calendar.Nav_button
+        class_="text-accent-soft-foreground hover:bg-default \
+                hover:text-accent-soft-foreground active:scale-95"
+        slot=`next
+      />
+    </Calendar.Header>
+    <Calendar.Grid>
+      <Calendar.Grid_header>
+        (fun day ->
+          <Calendar.Header_cell class_="pb-2 text-xs font-medium text-muted">
+            (Jsx.string (S.get day))
+          </Calendar.Header_cell>)
+      </Calendar.Grid_header>
+      <Calendar.Grid_body>
+        (fun date ->
+          <Calendar.Cell
+            class_="rounded-3xl hover:bg-default \
+                    data-[hovered=true]:bg-default \
+                    data-[outside-month=true]:text-muted \
+                    data-[outside-month=true]:opacity-50 \
+                    data-[selected=true]:bg-accent \
+                    data-[selected=true]:text-accent-foreground \
+                    data-[selected=true]:hover:bg-accent-hover \
+                    data-[selected=true]:data-[hovered=true]:bg-accent-hover \
+                    data-[selected=true]:data-[outside-month=true]:bg-default \
+                    data-[today=true]:bg-accent-soft \
+                    data-[today=true]:text-accent-soft-foreground \
+                    data-[today=true]:hover:bg-accent-soft-hover \
+                    data-[today=true]:data-[hovered=true]:bg-accent-soft-hover \
+                    data-[selected=true]:data-[today=true]:bg-accent \
+                    data-[selected=true]:data-[today=true]:hover:bg-accent-hover"
+            date=(S.get date)
+          />)
+      </Calendar.Grid_body>
+    </Calendar.Grid>
+  </Calendar>

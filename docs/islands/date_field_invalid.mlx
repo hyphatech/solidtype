@@ -1,0 +1,26 @@
+module S = Solidtype.Solid
+module Field_error = Solidtype_heroui.Field_error
+module Label = Solidtype_heroui.Label
+module Date_field = Solidtype_heroui.Date_field
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <Date_field is_invalid=true is_required=true class_="w-[256px]" name="date">
+      <Label>"Date"</Label>
+      <Date_field.Group>
+        <Date_field.Input>
+          (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+        </Date_field.Input>
+      </Date_field.Group>
+      <Field_error>"Please enter a valid date"</Field_error>
+    </Date_field>
+    <Date_field is_invalid=true class_="w-[256px]" name="invalid-date">
+      <Label>"Date"</Label>
+      <Date_field.Group>
+        <Date_field.Input>
+          (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+        </Date_field.Input>
+      </Date_field.Group>
+      <Field_error>"Date must be in the future"</Field_error>
+    </Date_field>
+  </div>

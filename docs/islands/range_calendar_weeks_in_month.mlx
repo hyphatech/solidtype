@@ -1,0 +1,29 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Range_calendar = Solidtype_heroui.Range_calendar
+module Description = Solidtype_heroui.Description
+
+let make () =
+  <div class_="flex flex-col items-center gap-4">
+    <Range_calendar aria_label="Trip dates" weeks_in_month=6>
+      <Range_calendar.Header>
+        <Range_calendar.Heading />
+        <Range_calendar.Nav_button slot=`previous />
+        <Range_calendar.Nav_button slot=`next />
+      </Range_calendar.Header>
+      <Range_calendar.Grid>
+        <Range_calendar.Grid_header>
+          (fun day ->
+            <Range_calendar.Header_cell>
+              (Jsx.string (S.get day))
+            </Range_calendar.Header_cell>)
+        </Range_calendar.Grid_header>
+        <Range_calendar.Grid_body>
+          (fun date -> <Range_calendar.Cell date=(S.get date) />)
+        </Range_calendar.Grid_body>
+      </Range_calendar.Grid>
+    </Range_calendar>
+    <Description class_="text-center">
+      "Always shows 6 weeks per month to avoid layout shift when navigating"
+    </Description>
+  </div>
