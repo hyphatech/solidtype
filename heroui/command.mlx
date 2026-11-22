@@ -1,0 +1,344 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Headless = Solidtype_headless.Command
+
+type variant = [ `opaque | `blur | `transparent ]
+type size = [ `sm | `md | `lg ]
+
+module Size_context = Solidtype.Context.Make_optional (struct
+  type t = size S.accessor
+end)
+
+(* What an input group's input reads of it and of the dialog: whether it takes
+   the focus as the palette opens, and how it says so. *)
+type focus_on_open = { wanted : bool S.accessor; take : Dom.element -> unit }
+
+module Focus_context = Solidtype.Context.Make_optional (struct
+  type t = Dom.element -> unit
+end)
+
+module Input_group_context = Solidtype.Context.Make_optional (struct
+  type t = focus_on_open
+end)
+
+external as_element : Dom.htmlInputElement -> Dom.element = "%identity"
+(* An input is an element. *)
+
+let within part = Dialog_frame.within part ~backdrop:"Command.Backdrop"
+
+module Context = struct
+  let use = Headless.Context.use
+end
+
+(* A class added after the palette's own, as React's className is: its look is
+   command.css's, in the components layer, which a utility given wins over. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+let variant_class = function
+  | `opaque -> "command__backdrop command__backdrop--opaque"
+  | `blur -> "command__backdrop command__backdrop--blur"
+  | `transparent -> "command__backdrop command__backdrop--transparent"
+
+let size_class = function
+  | `sm -> "command__dialog command__dialog--sm"
+  | `md -> "command__dialog command__dialog--md"
+  | `lg -> "command__dialog command__dialog--lg"
+
+module Backdrop = struct
+  let%component make ?(variant : variant = `opaque)
+      ?(is_dismissable : bool = true)
+      ?(is_keyboard_dismiss_disabled : bool = false) ?(is_open : bool option)
+      ?(default_open : bool option) ?(on_open_change : (bool -> unit) option)
+      ?(portal_container : _ Dom.element_like option) ?(class_ : string option)
+      ?(style : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : Dialog_frame.overlay_state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props ->
+         Dialog_frame.overlay_state ->
+         Solidtype.Jsx.element)
+         option) () =
+    Dialog_frame.backdrop ~slot:"command-backdrop"
+      ~portal_container:(fun () -> S.get portal_container)
+      ~class_:(fun () -> after (variant_class (S.get variant)) (S.get class_))
+      ~style:(fun () -> S.get style)
+      ~ref:given_ref
+      ~dismissable:(fun () -> S.get is_dismissable)
+      ~keyboard_dismissable:(fun () -> not (S.get is_keyboard_dismiss_disabled))
+      ~is_open:(fun () -> S.get is_open)
+      ~default_open:(fun () -> S.get default_open)
+      ~on_open_change:(fun o -> ignore (on_open_change o : unit option))
+      ~as_:(fun () -> S.get as_)
+      ~others:(Props.others props)
+      (fun s -> Jsx.draw (S.get children) s)
+  [@@element div]
+end
+
+module Container = struct
+  let%component make ?(size : size = `md) ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : Dialog_frame.overlay_state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props ->
+         Dialog_frame.overlay_state ->
+         Solidtype.Jsx.element)
+         option) () =
+    let f = within "Command.Container" in
+    Dialog_frame.container f ~slot:"command-container"
+      ~class_:(fun () -> after "command__container" (S.get class_))
+      ~ref:given_ref
+      ~as_:(fun () -> S.get as_)
+      ~others:(Props.others props)
+      (fun s ->
+        <Size_context.Provider value=size>
+          (Jsx.draw (S.get children) s)
+        </Size_context.Provider>)
+  [@@element div]
+end
+
+module Dialog = struct
+  let%component make ?(aria_label : string = "Command palette")
+      ?(input_value : string option) ?(default_input_value : string option)
+      ?(on_input_change : (string -> unit) option)
+      ?(filter : (string -> string -> bool) option) ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlElement -> unit) option)
+      ?(on_focus_out : (Dom.focusEvent -> unit) option)
+      ~(children : Dialog_frame.dialog_state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Section.props ->
+         Dialog_frame.dialog_state ->
+         Solidtype.Jsx.element)
+         option) () =
+    let f = within "Command.Dialog" in
+    let size =
+      match Size_context.use () with
+      | Some s -> s
+      | None -> S.accessor (fun () -> `md)
+    in
+    let search = ref None in
+    let filter =
+      if Option.is_some (Props.get_filter props) then
+        Some (fun text typed -> Option.value (filter text typed) ~default:true)
+      else None
+    in
+    Dialog_frame.dialog f
+      ~focus_on_open:(fun () -> !search)
+      ~aria_label:(fun () -> S.get aria_label)
+      ~slot:"command-dialog" ~role:`dialog
+      ~class_:(fun () -> after (size_class (S.get size)) (S.get class_))
+      ~ref:given_ref ~on_focus_out
+      ~as_:(fun () -> S.get as_)
+      ~others:(Props.others props)
+      (fun s ->
+        <Headless.Root
+          ?input_value=(S.get input_value)
+          ?default_input_value=(S.get default_input_value)
+          on_input_change=(fun v -> ignore (on_input_change v : unit option))
+          ?filter>
+          <Focus_context.Provider value=(fun e -> search := Some e)>
+            (Jsx.draw (S.get children) s)
+          </Focus_context.Provider>
+        </Headless.Root>)
+  [@@element section]
+end
+
+module Header = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
+    <div
+      class_=(after "command__header" (S.get class_))
+      data_slot="command-header"
+      props=(Props.others props)>
+      (S.get children)
+    </div>
+  [@@element div]
+end
+
+module Input_group = struct
+  module Prefix = struct
+    let%component make ?(class_ : string option) ~(children : Jsx.element) () =
+      <div
+        class_=(after "command__input-group-prefix" (S.get class_))
+        data_slot="command-input-group-prefix"
+        props=(Props.others props)>
+        (S.get children)
+      </div>
+    [@@element div]
+  end
+
+  module Suffix = struct
+    let%component make ?(class_ : string option) ~(children : Jsx.element) () =
+      <div
+        class_=(after "command__input-group-suffix" (S.get class_))
+        data_slot="command-input-group-suffix"
+        props=(Props.others props)>
+        (S.get children)
+      </div>
+    [@@element div]
+  end
+
+  module Input = struct
+    let%component make ?(placeholder : string = "Search commands...")
+        ?(aria_label : string = "Search commands") ?(class_ : string option)
+        ?ref:(given_ref : (Dom.htmlInputElement -> unit) option) () =
+      let group = Input_group_context.use () in
+      <Headless.Input
+        placeholder=(S.get placeholder)
+        aria_label=(S.get aria_label)
+        class_=(after "command__input-group-input" (S.get class_))
+        ref=(fun e ->
+              ignore (given_ref e : unit option);
+              match group with
+              | Some g when S.untrack (fun () -> S.get g.wanted) ->
+                  g.take (as_element e)
+              | Some _ | None -> ())
+        data_slot="command-input-group-input"
+        props=(Props.others props)
+      />
+    [@@element input]
+  end
+
+  module Clear_button = struct
+    let%component make ?(class_ : string option)
+        ?(on_click : (Dom.mouseEvent -> unit) option) () =
+      let h = Headless.Context.use () in
+      <Close_button
+        aria_label=(S.get h.translations).clear_search
+        class_=(after "command__input-group-clear-button" (S.get class_))
+        tabindex="-1"
+        on_click=(fun e ->
+                   ignore (on_click e : unit option);
+                   h.set_input_value "";
+                   h.focus_input ())
+        data_slot="command-input-group-clear-button"
+        props=(Props.others props)
+      />
+    [@@element button]
+  end
+
+  let%component make ?(auto_focus : bool = true) ?(class_ : string option)
+      ~(children : Jsx.element) () =
+    let h = Headless.Context.use () in
+    let take =
+      match Focus_context.use () with Some take -> take | None -> fun _ -> ()
+    in
+    <Input_group_context.Provider value={ wanted = auto_focus; take }>
+      <div
+        class_=(after "command__input-group" (S.get class_))
+        data_slot="command-input-group"
+        data_empty=(Jsx.flag (String.equal (S.get h.input_value) ""))
+        props=(Props.others props)>
+        (S.get children)
+      </div>
+    </Input_group_context.Provider>
+  [@@element div]
+end
+
+module List = struct
+  let%component make ?(on_action : (string -> unit) option)
+      ?(disabled_keys : string array option)
+      ?(render_empty_state : (unit -> Jsx.element) option)
+      ?(class_ : string option) ~(children : Jsx.element) () =
+    <Headless.List
+      on_action=(fun k -> ignore (on_action k : unit option))
+      ?disabled_keys=(S.get disabled_keys)
+      ?render_empty_state=(if
+                             Option.is_some (Props.get_render_empty_state props)
+                           then
+                             Some
+                               (fun () ->
+                                 <div
+                                   class_="command__empty"
+                                   data_slot="command-empty">
+                                   (Option.value (render_empty_state ())
+                                      ~default:Jsx.nothing)
+                                 </div>)
+                           else None)
+      class_=(after "command__list" (S.get class_))
+      data_slot="command-list"
+      props=(Props.others props)>
+      (S.get children)
+    </Headless.List>
+  [@@element div]
+end
+
+module Group = struct
+  let%component make ?(heading : Jsx.element option) ?(class_ : string option)
+      ~(children : Jsx.element) () =
+    <Headless.Group
+      class_=(after "command__group" (S.get class_))
+      data_slot="command-group"
+      props=(Props.others props)>
+      (match S.get heading with
+      | Some h ->
+          <Headless.Heading
+            class_="command__group-heading" data_slot="command-group-heading">
+            h
+          </Headless.Heading>
+      | None -> Jsx.nothing)
+      (S.get children)
+    </Headless.Group>
+  [@@element section]
+end
+
+module Item = struct
+  let%component make ?(id : string option) ?(text_value : string option)
+      ?(is_disabled : bool = false) ?(on_action : (unit -> unit) option)
+      ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : Jsx.element) () =
+    let h = Headless.Context.use () in
+    let made = S.create_unique_id () in
+    let key () = Option.value (S.get id) ~default:made in
+    let disabled () = S.get is_disabled || h.is_disabled (key ()) in
+    let i = Interaction.create ~disabled () in
+    <Headless.Item
+      id=(key ())
+      ?text_value=(S.get text_value)
+      is_disabled=(S.get is_disabled)
+      on_action=(fun () -> ignore (on_action () : unit option))
+      class_=(after "command__item" (S.get class_))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
+      data_slot="command-item"
+      data_focused=(Jsx.flag
+                      (match S.get h.focused_key with
+                      | Some k -> String.equal k (key ())
+                      | None -> false))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_pressed=(Jsx.flag (Interaction.pressed i))
+      data_disabled=(Jsx.flag (disabled ()))
+      props=(Props.others props)>
+      (S.get children)
+    </Headless.Item>
+  [@@element div]
+end
+
+module Separator = struct
+  let%component make ?(class_ : string option) () =
+    <Headless.Separator
+      class_=(after "command__separator" (S.get class_))
+      data_slot="command-separator"
+      props=(Props.others props)
+    />
+  [@@element div]
+end
+
+module Footer = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
+    <div
+      class_=(after "command__footer" (S.get class_))
+      data_slot="command-footer"
+      props=(Props.others props)>
+      (S.get children)
+    </div>
+  [@@element div]
+end
+
+let%component make ?(is_open : bool option) ?(default_open : bool option)
+    ?(on_open_change : (bool -> unit) option) ~(children : Jsx.element) () =
+  Dialog_frame.root
+    ~is_open:(fun () -> S.get is_open)
+    ~default_open:(fun () -> S.get default_open)
+    ~on_open_change:(fun o -> ignore (on_open_change o : unit option))
+    (fun () -> S.get children)

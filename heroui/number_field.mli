@@ -22,7 +22,9 @@
     A value is kept on the grid of a [step] it is given, counted from its
     minimum, and else within its range alone, as React Aria keeps it; its
     buttons and arrow keys step it by [step], else by 1, or by a hundredth for a
-    percent.
+    percent. Text typed is its value once Enter or a focus that leaves commits
+    it, which [on_change] is told, as React Aria's; a step is told at once. A
+    [value] of [nan] controls it empty.
 
     The wheel steps it so too while its input has the focus, as
     {!Solidtype_headless.Number_field} turns it, unless [is_wheel_disabled].

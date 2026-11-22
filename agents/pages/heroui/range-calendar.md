@@ -235,7 +235,7 @@ let make () =
       aria_label="Trip dates"
       first_day_of_week=`mon
       focused_value=(S.get focused)
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)
       on_focus_change=(S.set set_focused)>
       <Range_calendar.Header>
@@ -744,7 +744,7 @@ let make () =
       aria_label="Trip dates"
       first_day_of_week=`mon
       is_invalid=(too_long ())
-      value=(Js.Nullable.return (S.get value))
+      value=(Js.Null.return (S.get value))
       on_change=(Option.iter (S.set set_value))>
       <Range_calendar.Header>
         <Range_calendar.Heading />
@@ -906,7 +906,7 @@ let make () =
       aria_label="Booking range"
       is_date_unavailable
       min_value=(D.today (D.get_local_time_zone ()))
-      value=(Js.Nullable.fromOption (S.get selected))
+      value=(Js.Null.fromOption (S.get selected))
       on_change=(S.set set_selected)>
       <Range_calendar.Header>
         <Range_calendar.Heading />
@@ -1178,7 +1178,7 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `range Js.Nullable.t` | | Controlled selected range; null controls it empty |
+| `value` | `value` | `range Js.Null.t` | | Controlled selected range; null controls it empty |
 | `defaultValue` | `default_value` | `range` | | Initial selected range (uncontrolled) |
 | `onChange` | `on_change` | `range option -> unit` | | Called when a range is chosen, or cleared |
 | `allowsNonContiguousRanges` | `allows_non_contiguous_ranges` | `bool` | `false` | Allows ranges that span unavailable dates |

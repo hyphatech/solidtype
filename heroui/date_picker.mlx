@@ -59,7 +59,7 @@ type 'v state = {
 module Date_root = struct
   module V = D.Types.CalendarDate
 
-  let%component make ?(value : V.t Js.Nullable.t option)
+  let%component make ?(value : V.t Js.Null.t option)
       ?(default_value : V.t option) ?(on_change : (V.t option -> unit) option)
       ?(placeholder_value : V.t option) ?(min_value : V.t option)
       ?(max_value : V.t option) ?(is_date_unavailable : (V.t -> bool) option)
@@ -96,7 +96,7 @@ module Date_root = struct
       }
     in
     <Headless.Root
-      value=(Js.Nullable.fromOption (S.get r.current))
+      value=(Js.Null.fromOption (S.get r.current))
       ?default_value=(S.get default_value)
       on_change=r.change
       ?placeholder_value=(S.get placeholder_value)
@@ -142,7 +142,7 @@ end
 module Date_time = struct
   module V = D.Types.CalendarDateTime
 
-  let%component make ?(value : V.t Js.Nullable.t option)
+  let%component make ?(value : V.t Js.Null.t option)
       ?(default_value : V.t option) ?(on_change : (V.t option -> unit) option)
       ?(placeholder_value : V.t option)
       ?(granularity : [ `day | `hour | `minute | `second ] option)
@@ -181,7 +181,7 @@ module Date_time = struct
       }
     in
     <Headless.Root_date_time
-      value=(Js.Nullable.fromOption (S.get r.current))
+      value=(Js.Null.fromOption (S.get r.current))
       ?default_value=(S.get default_value)
       on_change=r.change
       ?placeholder_value=(S.get placeholder_value)
@@ -229,7 +229,7 @@ end
 module Zoned = struct
   module V = D.Types.ZonedDateTime
 
-  let%component make ?(value : V.t Js.Nullable.t option)
+  let%component make ?(value : V.t Js.Null.t option)
       ?(default_value : V.t option) ?(on_change : (V.t option -> unit) option)
       ~(placeholder_value : V.t)
       ?(granularity : [ `day | `hour | `minute | `second ] option)
@@ -269,7 +269,7 @@ module Zoned = struct
       }
     in
     <Headless.Root_zoned
-      value=(Js.Nullable.fromOption (S.get r.current))
+      value=(Js.Null.fromOption (S.get r.current))
       ?default_value=(S.get default_value)
       on_change=r.change
       placeholder_value=(S.get placeholder_value)

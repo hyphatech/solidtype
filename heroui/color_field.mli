@@ -151,7 +151,7 @@ module Props : sig
   type t
 
   val check :
-    ?value:Solidtype_kobalte.Types.Color.t Js.Nullable.t Solidtype.Check.value ->
+    ?value:Solidtype_kobalte.Types.Color.t Js.Null.t Solidtype.Check.value ->
     ?default_value:Solidtype_kobalte.Types.Color.t Solidtype.Check.value ->
     ?on_change:(Solidtype_kobalte.Types.Color.t option -> unit) ->
     ?channel:channel Solidtype.Check.value ->

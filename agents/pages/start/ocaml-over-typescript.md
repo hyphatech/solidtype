@@ -206,17 +206,19 @@ Kobalte reads a `value` of `undefined` as uncontrolled, and `null` as
 controlled and empty. In TSX, `value={selected()}` compiles where
 `selected()` may be `undefined`, and the moment it is, the select keeps a
 value of its own and stops following the page. In OCaml a value Kobalte
-reads as `null` is a `Js.Nullable.t`, so an empty selection says so:
+reads as `null` is a `Js.Null.t`, which cannot hold `undefined`, so an
+empty selection says so:
 
 ```ocaml
 let picker () =
   <Select.Root
     options=statuses
-    value=(Js.Nullable.fromOption (S.get selected)) />
+    value=(Js.Null.fromOption (S.get selected)) />
 ```
 
-`None` is `null`, still controlled. Handing the value to Kobalte is leaving
-the prop out.
+`None` is `null`, still controlled. `Js.Nullable.fromOption`, whose `None`
+is `undefined`, does not compile there. Handing the value to Kobalte is
+leaving the prop out.
 
 ### It is Solid underneath
 

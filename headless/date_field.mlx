@@ -1223,6 +1223,17 @@ module Slots_context = Solidtype.Context.Make_optional (struct
   type t = (string * inner) list
 end)
 
+(* The inputs whose segments the keys move through: both of a range's, as
+   React Aria moves through its group, else the field's own. Read in a part's
+   setup, where its contexts are. *)
+let scope (f : inner) =
+  let slots = Slots_context.use () in
+  fun () ->
+    match slots with
+    | Some slots when List.exists (fun (_, s) -> s == f) slots ->
+        List.filter_map (fun (_, (s : inner)) -> S.get s.input) slots
+    | Some _ | None -> Option.to_list (S.get f.input)
+
 let within part =
   match Field_context.use () with
   | Some f -> f
@@ -1242,18 +1253,22 @@ let named id =
   in
   (here, fun () -> if S.get count > 0 then Some id else None)
 
-(* The segments Tab reaches, in the page's order. *)
-let focusable input =
-  Js.Array.from (query_all input "[data-type][tabindex=\"0\"]")
+(* The segments Tab reaches in [inputs], in the page's order. *)
+let focusable inputs =
+  Array.concat
+    (List.map
+       (fun input ->
+         Js.Array.from (query_all input "[data-type][tabindex=\"0\"]"))
+       inputs)
 
 let focus_first input =
-  match focusable input with [||] -> () | all -> focus all.(0)
+  match focusable [ input ] with [||] -> () | all -> focus all.(0)
 
 let index_of all e = Js.Array.findIndex ~f:(fun s -> s == e) all
 
 (* The segment after the one focused, or before it. *)
-let focus_by input amount =
-  let all = focusable input in
+let focus_by inputs amount =
+  let all = focusable inputs in
   match Js.Null.toOption active with
   | Some a ->
       let at = index_of all a in
@@ -1266,7 +1281,7 @@ let focus_by input amount =
 
 (* The segment nearest [from] on the side [sign] says, by where each is
    drawn, as React Aria moves through a right-to-left field. *)
-let focus_beside input (from : Dom.element) sign =
+let focus_beside inputs (from : Dom.element) sign =
   let x = rect_left (rect from) in
   let nearest =
     Array.fold_left
@@ -1277,14 +1292,14 @@ let focus_beside input (from : Dom.element) sign =
           | Some (_, bd) when Float.abs bd <= Float.abs d -> best
           | Some _ | None -> Some (s, d)
         else best)
-      None (focusable input)
+      None (focusable inputs)
   in
   match nearest with Some (s, _) -> focus s | None -> ()
 
 (* The first segment with no part of those that end the field, or its last,
    as a press on the field outside a segment focuses. *)
 let focus_last input =
-  let all = focusable input in
+  let all = focusable [ input ] in
   let n = Array.length all in
   if n > 0 then
     let rec back i =
@@ -1345,7 +1360,7 @@ let format_options ~granularity ~time_zone ~hide_time_zone ~hour_cycle ~show_era
     ()
 
 (* A field of any kind of value: what each root is, given its kind. *)
-let field (type v) ~(kind : v kind) ~(value : v Js.Nullable.t option S.accessor)
+let field (type v) ~(kind : v kind) ~(value : v Js.Null.t option S.accessor)
     ~(default_value : v option) ~(on_change : v option -> unit)
     ~(placeholder_value : v option S.accessor)
     ~(today : string -> Dt.Calendar.t -> v) ~(min_value : v option S.accessor)
@@ -1419,7 +1434,7 @@ let field (type v) ~(kind : v kind) ~(value : v Js.Nullable.t option S.accessor)
   let current =
     S.create_memo (fun () ->
         match S.get value with
-        | Some v -> Js.Nullable.toOption v
+        | Some v -> Js.Null.toOption v
         | None -> S.get kept)
   in
   let set_value v =
@@ -1938,7 +1953,7 @@ module Common = struct
 end
 
 (* What a root does of a value it is given: a value given, an empty one
-   [Js.Nullable.null], or none, the root keeping its own. *)
+   [Js.Null.empty], or none, the root keeping its own. *)
 let given value props = S.accessor (fun () -> value props)
 
 (* Two dates as a reader is told them, split at the last literal their
@@ -1974,7 +1989,7 @@ let told_range format a b =
    them: each its end of the range, the range told once both are there and
    [None] as one is erased, invalid together, and described as a range. *)
 let range_field (type v) ~(kind : v kind)
-    ~(value : v range Js.Nullable.t option S.accessor)
+    ~(value : v range Js.Null.t option S.accessor)
     ~(default_value : v range option) ~(on_change : v range option -> unit)
     ~(placeholder_value : v option S.accessor)
     ~(today : string -> Dt.Calendar.t -> v) ~(min_value : v option S.accessor)
@@ -2002,7 +2017,7 @@ let range_field (type v) ~(kind : v kind)
     S.create_memo (fun () ->
         match S.get value with
         | Some n -> (
-            match Js.Nullable.toOption n with
+            match Js.Null.toOption n with
             | Some r -> (Some r.start, Some r.end_)
             | None -> (
                 (* A range controlled empty forgets one typed whole. *)
@@ -2044,8 +2059,7 @@ let range_field (type v) ~(kind : v kind)
   let engine ~name ~label ~labelled_by ~described_by ~auto_focus ~pick ~put =
     field ~kind
       ~value:
-        (S.accessor (fun () ->
-             Some (Js.Nullable.fromOption (pick (S.get shown)))))
+        (S.accessor (fun () -> Some (Js.Null.fromOption (pick (S.get shown)))))
       ~default_value:None
       ~on_change:(fun v -> put v (S.untrack (fun () -> S.get shown)))
       ~placeholder_value ~today ~min_value ~max_value ~is_date_unavailable
@@ -2145,7 +2159,7 @@ module Root = struct
     type t = Common.t
 
     external check :
-      ?value:V.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:V.t Js.Null.t Solidtype.Check.value ->
       ?default_value:V.t Solidtype.Check.value ->
       ?on_change:(V.t option -> unit) ->
       ?placeholder_value:V.t Solidtype.Check.value ->
@@ -2170,7 +2184,7 @@ module Root = struct
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external value : t -> V.t Js.Nullable.t option = "value" [@@mel.get]
+    external value : t -> V.t Js.Null.t option = "value" [@@mel.get]
     external default_value : t -> V.t option = "defaultValue" [@@mel.get]
 
     external on_change : t -> ((V.t option -> unit)[@u]) option = "onChange"
@@ -2216,7 +2230,7 @@ module Root_date_time = struct
     type t = Common.t
 
     external check :
-      ?value:V.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:V.t Js.Null.t Solidtype.Check.value ->
       ?default_value:V.t Solidtype.Check.value ->
       ?on_change:(V.t option -> unit) ->
       ?placeholder_value:V.t Solidtype.Check.value ->
@@ -2243,7 +2257,7 @@ module Root_date_time = struct
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external value : t -> V.t Js.Nullable.t option = "value" [@@mel.get]
+    external value : t -> V.t Js.Null.t option = "value" [@@mel.get]
     external default_value : t -> V.t option = "defaultValue" [@@mel.get]
 
     external on_change : t -> ((V.t option -> unit)[@u]) option = "onChange"
@@ -2292,7 +2306,7 @@ module Root_zoned = struct
     type t = Common.t
 
     external check :
-      ?value:V.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:V.t Js.Null.t Solidtype.Check.value ->
       ?default_value:V.t Solidtype.Check.value ->
       ?on_change:(V.t option -> unit) ->
       placeholder_value:V.t Solidtype.Check.value ->
@@ -2320,7 +2334,7 @@ module Root_zoned = struct
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external value : t -> V.t Js.Nullable.t option = "value" [@@mel.get]
+    external value : t -> V.t Js.Null.t option = "value" [@@mel.get]
     external default_value : t -> V.t option = "defaultValue" [@@mel.get]
 
     external on_change : t -> ((V.t option -> unit)[@u]) option = "onChange"
@@ -2400,7 +2414,7 @@ module Root_range = struct
     type t = Common.t
 
     external check :
-      ?value:V.t range Js.Nullable.t Solidtype.Check.value ->
+      ?value:V.t range Js.Null.t Solidtype.Check.value ->
       ?default_value:V.t range Solidtype.Check.value ->
       ?on_change:(V.t range option -> unit) ->
       ?start_name:string Solidtype.Check.value ->
@@ -2424,7 +2438,7 @@ module Root_range = struct
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external value : t -> V.t range Js.Nullable.t option = "value" [@@mel.get]
+    external value : t -> V.t range Js.Null.t option = "value" [@@mel.get]
     external default_value : t -> V.t range option = "defaultValue" [@@mel.get]
 
     external on_change : t -> ((V.t range option -> unit)[@u]) option
@@ -2473,7 +2487,7 @@ module Root_range_date_time = struct
     type t = Common.t
 
     external check :
-      ?value:V.t range Js.Nullable.t Solidtype.Check.value ->
+      ?value:V.t range Js.Null.t Solidtype.Check.value ->
       ?default_value:V.t range Solidtype.Check.value ->
       ?on_change:(V.t range option -> unit) ->
       ?start_name:string Solidtype.Check.value ->
@@ -2499,7 +2513,7 @@ module Root_range_date_time = struct
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external value : t -> V.t range Js.Nullable.t option = "value" [@@mel.get]
+    external value : t -> V.t range Js.Null.t option = "value" [@@mel.get]
     external default_value : t -> V.t range option = "defaultValue" [@@mel.get]
 
     external on_change : t -> ((V.t range option -> unit)[@u]) option
@@ -2551,7 +2565,7 @@ module Root_range_zoned = struct
     type t = Common.t
 
     external check :
-      ?value:V.t range Js.Nullable.t Solidtype.Check.value ->
+      ?value:V.t range Js.Null.t Solidtype.Check.value ->
       ?default_value:V.t range Solidtype.Check.value ->
       ?on_change:(V.t range option -> unit) ->
       ?start_name:string Solidtype.Check.value ->
@@ -2578,7 +2592,7 @@ module Root_range_zoned = struct
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external value : t -> V.t range Js.Nullable.t option = "value" [@@mel.get]
+    external value : t -> V.t range Js.Null.t option = "value" [@@mel.get]
     external default_value : t -> V.t range option = "defaultValue" [@@mel.get]
 
     external on_change : t -> ((V.t range option -> unit)[@u]) option
@@ -2719,15 +2733,16 @@ module Input = struct
       match slotted with Some f -> f | None -> within "Date_field.Input"
     in
     let element = ref None in
+    let inputs = scope f in
     let move (e : Dom.keyboardEvent) ~right =
-      match !element with
-      | None -> ()
-      | Some input -> (
+      match inputs () with
+      | [] -> ()
+      | inputs -> (
           prevent_key e;
           match S.get f.direction with
-          | `ltr -> ignore (focus_by input (if right then 1 else -1) : bool)
+          | `ltr -> ignore (focus_by inputs (if right then 1 else -1) : bool)
           | `rtl ->
-              focus_beside input (key_target e) (if right then 1. else -1.))
+              focus_beside inputs (key_target e) (if right then 1. else -1.))
     in
     let pressed_by_touch = ref false in
     <Field_context.Provider value=f>
@@ -2887,6 +2902,7 @@ module Segment = struct
 
   let make (props : Props.t) =
     let f = within "Date_field.Segment" in
+    let inputs = scope f in
     let entered = ref "" in
     let element = ref None in
     let composition = ref "" in
@@ -2976,12 +2992,8 @@ module Segment = struct
               [||])
     in
     let starts_with name typed = K.Filter.starts_with filter name typed in
-    let next () =
-      Option.iter (fun i -> ignore (focus_by i 1 : bool)) (S.get f.input)
-    in
-    let previous () =
-      Option.iter (fun i -> ignore (focus_by i (-1) : bool)) (S.get f.input)
-    in
+    let next () = ignore (focus_by (inputs ()) 1 : bool) in
+    let previous () = ignore (focus_by (inputs ()) (-1) : bool) in
     let erase () =
       let s = seg () in
       if String.equal s.text s.placeholder then previous ();
@@ -3147,7 +3159,7 @@ module Segment = struct
                before it, or after it. *)
             match (S.get f.input, Js.Null.toOption active) with
             | Some input, Some a when a == e ->
-                let all = focusable input in
+                let all = focusable [ input ] in
                 let at = index_of all e in
                 let rest = Js.Array.filter ~f:(fun s -> s != e) all in
                 let target = if at > 0 then at - 1 else 0 in

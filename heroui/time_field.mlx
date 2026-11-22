@@ -354,7 +354,7 @@ type state = {
 }
 
 let field (type v) ~(kind : v kind) ~(fallback : v S.accessor)
-    ~(value : v Js.Nullable.t option S.accessor)
+    ~(value : v Js.Null.t option S.accessor)
     ~(default_value : v option S.accessor)
     ~(on_change : v option -> unit option)
     ~(placeholder_value : v option S.accessor)
@@ -369,7 +369,7 @@ let field (type v) ~(kind : v kind) ~(fallback : v S.accessor)
   in
   let current, set =
     Field.controlled
-      ~value:(fun () -> Option.map Js.Nullable.toOption (S.get value))
+      ~value:(fun () -> Option.map Js.Null.toOption (S.get value))
       ~default:(S.get default_value)
       ~on_change:(fun v ->
         in_form.changed ();
@@ -646,7 +646,7 @@ module In_locale = struct
     else <I18n.I18nProvider locale="en-GB">(S.get children)</I18n.I18nProvider>
 end
 
-let%component make ?(value : Time.t Js.Nullable.t option)
+let%component make ?(value : Time.t Js.Null.t option)
     ?(default_value : Time.t option)
     ?(on_change : (Time.t option -> unit) option)
     ?(placeholder_value : Time.t option) ?(min_value : Time.t option)
@@ -682,7 +682,7 @@ let%component make ?(value : Time.t Js.Nullable.t option)
 module Date_time = struct
   module V = D.Types.CalendarDateTime
 
-  let%component make ?(value : V.t Js.Nullable.t option)
+  let%component make ?(value : V.t Js.Null.t option)
       ?(default_value : V.t option) ?(on_change : (V.t option -> unit) option)
       ~(placeholder_value : V.t) ?(min_value : Time.t option)
       ?(max_value : Time.t option)
@@ -719,7 +719,7 @@ end
 module Zoned = struct
   module V = D.Types.ZonedDateTime
 
-  let%component make ?(value : V.t Js.Nullable.t option)
+  let%component make ?(value : V.t Js.Null.t option)
       ?(default_value : V.t option) ?(on_change : (V.t option -> unit) option)
       ~(placeholder_value : V.t) ?(min_value : Time.t option)
       ?(max_value : Time.t option) ?(hide_time_zone : bool = false)

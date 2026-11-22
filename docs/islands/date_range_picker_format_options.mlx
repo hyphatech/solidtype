@@ -132,7 +132,7 @@ let make () =
         name
         placeholder_value=(at "2026-02-03T08:45:00")
         should_force_leading_zeros=(S.get leading_zeros)
-        value=(Js.Nullable.fromOption (value ()))
+        value=(Js.Null.fromOption (value ()))
         on_change=(Option.iter set)>
         <Time_field.Group variant=`secondary>
           <Time_field.Input>

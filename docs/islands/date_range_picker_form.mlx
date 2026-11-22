@@ -41,7 +41,7 @@ let make () =
       is_invalid=(is_invalid ())
       min_value=current
       start_name="tripStartDate"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Trip dates"</Label>
       <Date_field.Group full_width=true>

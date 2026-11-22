@@ -6,7 +6,8 @@
     and turned up steps it down, as React Aria's does, where Kobalte's goes the
     other way; and it leaves alone a field that is read-only, a turn mostly
     sideways, and one with Control held, which zooms the page, where Kobalte's
-    steps on each.
+    steps on each. A [raw_value] of [nan] empties it, as React Aria's, where
+    Kobalte's keeps the last number shown.
 
     {[
       <Number_field.Root default_value="4">

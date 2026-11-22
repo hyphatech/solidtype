@@ -39,7 +39,7 @@ let make () =
       is_invalid=(is_invalid ())
       min_value=current
       name="appointmentDate"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Appointment date"</Label>
       <Date_field.Group full_width=true>

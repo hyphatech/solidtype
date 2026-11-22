@@ -10,7 +10,7 @@ let make () =
       is_disabled=true
       class_="w-[256px]"
       name="date"
-      value=(Js.Nullable.return (D.today (D.get_local_time_zone ())))>
+      value=(Js.Null.return (D.today (D.get_local_time_zone ())))>
       <Label>"Date"</Label>
       <Date_field.Group>
         <Date_field.Input>

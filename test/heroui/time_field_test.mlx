@@ -487,14 +487,14 @@ let () =
       Jest.testPromise "is typed onto its placeholder's date and zone, empty"
         (fun () ->
           let told = ref "" in
-          let value, set_value = S.create_signal Js.Nullable.null in
+          let value, set_value = S.create_signal Js.Null.empty in
           render_en_us (fun () ->
               <Time_field.Zoned
                 value=(S.get value)
                 placeholder_value=(in_kyiv ~hour:0 ~minute:0)
                 hour_cycle=`h24
                 on_change=(fun v ->
-                            S.set set_value (Js.Nullable.fromOption v);
+                            S.set set_value (Js.Null.fromOption v);
                             Option.iter
                               (fun v -> told := Zoned.to_string v ())
                               v)>
@@ -545,19 +545,19 @@ let () =
       Jest.afterEach T.cleanup;
       Jest.testPromise
         "is typed into, then emptied by the null it is controlled by" (fun () ->
-          let time, set_time = S.create_signal Js.Nullable.null in
+          let time, set_time = S.create_signal Js.Null.empty in
           render_en_us (fun () ->
               <Time_field
                 value=(S.get time)
                 hour_cycle=`h24
-                on_change=(fun t -> S.set set_time (Js.Nullable.fromOption t))>
+                on_change=(fun t -> S.set set_time (Js.Null.fromOption t))>
                 (inside ())
               </Time_field>);
           let user = T.setup () in
           let* () = T.click user (segment T.body "hour") in
           let* () = T.keyboard user "0930" in
           let typed = placeholder "minute" in
-          S.set set_time Js.Nullable.null;
+          S.set set_time Js.Null.empty;
           Js.Promise.resolve
             E.(
               expect (typed, placeholder "hour", placeholder "minute")

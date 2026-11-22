@@ -725,7 +725,7 @@ module HoverCardContextValue : sig
   external cancel_opening : t -> unit -> unit = "cancelOpening" [@@mel.send]
   external cancel_closing : t -> unit -> unit = "cancelClosing" [@@mel.send]
   external close : t -> unit -> unit = "close" [@@mel.send]
-  external is_target_on_hover_card : t -> Dom.node Js.Nullable.t -> bool = "isTargetOnHoverCard" [@@mel.send]
+  external is_target_on_hover_card : t -> Dom.node Js.Null.t -> bool = "isTargetOnHoverCard" [@@mel.send]
   external set_trigger_ref : t -> Dom.htmlElement -> unit = "setTriggerRef" [@@mel.send]
   external set_content_ref : t -> Dom.htmlElement -> unit = "setContentRef" [@@mel.send]
   external make : dataset:(t_hover_card_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> is_open:(bool Solidtype.Solid.accessor [@mel.as "isOpen"]) -> content_present:(bool Solidtype.Solid.accessor [@mel.as "contentPresent"]) -> open_with_delay:((unit -> unit) [@mel.as "openWithDelay"]) -> close_with_delay:((unit -> unit) [@mel.as "closeWithDelay"]) -> cancel_opening:((unit -> unit) [@mel.as "cancelOpening"]) -> cancel_closing:((unit -> unit) [@mel.as "cancelClosing"]) -> close:((unit -> unit) [@mel.as "close"]) -> is_target_on_hover_card:((Dom.node Js.Nullable.t -> bool) [@mel.as "isTargetOnHoverCard"]) -> set_trigger_ref:((Dom.htmlElement -> unit) [@mel.as "setTriggerRef"]) -> set_content_ref:((Dom.htmlElement -> unit) [@mel.as "setContentRef"]) -> unit -> t = "" [@@mel.obj]
@@ -1355,7 +1355,7 @@ module TooltipContextValue : sig
   external cancel_opening : t -> unit -> unit = "cancelOpening" [@@mel.send]
   external generate_id : t -> string -> string = "generateId" [@@mel.send]
   val register_content_id : t -> string -> (unit -> unit)
-  external is_target_on_tooltip : t -> Dom.node Js.Nullable.t -> bool = "isTargetOnTooltip" [@@mel.send]
+  external is_target_on_tooltip : t -> Dom.node Js.Null.t -> bool = "isTargetOnTooltip" [@@mel.send]
   external set_trigger_ref : t -> Dom.htmlElement -> unit = "setTriggerRef" [@@mel.send]
   external set_content_ref : t -> Dom.htmlElement -> unit = "setContentRef" [@@mel.send]
   val make : dataset:t_tooltip_data_set Solidtype.Solid.accessor -> is_open:bool Solidtype.Solid.accessor -> is_disabled:bool Solidtype.Solid.accessor -> trigger_on_focus_only:bool Solidtype.Solid.accessor -> content_id:string option Solidtype.Solid.accessor -> content_present:bool Solidtype.Solid.accessor -> open_tooltip:(bool option -> unit) -> hide_tooltip:(bool option -> unit) -> cancel_opening:(unit -> unit) -> generate_id:(string -> string) -> register_content_id:(string -> (unit -> unit)) -> is_target_on_tooltip:(Dom.node Js.Nullable.t -> bool) -> set_trigger_ref:(Dom.htmlElement -> unit) -> set_content_ref:(Dom.htmlElement -> unit) -> unit -> t

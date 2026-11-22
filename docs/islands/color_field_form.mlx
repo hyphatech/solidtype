@@ -43,7 +43,7 @@ let make () =
       is_required=true
       class_="w-full"
       name="brand-color"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Brand Color"</Label>
       <Color_field.Group>

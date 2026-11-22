@@ -20,6 +20,7 @@ module Drawer = H.Drawer
 module Dropdown = H.Dropdown
 module Header = H.Header
 module Modal = H.Modal
+module Command = H.Command
 module Pagination = H.Pagination
 module Popover = H.Popover
 module Tooltip = H.Tooltip
@@ -1155,6 +1156,164 @@ let () =
                         </Modal.Container>
                       </Modal.Backdrop>
                     </Modal>
+                    <Command default_open=true>
+                      <Command.Backdrop
+                        ?as_=(drawn "Command.Backdrop" "div" ())
+                        data_testid="Command.Backdrop"
+                        class_="given-class"
+                        title="Command.Backdrop"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Command.Backdrop" e)
+                        on_key_down=(fun e -> heard "Command.Backdrop" e)>
+                        <Command.Container
+                          ?as_=(drawn "Command.Container" "div" ())
+                          data_testid="Command.Container"
+                          class_="given-class"
+                          title="Command.Container"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Command.Container" e)
+                          on_key_down=(fun e -> heard "Command.Container" e)>
+                          <Command.Dialog
+                            ?as_=(drawn "Command.Dialog" "section" ())
+                            data_testid="Command.Dialog"
+                            class_="given-class"
+                            title="Command.Dialog"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Command.Dialog" e)
+                            on_key_down=(fun e -> heard "Command.Dialog" e)>
+                            <Command.Header
+                              ?as_=(drawn "Command.Header" "div" ())
+                              data_testid="Command.Header"
+                              class_="given-class"
+                              title="Command.Header"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Command.Header" e)
+                              on_key_down=(fun e -> heard "Command.Header" e)>
+                              "Home"
+                            </Command.Header>
+                            <Command.Input_group
+                              ?as_=(drawn "Command.Input_group" "div" ())
+                              data_testid="Command.Input_group"
+                              class_="given-class"
+                              title="Command.Input_group"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Command.Input_group" e)
+                              on_key_down=(fun e ->
+                                            heard "Command.Input_group" e)>
+                              <Command.Input_group.Prefix
+                                ?as_=(drawn "Command.Input_group.Prefix" "div"
+                                        ())
+                                data_testid="Command.Input_group.Prefix"
+                                class_="given-class"
+                                title="Command.Input_group.Prefix"
+                                style="--part: 1"
+                                ref=(fun e ->
+                                      seen "Command.Input_group.Prefix" e)
+                                on_key_down=(fun e ->
+                                              heard "Command.Input_group.Prefix"
+                                                e)>
+                                "?"
+                              </Command.Input_group.Prefix>
+                              <Command.Input_group.Input
+                                ?as_=(drawn "Command.Input_group.Input" "input"
+                                        ())
+                                data_testid="Command.Input_group.Input"
+                                class_="given-class"
+                                title="Command.Input_group.Input"
+                                style="--part: 1"
+                                ref=(fun e ->
+                                      seen "Command.Input_group.Input" e)
+                                on_key_down=(fun e ->
+                                              heard "Command.Input_group.Input"
+                                                e)
+                              />
+                              <Command.Input_group.Clear_button
+                                ?as_=(drawn "Command.Input_group.Clear_button"
+                                        "button" ())
+                                data_testid="Command.Input_group.Clear_button"
+                                class_="given-class"
+                                title="Command.Input_group.Clear_button"
+                                style="--part: 1"
+                                ref=(fun e ->
+                                      seen "Command.Input_group.Clear_button" e)
+                                on_key_down=(fun e ->
+                                              heard
+                                                "Command.Input_group.Clear_button"
+                                                e)
+                              />
+                              <Command.Input_group.Suffix
+                                ?as_=(drawn "Command.Input_group.Suffix" "div"
+                                        ())
+                                data_testid="Command.Input_group.Suffix"
+                                class_="given-class"
+                                title="Command.Input_group.Suffix"
+                                style="--part: 1"
+                                ref=(fun e ->
+                                      seen "Command.Input_group.Suffix" e)
+                                on_key_down=(fun e ->
+                                              heard "Command.Input_group.Suffix"
+                                                e)>
+                                "Esc"
+                              </Command.Input_group.Suffix>
+                            </Command.Input_group>
+                            <Command.List
+                              ?as_=(drawn "Command.List" "div" ())
+                              data_testid="Command.List"
+                              class_="given-class"
+                              title="Command.List"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Command.List" e)
+                              on_key_down=(fun e -> heard "Command.List" e)>
+                              <Command.Group
+                                heading=(Solidtype.Jsx.string "Files")
+                                ?as_=(drawn "Command.Group" "section" ())
+                                data_testid="Command.Group"
+                                class_="given-class"
+                                title="Command.Group"
+                                style="--part: 1"
+                                ref=(fun e -> seen "Command.Group" e)
+                                on_key_down=(fun e -> heard "Command.Group" e)>
+                                <Command.Item
+                                  id="open"
+                                  ?as_=(drawn "Command.Item" "div" ())
+                                  data_testid="Command.Item"
+                                  class_="given-class"
+                                  title="Command.Item"
+                                  style="--part: 1"
+                                  ref=(fun e -> seen "Command.Item" e)
+                                  on_key_down=(fun e -> heard "Command.Item" e)>
+                                  "Open"
+                                </Command.Item>
+                              </Command.Group>
+                              <Command.Separator
+                                ?as_=(drawn "Command.Separator" "div" ())
+                                data_testid="Command.Separator"
+                                class_="given-class"
+                                title="Command.Separator"
+                                style="--part: 1"
+                                ref=(fun e -> seen "Command.Separator" e)
+                                on_key_down=(fun e ->
+                                              heard "Command.Separator" e)
+                              />
+                              <Command.Group
+                                heading=(Solidtype.Jsx.string "Settings")>
+                                <Command.Item id="theme">"Theme"</Command.Item>
+                              </Command.Group>
+                            </Command.List>
+                            <Command.Footer
+                              ?as_=(drawn "Command.Footer" "div" ())
+                              data_testid="Command.Footer"
+                              class_="given-class"
+                              title="Command.Footer"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Command.Footer" e)
+                              on_key_down=(fun e -> heard "Command.Footer" e)>
+                              "Navigate"
+                            </Command.Footer>
+                          </Command.Dialog>
+                        </Command.Container>
+                      </Command.Backdrop>
+                    </Command>
                     <Button_group
                       ?as_=(drawn "Button_group" "div" ())
                       data_testid="Button_group"
@@ -2283,6 +2442,24 @@ let () =
                        ("Modal.Heading", "[data-slot=modal-heading]");
                        ("Modal.Body", "[data-slot=modal-body]");
                        ("Modal.Footer", "[data-slot=modal-footer]");
+                       ("Command.Backdrop", "[data-slot=command-backdrop]");
+                       ("Command.Container", "[data-slot=command-container]");
+                       ("Command.Dialog", "[data-slot=command-dialog]");
+                       ("Command.Header", "[data-slot=command-header]");
+                       ("Command.Input_group", "[data-slot=command-input-group]");
+                       ( "Command.Input_group.Prefix",
+                         "[data-slot=command-input-group-prefix]" );
+                       ( "Command.Input_group.Input",
+                         "[data-slot=command-input-group-input]" );
+                       ( "Command.Input_group.Clear_button",
+                         "[data-slot=command-input-group-clear-button]" );
+                       ( "Command.Input_group.Suffix",
+                         "[data-slot=command-input-group-suffix]" );
+                       ("Command.List", "[data-slot=command-list]");
+                       ("Command.Group", "[data-slot=command-group]");
+                       ("Command.Item", "[data-slot=command-item]");
+                       ("Command.Separator", "[data-slot=command-separator]");
+                       ("Command.Footer", "[data-slot=command-footer]");
                        ("Button_group", "[data-slot=button-group]");
                        ("Button", "[data-slot=button]");
                        ( "Button_group.Separator",

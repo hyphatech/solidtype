@@ -90,7 +90,8 @@ mapped, and further:
 | `string`, `boolean` | `string`, `bool` |
 | a closed set of string literals, `"horizontal" \| "vertical"` | a polymorphic variant, `` [ `horizontal \| `vertical ] `` |
 | `number` | `float`, since a slider's value is fractional |
-| `T \| null` | `T Js.Nullable.t`: Kobalte reads `undefined` as uncontrolled and `null` as controlled and empty |
+| `T \| null`, given | `T Js.Null.t`: Kobalte reads `undefined` as uncontrolled and `null` as controlled and empty, and `Js.Null.t` cannot hold `undefined` |
+| `T \| null`, read | `T Js.Nullable.t`, which takes whatever JavaScript gives |
 | an optional prop, `T \| undefined` | an optional argument, `?name` |
 | a callback's optional argument | an `option` |
 | `A \| B` of different JavaScript kinds | `(a, b) Types.Either.t`, built by `Either.left` and `Either.right` |
@@ -103,7 +104,7 @@ are Kobalte's building blocks -- menu, popper, dismissable layer,
 polymorphic -- which its documentation does not offer as components.
 
 `Root` and `Root_multiple` show why a type is split rather than widened. A
-toggle group's value is one `string`, or nothing, `string Js.Nullable.t`;
+toggle group's value is one `string`, or nothing, `string Js.Null.t`;
 with `multiple`, it is a `string array`. TypeScript says which by
 overloading on `multiple`, which OCaml cannot. Two modules give each its own
 exact type. [Using Kobalte](/solidtype/kobalte/usage/#toggle-group) shows both.

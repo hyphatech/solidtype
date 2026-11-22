@@ -239,9 +239,9 @@ let around () =
         around_unavailable = (fun () -> None);
       }
 
-let%component make ?(value : C.t Js.Nullable.t option)
-    ?(default_value : C.t option) ?(on_change : (C.t -> unit) option)
-    ?(focused_value : C.t option) ?(default_focused_value : C.t option)
+let%component make ?(value : C.t Js.Null.t option) ?(default_value : C.t option)
+    ?(on_change : (C.t -> unit) option) ?(focused_value : C.t option)
+    ?(default_focused_value : C.t option)
     ?(on_focus_change : (C.t -> unit) option) ?(min_value : C.t option)
     ?(max_value : C.t option)
     ?is_date_unavailable:(is_date_unavailable_given : (C.t -> bool) option)
@@ -287,7 +287,7 @@ let%component make ?(value : C.t Js.Nullable.t option)
     Field.controlled
       ~value:(fun () ->
         match (S.get value, picked) with
-        | Some v, _ -> Some (Js.Nullable.toOption v)
+        | Some v, _ -> Some (Js.Null.toOption v)
         | None, Some v -> Some (S.get v)
         | None, None -> None)
       ~default:(S.get default_value)
@@ -319,7 +319,7 @@ let%component make ?(value : C.t Js.Nullable.t option)
       in
       let state = { is_disabled; is_invalid = invalid } in
       <Headless.Root
-        value=(Js.Nullable.fromOption (S.get current))
+        value=(Js.Null.fromOption (S.get current))
         on_change=(fun d -> set (Some d))
         ?focused_value=(S.get focused_value)
         ?default_focused_value=(S.get default_focused_value)
@@ -442,7 +442,7 @@ end
 type range = Headless.range = { start : C.t; end_ : C.t }
 
 module Range = struct
-  let%component make ?(value : range Js.Nullable.t option)
+  let%component make ?(value : range Js.Null.t option)
       ?(default_value : range option)
       ?(on_change : (range option -> unit) option)
       ?(allows_non_contiguous_ranges : bool option)
@@ -495,7 +495,7 @@ module Range = struct
       Field.controlled
         ~value:(fun () ->
           match (S.get value, picked) with
-          | Some v, _ -> Some (Js.Nullable.toOption v)
+          | Some v, _ -> Some (Js.Null.toOption v)
           | None, Some v -> Some (S.get v)
           | None, None -> None)
         ~default:(S.get default_value)
@@ -530,7 +530,7 @@ module Range = struct
         in
         let state = { is_disabled; is_invalid = invalid } in
         <Headless.Root_range
-          value=(Js.Nullable.fromOption (S.get current))
+          value=(Js.Null.fromOption (S.get current))
           on_change=set
           ?allows_non_contiguous_ranges=(S.get allows_non_contiguous_ranges)
           ?commit_behavior=(S.get commit_behavior)

@@ -31,7 +31,7 @@ type 'v root = {
 }
 
 let root ~(compare : 'v -> 'v -> float)
-    ~(value : 'v range Js.Nullable.t option S.accessor)
+    ~(value : 'v range Js.Null.t option S.accessor)
     ~(default_value : 'v range option S.accessor)
     ~(on_change : 'v range option -> unit option)
     ~(min_value : 'v option S.accessor) ~(max_value : 'v option S.accessor)
@@ -39,7 +39,7 @@ let root ~(compare : 'v -> 'v -> float)
     ~(on_blur : Dom.focusEvent -> unit option) =
   let current, set =
     Field.controlled
-      ~value:(fun () -> Option.map Js.Nullable.toOption (S.get value))
+      ~value:(fun () -> Option.map Js.Null.toOption (S.get value))
       ~default:(S.get default_value)
       ~on_change:(fun v -> ignore (on_change v : unit option))
   in
@@ -75,7 +75,7 @@ let root ~(compare : 'v -> 'v -> float)
 module Date_root = struct
   module V = D.Types.CalendarDate
 
-  let%component make ?(value : V.t Headless_field.range Js.Nullable.t option)
+  let%component make ?(value : V.t Headless_field.range Js.Null.t option)
       ?(default_value : V.t Headless_field.range option)
       ?(on_change : (V.t Headless_field.range option -> unit) option)
       ?(start_name : string option) ?(end_name : string option)
@@ -113,7 +113,7 @@ module Date_root = struct
       }
     in
     <Headless.Root_range
-      value=(Js.Nullable.fromOption (S.get r.current))
+      value=(Js.Null.fromOption (S.get r.current))
       ?default_value=(S.get default_value)
       on_change=r.change
       ?start_name=(S.get start_name)
@@ -160,7 +160,7 @@ end
 module Date_time = struct
   module V = D.Types.CalendarDateTime
 
-  let%component make ?(value : V.t Headless_field.range Js.Nullable.t option)
+  let%component make ?(value : V.t Headless_field.range Js.Null.t option)
       ?(default_value : V.t Headless_field.range option)
       ?(on_change : (V.t Headless_field.range option -> unit) option)
       ?(start_name : string option) ?(end_name : string option)
@@ -200,7 +200,7 @@ module Date_time = struct
       }
     in
     <Headless.Root_range_date_time
-      value=(Js.Nullable.fromOption (S.get r.current))
+      value=(Js.Null.fromOption (S.get r.current))
       ?default_value=(S.get default_value)
       on_change=r.change
       ?start_name=(S.get start_name)
@@ -249,7 +249,7 @@ end
 module Zoned = struct
   module V = D.Types.ZonedDateTime
 
-  let%component make ?(value : V.t Headless_field.range Js.Nullable.t option)
+  let%component make ?(value : V.t Headless_field.range Js.Null.t option)
       ?(default_value : V.t Headless_field.range option)
       ?(on_change : (V.t Headless_field.range option -> unit) option)
       ?(start_name : string option) ?(end_name : string option)
@@ -290,7 +290,7 @@ module Zoned = struct
       }
     in
     <Headless.Root_range_zoned
-      value=(Js.Nullable.fromOption (S.get r.current))
+      value=(Js.Null.fromOption (S.get r.current))
       ?default_value=(S.get default_value)
       on_change=r.change
       ?start_name=(S.get start_name)

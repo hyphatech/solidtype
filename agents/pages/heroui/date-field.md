@@ -274,7 +274,7 @@ let make () =
       is_disabled=true
       class_="w-[256px]"
       name="date"
-      value=(Js.Nullable.return (D.today (D.get_local_time_zone ())))>
+      value=(Js.Null.return (D.today (D.get_local_time_zone ())))>
       <Label>"Date"</Label>
       <Date_field.Group>
         <Date_field.Input>
@@ -475,7 +475,7 @@ let make () =
     <Date_field
       class_="w-[256px]"
       name="date"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Date"</Label>
       <Date_field.Group>
@@ -541,7 +541,7 @@ let make () =
     <Date_field.Zoned
       class_="w-[320px]"
       name="meeting"
-      value=(Js.Nullable.fromOption (S.get meeting))
+      value=(Js.Null.fromOption (S.get meeting))
       on_change=(S.set set_meeting)
       placeholder_value=(kyiv "2026-10-25T00:00")
       hour_cycle=`h24>
@@ -612,7 +612,7 @@ let make () =
       is_invalid=(is_invalid ())
       min_value=today
       name="date"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Appointment date"</Label>
       <Date_field.Group>
@@ -670,7 +670,7 @@ let make () =
       is_invalid=(is_invalid ())
       min_value=today
       name="date"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Date"</Label>
       <Date_field.Group>
@@ -770,7 +770,7 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `CalendarDate.t Js.Nullable.t` | | Current value (controlled); null controls it empty |
+| `value` | `value` | `CalendarDate.t Js.Null.t` | | Current value (controlled); null controls it empty |
 | `defaultValue` | `default_value` | `CalendarDate.t` | | Default value (uncontrolled) |
 | `onChange` | `on_change` | `CalendarDate.t option -> unit` | | Called as soon as its segments make a date other than its value, and with `None` once every segment is erased |
 | `placeholderValue` | `placeholder_value` | `CalendarDate.t` | today | What an arrow key steps an empty segment from |

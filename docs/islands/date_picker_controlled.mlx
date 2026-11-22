@@ -16,7 +16,7 @@ let make () =
   <div class_="flex w-72 flex-col gap-4">
     <Date_picker
       name="date"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Date"</Label>
       <Date_field.Group full_width=true>

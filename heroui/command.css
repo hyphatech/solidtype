@@ -1,0 +1,155 @@
+/* Command, in HeroUI's look, which ships no stylesheet for it: Tailwind on
+   HeroUI's tokens, written as HeroUI writes its components' CSS, so an
+   application imports it into the components layer and restyles a part by a
+   rule for its class. */
+
+.command__backdrop {
+  @apply fixed inset-0 z-(--z-index-overlay) flex h-(--visual-viewport-height) w-full items-start justify-center;
+
+  &[data-entering="true"] {
+    @apply animate-in duration-150 ease-out fade-in-0;
+  }
+
+  &[data-exiting="true"] {
+    @apply animate-out duration-100 ease-out fade-out-0;
+  }
+
+  &[data-entering="true"],
+  &[data-exiting="true"] {
+    @apply will-change-[opacity] motion-reduce:animate-none;
+  }
+}
+
+.command__backdrop--transparent {
+  @apply bg-transparent;
+}
+
+.command__backdrop--opaque {
+  @apply bg-backdrop;
+}
+
+.command__backdrop--blur {
+  @apply bg-backdrop backdrop-blur-md;
+}
+
+.command__container {
+  @apply pointer-events-none flex h-(--visual-viewport-height) w-full items-start justify-center px-4 pt-[15vh];
+
+  &[data-entering="true"] {
+    @apply animate-in duration-200 ease-out-quad fade-in-0 zoom-in-95 slide-in-from-top-2;
+  }
+
+  &[data-exiting="true"] {
+    @apply animate-out duration-100 ease-out-quad fade-out-0 zoom-out-95;
+  }
+
+  &[data-entering="true"],
+  &[data-exiting="true"] {
+    @apply will-change-[opacity,transform] motion-reduce:animate-none;
+  }
+}
+
+.command__dialog {
+  @apply pointer-events-auto relative flex w-full flex-col overflow-hidden rounded-2xl bg-overlay shadow-overlay outline-none;
+  interpolate-size: allow-keywords;
+  transition: height 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  @apply motion-reduce:transition-none;
+}
+
+.command__dialog--sm {
+  @apply max-h-[300px] max-w-sm;
+}
+
+.command__dialog--md {
+  @apply max-h-[356px] max-w-lg;
+}
+
+.command__dialog--lg {
+  @apply max-h-[440px] max-w-xl;
+}
+
+.command__header {
+  @apply flex items-center gap-2 px-2 pt-2 text-sm;
+}
+
+.command__input-group {
+  @apply flex items-center gap-2 border-b border-border/70;
+
+  &[data-empty="true"] .command__input-group-clear-button {
+    @apply pointer-events-none opacity-0;
+  }
+}
+
+.command__input-group-prefix {
+  @apply flex shrink-0 items-center ps-4 text-muted;
+}
+
+.command__input-group-input {
+  @apply min-w-0 flex-1 bg-transparent py-3 text-sm text-foreground outline-none placeholder:text-muted;
+
+  &:first-child {
+    @apply ps-4;
+  }
+
+  &::-webkit-search-cancel-button,
+  &::-webkit-search-decoration {
+    @apply appearance-none;
+  }
+}
+
+.command__input-group-clear-button {
+  @apply me-3 size-5 shrink-0 p-1;
+
+  &:last-child {
+    @apply me-4;
+  }
+}
+
+.command__input-group-suffix {
+  @apply flex shrink-0 items-center pe-4 text-muted;
+}
+
+.command__list {
+  @apply flex-1 overflow-y-auto overscroll-contain p-1.5 outline-none;
+}
+
+.command__group + .command__group {
+  @apply mt-1;
+}
+
+.command__group-heading {
+  @apply px-3 py-1.5 text-xs font-medium text-muted;
+}
+
+.command__item {
+  @apply relative flex cursor-(--cursor-interactive) items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-foreground outline-none select-none;
+
+  & > svg {
+    @apply size-4 shrink-0 text-muted;
+  }
+
+  &[data-hovered="true"],
+  &[data-focused="true"] {
+    @apply bg-default;
+  }
+
+  &[data-pressed="true"] {
+    @apply bg-default-hover;
+  }
+
+  &[data-disabled="true"] {
+    @apply cursor-default opacity-(--disabled-opacity);
+  }
+}
+
+.command__separator {
+  @apply mx-3 my-1.5 h-px bg-separator;
+}
+
+.command__footer {
+  @apply flex items-center gap-2 border-t border-border/50 bg-default/50 px-3 py-1 text-xs text-muted;
+}
+
+.command__empty {
+  @apply py-6 text-center text-sm text-muted;
+}

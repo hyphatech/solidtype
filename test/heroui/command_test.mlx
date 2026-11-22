@@ -1,0 +1,238 @@
+(* A command palette as a caller meets it, since it has no twin: opened by its
+   trigger with the focus in its search, its parts' classes and slots, a class
+   given after its own, for each size and backdrop; its items' state as its
+   styles read it; the search emptied by its clear button and by Escape before
+   Escape closes it and gives the focus back; an item run by Enter with the
+   palette left open; an empty state drawn in its place; and no violation axe
+   finds. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Command = Solidtype_heroui.Command
+module Button = Solidtype_heroui.Button
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
+external value : Dom.element -> string = "value" [@@mel.get]
+
+external text_by : string -> Dom.element = "getByText"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
+
+let all selector = Js.Array.from (T.all_with selector)
+
+let one selector =
+  match T.query selector with
+  | Some e -> e
+  | None -> Js.Exn.raiseError ("nothing is " ^ selector)
+
+let slot name = one ("[data-slot=" ^ name ^ "]")
+let classes name = T.class_name (slot name)
+
+(* A while for Kobalte's focus moves and the overlay's timers to run. *)
+let settle () = T.wait 30
+
+let palette ?(variant = `opaque) ?(size = `md) ?(told = ref []) () =
+  T.render (fun () ->
+      <Command>
+        <Button variant=`outline>"Open"</Button>
+        <Command.Backdrop variant>
+          <Command.Container size>
+            <Command.Dialog>
+              <Command.Header>"Home"</Command.Header>
+              <Command.Input_group>
+                <Command.Input_group.Prefix>"?"</Command.Input_group.Prefix>
+                <Command.Input_group.Input
+                  placeholder="Type a command or search..."
+                />
+                <Command.Input_group.Clear_button />
+                <Command.Input_group.Suffix>"Esc"</Command.Input_group.Suffix>
+              </Command.Input_group>
+              <Command.List
+                on_action=(fun key -> told := key :: !told)
+                render_empty_state=(fun () -> Jsx.string "No results found.")>
+                <Command.Group heading=(Jsx.string "Actions")>
+                  <Command.Item id="file" class_="first">
+                    "Create new file..."
+                  </Command.Item>
+                  <Command.Item id="folder" is_disabled=true>
+                    "Create new folder..."
+                  </Command.Item>
+                </Command.Group>
+                <Command.Separator />
+                <Command.Group heading=(Jsx.string "Settings")>
+                  <Command.Item id="theme">"Change theme"</Command.Item>
+                </Command.Group>
+              </Command.List>
+              <Command.Footer>"Navigate"</Command.Footer>
+            </Command.Dialog>
+          </Command.Container>
+        </Command.Backdrop>
+      </Command>)
+
+let open_palette user =
+  let* () = T.click user (T.by_role "button") in
+  settle ()
+
+let () =
+  Jest.describe "HeroUI Command" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "opens by its trigger, the focus in its search"
+        (fun () ->
+          palette ();
+          let closed = T.query "[role=dialog]" in
+          let user = T.setup () in
+          let* () = open_palette user in
+          let dialog = one "[role=dialog]" in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( Option.is_some closed,
+                  T.attribute dialog "aria-label",
+                  active == slot "command-input-group-input",
+                  T.attribute active "placeholder",
+                  T.attribute active "aria-label" )
+              |> toEqual
+                   ( false,
+                     Some "Command palette",
+                     true,
+                     Some "Type a command or search...",
+                     Some "Search commands" )));
+      Jest.testPromise "draws each part with its classes and slot" (fun () ->
+          palette ~variant:`blur ~size:`lg ();
+          let user = T.setup () in
+          let* () = open_palette user in
+          Js.Promise.resolve
+            E.(
+              expect
+                [|
+                  classes "command-backdrop";
+                  classes "command-container";
+                  classes "command-dialog";
+                  classes "command-header";
+                  classes "command-input-group";
+                  classes "command-input-group-prefix";
+                  classes "command-input-group-input";
+                  classes "command-input-group-clear-button";
+                  classes "command-input-group-suffix";
+                  classes "command-list";
+                  classes "command-group";
+                  classes "command-group-heading";
+                  T.class_name (one "[data-key=file]");
+                  T.class_name (one "[data-slot=command-separator]");
+                  classes "command-footer";
+                |]
+              |> toEqual
+                   [|
+                     "command__backdrop command__backdrop--blur";
+                     "command__container";
+                     "command__dialog command__dialog--lg";
+                     "command__header";
+                     "command__input-group";
+                     "command__input-group-prefix";
+                     "command__input-group-input";
+                     "close-button close-button--default \
+                      command__input-group-clear-button";
+                     "command__input-group-suffix";
+                     "command__list";
+                     "command__group";
+                     "command__group-heading";
+                     "command__item first";
+                     "command__separator";
+                     "command__footer";
+                   |]));
+      Jest.testPromise "shows its items' state as its styles read it" (fun () ->
+          palette ();
+          let user = T.setup () in
+          let* () = open_palette user in
+          let* () = T.keyboard user "{ArrowDown}" in
+          let state e =
+            ( T.attribute e "data-focused",
+              T.attribute e "data-disabled",
+              T.attribute e "data-hovered" )
+          in
+          let focused = Array.map state (all "[role=menuitem]") in
+          let* () = T.hover user (text_by "Change theme") in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( focused,
+                  state (text_by "Change theme"),
+                  T.attribute (slot "command-input-group") "data-empty" )
+              |> toEqual
+                   ( [|
+                       (Some "true", None, None);
+                       (None, Some "true", None);
+                       (None, None, None);
+                     |],
+                     (Some "true", None, Some "true"),
+                     Some "true" )));
+      Jest.testPromise "is emptied by its clear button, the search refocused"
+        (fun () ->
+          palette ();
+          let user = T.setup () in
+          let* () = open_palette user in
+          let* () = T.keyboard user "the" in
+          let typed =
+            ( T.attribute (slot "command-input-group") "data-empty",
+              Array.length (all "[role=menuitem]") )
+          in
+          let clear = slot "command-input-group-clear-button" in
+          let* () = T.click user clear in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( typed,
+                  T.attribute clear "aria-label",
+                  T.attribute clear "tabindex",
+                  value (slot "command-input-group-input"),
+                  active == slot "command-input-group-input",
+                  Array.length (all "[role=menuitem]") )
+              |> toEqual ((None, 1), Some "Clear search", Some "-1", "", true, 3)));
+      Jest.testPromise
+        "runs an item by Enter and stays open; Escape empties, then closes"
+        (fun () ->
+          let told = ref [] in
+          palette ~told ();
+          let user = T.setup () in
+          let* () = open_palette user in
+          let* () = T.keyboard user "the{Enter}" in
+          let ran = (!told, Option.is_some (T.query "[role=dialog]")) in
+          let* () = T.keyboard user "{Escape}" in
+          let* () = settle () in
+          let emptied =
+            ( value (slot "command-input-group-input"),
+              Option.is_some (T.query "[role=dialog]") )
+          in
+          let* () = T.keyboard user "{Escape}" in
+          let* () = T.wait 250 in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( ran,
+                  emptied,
+                  Option.is_some (T.query "[role=dialog]"),
+                  active == T.by_role "button" )
+              |> toEqual (([ "theme" ], true), ("", true), false, true)));
+      Jest.testPromise "draws its empty state while nothing is shown" (fun () ->
+          palette ();
+          let user = T.setup () in
+          let* () = open_palette user in
+          let* () = T.keyboard user "zz" in
+          let empty = slot "command-empty" in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( T.class_name empty,
+                  T.text_content empty,
+                  T.attribute (slot "command-list") "data-empty",
+                  Option.is_some (T.query "[role=group]") )
+              |> toEqual ("command__empty", "No results found.", Some "", false)));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          palette ();
+          let user = T.setup () in
+          let* () = open_palette user in
+          let* () = T.keyboard user "{ArrowDown}" in
+          let* found = T.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))

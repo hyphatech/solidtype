@@ -12,7 +12,7 @@ let make () =
     <Date_field
       class_="w-[256px]"
       name="date"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Date"</Label>
       <Date_field.Group>

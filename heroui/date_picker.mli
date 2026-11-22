@@ -56,7 +56,7 @@ module Props : sig
   type t
 
   val check :
-    ?value:D.Types.CalendarDate.t Js.Nullable.t Solidtype.Check.value ->
+    ?value:D.Types.CalendarDate.t Js.Null.t Solidtype.Check.value ->
     ?default_value:D.Types.CalendarDate.t Solidtype.Check.value ->
     ?on_change:(D.Types.CalendarDate.t option -> unit) ->
     ?placeholder_value:D.Types.CalendarDate.t Solidtype.Check.value ->
@@ -103,7 +103,7 @@ module Date_time : sig
     type t
 
     val check :
-      ?value:D.Types.CalendarDateTime.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:D.Types.CalendarDateTime.t Js.Null.t Solidtype.Check.value ->
       ?default_value:D.Types.CalendarDateTime.t Solidtype.Check.value ->
       ?on_change:(D.Types.CalendarDateTime.t option -> unit) ->
       ?placeholder_value:D.Types.CalendarDateTime.t Solidtype.Check.value ->
@@ -155,7 +155,7 @@ module Zoned : sig
     type t
 
     val check :
-      ?value:D.Types.ZonedDateTime.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:D.Types.ZonedDateTime.t Js.Null.t Solidtype.Check.value ->
       ?default_value:D.Types.ZonedDateTime.t Solidtype.Check.value ->
       ?on_change:(D.Types.ZonedDateTime.t option -> unit) ->
       placeholder_value:D.Types.ZonedDateTime.t Solidtype.Check.value ->

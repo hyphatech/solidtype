@@ -89,25 +89,28 @@ val backdrop :
     body, or inside [portal_container] while that gives an element. *)
 
 val container :
+  ?placement:(unit -> string) ->
   t ->
   slot:string ->
   class_:(unit -> string) ->
-  placement:(unit -> string) ->
   ref:(Dom.htmlDivElement -> unit option) ->
   as_:
     (unit -> (Solidtype.Html.Div.props -> overlay_state -> Jsx.element) option) ->
   others:_ S.rest ->
   (overlay_state -> Jsx.element) ->
   Jsx.element
-(** A [<div>] that enters and exits with the backdrop. *)
+(** A [<div>] that enters and exits with the backdrop, its [data-placement] the
+    [placement] given. *)
 
 val dialog :
   ?on_element:(Dom.element -> unit) ->
+  ?focus_on_open:(unit -> Dom.element option) ->
+  ?placement:(unit -> string) ->
+  ?aria_label:(unit -> string) ->
   t ->
   slot:string ->
   role:Solidtype.Html.Section.role ->
   class_:(unit -> string) ->
-  placement:(unit -> string) ->
   ref:(Dom.htmlElement -> unit option) ->
   on_focus_out:(Dom.focusEvent -> unit option) ->
   as_:
@@ -117,7 +120,9 @@ val dialog :
   (dialog_state -> Jsx.element) ->
   Jsx.element
 (** [on_element] is given the dialog's element as it is made, for a part that
-    does more with it, as a drawer is dragged. *)
+    does more with it, as a drawer is dragged. As it opens, the focus goes to
+    what [focus_on_open] gives, else to the dialog. It is named [aria_label]
+    where that is given. *)
 
 val heading :
   slot:string ->

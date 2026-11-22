@@ -36,7 +36,7 @@ let make () =
     <Calendar
       aria_label="Event date"
       focused_value=(S.get focused)
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(fun d -> S.set set_value (Some d))
       on_focus_change=(S.set set_focused)>
       <Calendar.Header>

@@ -85,7 +85,7 @@ module Root : sig
     type t
 
     val check :
-      ?value:D.Types.CalendarDate.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:D.Types.CalendarDate.t Js.Null.t Solidtype.Check.value ->
       ?default_value:D.Types.CalendarDate.t Solidtype.Check.value ->
       ?on_change:(D.Types.CalendarDate.t option -> unit) ->
       ?placeholder_value:D.Types.CalendarDate.t Solidtype.Check.value ->
@@ -133,7 +133,7 @@ module Root_date_time : sig
     type t
 
     val check :
-      ?value:D.Types.CalendarDateTime.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:D.Types.CalendarDateTime.t Js.Null.t Solidtype.Check.value ->
       ?default_value:D.Types.CalendarDateTime.t Solidtype.Check.value ->
       ?on_change:(D.Types.CalendarDateTime.t option -> unit) ->
       ?placeholder_value:D.Types.CalendarDateTime.t Solidtype.Check.value ->
@@ -183,7 +183,7 @@ module Root_zoned : sig
     type t
 
     val check :
-      ?value:D.Types.ZonedDateTime.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:D.Types.ZonedDateTime.t Js.Null.t Solidtype.Check.value ->
       ?default_value:D.Types.ZonedDateTime.t Solidtype.Check.value ->
       ?on_change:(D.Types.ZonedDateTime.t option -> unit) ->
       placeholder_value:D.Types.ZonedDateTime.t Solidtype.Check.value ->
@@ -252,8 +252,7 @@ module Root_range : sig
 
     val check :
       ?value:
-        D.Types.CalendarDate.t Date_field.range Js.Nullable.t
-        Solidtype.Check.value ->
+        D.Types.CalendarDate.t Date_field.range Js.Null.t Solidtype.Check.value ->
       ?default_value:
         D.Types.CalendarDate.t Date_field.range Solidtype.Check.value ->
       ?on_change:(D.Types.CalendarDate.t Date_field.range option -> unit) ->
@@ -305,7 +304,7 @@ module Root_range_date_time : sig
 
     val check :
       ?value:
-        D.Types.CalendarDateTime.t Date_field.range Js.Nullable.t
+        D.Types.CalendarDateTime.t Date_field.range Js.Null.t
         Solidtype.Check.value ->
       ?default_value:
         D.Types.CalendarDateTime.t Date_field.range Solidtype.Check.value ->
@@ -358,8 +357,7 @@ module Root_range_zoned : sig
 
     val check :
       ?value:
-        D.Types.ZonedDateTime.t Date_field.range Js.Nullable.t
-        Solidtype.Check.value ->
+        D.Types.ZonedDateTime.t Date_field.range Js.Null.t Solidtype.Check.value ->
       ?default_value:
         D.Types.ZonedDateTime.t Date_field.range Solidtype.Check.value ->
       ?on_change:(D.Types.ZonedDateTime.t Date_field.range option -> unit) ->

@@ -29,11 +29,15 @@ type field = {
   current : float S.accessor;
   can_increment : bool S.accessor;
   can_decrement : bool S.accessor;
+  typed : unit -> unit;
+  commit : unit -> unit;
 }
 
 module Context = Solidtype.Context.Make_optional (struct
   type t = field
 end)
+
+external queue_microtask : (unit -> unit) -> unit = "queueMicrotask"
 
 (* The decimals [x] is written with, a 1e-7 as a 0.0000001: the precision a
    value on a grid of its step, counted from its minimum, is rounded to. *)
@@ -176,8 +180,11 @@ module Input = struct
     let stepping e =
       ignore (on_key_down e : unit option);
       match key e with
+      | "Enter" ->
+          f.commit ();
+          S.set set_editing false
       | "ArrowUp" | "ArrowDown" | "PageUp" | "PageDown" | "Home" | "End"
-      | "Enter" | "Escape" ->
+      | "Escape" ->
           S.set set_editing false
       | _ -> ()
     in
@@ -197,10 +204,12 @@ module Input = struct
       data_editing=(Jsx.flag (f.look_given && S.get editing))
       on_input=(fun e ->
                  ignore (on_input e : unit option);
+                 f.typed ();
                  S.set set_editing true)
       on_key_down=stepping
       on_focus_out=(fun e ->
                      ignore (on_focus_out e : unit option);
+                     f.commit ();
                      S.set set_editing false)
       data_hovered=(Jsx.flag (Interaction.hovered i))
       data_focused=(Jsx.flag (Interaction.focused i))
@@ -365,12 +374,33 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     S.accessor (fun () ->
         S.get is_invalid || Option.is_some (S.get in_form.error))
   in
-  let change v =
+  let committed v =
     let v = snapped v in
     let now = S.get current in
     if not (Float.equal v now || (Float.is_nan v && Float.is_nan now)) then (
       in_form.changed ();
       set v)
+  in
+  (* Text typed is the value once it is committed, by Enter or as the focus
+     leaves, as React Aria's field commits it; a step, by the keys, a button
+     or the wheel, at once. The input marks the change its typing makes, which
+     Kobalte tells within the same event, and a key it refuses makes none. *)
+  let typing = ref false in
+  let pending = ref None in
+  let change v =
+    if !typing then (
+      typing := false;
+      pending := Some v)
+    else (
+      pending := None;
+      committed v)
+  in
+  let commit () =
+    match !pending with
+    | Some v ->
+        pending := None;
+        committed v
+    | None -> ()
   in
   (* A button steps the value while its step would move it. *)
   let can moved =
@@ -428,6 +458,11 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       invalid;
       can_increment = can (fun v -> v +. by ());
       can_decrement = can (fun v -> v -. by ());
+      typed =
+        (fun () ->
+          typing := true;
+          queue_microtask (fun () -> typing := false));
+      commit;
     }
   in
   let state () =

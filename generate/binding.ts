@@ -196,6 +196,31 @@ function elementBound(t: ts.Type, vars: Vars): Type | null {
   return dom ? apply("Dom.element_like", typeVar(t.symbol?.name ?? "t", vars)) : null;
 }
 
+// Which way a value being mapped crosses: given to JavaScript, as a prop is;
+// read from it, as a function's result is; or both, as a field its object's
+// constructor takes and its getter reads. A function's parameters cross the
+// other way to the function itself.
+type Polarity = "given" | "read" | "both";
+let polarity: Polarity = "both";
+const flip = (p: Polarity): Polarity => (p === "given" ? "read" : p === "read" ? "given" : "both");
+function crossing<T>(p: Polarity, f: () => T): T {
+  const outer = polarity;
+  polarity = p;
+  try {
+    return f();
+  } finally {
+    polarity = outer;
+  }
+}
+
+// TypeScript's null, by AGENTS.md's "Kobalte's binding is generated from its
+// declarations": given, `T | null` is Js.Null.t, which cannot hold the
+// undefined a library reads as no value given, so an option is made one only
+// by Js.Null.fromOption, whose None is null; read, or `T | null | undefined`
+// given, it is Js.Nullable.t, which takes whatever JavaScript holds.
+const nullOf = (undefinable: boolean) =>
+  polarity === "given" && !undefinable ? "Js.Null.t" : "Js.Nullable.t";
+
 // [absent] drops undefined, which an optional prop's absence already says;
 // anywhere else -- a callback's argument, a result -- it is an option.
 // The OCaml type of a TypeScript one, by AGENTS.md's "Kobalte's binding is
@@ -227,7 +252,7 @@ function map(t: ts.Type, vars: Vars, where: string, absent = false): Type | null
     if (!isJsx) members = members.filter((m) => !(m.flags & ts.TypeFlags.Null));
     const inner = mapUnion(members, vars, where);
     if (!inner) return null;
-    const value = nullable ? apply("Js.Nullable.t", inner) : inner;
+    const value = nullable ? apply(nullOf(undefinable && !absent), inner) : inner;
     return undefinable && !absent && !isJsx && !isUnit(inner) && !nullable ? apply("option", value) : value;
   }
   return mapUnion([t], vars, where);
@@ -495,7 +520,8 @@ function mapFunction(sig: ts.Signature, vars: Vars, where: string, labelled = fa
   const params: (Param | null)[] = ps.map((q) => {
     const optional = labelled && leftOut(q);
     const t = checker.getTypeOfSymbol(q);
-    const m = declaredPorted(q, vars, where, optional) ?? map(optional ? checker.getNonNullableType(t) : t, vars, where);
+    const m = crossing(flip(polarity), () =>
+      declaredPorted(q, vars, where, optional) ?? map(optional ? checker.getNonNullableType(t) : t, vars, where));
     if (m === null) return null;
     return optional ? { label: value(snake(q.name)), optional: true, type: m } : { type: m };
   });
@@ -602,7 +628,8 @@ export function part(src: Source, jsModule: string, where: string, decl: ts.Sign
     const t: Type | null =
       p.name === "ref"
         ? refOf(pt, vars, `${where}.${p.name}`)
-        : (declaredPorted(p, vars, `${where}.${p.name}`, optional) ?? map(pt, vars, `${where}.${p.name}`, optional));
+        : crossing("given", () =>
+            declaredPorted(p, vars, `${where}.${p.name}`, optional) ?? map(pt, vars, `${where}.${p.name}`, optional));
     if (!t) {
       unmapped.set(`${where}.${p.name}`, checker.typeToString(pt));
       continue;
@@ -700,7 +727,7 @@ export const real = (s: ts.Symbol) => (s.flags & ts.SymbolFlags.Alias ? checker.
 // one that may throw under a wrapper that raises, with an _opt beside it.
 export function functionBinding(src: Source, symbol: ts.Symbol, jsName: string, jsModule: string, where: string): void {
   const sig = checker.getSignaturesOfType(checker.getTypeOfSymbol(symbol), ts.SignatureKind.Call)[0];
-  const t = sig ? mapFunction(sig, new Map(), where, true) : null;
+  const t = sig ? crossing("read", () => mapFunction(sig, new Map(), where, true)) : null;
   if (!t) {
     unmapped.set(where, sig ? checker.signatureToString(sig) : "?");
     return;
@@ -761,7 +788,7 @@ export function valueBinding(src: Source, symbol: ts.Symbol, jsName: string, jsM
   // A value: toaster, the storage managers, the default translations.
   const vt = checker.getTypeOfSymbol(symbol);
   if (vt.getCallSignatures().length > 0 && vt.getProperties().length > 0) return;
-  const t = map(vt, new Map(), where);
+  const t = crossing("read", () => map(vt, new Map(), where));
   if (!t || typeVarsOf(t).length > 0) {
     unmapped.set(where, checker.typeToString(vt));
     return;
@@ -822,7 +849,7 @@ while (queue.length > 0) {
         // The standard library's methods are Melange's to bind.
         if (library) continue;
         const sig = pt.getCallSignatures()[0];
-        const f = sig ? mapFunction(sig, vars, `${n.module}.${p.name}`, true) : null;
+        const f = sig ? crossing("read", () => mapFunction(sig, vars, `${n.module}.${p.name}`, true)) : null;
         if (!f || unbound(f, params)) {
           unmapped.set(`${n.module}.${p.name}()`, sig ? checker.signatureToString(sig) : "?");
           continue;
@@ -884,7 +911,7 @@ while (queue.length > 0) {
           // Called as a method of the object that holds it: an external is
           // called directly from another library, where a [let] in a nested
           // module goes through Curry, its arity lost.
-          src.both(`    external ${value(snake(p.name))} : ${t} -> ${showIn(mapFunction(sig, vars, `${n.module}.${p.name}`, true) ?? fn)} = "${p.name}" [@@mel.send]`);
+          src.both(`    external ${value(snake(p.name))} : ${t} -> ${showIn(crossing("read", () => mapFunction(sig, vars, `${n.module}.${p.name}`, true)) ?? fn)} = "${p.name}" [@@mel.send]`);
         }
       } else {
         src.both(`    external ${value(snake(p.name))} : ${t} -> ${optional ? `${argIn(ft)} option` : argIn(ft)} = "${p.name}" [@@mel.get]`);
@@ -934,7 +961,7 @@ while (queue.length > 0) {
     if (isClass && n.symbol?.valueDeclaration) {
       const mod = moduleOf(n.symbol);
       const ctor = checker.getTypeOfSymbolAtLocation(n.symbol, n.symbol.valueDeclaration).getConstructSignatures()[0];
-      const f = ctor ? mapFunction(ctor, vars, `${n.module}.constructor`, true) : null;
+      const f = ctor ? crossing("read", () => mapFunction(ctor, vars, `${n.module}.constructor`, true)) : null;
       if (f && mod) {
         src.both(`    external make : ${showIn({ ...f, result: self })} = "${n.module}" [@@mel.new] [@@mel.module "${mod}"]`);
       }

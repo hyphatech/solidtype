@@ -69,7 +69,7 @@ let () =
           H.render (fun () ->
               <Picker default_value=(Colors.parse_color "#ff0000")>
                 <Field.Root
-                  value=(Js.Nullable.return (Colors.parse_color "#0000ff"))>
+                  value=(Js.Null.return (Colors.parse_color "#0000ff"))>
                   <Field.Input aria_label="Hex" data_testid="hex" />
                 </Field.Root>
               </Picker>);

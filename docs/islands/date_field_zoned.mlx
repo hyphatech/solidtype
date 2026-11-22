@@ -24,7 +24,7 @@ let make () =
     <Date_field.Zoned
       class_="w-[320px]"
       name="meeting"
-      value=(Js.Nullable.fromOption (S.get meeting))
+      value=(Js.Null.fromOption (S.get meeting))
       on_change=(S.set set_meeting)
       placeholder_value=(kyiv "2026-10-25T00:00")
       hour_cycle=`h24>

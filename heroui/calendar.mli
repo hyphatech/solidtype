@@ -57,7 +57,7 @@ module Props : sig
   type t
 
   val check :
-    ?value:D.Types.CalendarDate.t Js.Nullable.t Solidtype.Check.value ->
+    ?value:D.Types.CalendarDate.t Js.Null.t Solidtype.Check.value ->
     ?default_value:D.Types.CalendarDate.t Solidtype.Check.value ->
     ?on_change:(D.Types.CalendarDate.t -> unit) ->
     ?focused_value:D.Types.CalendarDate.t Solidtype.Check.value ->
@@ -148,7 +148,7 @@ module Range : sig
     type t
 
     val check :
-      ?value:range Js.Nullable.t Solidtype.Check.value ->
+      ?value:range Js.Null.t Solidtype.Check.value ->
       ?default_value:range Solidtype.Check.value ->
       ?on_change:(range option -> unit) ->
       ?allows_non_contiguous_ranges:bool Solidtype.Check.value ->

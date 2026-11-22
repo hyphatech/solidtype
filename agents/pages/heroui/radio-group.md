@@ -212,7 +212,8 @@ module Description = Solidtype_heroui.Description
 let make () =
   let value, set_value = S.create_signal "pro" in
   <div class_="flex flex-col gap-4">
-    <Radio_group value=(S.get value) on_change=(S.set set_value)>
+    <Radio_group
+      value=(Js.Null.return (S.get value)) on_change=(S.set set_value)>
       <Label>"Subscription plan"</Label>
       <Radio value="starter">
         <Radio.Content>
@@ -461,7 +462,7 @@ string React takes.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `string` | | The current value (controlled) |
+| `value` | `value` | `string Js.Null.t` | | The current value (controlled); null controls it empty |
 | `defaultValue` | `default_value` | `string` | none | The default value (uncontrolled) |
 | `onChange` | `on_change` | `string -> unit` | | Handler called when the value changes |
 | `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `vertical `` | The orientation of the radio group |

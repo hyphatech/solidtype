@@ -115,7 +115,7 @@ let make () =
     is_disabled=true
     class_="w-72"
     name="date"
-    value=(Js.Nullable.return (D.today (D.get_local_time_zone ())))>
+    value=(Js.Null.return (D.today (D.get_local_time_zone ())))>
     <Label>"Date"</Label>
     <Date_field.Group full_width=true>
       <Date_field.Input>
@@ -178,7 +178,7 @@ let make () =
   <div class_="flex w-72 flex-col gap-4">
     <Date_picker
       name="date"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Date"</Label>
       <Date_field.Group full_width=true>
@@ -267,7 +267,7 @@ let make () =
     is_invalid=(is_invalid ())
     min_value=current
     name="date"
-    value=(Js.Nullable.fromOption (S.get value))
+    value=(Js.Null.fromOption (S.get value))
     on_change=(S.set set_value)>
     <Label>"Appointment date"</Label>
     <Date_field.Group full_width=true>
@@ -461,8 +461,7 @@ let make () =
                       name="time"
                       placeholder_value=(at_time ())
                       should_force_leading_zeros=(S.get leading_zeros)
-                      value=(Js.Nullable.fromOption
-                               (S.get picker.state.time_value))
+                      value=(Js.Null.fromOption (S.get picker.state.time_value))
                       on_change=(Option.iter picker.state.set_time_value)>
                       <Time_field.Group variant=`secondary>
                         <Time_field.Input>
@@ -558,7 +557,7 @@ let make () =
       is_invalid=(is_invalid ())
       min_value=current
       name="appointmentDate"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Appointment date"</Label>
       <Date_field.Group full_width=true>
@@ -890,7 +889,7 @@ It takes every prop a [DateField](date-field.md) takes, and:
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `CalendarDate.t Js.Nullable.t` | | Controlled selected date; null controls it empty |
+| `value` | `value` | `CalendarDate.t Js.Null.t` | | Controlled selected date; null controls it empty |
 | `defaultValue` | `default_value` | `CalendarDate.t` | | Default selected value in uncontrolled mode |
 | `onChange` | `on_change` | `CalendarDate.t option -> unit` | | Called when the selected date changes |
 | `isOpen` | `is_open` | `bool` | | Controlled popover open state |

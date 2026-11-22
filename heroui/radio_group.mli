@@ -4,8 +4,9 @@
     as React Aria writes it. A {!Label} inside it, but outside a radio's
     content, is the group's, which names it, and a {!Description} the group's,
     which describes it. It is disabled as [is_disabled] says, else as the
-    {!Fieldset} it is in is. Its props are named as HeroUI's documentation names
-    them.
+    {!Fieldset} it is in is. A [value] of [Js.Null.empty] controls it with none
+    chosen, as React's [null] does. Its props are named as HeroUI's
+    documentation names them.
 
     Its page, with its examples:
     [$(opam var solidtype:doc)/pages/heroui/radio-group.md].
@@ -66,7 +67,7 @@ module Props : sig
 
   val check :
     ?variant:[ `primary | `secondary ] Solidtype.Check.value ->
-    ?value:string Solidtype.Check.value ->
+    ?value:string Js.Null.t Solidtype.Check.value ->
     ?default_value:string Solidtype.Check.value ->
     ?on_change:(string -> unit) ->
     ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->

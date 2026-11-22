@@ -97,6 +97,7 @@ imported as [Theming](theming.md#setup) shows.
 
 | Component | Status |
 |---|---|
+| [Command](command.md) | made: a search that filters a menu of commands in a dialog, kept or controlled, by its text or a filter given, the focus kept in the search while the keys move through the commands shown, groups, separators, an empty state, a header and a footer, sizes, backdrops |
 | [Data Grid](data-grid.md) | made: rows as data and columns as definitions, sorted in the browser by text in the page's order or a comparison, or by the application, selection checkboxes, columns resized, pinned to either side and aligned, a header kept in view, rows dragged by a handle and the keys, cells of any control, an empty state, loading more, virtualized, a footer |
 | [NumberStepper](number-stepper.md) | made: a number field's value, range, step, format and keys, sizes, a value that rolls, a custom value, custom icons and buttons, reversed, disabled |
 | [Segment](segment.md) | made: one option always selected, controlled or kept, default and ghost, sizes, disabled whole or by option, separators, icons, options that show their label only while selected, an indicator that slides between options |

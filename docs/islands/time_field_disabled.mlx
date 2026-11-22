@@ -21,7 +21,7 @@ let make () =
       is_disabled=true
       class_="w-[256px]"
       name="time"
-      value=(Js.Nullable.return time_value)>
+      value=(Js.Null.return time_value)>
       <Label>"Time"</Label>
       <Time_field.Group>
         <Time_field.Input>

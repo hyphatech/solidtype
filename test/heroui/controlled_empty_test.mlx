@@ -1,0 +1,288 @@
+(* Each port whose value can be empty, controlled empty: a value entered and
+   told, then the value set empty again, which empties it, as React's does.
+   Its value given as [Js.Null.t], an option is made one only so. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Calendar = Solidtype_heroui.Calendar
+module Range_calendar = Solidtype_heroui.Range_calendar
+module Color_field = Solidtype_heroui.Color_field
+module Date_field = Solidtype_heroui.Date_field
+module Date_picker = Solidtype_heroui.Date_picker
+module Date_range_picker = Solidtype_heroui.Date_range_picker
+module Time_field = Solidtype_heroui.Time_field
+module Radio_group = Solidtype_heroui.Radio_group
+module Radio = Solidtype_heroui.Radio
+module Number_field = Solidtype_heroui.Number_field
+module Select = Solidtype_heroui.Select
+module Combo_box = Solidtype_heroui.Combo_box
+module List_box = Solidtype_heroui.List_box
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module I18n = Solidtype_kobalte.I18n
+module D = Solidtype_internationalized_date
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+external value_of : Dom.element -> string = "value" [@@mel.get]
+external checked : Dom.element -> bool = "checked" [@@mel.get]
+
+let all selector = Js.Array.from (T.all_with selector)
+
+let digits () =
+  all "[role=spinbutton]" |> Array.map T.text_content |> Array.to_list
+  |> String.concat "" |> String.to_seq
+  |> Seq.filter (fun c -> c >= '0' && c <= '9')
+  |> String.of_seq
+
+let value selector =
+  match T.query selector with Some e -> value_of e | None -> "?"
+
+let is_checked selector =
+  match T.query selector with Some e -> checked e | None -> false
+
+let click selector =
+  match T.query selector with
+  | Some e -> T.click (T.setup ()) e
+  | None -> Js.Promise.resolve ()
+
+let nullable = function Some v -> Js.Null.return v | None -> Js.Null.empty
+
+let in_locale f =
+  T.render (fun () ->
+      <I18n.I18nProvider locale="en-US">(f ())</I18n.I18nProvider>)
+
+let type_in selector text =
+  let* () = click selector in
+  let* () = T.keyboard (T.setup ()) text in
+  T.frame ()
+
+let click_day n =
+  match
+    all "[role=gridcell] *" |> Array.to_list
+    |> List.find_opt (fun e ->
+        String.equal (String.trim (T.text_content e)) (string_of_int n))
+  with
+  | Some cell -> T.click (T.setup ()) cell
+  | None -> Js.Promise.resolve ()
+
+let selected () =
+  string_of_int (Array.length (all "[role=gridcell][aria-selected=true]"))
+
+(* Controlled empty, a value entered and stored, then the value set empty
+   again: what the field shows then is what it showed before any input. *)
+let check name ~render ~enter ~shown =
+  Jest.testPromise name (fun () ->
+      let value, set_value = S.create_signal Js.Null.empty in
+      render value (fun v -> S.set set_value (nullable v));
+      let* () = T.frame () in
+      let empty = shown () in
+      let* () = enter () in
+      let entered = shown () in
+      S.set set_value Js.Null.empty;
+      let* () = T.frame () in
+      Js.Promise.resolve
+        E.(
+          expect (not (String.equal entered empty), shown ())
+          |> toEqual (true, empty)))
+
+let () =
+  Jest.describe "a controlled value set empty after input" (fun () ->
+      Jest.afterEach T.cleanup;
+      check "Date_field"
+        ~render:(fun v set ->
+          in_locale (fun () ->
+              <Date_field name="d" value=(S.get v) on_change=set>
+                <Label>"Date"</Label>
+                <Date_field.Group>
+                  <Date_field.Input>
+                    (fun segment ->
+                      <Date_field.Segment segment=(S.get segment) />)
+                  </Date_field.Input>
+                </Date_field.Group>
+              </Date_field>))
+        ~enter:(fun () -> type_in "[role=spinbutton]" "11212026")
+        ~shown:(fun () -> digits () ^ "|" ^ value "input[name=d]");
+      check "Time_field"
+        ~render:(fun v set ->
+          in_locale (fun () ->
+              <Time_field name="t" value=(S.get v) on_change=set>
+                <Label>"Time"</Label>
+                <Time_field.Group>
+                  <Time_field.Input>
+                    (fun segment ->
+                      <Time_field.Segment segment=(S.get segment) />)
+                  </Time_field.Input>
+                </Time_field.Group>
+              </Time_field>))
+        ~enter:(fun () -> type_in "[role=spinbutton]" "0930a")
+        ~shown:(fun () -> digits () ^ "|" ^ value "input[name=t]");
+      check "Date_picker"
+        ~render:(fun v set ->
+          in_locale (fun () ->
+              <Date_picker name="d" value=(S.get v) on_change=set>
+                <Label>"Date"</Label>
+                <Date_field.Group>
+                  <Date_field.Input>
+                    (fun segment ->
+                      <Date_field.Segment segment=(S.get segment) />)
+                  </Date_field.Input>
+                </Date_field.Group>
+              </Date_picker>))
+        ~enter:(fun () -> type_in "[role=spinbutton]" "11212026")
+        ~shown:(fun () -> digits () ^ "|" ^ value "input[name=d]");
+      check "Date_range_picker"
+        ~render:(fun v set ->
+          in_locale (fun () ->
+              <Date_range_picker
+                start_name="s" end_name="e" value=(S.get v) on_change=set>
+                <Label>"Trip"</Label>
+                <Date_field.Group>
+                  <Date_field.Input slot="start">
+                    (fun segment ->
+                      <Date_field.Segment segment=(S.get segment) />)
+                  </Date_field.Input>
+                  <Date_field.Input slot="end">
+                    (fun segment ->
+                      <Date_field.Segment segment=(S.get segment) />)
+                  </Date_field.Input>
+                </Date_field.Group>
+              </Date_range_picker>))
+        ~enter:(fun () -> type_in "[role=spinbutton]" "1121202611232026")
+        ~shown:(fun () ->
+          digits () ^ "|" ^ value "input[name=s]" ^ "/" ^ value "input[name=e]");
+      check "Calendar"
+        ~render:(fun v set ->
+          in_locale (fun () ->
+              <Calendar
+                aria_label="Day"
+                default_focused_value=(D.parse_date "2026-11-01")
+                value=(S.get v)
+                on_change=(fun d -> set (Some d))>
+                <Calendar.Grid>
+                  <Calendar.Grid_body>
+                    (fun date -> <Calendar.Cell date=(S.get date) />)
+                  </Calendar.Grid_body>
+                </Calendar.Grid>
+              </Calendar>))
+        ~enter:(fun () -> click_day 21)
+        ~shown:selected;
+      check "Range_calendar"
+        ~render:(fun v set ->
+          in_locale (fun () ->
+              <Range_calendar
+                aria_label="Days"
+                default_focused_value=(D.parse_date "2026-11-01")
+                value=(S.get v)
+                on_change=set>
+                <Range_calendar.Grid>
+                  <Range_calendar.Grid_body>
+                    (fun date -> <Range_calendar.Cell date=(S.get date) />)
+                  </Range_calendar.Grid_body>
+                </Range_calendar.Grid>
+              </Range_calendar>))
+        ~enter:(fun () ->
+          let* () = click_day 21 in
+          click_day 23)
+        ~shown:selected;
+      check "Color_field"
+        ~render:(fun v set ->
+          T.render (fun () ->
+              <Color_field name="c" value=(S.get v) on_change=set>
+                <Label>"Color"</Label>
+                <Color_field.Group><Color_field.Input /></Color_field.Group>
+              </Color_field>))
+        ~enter:(fun () ->
+          type_in "[data-slot=color-field] input:not([type=hidden])"
+            "#ff0000{Enter}")
+        ~shown:(fun () ->
+          value "[data-slot=color-field] input:not([type=hidden])"
+          ^ "|" ^ value "input[name=c]");
+      Jest.testPromise "Radio_group" (fun () ->
+          let v, set_v = S.create_signal Js.Null.empty in
+          T.render (fun () ->
+              <Radio_group
+                name="r"
+                value=(S.get v)
+                on_change=(fun x -> S.set set_v (Js.Null.return x))>
+                <Label>"Plan"</Label>
+                <Radio value="a"><Radio.Content>"A"</Radio.Content></Radio>
+                <Radio value="b"><Radio.Content>"B"</Radio.Content></Radio>
+              </Radio_group>);
+          let* () = click "input[value=b]" in
+          let* () = T.frame () in
+          let picked = is_checked "input[value=b]" in
+          S.set set_v Js.Null.empty;
+          let* () = T.frame () in
+          Js.Promise.resolve
+            E.(
+              expect (picked, is_checked "input[value=b]")
+              |> toEqual (true, false)));
+      Jest.testPromise "Number_field, set to NaN" (fun () ->
+          let v, set_v = S.create_signal Float.nan in
+          T.render (fun () ->
+              <Number_field name="n" value=(S.get v) on_change=(S.set set_v)>
+                <Label>"Width"</Label>
+                <Number_field.Group><Number_field.Input /></Number_field.Group>
+              </Number_field>);
+          let* () = type_in "input[inputmode]" "42{Enter}" in
+          let entered = value "input[inputmode]" in
+          S.set set_v Float.nan;
+          let* () = T.frame () in
+          Js.Promise.resolve
+            E.(expect (entered, value "input[inputmode]") |> toEqual ("42", "")));
+      Jest.testPromise "Select, set to no keys" (fun () ->
+          let v, set_v = S.create_signal [| "b" |] in
+          T.render (fun () ->
+              <Select
+                placeholder="Pick" value=(S.get v) on_change=(S.set set_v)>
+                <Label>"Pick"</Label>
+                <Select.Trigger><Select.Value /></Select.Trigger>
+                <Select.Popover>
+                  <List_box>
+                    <List_box.Item id="a" text_value="Alpha">
+                      "Alpha"
+                    </List_box.Item>
+                    <List_box.Item id="b" text_value="Beta">
+                      "Beta"
+                    </List_box.Item>
+                  </List_box>
+                </Select.Popover>
+              </Select>);
+          let* () = T.frame () in
+          let shown () =
+            match T.query "[data-slot=select-value]" with
+            | Some e -> T.text_content e
+            | None -> "?"
+          in
+          let before = shown () in
+          S.set set_v [||];
+          let* () = T.frame () in
+          Js.Promise.resolve
+            E.(expect (before, shown ()) |> toEqual ("Beta", "Pick")));
+      Jest.testPromise "Combo_box, set to no keys" (fun () ->
+          let v, set_v = S.create_signal [| "b" |] in
+          T.render (fun () ->
+              <Combo_box value=(S.get v) on_change=(S.set set_v)>
+                <Label>"Pick"</Label>
+                <Combo_box.Input_group><Input /></Combo_box.Input_group>
+                <Combo_box.Popover>
+                  <List_box>
+                    <List_box.Item id="a" text_value="Alpha">
+                      "Alpha"
+                    </List_box.Item>
+                    <List_box.Item id="b" text_value="Beta">
+                      "Beta"
+                    </List_box.Item>
+                  </List_box>
+                </Combo_box.Popover>
+              </Combo_box>);
+          let* () = T.frame () in
+          let before = value "input[role=combobox]" in
+          S.set set_v [||];
+          let* () = T.frame () in
+          Js.Promise.resolve
+            E.(
+              expect (before, value "input[role=combobox]")
+              |> toEqual ("Beta", ""))))

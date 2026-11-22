@@ -285,14 +285,14 @@ type 'v root = {
   leave : Dom.focusEvent -> unit;
 }
 
-let root (type v) ~(kind : v kind) ~(value : v Js.Nullable.t option S.accessor)
+let root (type v) ~(kind : v kind) ~(value : v Js.Null.t option S.accessor)
     ~(default_value : v option S.accessor)
     ~(on_change : v option -> unit option) ~(min_value : v option S.accessor)
     ~(max_value : v option S.accessor) ~(is_date_unavailable : v -> bool option)
     ~is_invalid ~name ~(on_blur : Dom.focusEvent -> unit option) : v root =
   let current, set =
     Field.controlled
-      ~value:(fun () -> Option.map Js.Nullable.toOption (S.get value))
+      ~value:(fun () -> Option.map Js.Null.toOption (S.get value))
       ~default:(S.get default_value)
       ~on_change:(fun v -> ignore (on_change v : unit option))
   in
@@ -327,11 +327,7 @@ let root (type v) ~(kind : v kind) ~(value : v Js.Nullable.t option S.accessor)
           ignore (on_blur e : unit option));
   }
 
-let nullable = function
-  | Some v -> Js.Nullable.return v
-  | None -> Js.Nullable.null
-
-let%component make ?(value : D.Types.CalendarDate.t Js.Nullable.t option)
+let%component make ?(value : D.Types.CalendarDate.t Js.Null.t option)
     ?(default_value : D.Types.CalendarDate.t option)
     ?(on_change : (D.Types.CalendarDate.t option -> unit) option)
     ?(placeholder_value : D.Types.CalendarDate.t option)
@@ -362,7 +358,7 @@ let%component make ?(value : D.Types.CalendarDate.t Js.Nullable.t option)
   in
   <Field_context.Provider value=full_width>
     <Headless.Root
-      value=(nullable (S.get r.current))
+      value=(Js.Null.fromOption (S.get r.current))
       ?default_value=(S.get default_value)
       on_change=r.change
       ?placeholder_value=(S.get placeholder_value)
@@ -402,7 +398,7 @@ let%component make ?(value : D.Types.CalendarDate.t Js.Nullable.t option)
 module Date_time = struct
   module V = D.Types.CalendarDateTime
 
-  let%component make ?(value : V.t Js.Nullable.t option)
+  let%component make ?(value : V.t Js.Null.t option)
       ?(default_value : V.t option) ?(on_change : (V.t option -> unit) option)
       ?(placeholder_value : V.t option) ?(min_value : V.t option)
       ?(max_value : V.t option) ?(is_date_unavailable : (V.t -> bool) option)
@@ -431,7 +427,7 @@ module Date_time = struct
     in
     <Field_context.Provider value=full_width>
       <Headless.Root_date_time
-        value=(nullable (S.get r.current))
+        value=(Js.Null.fromOption (S.get r.current))
         ?default_value=(S.get default_value)
         on_change=r.change
         ?placeholder_value=(S.get placeholder_value)
@@ -475,7 +471,7 @@ end
 module Zoned = struct
   module V = D.Types.ZonedDateTime
 
-  let%component make ?(value : V.t Js.Nullable.t option)
+  let%component make ?(value : V.t Js.Null.t option)
       ?(default_value : V.t option) ?(on_change : (V.t option -> unit) option)
       ~(placeholder_value : V.t) ?(min_value : V.t option)
       ?(max_value : V.t option) ?(is_date_unavailable : (V.t -> bool) option)
@@ -504,7 +500,7 @@ module Zoned = struct
     in
     <Field_context.Provider value=full_width>
       <Headless.Root_zoned
-        value=(nullable (S.get r.current))
+        value=(Js.Null.fromOption (S.get r.current))
         ?default_value=(S.get default_value)
         on_change=r.change
         placeholder_value=(S.get placeholder_value)

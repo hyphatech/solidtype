@@ -157,22 +157,21 @@ end
 
 (** A calendar of one date, a [<div role="application">] named by [aria_label],
     else [aria_labelledby], and the dates it shows. Its value is [value] while
-    it is given one -- [Js.Nullable.null] keeps it empty -- else the one it
-    keeps, [default_value] at first; each date chosen calls [on_change]. Paging
-    moves by [visible_duration], or a single month, week or day with
-    [page_behavior] [`single]; [selection_alignment] places the focused date at
-    the start, the centre or the end of what is shown. Its weeks start on
-    [first_day_of_week], else the locale's, and a month's grid has
-    [weeks_in_month] rows, else as many as the month needs. While [is_disabled]
-    nothing is focused or chosen, and while [is_read_only] days are focused but
-    not chosen; it is invalid while [is_invalid] or while its value is out of
-    its range or unavailable. *)
+    it is given one -- [Js.Null.empty] keeps it empty -- else the one it keeps,
+    [default_value] at first; each date chosen calls [on_change]. Paging moves
+    by [visible_duration], or a single month, week or day with [page_behavior]
+    [`single]; [selection_alignment] places the focused date at the start, the
+    centre or the end of what is shown. Its weeks start on [first_day_of_week],
+    else the locale's, and a month's grid has [weeks_in_month] rows, else as
+    many as the month needs. While [is_disabled] nothing is focused or chosen,
+    and while [is_read_only] days are focused but not chosen; it is invalid
+    while [is_invalid] or while its value is out of its range or unavailable. *)
 module Root : sig
   module Props : sig
     type t
 
     val check :
-      ?value:D.Types.CalendarDate.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:D.Types.CalendarDate.t Js.Null.t Solidtype.Check.value ->
       ?default_value:D.Types.CalendarDate.t Solidtype.Check.value ->
       ?on_change:(D.Types.CalendarDate.t -> unit) ->
       ?focused_value:D.Types.CalendarDate.t Solidtype.Check.value ->
@@ -261,7 +260,7 @@ module Root_range : sig
     type t
 
     val check :
-      ?value:range Js.Nullable.t Solidtype.Check.value ->
+      ?value:range Js.Null.t Solidtype.Check.value ->
       ?default_value:range Solidtype.Check.value ->
       ?on_change:(range option -> unit) ->
       ?allows_non_contiguous_ranges:bool Solidtype.Check.value ->

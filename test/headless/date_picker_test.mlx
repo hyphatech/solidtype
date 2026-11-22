@@ -138,6 +138,26 @@ let () =
                      "11 9 2026",
                      None,
                      true )));
+      Jest.testPromise
+        "is emptied by a null value after a date is typed and told" (fun () ->
+          let value, set_value = S.create_signal Js.Null.empty in
+          H.render (fun () ->
+              <I18n.I18nProvider locale="en-US">
+                <Date_picker.Root
+                  value=(S.get value)
+                  on_change=(fun d -> S.set set_value (Js.Null.fromOption d))>
+                  (inside ())
+                </Date_picker.Root>
+              </I18n.I18nProvider>);
+          let user = H.setup () in
+          let* () = H.click user (one "[role=spinbutton]") in
+          let* () = H.keyboard user "11212026" in
+          let typed = segments () in
+          S.set set_value Js.Null.empty;
+          let* () = H.frame () in
+          Js.Promise.resolve
+            E.(
+              expect (typed, segments ()) |> toEqual ("11 21 2026", "mm dd yyyy")));
       Jest.testPromise "closes by Escape, its value kept" (fun () ->
           let told = ref [] in
           picker ~told ();

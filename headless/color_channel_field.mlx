@@ -52,7 +52,7 @@ module Root = struct
     type t
 
     external check :
-      ?value:Color.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:Color.t Js.Null.t Solidtype.Check.value ->
       ?default_value:Color.t Solidtype.Check.value ->
       ?on_change:(Color.t option -> unit) ->
       channel:channel Solidtype.Check.value ->
@@ -79,7 +79,7 @@ module Root = struct
     [@@mel.module "vite-plugin-solidtype/markers"]
 
     external channel : t -> channel = "channel" [@@mel.get]
-    external value : t -> Color.t Js.Nullable.t option = "value" [@@mel.get]
+    external value : t -> Color.t Js.Null.t option = "value" [@@mel.get]
     external default_value : t -> Color.t option = "defaultValue" [@@mel.get]
 
     external color_space : t -> [ `rgb | `hsl | `hsb ] option = "colorSpace"
@@ -102,7 +102,7 @@ module Root = struct
     let current () =
       match (Props.value props, picker) with
       | Some v, _ -> (
-          match Js.Nullable.toOption v with
+          match Js.Null.toOption v with
           | Some _ as given -> given
           | None -> S.get kept)
       | None, Some p -> Some (S.get p.color)

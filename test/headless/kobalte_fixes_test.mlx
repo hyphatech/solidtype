@@ -408,6 +408,27 @@ let handled ~fixed =
   Js.Promise.resolve
     (H.attribute input "aria-valuenow", List.sort String.compare !told)
 
+external input_value : Dom.element -> string = "value" [@@mel.get]
+
+(* What a number field, the fixed one or Kobalte's own, shows given a number
+   and then not a number, which React Aria shows as empty. *)
+let emptied ~fixed =
+  let raw, set_raw = S.create_signal 3. in
+  H.render (fun () ->
+      if fixed then
+        <Number_field.Root aria_label="Points" raw_value=(S.get raw)>
+          <Number_field.Input />
+        </Number_field.Root>
+      else
+        <Kobalte_number_field.Root aria_label="Points" raw_value=(S.get raw)>
+          <Kobalte_number_field.Input />
+        </Kobalte_number_field.Root>);
+  let input = query "[role=spinbutton]" in
+  let given = input_value input in
+  S.set set_raw Float.nan;
+  let* () = H.frame () in
+  Js.Promise.resolve (given, input_value input)
+
 (* The hue a channel field, the fixed one or Kobalte's own, tells after a step
    up by the keys, and whether its caller's key handler was called. *)
 let channel_handled ~fixed =
@@ -445,6 +466,13 @@ let () =
               |> toEqual
                    ( (Some "5", [ "blur"; "focus"; "key" ]),
                      (Some "3", [ "blur"; "focus"; "key" ]) )));
+      Jest.testPromise "is emptied by a raw value that is not a number"
+        (fun () ->
+          let* fixed = emptied ~fixed:true in
+          H.cleanup ();
+          let* kobalte = emptied ~fixed:false in
+          Js.Promise.resolve
+            E.(expect (fixed, kobalte) |> toEqual (("3", ""), ("3", "3"))));
       Jest.testPromise
         "steps a colour's channel by the keys, its caller's key handler called"
         (fun () ->

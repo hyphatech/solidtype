@@ -139,14 +139,10 @@ let () =
           E.(expect (segments ()) |> toEqual "day=21/month=11/year=2026"));
       Jest.test "writes the segments in the locale's order and calendar"
         (fun () ->
-          date ~locale:"de-DE"
-            ~value:(Js.Nullable.return (Date.make 2026 11 21))
-            ();
+          date ~locale:"de-DE" ~value:(Js.Null.return (Date.make 2026 11 21)) ();
           let german = segments () in
           H.cleanup ();
-          date ~locale:"th-TH"
-            ~value:(Js.Nullable.return (Date.make 2026 11 21))
-            ();
+          date ~locale:"th-TH" ~value:(Js.Null.return (Date.make 2026 11 21)) ();
           E.(
             expect (german, segments ())
             |> toEqual ("day=21.month=11.year=2026", "day=21/month=11/year=2569")));
@@ -234,7 +230,7 @@ let () =
                      [ "2026-02-28" ] )));
       Jest.test "is invalid before its least date" (fun () ->
           date
-            ~value:(Js.Nullable.return (Date.make 2026 1 1))
+            ~value:(Js.Null.return (Date.make 2026 1 1))
             ~min_value:(Date.make 2026 6 1) ();
           E.(
             expect
@@ -271,7 +267,7 @@ let () =
           H.cleanup ();
           let told = ref [] in
           date ~told ~is_read_only:true
-            ~value:(Js.Nullable.return (Date.make 2026 11 21))
+            ~value:(Js.Null.return (Date.make 2026 11 21))
             ();
           let user = H.setup () in
           let* () = H.click user (segment "month") in
@@ -314,7 +310,7 @@ let () =
               |> toEqual
                    ("2026-11-22", "2026-11-21", "day=21/month=11/year=2026")));
       Jest.testPromise "has no violation axe finds" (fun () ->
-          date ~value:(Js.Nullable.return (Date.make 2026 11 21)) ();
+          date ~value:(Js.Null.return (Date.make 2026 11 21)) ();
           let* found = H.accessibility_violations () in
           Js.Promise.resolve E.(expect found |> toEqual [||])))
 

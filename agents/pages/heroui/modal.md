@@ -219,7 +219,9 @@ let make () =
   let label () = String.capitalize_ascii (S.get scroll) in
   <div class_="flex flex-col gap-4">
     <Radio_group
-      orientation=`horizontal value=(S.get scroll) on_change=(S.set set_scroll)>
+      orientation=`horizontal
+      value=(Js.Null.return (S.get scroll))
+      on_change=(S.set set_scroll)>
       <Radio value="inside">
         <Radio.Content>
           <Radio.Control><Radio.Indicator /></Radio.Control> "Inside"

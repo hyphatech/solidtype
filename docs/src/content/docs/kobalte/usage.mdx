@@ -36,8 +36,9 @@ reaches, so the control's focus ring is styled from it, `peer-focus-visible`.
 <Example code={toggleGroup} title="kobalte_toggle_group.mlx"><ToggleGroup.make client:visible /></Example>
 
 `ToggleGroup.Root` holds one value, or none: its `value` is a
-`string Js.Nullable.t`, since Kobalte reads `undefined` as uncontrolled and
-`null` as a controlled group with nothing pressed. `ToggleGroup.Root_multiple`
+`string Js.Null.t`, since Kobalte reads `undefined` as uncontrolled and
+`null` as a controlled group with nothing pressed. `on_change` tells a
+`string Js.Nullable.t`, as Kobalte gives it. `ToggleGroup.Root_multiple`
 holds several, a `string array`, and takes `multiple=true`. Each has the
 exact type of its value, where TypeScript has one component whose type
 turns on `multiple`.
