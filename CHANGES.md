@@ -1,5 +1,12 @@
 # Changes
 
+## Unreleased
+
+- Breaking: the skill, `skills/solidtype`, is no longer installed. The
+  documentation for an agent is `llms.txt` and every page in Markdown, in
+  `$(opam var solidtype:doc)`, and the README's *With an agent* gives the
+  line for a project's `AGENTS.md` that sends an agent there.
+
 ## 0.12.0 (2026-11-20)
 
 - HeroUI's `Data_grid`: rows given as data, each known by its `row_id`, and
