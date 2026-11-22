@@ -1,0 +1,2911 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Index = Solidtype.Index
+module D = Solidtype_internationalized_date
+module Dt = D.Types
+module C = Dt.CalendarDate
+module I18n = Solidtype_kobalte.I18n
+module K = Solidtype_kobalte.Types
+
+(* Any element as the element it is, which DOM's every element is. *)
+external as_element : _ Dom.element_like -> Dom.element = "%identity"
+external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+external focus_element : _ Dom.element_like -> unit = "focus" [@@mel.send]
+
+external contains : _ Dom.element_like -> Dom.element -> bool = "contains"
+[@@mel.send]
+
+external query : _ Dom.element_like -> string -> Dom.element Js.null
+  = "querySelector"
+[@@mel.send]
+
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external shift_key : Dom.keyboardEvent -> bool = "shiftKey" [@@mel.get]
+external alt : Dom.keyboardEvent -> bool = "altKey" [@@mel.get]
+external ctrl : Dom.keyboardEvent -> bool = "ctrlKey" [@@mel.get]
+external meta : Dom.keyboardEvent -> bool = "metaKey" [@@mel.get]
+external prevent_key : Dom.keyboardEvent -> unit = "preventDefault" [@@mel.send]
+external prevent_mouse : Dom.mouseEvent -> unit = "preventDefault" [@@mel.send]
+
+external related : Dom.focusEvent -> Dom.element Js.null = "relatedTarget"
+[@@mel.get]
+
+external closest : _ Dom.element_like -> string -> Dom.element Js.null
+  = "closest"
+[@@mel.send]
+
+external window_listen : string -> (Dom.event -> unit) -> unit
+  = "addEventListener"
+[@@mel.scope "window"]
+
+external window_unlisten : string -> (Dom.event -> unit) -> unit
+  = "removeEventListener"
+[@@mel.scope "window"]
+
+type listening
+
+external listening : passive:bool -> capture:bool -> listening = "" [@@mel.obj]
+
+external listen :
+  Dom.element -> string -> (Dom.event -> unit) -> listening -> unit
+  = "addEventListener"
+[@@mel.send]
+
+external unlisten :
+  Dom.element -> string -> (Dom.event -> unit) -> listening -> unit
+  = "removeEventListener"
+[@@mel.send]
+
+external event_target : Dom.event -> Dom.element Js.null = "target" [@@mel.get]
+
+external event_related : Dom.event -> Dom.element Js.null = "relatedTarget"
+[@@mel.get]
+
+external prevent : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+(* A pointer of no size is a screen reader's, which clicks after it. *)
+external width : Dom.event -> float Js.undefined = "width" [@@mel.get]
+external height : Dom.event -> float Js.undefined = "height" [@@mel.get]
+
+external pointer_type : Dom.pointerEvent -> string Js.undefined = "pointerType"
+[@@mel.get]
+
+external button : Dom.pointerEvent -> int = "button" [@@mel.get]
+external pointer_id : Dom.pointerEvent -> int = "pointerId" [@@mel.get]
+
+external pointer_element : Dom.pointerEvent -> Dom.element = "currentTarget"
+[@@mel.get]
+
+type capture
+
+external capture : Dom.element -> capture Js.undefined = "releasePointerCapture"
+[@@mel.get]
+
+external has_capture : Dom.element -> int -> bool = "hasPointerCapture"
+[@@mel.send]
+
+external release_capture : Dom.element -> int -> unit = "releasePointerCapture"
+[@@mel.send]
+
+external prevent_pointer : Dom.pointerEvent -> unit = "preventDefault"
+[@@mel.send]
+
+external detail : Dom.mouseEvent -> int = "detail" [@@mel.get]
+
+type timer
+
+external set_timeout : (unit -> unit) -> int -> timer = "setTimeout"
+external clear_timeout : timer -> unit = "clearTimeout"
+
+type duration = Months of int | Weeks of int | Days of int
+type day_of_week = [ `sun | `mon | `tue | `wed | `thu | `fri | `sat ]
+type range = { start : C.t; end_ : C.t }
+
+type translations = {
+  previous : string;
+  next : string;
+  selected_date_description : string -> string;
+  today_date : string -> string;
+  today_date_selected : string -> string;
+  date_selected : string -> string;
+  minimum_date : string;
+  maximum_date : string;
+  date_range : string -> string -> string;
+  selected_range_description : string -> string;
+  start_range_selection_prompt : string;
+  finish_range_selection_prompt : string;
+}
+
+let english =
+  {
+    previous = "Previous";
+    next = "Next";
+    selected_date_description = (fun d -> "Selected Date: " ^ d);
+    today_date = (fun d -> "Today, " ^ d);
+    today_date_selected = (fun d -> "Today, " ^ d ^ " selected");
+    date_selected = (fun d -> d ^ " selected");
+    minimum_date = "First available date";
+    maximum_date = "Last available date";
+    date_range = (fun s e -> s ^ " to " ^ e);
+    selected_range_description = (fun r -> "Selected Range: " ^ r);
+    start_range_selection_prompt = "Click to start selecting date range";
+    finish_range_selection_prompt = "Click to finish selecting date range";
+  }
+
+let locale_language locale =
+  match String.index_opt locale '-' with
+  | Some i -> String.sub locale 0 i
+  | None -> locale
+
+(* A locale's entry of [table]: its own, else its language's, else the first
+   of its language, else [default], as \@internationalized/string finds a
+   locale's strings. *)
+let localized table locale ~default =
+  match List.assoc_opt locale table with
+  | Some p -> p
+  | None -> (
+      let language = locale_language locale in
+      match List.assoc_opt language table with
+      | Some p -> p
+      | None -> (
+          let prefix = language ^ "-" in
+          let n = String.length prefix in
+          match
+            List.find_opt
+              (fun (k, _) ->
+                String.length k > n && String.equal (String.sub k 0 n) prefix)
+              table
+          with
+          | Some (_, p) -> p
+          | None -> default))
+
+(* What a calendar tells a reader in each language React Aria's speaks. *)
+let translated =
+  [
+    ( "ar-AE",
+      {
+        previous = {js|السابق|js};
+        next = {js|التالي|js};
+        selected_date_description = (fun d -> {js|تاريخ محدد: |js} ^ d);
+        today_date = (fun d -> {js|اليوم، |js} ^ d);
+        today_date_selected = (fun d -> {js|اليوم، |js} ^ d ^ {js| محدد|js});
+        date_selected = (fun d -> d ^ {js| المحدد|js});
+        minimum_date = {js|أول تاريخ متاح|js};
+        maximum_date = {js|آخر تاريخ متاح|js};
+        date_range = (fun s e -> s ^ {js| إلى |js} ^ e);
+        selected_range_description =
+          (fun r -> {js|المدى الزمني المحدد: |js} ^ r);
+        start_range_selection_prompt =
+          {js|انقر لبدء عملية تحديد نطاق التاريخ|js};
+        finish_range_selection_prompt =
+          {js|انقر لإنهاء عملية تحديد نطاق التاريخ|js};
+      } );
+    ( "bg-BG",
+      {
+        previous = {js|Назад|js};
+        next = {js|Напред|js};
+        selected_date_description = (fun d -> {js|Избрана дата: |js} ^ d);
+        today_date = (fun d -> {js|Днес, |js} ^ d);
+        today_date_selected =
+          (fun d -> {js|Днес, |js} ^ d ^ {js| са избрани|js});
+        date_selected = (fun d -> {js|Избрано е |js} ^ d);
+        minimum_date = {js|Първа налична дата|js};
+        maximum_date = {js|Последна налична дата|js};
+        date_range = (fun s e -> s ^ {js| до |js} ^ e);
+        selected_range_description = (fun r -> {js|Избран диапазон: |js} ^ r);
+        start_range_selection_prompt =
+          {js|Натиснете, за да пристъпите към избора на времеви интервал|js};
+        finish_range_selection_prompt =
+          {js|Натиснете, за да довършите избора на времеви интервал|js};
+      } );
+    ( "cs-CZ",
+      {
+        previous = {js|Předchozí|js};
+        next = {js|Další|js};
+        selected_date_description = (fun d -> {js|Vybrané datum: |js} ^ d);
+        today_date = (fun d -> "Dnes, " ^ d);
+        today_date_selected = (fun d -> {js|Dnes, vybráno |js} ^ d);
+        date_selected = (fun d -> {js|Vybráno |js} ^ d);
+        minimum_date = {js|První dostupné datum|js};
+        maximum_date = {js|Poslední dostupné datum|js};
+        date_range = (fun s e -> s ^ {js| až |js} ^ e);
+        selected_range_description = (fun r -> {js|Vybrané období: |js} ^ r);
+        start_range_selection_prompt =
+          {js|Kliknutím zahájíte výběr rozsahu dat|js};
+        finish_range_selection_prompt =
+          {js|Kliknutím dokončíte výběr rozsahu dat|js};
+      } );
+    ( "da-DK",
+      {
+        previous = "Forrige";
+        next = {js|Næste|js};
+        selected_date_description = (fun d -> "Valgt dato: " ^ d);
+        today_date = (fun d -> "I dag, " ^ d);
+        today_date_selected = (fun d -> "I dag, " ^ d ^ " valgt");
+        date_selected = (fun d -> d ^ " valgt");
+        minimum_date = {js|Første ledige dato|js};
+        maximum_date = "Sidste ledige dato";
+        date_range = (fun s e -> s ^ " til " ^ e);
+        selected_range_description = (fun r -> "Valgt interval: " ^ r);
+        start_range_selection_prompt =
+          {js|Klik for at starte valg af datoområde|js};
+        finish_range_selection_prompt =
+          {js|Klik for at fuldføre valg af datoområde|js};
+      } );
+    ( "de-DE",
+      {
+        previous = {js|Zurück|js};
+        next = "Weiter";
+        selected_date_description = (fun d -> {js|Ausgewähltes Datum: |js} ^ d);
+        today_date = (fun d -> "Heute, " ^ d);
+        today_date_selected = (fun d -> "Heute, " ^ d ^ {js| ausgewählt|js});
+        date_selected = (fun d -> d ^ {js| ausgewählt|js});
+        minimum_date = {js|Erstes verfügbares Datum|js};
+        maximum_date = {js|Letztes verfügbares Datum|js};
+        date_range = (fun s e -> s ^ " bis " ^ e);
+        selected_range_description =
+          (fun r -> {js|Ausgewählter Bereich: |js} ^ r);
+        start_range_selection_prompt =
+          "Klicken, um die Auswahl des Datumsbereichs zu beginnen";
+        finish_range_selection_prompt =
+          "Klicken, um die Auswahl des Datumsbereichs zu beenden";
+      } );
+    ( "el-GR",
+      {
+        previous = {js|Προηγούμενο|js};
+        next = {js|Επόμενο|js};
+        selected_date_description =
+          (fun d -> {js|Επιλεγμένη ημερομηνία: |js} ^ d);
+        today_date = (fun d -> {js|Σήμερα, |js} ^ d);
+        today_date_selected = (fun d -> {js|Σήμερα, επιλέχτηκε |js} ^ d);
+        date_selected = (fun d -> {js|Επιλέχθηκε |js} ^ d);
+        minimum_date = {js|Πρώτη διαθέσιμη ημερομηνία|js};
+        maximum_date = {js|Τελευταία διαθέσιμη ημερομηνία|js};
+        date_range = (fun s e -> s ^ {js| έως |js} ^ e);
+        selected_range_description = (fun r -> {js|Επιλεγμένο εύρος: |js} ^ r);
+        start_range_selection_prompt =
+          {js|Κάντε κλικ για να ξεκινήσετε την επιλογή εύρους ημερομηνιών|js};
+        finish_range_selection_prompt =
+          {js|Κάντε κλικ για να ολοκληρώσετε την επιλογή εύρους ημερομηνιών|js};
+      } );
+    ( "en-US",
+      {
+        previous = "Previous";
+        next = "Next";
+        selected_date_description = (fun d -> "Selected Date: " ^ d);
+        today_date = (fun d -> "Today, " ^ d);
+        today_date_selected = (fun d -> "Today, " ^ d ^ " selected");
+        date_selected = (fun d -> d ^ " selected");
+        minimum_date = "First available date";
+        maximum_date = "Last available date";
+        date_range = (fun s e -> s ^ " to " ^ e);
+        selected_range_description = (fun r -> "Selected Range: " ^ r);
+        start_range_selection_prompt = "Click to start selecting date range";
+        finish_range_selection_prompt = "Click to finish selecting date range";
+      } );
+    ( "es-ES",
+      {
+        previous = "Anterior";
+        next = "Siguiente";
+        selected_date_description = (fun d -> "Fecha seleccionada: " ^ d);
+        today_date = (fun d -> "Hoy, " ^ d);
+        today_date_selected = (fun d -> "Hoy, " ^ d ^ " seleccionado");
+        date_selected = (fun d -> d ^ " seleccionado");
+        minimum_date = "Primera fecha disponible";
+        maximum_date = {js|Última fecha disponible|js};
+        date_range = (fun s e -> s ^ " a " ^ e);
+        selected_range_description = (fun r -> "Intervalo seleccionado: " ^ r);
+        start_range_selection_prompt =
+          "Haga clic para comenzar a seleccionar un rango de fechas";
+        finish_range_selection_prompt =
+          "Haga clic para terminar de seleccionar rango de fechas";
+      } );
+    ( "et-EE",
+      {
+        previous = "Eelmine";
+        next = {js|Järgmine|js};
+        selected_date_description = (fun d -> {js|Valitud kuupäev: |js} ^ d);
+        today_date = (fun d -> {js|Täna, |js} ^ d);
+        today_date_selected = (fun d -> {js|Täna, |js} ^ d ^ " valitud");
+        date_selected = (fun d -> d ^ " valitud");
+        minimum_date = {js|Esimene saadaolev kuupäev|js};
+        maximum_date = {js|Viimane saadaolev kuupäev|js};
+        date_range = (fun s e -> s ^ " kuni " ^ e);
+        selected_range_description = (fun r -> "Valitud vahemik: " ^ r);
+        start_range_selection_prompt =
+          {js|Klõpsake kuupäevavahemiku valimiseks|js};
+        finish_range_selection_prompt =
+          {js|Klõpsake kuupäevavahemiku valimise lõpetamiseks|js};
+      } );
+    ( "fi-FI",
+      {
+        previous = "Edellinen";
+        next = "Seuraava";
+        selected_date_description = (fun d -> {js|Valittu päivämäärä: |js} ^ d);
+        today_date = (fun d -> {js|Tänään, |js} ^ d);
+        today_date_selected = (fun d -> {js|Tänään, |js} ^ d ^ " valittu");
+        date_selected = (fun d -> d ^ " valittu");
+        minimum_date = {js|Ensimmäinen varattavissa oleva päivämäärä|js};
+        maximum_date = {js|Viimeinen varattavissa oleva päivämäärä|js};
+        date_range = (fun s e -> s ^ {js| – |js} ^ e);
+        selected_range_description = (fun r -> {js|Valittu aikaväli: |js} ^ r);
+        start_range_selection_prompt =
+          {js|Aloita päivämääräalueen valinta napsauttamalla tätä.|js};
+        finish_range_selection_prompt =
+          {js|Lopeta päivämääräalueen valinta napsauttamalla tätä.|js};
+      } );
+    ( "fr-FR",
+      {
+        previous = {js|Précédent|js};
+        next = "Suivant";
+        selected_date_description = (fun d -> {js|Date sélectionnée : |js} ^ d);
+        today_date = (fun d -> "Aujourd'hui, " ^ d);
+        today_date_selected =
+          (fun d -> {js|Aujourd’hui, |js} ^ d ^ {js| sélectionné|js});
+        date_selected = (fun d -> d ^ {js| sélectionné|js});
+        minimum_date = {js|Première date disponible|js};
+        maximum_date = {js|Dernière date disponible|js};
+        date_range = (fun s e -> s ^ {js| à |js} ^ e);
+        selected_range_description =
+          (fun r -> {js|Plage sélectionnée : |js} ^ r);
+        start_range_selection_prompt =
+          {js|Cliquer pour commencer à sélectionner la plage de dates|js};
+        finish_range_selection_prompt =
+          {js|Cliquer pour finir de sélectionner la plage de dates|js};
+      } );
+    ( "he-IL",
+      {
+        previous = {js|הקודם|js};
+        next = {js|הבא|js};
+        selected_date_description = (fun d -> {js|תאריך נבחר: |js} ^ d);
+        today_date = (fun d -> {js|היום, |js} ^ d);
+        today_date_selected = (fun d -> {js|היום, |js} ^ d ^ {js| נבחר|js});
+        date_selected = (fun d -> d ^ {js| נבחר|js});
+        minimum_date = {js|תאריך פנוי ראשון|js};
+        maximum_date = {js|תאריך פנוי אחרון|js};
+        date_range = (fun s e -> s ^ {js| עד |js} ^ e);
+        selected_range_description = (fun r -> {js|טווח נבחר: |js} ^ r);
+        start_range_selection_prompt =
+          {js|לחץ כדי להתחיל בבחירת טווח התאריכים|js};
+        finish_range_selection_prompt =
+          {js|חץ כדי לסיים את בחירת טווח התאריכים|js};
+      } );
+    ( "hr-HR",
+      {
+        previous = "Prethodni";
+        next = {js|Sljedeći|js};
+        selected_date_description = (fun d -> "Odabrani datum: " ^ d);
+        today_date = (fun d -> "Danas, " ^ d);
+        today_date_selected = (fun d -> "Danas, odabran " ^ d);
+        date_selected = (fun d -> d ^ " odabran");
+        minimum_date = {js|Prvi raspoloživi datum|js};
+        maximum_date = {js|Posljednji raspoloživi datum|js};
+        date_range = (fun s e -> s ^ " do " ^ e);
+        selected_range_description = (fun r -> "Odabrani raspon: " ^ r);
+        start_range_selection_prompt =
+          {js|Kliknite da započnete raspon odabranih datuma|js};
+        finish_range_selection_prompt =
+          {js|Kliknite da dovršite raspon odabranih datuma|js};
+      } );
+    ( "hu-HU",
+      {
+        previous = {js|Előző|js};
+        next = {js|Következő|js};
+        selected_date_description = (fun d -> {js|Kijelölt dátum: |js} ^ d);
+        today_date = (fun d -> "Ma, " ^ d);
+        today_date_selected = (fun d -> "Ma, " ^ d ^ {js| kijelölve|js});
+        date_selected = (fun d -> d ^ {js| kiválasztva|js});
+        minimum_date = {js|Az első elérhető dátum|js};
+        maximum_date = {js|Utolsó elérhető dátum|js};
+        date_range = (fun s e -> s ^ {js|–|js} ^ e);
+        selected_range_description = (fun r -> {js|Kijelölt tartomány: |js} ^ r);
+        start_range_selection_prompt =
+          {js|Kattintson a dátumtartomány kijelölésének indításához|js};
+        finish_range_selection_prompt =
+          {js|Kattintson a dátumtartomány kijelölésének befejezéséhez|js};
+      } );
+    ( "it-IT",
+      {
+        previous = "Precedente";
+        next = "Successivo";
+        selected_date_description = (fun d -> "Data selezionata: " ^ d);
+        today_date = (fun d -> "Oggi, " ^ d);
+        today_date_selected = (fun d -> "Oggi, " ^ d ^ " selezionata");
+        date_selected = (fun d -> d ^ " selezionata");
+        minimum_date = "Prima data disponibile";
+        maximum_date = "Ultima data disponibile";
+        date_range = (fun s e -> "Da " ^ s ^ " a " ^ e);
+        selected_range_description = (fun r -> "Intervallo selezionato: " ^ r);
+        start_range_selection_prompt =
+          {js|Fai clic per selezionare l’intervallo di date|js};
+        finish_range_selection_prompt =
+          {js|Fai clic per completare la selezione dell’intervallo di date|js};
+      } );
+    ( "ja-JP",
+      {
+        previous = {js|前へ|js};
+        next = {js|次へ|js};
+        selected_date_description = (fun d -> {js|選択した日付 : |js} ^ d);
+        today_date = (fun d -> {js|本日、|js} ^ d);
+        today_date_selected = (fun d -> {js|本日、|js} ^ d ^ {js| を選択|js});
+        date_selected = (fun d -> d ^ {js| を選択|js});
+        minimum_date = {js|最初の利用可能日|js};
+        maximum_date = {js|最終利用可能日|js};
+        date_range = (fun s e -> s ^ {js| から |js} ^ e);
+        selected_range_description = (fun r -> {js|選択範囲 : |js} ^ r);
+        start_range_selection_prompt = {js|クリックして日付範囲の選択を開始|js};
+        finish_range_selection_prompt = {js|クリックして日付範囲の選択を終了|js};
+      } );
+    ( "ko-KR",
+      {
+        previous = {js|이전|js};
+        next = {js|다음|js};
+        selected_date_description = (fun d -> {js|선택 일자: |js} ^ d);
+        today_date = (fun d -> {js|오늘, |js} ^ d);
+        today_date_selected = (fun d -> {js|오늘, |js} ^ d ^ {js| 선택됨|js});
+        date_selected = (fun d -> d ^ {js| 선택됨|js});
+        minimum_date = {js|처음으로 사용 가능한 일자|js};
+        maximum_date = {js|마지막으로 사용 가능한 일자|js};
+        date_range = (fun s e -> s ^ " ~ " ^ e);
+        selected_range_description = (fun r -> {js|선택 범위: |js} ^ r);
+        start_range_selection_prompt = {js|날짜 범위 선택을 시작하려면 클릭하십시오.|js};
+        finish_range_selection_prompt = {js|날짜 범위 선택을 완료하려면 클릭하십시오.|js};
+      } );
+    ( "lt-LT",
+      {
+        previous = "Ankstesnis";
+        next = "Paskesnis";
+        selected_date_description = (fun d -> "Pasirinkta data: " ^ d);
+        today_date = (fun d -> {js|Šiandien, |js} ^ d);
+        today_date_selected = (fun d -> {js|Šiandien, pasirinkta |js} ^ d);
+        date_selected = (fun d -> "Pasirinkta " ^ d);
+        minimum_date = "Pirmoji galima data";
+        maximum_date = {js|Paskutinė galima data|js};
+        date_range = (fun s e -> "Nuo " ^ s ^ " iki " ^ e);
+        selected_range_description = (fun r -> "Pasirinktas intervalas: " ^ r);
+        start_range_selection_prompt =
+          {js|Spustelėkite, kad pradėtumėte pasirinkti datų intervalą|js};
+        finish_range_selection_prompt =
+          {js|Spustelėkite, kad baigtumėte pasirinkti datų intervalą|js};
+      } );
+    ( "lv-LV",
+      {
+        previous = {js|Atpakaļ|js};
+        next = {js|Tālāk|js};
+        selected_date_description = (fun d -> {js|Atlasītais datums: |js} ^ d);
+        today_date = (fun d -> {js|Šodien, |js} ^ d);
+        today_date_selected = (fun d -> {js|Atlasīta šodiena, |js} ^ d);
+        date_selected = (fun d -> {js|Atlasīts: |js} ^ d);
+        minimum_date = "Pirmais pieejamais datums";
+        maximum_date = {js|Pēdējais pieejamais datums|js};
+        date_range = (fun s e -> "No " ^ s ^ {js| līdz |js} ^ e);
+        selected_range_description =
+          (fun r -> {js|Atlasītais diapazons: |js} ^ r);
+        start_range_selection_prompt =
+          {js|Noklikšķiniet, lai sāktu datumu diapazona atlasi|js};
+        finish_range_selection_prompt =
+          {js|Noklikšķiniet, lai pabeigtu datumu diapazona atlasi|js};
+      } );
+    ( "nb-NO",
+      {
+        previous = "Forrige";
+        next = "Neste";
+        selected_date_description = (fun d -> "Valgt dato: " ^ d);
+        today_date = (fun d -> "I dag, " ^ d);
+        today_date_selected = (fun d -> "I dag, " ^ d ^ " valgt");
+        date_selected = (fun d -> d ^ " valgt");
+        minimum_date = {js|Første tilgjengelige dato|js};
+        maximum_date = "Siste tilgjengelige dato";
+        date_range = (fun s e -> s ^ " til " ^ e);
+        selected_range_description = (fun r -> {js|Valgt område: |js} ^ r);
+        start_range_selection_prompt =
+          {js|Klikk for å starte valg av datoområde|js};
+        finish_range_selection_prompt =
+          {js|Klikk for å fullføre valg av datoområde|js};
+      } );
+    ( "nl-NL",
+      {
+        previous = "Vorige";
+        next = "Volgende";
+        selected_date_description = (fun d -> "Geselecteerde datum: " ^ d);
+        today_date = (fun d -> "Vandaag, " ^ d);
+        today_date_selected = (fun d -> "Vandaag, " ^ d ^ " geselecteerd");
+        date_selected = (fun d -> d ^ " geselecteerd");
+        minimum_date = "Eerste beschikbare datum";
+        maximum_date = "Laatste beschikbare datum";
+        date_range = (fun s e -> s ^ " tot " ^ e);
+        selected_range_description = (fun r -> "Geselecteerd bereik: " ^ r);
+        start_range_selection_prompt = "Klik om het datumbereik te selecteren";
+        finish_range_selection_prompt =
+          "Klik om de selectie van het datumbereik te voltooien";
+      } );
+    ( "pl-PL",
+      {
+        previous = "Wstecz";
+        next = "Dalej";
+        selected_date_description = (fun d -> "Wybrana data: " ^ d);
+        today_date = (fun d -> "Dzisiaj, " ^ d);
+        today_date_selected = (fun d -> "Dzisiaj wybrano " ^ d);
+        date_selected = (fun d -> "Wybrano " ^ d);
+        minimum_date = {js|Pierwsza dostępna data|js};
+        maximum_date = {js|Ostatnia dostępna data|js};
+        date_range = (fun s e -> s ^ " do " ^ e);
+        selected_range_description = (fun r -> "Wybrany zakres: " ^ r);
+        start_range_selection_prompt =
+          {js|Kliknij, aby rozpocząć wybór zakresu dat|js};
+        finish_range_selection_prompt =
+          {js|Kliknij, aby zakończyć wybór zakresu dat|js};
+      } );
+    ( "pt-BR",
+      {
+        previous = "Anterior";
+        next = {js|Próximo|js};
+        selected_date_description = (fun d -> "Data selecionada: " ^ d);
+        today_date = (fun d -> "Hoje, " ^ d);
+        today_date_selected = (fun d -> "Hoje, " ^ d ^ " selecionado");
+        date_selected = (fun d -> d ^ " selecionado");
+        minimum_date = {js|Primeira data disponível|js};
+        maximum_date = {js|Última data disponível|js};
+        date_range = (fun s e -> s ^ " a " ^ e);
+        selected_range_description = (fun r -> "Intervalo selecionado: " ^ r);
+        start_range_selection_prompt =
+          {js|Clique para iniciar a seleção do intervalo de datas|js};
+        finish_range_selection_prompt =
+          {js|Clique para concluir a seleção do intervalo de datas|js};
+      } );
+    ( "pt-PT",
+      {
+        previous = "Anterior";
+        next = {js|Próximo|js};
+        selected_date_description = (fun d -> "Data selecionada: " ^ d);
+        today_date = (fun d -> "Hoje, " ^ d);
+        today_date_selected = (fun d -> "Hoje, " ^ d ^ " selecionado");
+        date_selected = (fun d -> d ^ " selecionado");
+        minimum_date = {js|Primeira data disponível|js};
+        maximum_date = {js|Última data disponível|js};
+        date_range = (fun s e -> s ^ " a " ^ e);
+        selected_range_description = (fun r -> "Intervalo selecionado: " ^ r);
+        start_range_selection_prompt =
+          {js|Clique para começar a selecionar o intervalo de datas|js};
+        finish_range_selection_prompt =
+          "Clique para terminar de selecionar o intervalo de datas";
+      } );
+    ( "ro-RO",
+      {
+        previous = {js|Înainte|js};
+        next = {js|Următorul|js};
+        selected_date_description = (fun d -> {js|Dată selectată: |js} ^ d);
+        today_date = (fun d -> {js|Astăzi, |js} ^ d);
+        today_date_selected = (fun d -> "Azi, " ^ d ^ {js| selectată|js});
+        date_selected = (fun d -> d ^ {js| selectată|js});
+        minimum_date = {js|Prima dată disponibilă|js};
+        maximum_date = {js|Ultima dată disponibilă|js};
+        date_range = (fun s e -> "De la " ^ s ^ {js| până la |js} ^ e);
+        selected_range_description = (fun r -> "Interval selectat: " ^ r);
+        start_range_selection_prompt =
+          {js|Apăsaţi pentru a începe selecţia razei pentru dată|js};
+        finish_range_selection_prompt =
+          {js|Apăsaţi pentru a finaliza selecţia razei pentru dată|js};
+      } );
+    ( "ru-RU",
+      {
+        previous = {js|Назад|js};
+        next = {js|Далее|js};
+        selected_date_description = (fun d -> {js|Выбранная дата: |js} ^ d);
+        today_date = (fun d -> {js|Сегодня, |js} ^ d);
+        today_date_selected = (fun d -> {js|Сегодня, выбрано |js} ^ d);
+        date_selected = (fun d -> {js|Выбрано |js} ^ d);
+        minimum_date = {js|Первая доступная дата|js};
+        maximum_date = {js|Последняя доступная дата|js};
+        date_range = (fun s e -> {js|С |js} ^ s ^ {js| по |js} ^ e);
+        selected_range_description = (fun r -> {js|Выбранный диапазон: |js} ^ r);
+        start_range_selection_prompt =
+          {js|Щелкните, чтобы начать выбор диапазона дат|js};
+        finish_range_selection_prompt =
+          {js|Щелкните, чтобы завершить выбор диапазона дат|js};
+      } );
+    ( "sk-SK",
+      {
+        previous = {js|Predchádzajúce|js};
+        next = {js|Nasledujúce|js};
+        selected_date_description = (fun d -> {js|Vybratý dátum: |js} ^ d);
+        today_date = (fun d -> "Dnes " ^ d);
+        today_date_selected = (fun d -> {js|Vybratý dnešný dátum |js} ^ d);
+        date_selected = (fun d -> {js|Vybratý dátum |js} ^ d);
+        minimum_date = {js|Prvý dostupný dátum|js};
+        maximum_date = {js|Posledný dostupný dátum|js};
+        date_range = (fun s e -> "Od " ^ s ^ " do " ^ e);
+        selected_range_description = (fun r -> {js|Vybratý rozsah: |js} ^ r);
+        start_range_selection_prompt =
+          {js|Kliknutím spustíte výber rozsahu dátumov|js};
+        finish_range_selection_prompt =
+          {js|Kliknutím dokončíte výber rozsahu dátumov|js};
+      } );
+    ( "sl-SI",
+      {
+        previous = "Nazaj";
+        next = "Naprej";
+        selected_date_description = (fun d -> "Izbrani datum: " ^ d);
+        today_date = (fun d -> "Danes, " ^ d);
+        today_date_selected = (fun d -> "Danes, " ^ d ^ " izbrano");
+        date_selected = (fun d -> d ^ " izbrano");
+        minimum_date = {js|Prvi razpoložljivi datum|js};
+        maximum_date = {js|Zadnji razpoložljivi datum|js};
+        date_range = (fun s e -> s ^ " do " ^ e);
+        selected_range_description = (fun r -> {js|Izbrano območje: |js} ^ r);
+        start_range_selection_prompt =
+          {js|Kliknite za začetek izbire datumskega obsega|js};
+        finish_range_selection_prompt =
+          {js|Kliknite za dokončanje izbire datumskega obsega|js};
+      } );
+    ( "sr-SP",
+      {
+        previous = "Prethodni";
+        next = {js|Sledeći|js};
+        selected_date_description = (fun d -> "Izabrani datum: " ^ d);
+        today_date = (fun d -> "Danas, " ^ d);
+        today_date_selected = (fun d -> "Danas, izabran " ^ d);
+        date_selected = (fun d -> d ^ " izabran");
+        minimum_date = {js|Prvi raspoloživi datum|js};
+        maximum_date = {js|Zadnji raspoloživi datum|js};
+        date_range = (fun s e -> s ^ " do " ^ e);
+        selected_range_description = (fun r -> "Izabrani period: " ^ r);
+        start_range_selection_prompt =
+          {js|Kliknite da započnete opseg izabranih datuma|js};
+        finish_range_selection_prompt =
+          {js|Kliknite da dovršite opseg izabranih datuma|js};
+      } );
+    ( "sv-SE",
+      {
+        previous = {js|Föregående|js};
+        next = {js|Nästa|js};
+        selected_date_description = (fun d -> "Valt datum: " ^ d);
+        today_date = (fun d -> "Idag, " ^ d);
+        today_date_selected = (fun d -> "Idag, " ^ d ^ " har valts");
+        date_selected = (fun d -> d ^ " har valts");
+        minimum_date = {js|Första tillgängliga datum|js};
+        maximum_date = {js|Sista tillgängliga datum|js};
+        date_range = (fun s e -> s ^ " till " ^ e);
+        selected_range_description = (fun r -> "Valt intervall: " ^ r);
+        start_range_selection_prompt =
+          {js|Klicka för att välja datumintervall|js};
+        finish_range_selection_prompt =
+          {js|Klicka för att avsluta val av datumintervall|js};
+      } );
+    ( "tr-TR",
+      {
+        previous = {js|Önceki|js};
+        next = "Sonraki";
+        selected_date_description = (fun d -> {js|Seçilen Tarih: |js} ^ d);
+        today_date = (fun d -> {js|Bugün, |js} ^ d);
+        today_date_selected = (fun d -> {js|Bugün, |js} ^ d ^ {js| seçildi|js});
+        date_selected = (fun d -> d ^ {js| seçildi|js});
+        minimum_date = {js|İlk müsait tarih|js};
+        maximum_date = {js|Son müsait tarih|js};
+        date_range = (fun s e -> s ^ " - " ^ e);
+        selected_range_description = (fun r -> {js|Seçilen Aralık: |js} ^ r);
+        start_range_selection_prompt =
+          {js|Tarih aralığı seçimini başlatmak için tıklayın|js};
+        finish_range_selection_prompt =
+          {js|Tarih aralığı seçimini tamamlamak için tıklayın|js};
+      } );
+    ( "uk-UA",
+      {
+        previous = {js|Попередній|js};
+        next = {js|Наступний|js};
+        selected_date_description = (fun d -> {js|Вибрана дата: |js} ^ d);
+        today_date = (fun d -> {js|Сьогодні, |js} ^ d);
+        today_date_selected = (fun d -> {js|Сьогодні, вибрано |js} ^ d);
+        date_selected = (fun d -> {js|Вибрано |js} ^ d);
+        minimum_date = {js|Перша доступна дата|js};
+        maximum_date = {js|Остання доступна дата|js};
+        date_range = (fun s e -> s ^ {js| — |js} ^ e);
+        selected_range_description = (fun r -> {js|Вибраний діапазон: |js} ^ r);
+        start_range_selection_prompt =
+          {js|Натисніть, щоб почати вибір діапазону дат|js};
+        finish_range_selection_prompt =
+          {js|Натисніть, щоб завершити вибір діапазону дат|js};
+      } );
+    ( "zh-CN",
+      {
+        previous = {js|上一页|js};
+        next = {js|下一页|js};
+        selected_date_description = (fun d -> {js|选定的日期：|js} ^ d);
+        today_date = (fun d -> {js|今天，即 |js} ^ d);
+        today_date_selected = (fun d -> {js|已选择今天，即 |js} ^ d);
+        date_selected = (fun d -> {js|已选择 |js} ^ d);
+        minimum_date = {js|第一个可用日期|js};
+        maximum_date = {js|最后一个可用日期|js};
+        date_range = (fun s e -> s ^ {js| 至 |js} ^ e);
+        selected_range_description = (fun r -> {js|选定的范围：|js} ^ r);
+        start_range_selection_prompt = {js|单击以开始选择日期范围|js};
+        finish_range_selection_prompt = {js|单击以完成选择日期范围|js};
+      } );
+    ( "zh-TW",
+      {
+        previous = {js|上一頁|js};
+        next = {js|下一頁|js};
+        selected_date_description = (fun d -> {js|選定的日期：|js} ^ d);
+        today_date = (fun d -> {js|今天，|js} ^ d);
+        today_date_selected = (fun d -> {js|已選取今天，|js} ^ d);
+        date_selected = (fun d -> {js|已選取 |js} ^ d);
+        minimum_date = {js|第一個可用日期|js};
+        maximum_date = {js|最後一個可用日期|js};
+        date_range = (fun s e -> s ^ {js| 至 |js} ^ e);
+        selected_range_description = (fun r -> {js|選定的範圍：|js} ^ r);
+        start_range_selection_prompt = {js|按一下以開始選取日期範圍|js};
+        finish_range_selection_prompt = {js|按一下以完成選取日期範圍|js};
+      } );
+  ]
+
+let translations_for locale = localized translated locale ~default:english
+
+type calendar = {
+  focused_date : C.t S.accessor;
+  set_focused_date : C.t -> unit;
+  visible_start : C.t S.accessor;
+  visible_end : C.t S.accessor;
+  visible_duration : duration S.accessor;
+  min_value : C.t option S.accessor;
+  max_value : C.t option S.accessor;
+  locale : string S.accessor;
+  time_zone : string S.accessor;
+  is_disabled : bool S.accessor;
+  is_read_only : bool S.accessor;
+  is_invalid : bool S.accessor;
+  is_focused : bool S.accessor;
+  is_previous_disabled : bool S.accessor;
+  is_next_disabled : bool S.accessor;
+  focus : unit -> unit;
+}
+
+type cell = {
+  date : C.t S.accessor;
+  formatted_date : string S.accessor;
+  is_selected : bool S.accessor;
+  is_focused : bool S.accessor;
+  is_disabled : bool S.accessor;
+  is_unavailable : bool S.accessor;
+  is_outside_month : bool S.accessor;
+  is_outside_visible_range : bool S.accessor;
+  is_today : bool S.accessor;
+  is_invalid : bool S.accessor;
+  is_selection_start : bool S.accessor;
+  is_selection_end : bool S.accessor;
+}
+
+(* Kobalte's state, an attribute present and empty, or none. *)
+let state on = if on then Jsx.data "" else Jsx.flag false
+
+(* What a reader reads where nothing is seen, as React Aria's VisuallyHidden
+   is drawn. *)
+let visually_hidden =
+  "border: 0px; clip: rect(0px, 0px, 0px, 0px); clip-path: inset(50%); height: \
+   1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; \
+   width: 1px; white-space: nowrap;"
+
+(* A date's arithmetic, as @internationalized/date's queries do it, on a
+   CalendarDate alone. *)
+let before a b = C.compare a b < 0.
+let after a b = C.compare a b > 0.
+let same_day a b = D.is_same_day a b
+let start_of_month d = C.set d (Dt.DateFields.make ~day:1 ())
+
+let end_of_month d =
+  C.set d
+    (Dt.DateFields.make
+       ~day:(Dt.Calendar.get_days_in_month (C.calendar d) d)
+       ())
+
+let start_of_week d locale first =
+  C.subtract d
+    (Dt.DateDuration.make
+       ~days:(D.get_day_of_week d locale ?first_day_of_week:first ())
+       ())
+
+let end_of_week d locale first =
+  C.add (start_of_week d locale first) (Dt.DateDuration.make ~days:6 ())
+
+let earlier a b = if before b a then b else a
+let later a b = if after b a then b else a
+
+let shift d (by : duration) sign =
+  let n x = sign * x in
+  C.add d
+    (match by with
+    | Months m -> Dt.DateDuration.make ~months:(n m) ()
+    | Weeks w -> Dt.DateDuration.make ~weeks:(n w) ()
+    | Days x -> Dt.DateDuration.make ~days:(n x) ())
+
+let days n d = C.add d (Dt.DateDuration.make ~days:n ())
+
+let same_duration (a : duration) (b : duration) =
+  match (a, b) with
+  | Months x, Months y | Weeks x, Weeks y | Days x, Days y -> x = y
+  | _ -> false
+
+let unit (by : duration) =
+  match by with Months _ -> Months 1 | Weeks _ -> Weeks 1 | Days _ -> Days 1
+
+let out_of_range d ~min ~max =
+  (match min with Some m -> before d m | None -> false)
+  || match max with Some m -> after d m | None -> false
+
+let constrain d ~min ~max =
+  let d = match min with Some m -> later d m | None -> d in
+  match max with Some m -> earlier d m | None -> d
+
+(* Where a view of [by] starts to hold [date], as React Stately aligns it:
+   the start of its largest unit, then kept within the range. *)
+let rec align_start date by locale first ~min ~max =
+  let aligned =
+    match by with
+    | Months _ -> start_of_month date
+    | Weeks _ -> start_of_week date locale first
+    | Days n when n > 7 -> start_of_week date locale first
+    | Days _ -> date
+  in
+  constrain_start date aligned by locale first ~min ~max
+
+and align_end date by locale first ~min ~max =
+  let less =
+    match by with
+    | Months n -> Months (n - 1)
+    | Weeks n -> Weeks (n - 1)
+    | Days n -> Days (n - 1)
+  in
+  let aligned =
+    shift (align_start date by locale first ~min:None ~max:None) less (-1)
+  in
+  constrain_start date aligned by locale first ~min ~max
+
+and constrain_start date aligned by locale first ~min ~max =
+  let aligned =
+    match min with
+    | Some m when not (before date m) ->
+        later aligned (align_start m by locale first ~min:None ~max:None)
+    | Some _ | None -> aligned
+  in
+  match max with
+  | Some m when not (after date m) ->
+      earlier aligned (align_end m by locale first ~min:None ~max:None)
+  | Some _ | None -> aligned
+
+let align_center date by locale first ~min ~max =
+  let half n =
+    let h = n / 2 in
+    if h > 0 && n mod 2 = 0 then h - 1 else h
+  in
+  let back =
+    match by with
+    | Months n -> Months (half n)
+    | Weeks n -> Weeks (half n)
+    | Days n -> Days (half n)
+  in
+  let aligned =
+    shift (align_start date by locale first ~min:None ~max:None) back (-1)
+  in
+  constrain_start date aligned by locale first ~min ~max
+
+(* The latest date not after [date] and not before [lowest] that is
+   available. *)
+let rec available date ~lowest ~unavailable =
+  if before date lowest then None
+  else if unavailable date then available (days (-1) date) ~lowest ~unavailable
+  else Some date
+
+(* A provider's locale, or en-GB, day before month as most of the world
+   writes a date, never the browser's: Kobalte gives a provider's own locale
+   each time it is asked, and where there is none a new one, the
+   browser's. *)
+let use_locale () =
+  let i18n = I18n.use_locale () in
+  let provided = I18n.use_locale () == i18n in
+  S.accessor (fun () ->
+      if provided then K.I18n_UseLocale.locale i18n () else "en-GB")
+
+let formatter locale options = Dt.DateFormatter.make locale ~options ()
+
+(* Two dates as a reader is told them, joined by the locale's words for a
+   range, as React Aria splits a formatted range at its last shared
+   literal. *)
+let spoken_range format ~(translations : translations) ~time_zone a b =
+  let parts =
+    Dt.DateFormatter.format_range_to_parts format (C.to_date a time_zone)
+      (C.to_date b time_zone)
+  in
+  let separator = ref (-1) in
+  (try
+     Array.iteri
+       (fun i p ->
+         match
+           (Dt.DateRangeFormatPart.source p, Dt.DateRangeFormatPart.type_ p)
+         with
+         | `shared, `literal -> separator := i
+         | `endRange, _ -> raise Exit
+         | _ -> ())
+       parts
+   with Exit -> ());
+  let first = Buffer.create 16 and last = Buffer.create 16 in
+  Array.iteri
+    (fun i p ->
+      if i < !separator then
+        Buffer.add_string first (Dt.DateRangeFormatPart.value p)
+      else if i > !separator then
+        Buffer.add_string last (Dt.DateRangeFormatPart.value p))
+    parts;
+  translations.date_range (Buffer.contents first) (Buffer.contents last)
+
+(* An era where a Gregorian date is before Christ. *)
+let era_of d =
+  if
+    String.equal (Dt.Calendar.identifier (C.calendar d)) "gregory"
+    && String.equal (C.era d) "BC"
+  then Some `short
+  else None
+
+(* What a calendar shows, as React Aria names it: a month, a range of months,
+   or a range of days. *)
+let visible_description ~locale ~time_zone ~translations ~aria start finish =
+  let era =
+    match era_of start with Some e -> Some e | None -> era_of finish
+  in
+  let calendar = Dt.Calendar.identifier (C.calendar start) in
+  let months =
+    formatter locale
+      (Dt.DateTimeFormatOptions.make ~month:"long" ~year:"numeric" ?era
+         ~calendar ~time_zone ())
+  in
+  let dates =
+    formatter locale
+      (Dt.DateTimeFormatOptions.make ~month:"long" ~year:"numeric"
+         ~day:"numeric" ?era ~calendar ~time_zone ())
+  in
+  let range format =
+    if aria then spoken_range format ~translations ~time_zone start finish
+    else
+      Dt.DateFormatter.format_range format
+        (C.to_date start time_zone)
+        (C.to_date finish time_zone)
+  in
+  if same_day start (start_of_month start) then
+    if same_day finish (end_of_month start) then
+      Dt.DateFormatter.format months (C.to_date start time_zone)
+    else if same_day finish (end_of_month finish) then range months
+    else range dates
+  else range dates
+
+(* What the parts read of their calendar, beyond what a style reads. *)
+type inner = {
+  public : calendar;
+  first_day : day_of_week option S.accessor;
+  weeks_in_month : int option S.accessor;
+  translations : translations S.accessor;
+  multiple : bool;
+  is_range : bool;
+  anchor : C.t option S.accessor;
+  highlighted : (C.t * C.t) option S.accessor;
+  range_description : string S.accessor;
+  prompt_id : string;
+  press_start : touch:bool -> C.t -> unit;
+  press_up : C.t -> unit;
+  hover : touch:bool -> C.t -> unit;
+  is_selected : C.t -> bool;
+  is_value_invalid : C.t -> bool;
+  is_unavailable : C.t -> bool;
+  select : C.t -> unit;
+  set_focused : bool -> unit;
+  focus_previous_page : unit -> unit;
+  focus_next_page : unit -> unit;
+  on_key : Dom.keyboardEvent -> unit;
+  previous_invalid : bool S.accessor;
+  next_invalid : bool S.accessor;
+  aria_label : string option S.accessor;
+  labelled_by : string option S.accessor;
+}
+
+module Calendar_context = Solidtype.Context.Make_optional (struct
+  type t = inner
+end)
+
+let within part =
+  match Calendar_context.use () with
+  | Some c -> c
+  | None -> invalid_arg (part ^ " is used inside a Calendar root")
+
+module Context = struct
+  let use () = (within "Calendar.Context.use").public
+end
+
+(* The selection a root makes, of one date or several, each in the
+   calendar's own system. *)
+type selection = {
+  chosen : C.t list S.accessor;
+  choose : C.t -> unit;
+  is_multiple : bool;
+  range : range_selection option;
+}
+
+(* A range's selection: its ends committed, or none, and how it ends as the
+   pointer is let go of outside its days. *)
+and range_selection = {
+  commit : C.t -> C.t -> unit;
+  clear : unit -> unit;
+  non_contiguous : bool S.accessor;
+  commit_behavior : [ `clear | `reset | `select ] S.accessor;
+}
+
+(* A calendar of any selection: what each root is. *)
+let calendar
+    ~(selection : Dt.Calendar.t S.accessor -> (C.t -> C.t option) -> selection)
+    ~(focused_value : C.t option S.accessor)
+    ~(default_focused_value : C.t option) ~(on_focus_change : C.t -> unit)
+    ~(min_value : C.t option S.accessor) ~(max_value : C.t option S.accessor)
+    ~(is_date_unavailable : (C.t -> C.t option -> bool) option S.accessor)
+    ~(visible_duration : duration S.accessor)
+    ~(page_behavior : [ `visible | `single ] S.accessor)
+    ~(selection_alignment : [ `start | `center | `end_ ] option S.accessor)
+    ~(first_day_of_week : day_of_week option S.accessor)
+    ~(weeks_in_month : int option S.accessor) ~(is_disabled : bool S.accessor)
+    ~(is_read_only : bool S.accessor) ~(is_invalid : bool S.accessor)
+    ~(auto_focus : bool) ~(aria_label : string option S.accessor)
+    ~(aria_labelledby : string option S.accessor)
+    ~(aria_describedby : string option S.accessor)
+    ~(translations : translations option S.accessor) ~children ~others =
+  let locale = use_locale () in
+  let translations =
+    S.accessor (fun () ->
+        match S.get translations with
+        | Some t -> t
+        | None -> translations_for (S.get locale))
+  in
+  let resolved =
+    S.create_memo (fun () ->
+        Dt.DateFormatter.resolved_options
+          (formatter (S.get locale) (Dt.DateTimeFormatOptions.make ()))
+          ())
+  in
+  let cal =
+    S.create_memo (fun () ->
+        D.create_calendar
+          (Dt.ResolvedDateTimeFormatOptions.calendar (S.get resolved)))
+  in
+  let time_zone =
+    S.accessor (fun () ->
+        Dt.ResolvedDateTimeFormatOptions.time_zone (S.get resolved))
+  in
+  let in_calendar d = D.to_calendar d (S.get cal) in
+  let base_min () = Option.map in_calendar (S.get min_value) in
+  let base_max () = Option.map in_calendar (S.get max_value) in
+  (* A range's first date, while its last is still to be chosen, which a
+     range's predicate is given beside each date. *)
+  let anchor, set_anchor = S.create_signal None in
+  let unavailable d =
+    match S.get is_date_unavailable with
+    | Some f -> f d (S.get anchor)
+    | None -> false
+  in
+  (* The focused date's own visible start: set as the focus moves, so the
+     month shown follows it. *)
+  let start_ref = ref None in
+  (* A date chosen, constrained to the range, the latest available on or
+     before it, in the calendar of the value given, else the Gregorian. *)
+  let normalize d =
+    let constrained = constrain d ~min:(base_min ()) ~max:(base_max ()) in
+    let lowest =
+      match base_min () with
+      | Some m -> m
+      | None -> (
+          match !start_ref with
+          | Some s -> earlier constrained s
+          | None -> constrained)
+    in
+    available constrained ~lowest ~unavailable
+  in
+  let sel = selection cal normalize in
+  (* Whether the pointer drags a range. *)
+  let dragging, set_dragging = S.create_signal false in
+  (* The days a range from an anchor may reach: up to the nearest unavailable
+     day each way, within what the calendar shows, unless a range may hold
+     unavailable days. *)
+  let reach a =
+    match (sel.range, S.get is_date_unavailable) with
+    | Some r, Some _ when not (S.get r.non_contiguous) ->
+        let f = unavailable in
+        let by = S.get visible_duration in
+        let next dir =
+          let bound = shift a by dir in
+          let rec go d =
+            let within =
+              if dir < 0 then not (before d bound) else not (after d bound)
+            in
+            if within && not (f d) then go (days dir d) else d
+          in
+          let d = go (days dir a) in
+          if f d then Some (days (-dir) d) else None
+        in
+        Some (next (-1), next 1)
+    | _ -> None
+  in
+  let reached = S.create_memo (fun () -> Option.bind (S.get anchor) reach) in
+  let min () =
+    match (base_min (), S.get reached) with
+    | Some m, Some (Some lo, _) -> Some (later m lo)
+    | None, Some (Some lo, _) -> Some lo
+    | m, _ -> m
+  in
+  let max () =
+    match (base_max (), S.get reached) with
+    | Some m, Some (_, Some hi) -> Some (earlier m hi)
+    | None, Some (_, Some hi) -> Some hi
+    | m, _ -> m
+  in
+  let chosen =
+    S.create_memo (fun () -> List.map in_calendar (S.get sel.chosen))
+  in
+  let first () = S.get first_day_of_week in
+  let default_focused =
+    let seed =
+      match default_focused_value with
+      | Some d -> d
+      | None -> (
+          match S.untrack (fun () -> S.get chosen) with
+          | d :: _ -> d
+          | [] -> D.today (S.untrack (fun () -> S.get time_zone)))
+    in
+    S.untrack (fun () ->
+        constrain (in_calendar seed) ~min:(min ()) ~max:(max ()))
+  in
+  let kept, set_kept = S.create_signal default_focused in
+  let focused =
+    S.create_memo (fun () ->
+        match S.get focused_value with
+        | Some d -> constrain (in_calendar d) ~min:(min ()) ~max:(max ())
+        | None -> S.get kept)
+  in
+  (* A range that runs past a view centred on its start is shown from its
+     start. *)
+  let alignment () =
+    match (S.get selection_alignment, sel.range, S.get chosen) with
+    | Some a, _, _ -> a
+    | None, Some _, [ s; e ] ->
+        let by = S.get visible_duration in
+        let shown =
+          align_center s by (S.get locale) (first ()) ~min:(base_min ())
+            ~max:(base_max ())
+        in
+        if after e (days (-1) (shift shown by 1)) then `start else `center
+    | None, _, _ -> `center
+  in
+  (* The range shown: from the anchor to the focused date while one is
+     chosen, else the value. *)
+  let highlighted =
+    S.create_memo (fun () ->
+        match sel.range with
+        | None -> None
+        | Some _ -> (
+            match (S.get anchor, S.get chosen) with
+            | Some a, _ ->
+                let f = S.get focused in
+                Some (if after a f then (f, a) else (a, f))
+            | None, [ s; e ] -> Some (if after s e then (e, s) else (s, e))
+            | None, _ -> None))
+  in
+  let start_for d =
+    let by = S.get visible_duration and l = S.get locale in
+    match alignment () with
+    | `start -> align_start d by l (first ()) ~min:(min ()) ~max:(max ())
+    | `end_ -> align_end d by l (first ()) ~min:(min ()) ~max:(max ())
+    | `center -> align_center d by l (first ()) ~min:(min ()) ~max:(max ())
+  in
+  let start, set_start =
+    S.create_signal (S.untrack (fun () -> start_for (S.get focused)))
+  in
+  start_ref := Some (S.untrack (fun () -> S.get start));
+  let finish =
+    S.create_memo (fun () ->
+        let less =
+          match S.get visible_duration with Days n -> Days (n - 1) | by -> by
+        in
+        let ended = shift (S.get start) less 1 in
+        match S.get visible_duration with
+        | Days _ -> ended
+        | Months _ | Weeks _ -> days (-1) ended)
+  in
+  let set_start_to s =
+    start_ref := Some s;
+    S.set set_start s
+  in
+  (* The view follows the focus: a date before it shows the view that ends
+     with it, and one after it the view that starts with it. *)
+  S.create_render_effect (fun () ->
+      let f = S.get focused in
+      let by = S.get visible_duration and l = S.get locale in
+      S.untrack (fun () ->
+          if before f (S.get start) then
+            set_start_to
+              (align_end f by l (first ()) ~min:(min ()) ~max:(max ()))
+          else if after f (S.get finish) then
+            set_start_to
+              (align_start f by l (first ()) ~min:(min ()) ~max:(max ()))));
+  (* A new size of view is aligned again around the focus. *)
+  let last_duration = ref (S.untrack (fun () -> S.get visible_duration)) in
+  S.create_render_effect (fun () ->
+      let by = S.get visible_duration in
+      if not (same_duration by !last_duration) then (
+        last_duration := by;
+        S.untrack (fun () -> set_start_to (start_for (S.get focused)))));
+  let focus_date d =
+    let d = constrain d ~min:(min ()) ~max:(max ()) in
+    if not (same_day d (S.get focused)) then (
+      if Option.is_none (S.get focused_value) then S.set set_kept d;
+      on_focus_change d)
+  in
+  let page () =
+    match S.get page_behavior with
+    | `visible -> S.get visible_duration
+    | `single -> unit (S.get visible_duration)
+  in
+  let is_focused, set_is_focused = S.create_signal auto_focus in
+  let focus_next_page () =
+    let by = page () and l = S.get locale in
+    let f = S.get focused in
+    let s = shift (S.get start) by 1 in
+    set_start_to
+      (align_start
+         (constrain_start f s by l (first ()) ~min:(min ()) ~max:(max ()))
+         by l (first ()) ~min:None ~max:None);
+    focus_date (shift f by 1)
+  in
+  let focus_previous_page () =
+    let by = page () and l = S.get locale in
+    let f = S.get focused in
+    let s = shift (S.get start) by (-1) in
+    set_start_to
+      (align_start
+         (constrain_start f s by l (first ()) ~min:(min ()) ~max:(max ()))
+         by l (first ()) ~min:None ~max:None);
+    focus_date (shift f by (-1))
+  in
+  let focus_row sign =
+    match S.get visible_duration with
+    | Days _ -> if sign > 0 then focus_next_page () else focus_previous_page ()
+    | Months _ | Weeks _ ->
+        focus_date (C.add (S.get focused) (Dt.DateDuration.make ~weeks:sign ()))
+  in
+  let focus_section ~larger sign =
+    let f = S.get focused in
+    match S.get visible_duration with
+    | Days _ -> if sign > 0 then focus_next_page () else focus_previous_page ()
+    | by when not larger -> focus_date (shift f (unit by) sign)
+    | Weeks _ -> focus_date (C.add f (Dt.DateDuration.make ~months:sign ()))
+    | Months _ -> focus_date (C.add f (Dt.DateDuration.make ~years:sign ()))
+  in
+  let focus_section_edge ~at_end =
+    let f = S.get focused and l = S.get locale in
+    match S.get visible_duration with
+    | Days _ -> focus_date (if at_end then S.get finish else S.get start)
+    | Weeks _ ->
+        focus_date
+          (if at_end then end_of_week f l (first ())
+           else start_of_week f l (first ()))
+    | Months _ ->
+        focus_date (if at_end then end_of_month f else start_of_month f)
+  in
+  let in_range d (s, e) = not (before d s || after d e) in
+  (* A date chosen in a range: its anchor, else its last date, constrained
+     to what the anchor reaches, the latest available on or before it. *)
+  let choose_in_range (r : range_selection) d =
+    let d = constrain d ~min:(min ()) ~max:(max ()) in
+    match available d ~lowest:(S.get start) ~unavailable with
+    | None -> ()
+    | Some d -> (
+        match S.get anchor with
+        | None -> S.set set_anchor (Some d)
+        | Some a ->
+            let s, e = if after a d then (d, a) else (a, d) in
+            S.set set_anchor None;
+            r.commit s e)
+  in
+  let select d =
+    if not (S.get is_disabled || S.get is_read_only) then
+      match sel.range with
+      | Some r -> choose_in_range r d
+      | None -> sel.choose d
+  in
+  let is_selected d =
+    match sel.range with
+    | Some _ -> (
+        match S.get highlighted with Some r -> in_range d r | None -> false)
+    | None -> List.exists (fun v -> same_day v d) (S.get chosen)
+  in
+  let value_invalid =
+    S.create_memo (fun () ->
+        S.get is_invalid
+        ||
+        match sel.range with
+        | Some _ -> (
+            match (S.get anchor, S.get chosen) with
+            | None, [ s; e ] ->
+                unavailable s || unavailable e
+                || out_of_range s ~min:(base_min ()) ~max:(base_max ())
+                || out_of_range e ~min:(base_min ()) ~max:(base_max ())
+            | _ -> false)
+        | None ->
+            List.exists
+              (fun v ->
+                unavailable v || out_of_range v ~min:(min ()) ~max:(max ()))
+              (S.get chosen))
+  in
+  let previous_invalid =
+    S.accessor (fun () ->
+        let p = days (-1) (S.get start) in
+        same_day p (S.get start) || out_of_range p ~min:(min ()) ~max:(max ()))
+  in
+  let next_invalid =
+    S.accessor (fun () ->
+        let n = days 1 (S.get finish) in
+        same_day n (S.get finish) || out_of_range n ~min:(min ()) ~max:(max ()))
+  in
+  let root, set_root = S.create_signal None in
+  let focus_cell () =
+    match S.get root with
+    | Some r -> (
+        match Js.Null.toOption (query r "[role=gridcell] [tabindex=\"0\"]") with
+        | Some b -> focus_element b
+        | None -> ())
+    | None -> ()
+  in
+  let direction =
+    S.accessor (fun () -> I18n.get_reading_direction (S.get locale))
+  in
+  let focus_on d =
+    focus_date d;
+    S.set set_is_focused true
+  in
+  (* As a range is begun by the keys, the focus moves on to the next day it
+     may reach, else the day before, to show a range is being chosen. *)
+  let focus_nearest a =
+    let invalid d = out_of_range d ~min:(min ()) ~max:(max ()) in
+    let next = if invalid (days 1 a) then days (-1) a else days 1 a in
+    if not (invalid next) then focus_on next
+  in
+  let finish_range (r : range_selection) =
+    match S.get r.commit_behavior with
+    | `select -> select (S.get focused)
+    | `reset -> S.set set_anchor None
+    | `clear ->
+        S.set set_anchor None;
+        r.clear ()
+  in
+  (* Where a press on a day began: a range's anchor, an end of the range
+     chosen, or a touch not yet taken for a drag. *)
+  let pressed = ref `none in
+  let touch_timer = ref None in
+  let press_start ~touch d =
+    match S.get anchor with
+    | Some _ -> ()
+    | None -> (
+        let move_end other =
+          S.set set_anchor (Some other);
+          focus_on d;
+          S.set set_dragging true;
+          pressed := `boundary d
+        in
+        match S.get highlighted with
+        | Some (s, e) when (not (S.get value_invalid)) && same_day d s ->
+            move_end e
+        | Some (s, e) when (not (S.get value_invalid)) && same_day d e ->
+            move_end s
+        | _ ->
+            let begin_range () =
+              touch_timer := None;
+              S.set set_dragging true;
+              select d;
+              focus_on d;
+              pressed := `anchor d
+            in
+            (* A touch is a drag only once held, else it scrolls. *)
+            if touch then touch_timer := Some (set_timeout begin_range 200)
+            else begin_range ())
+  in
+  let press_up d =
+    (match !touch_timer with
+    | Some t ->
+        clear_timeout t;
+        touch_timer := None;
+        select d;
+        focus_on d
+    | None -> (
+        match !pressed with
+        | `boundary b when same_day b d -> S.set set_anchor (Some d)
+        | `anchor a when same_day a d -> ()
+        | `none | `boundary _ | `anchor _ ->
+            if Option.is_some (S.get anchor) then (
+              select d;
+              focus_on d)));
+    pressed := `none
+  in
+  let hover ~touch d =
+    if (not touch) || S.get dragging then
+      match S.get anchor with Some _ -> focus_date d | None -> ()
+  in
+  let on_key (e : Dom.keyboardEvent) =
+    let handled f =
+      prevent_key e;
+      f ()
+    in
+    if not (alt e || ctrl e || meta e) then
+      match (key e, shift_key e) with
+      | ("Enter" | " "), false ->
+          handled (fun () ->
+              let f = S.get focused in
+              if not (unavailable f) then (
+                let beginning =
+                  Option.is_some sel.range && Option.is_none (S.get anchor)
+                in
+                select f;
+                if beginning && Option.is_some (S.get anchor) then
+                  focus_nearest f))
+      | "Escape", false -> (
+          match S.get anchor with Some _ -> S.set set_anchor None | None -> ())
+      | "PageUp", s -> handled (fun () -> focus_section ~larger:s (-1))
+      | "PageDown", s -> handled (fun () -> focus_section ~larger:s 1)
+      | "Home", false -> handled (fun () -> focus_section_edge ~at_end:false)
+      | "End", false -> handled (fun () -> focus_section_edge ~at_end:true)
+      | "ArrowLeft", false ->
+          handled (fun () ->
+              focus_date
+                (days
+                   (match S.get direction with `rtl -> 1 | `ltr -> -1)
+                   (S.get focused)))
+      | "ArrowRight", false ->
+          handled (fun () ->
+              focus_date
+                (days
+                   (match S.get direction with `rtl -> -1 | `ltr -> 1)
+                   (S.get focused)))
+      | "ArrowUp", false -> handled (fun () -> focus_row (-1))
+      | "ArrowDown", false -> handled (fun () -> focus_row 1)
+      | _ -> ()
+  in
+  let announced, set_announced = S.create_signal "" in
+  let visible_aria =
+    S.accessor (fun () ->
+        visible_description ~locale:(S.get locale) ~time_zone:(S.get time_zone)
+          ~translations:(S.get translations) ~aria:true (S.get start)
+          (S.get finish))
+  in
+  (* A reader is told the dates shown as they change while the focus is not
+     in the grid -- as the buttons page -- and each date chosen. *)
+  let shown_before = ref (S.untrack (fun () -> S.get visible_aria)) in
+  S.create_effect (fun () ->
+      let now = S.get visible_aria in
+      if
+        (not (String.equal now !shown_before))
+        && not (S.untrack (fun () -> S.get is_focused))
+      then S.set set_announced now;
+      shown_before := now);
+  (* What a range chosen is: its one date, or its two ends. *)
+  let range_description =
+    S.create_memo (fun () ->
+        match (sel.range, S.get anchor, S.get chosen) with
+        | Some _, None, [ a; b ] ->
+            let s, e = if after a b then (b, a) else (a, b) in
+            let t = S.get translations and tz = S.get time_zone in
+            let format =
+              formatter (S.get locale)
+                (Dt.DateTimeFormatOptions.make ~weekday:`long ~month:"long"
+                   ~year:"numeric" ~day:"numeric"
+                   ?era:
+                     (match era_of s with Some x -> Some x | None -> era_of e)
+                   ~time_zone:tz ())
+            in
+            if same_day s e then
+              t.selected_date_description
+                (Dt.DateFormatter.format format (C.to_date s tz))
+            else
+              t.selected_range_description
+                (spoken_range format ~translations:t ~time_zone:tz s e)
+        | _ -> "")
+  in
+  let range_before = ref (S.untrack (fun () -> S.get range_description)) in
+  S.create_effect (fun () ->
+      let now = S.get range_description in
+      if not (String.equal now !range_before) then (
+        range_before := now;
+        if not (String.equal now "") then S.set set_announced now));
+  let chosen_before = ref (S.untrack (fun () -> S.get chosen)) in
+  S.create_effect (fun () ->
+      let now = S.get chosen in
+      if
+        Option.is_none sel.range && not (List.equal same_day now !chosen_before)
+      then (
+        chosen_before := now;
+        match now with
+        | [] -> ()
+        | dates ->
+            let tz = S.untrack (fun () -> S.get time_zone) in
+            let format =
+              formatter
+                (S.untrack (fun () -> S.get locale))
+                (Dt.DateTimeFormatOptions.make ~weekday:`long ~month:"long"
+                   ~year:"numeric" ~day:"numeric" ~time_zone:tz ())
+            in
+            let names =
+              List.map
+                (fun d -> Dt.DateFormatter.format format (C.to_date d tz))
+                dates
+            in
+            S.set set_announced
+              ((S.untrack (fun () -> S.get translations))
+                 .selected_date_description (String.concat ", " names))));
+  let id = S.create_unique_id () in
+  let labelled_by =
+    S.accessor (fun () ->
+        Option.map (fun l -> id ^ " " ^ l) (S.get aria_labelledby))
+  in
+  let label () =
+    match
+      List.filter_map Fun.id [ S.get aria_label; Some (S.get visible_aria) ]
+    with
+    | [] -> None
+    | l -> Some (String.concat ", " l)
+  in
+  let inner =
+    {
+      public =
+        {
+          focused_date = focused;
+          set_focused_date = focus_date;
+          visible_start = start;
+          visible_end = finish;
+          visible_duration;
+          min_value = S.accessor min;
+          max_value = S.accessor max;
+          locale;
+          time_zone;
+          is_disabled;
+          is_read_only;
+          is_invalid = value_invalid;
+          is_focused;
+          is_previous_disabled =
+            S.accessor (fun () -> S.get is_disabled || S.get previous_invalid);
+          is_next_disabled =
+            S.accessor (fun () -> S.get is_disabled || S.get next_invalid);
+          focus = focus_cell;
+        };
+      first_day = first_day_of_week;
+      weeks_in_month;
+      translations;
+      multiple = sel.is_multiple;
+      is_range = Option.is_some sel.range;
+      anchor;
+      highlighted;
+      range_description;
+      prompt_id = id ^ "-range-prompt";
+      press_start;
+      press_up;
+      hover;
+      is_selected;
+      is_value_invalid =
+        (fun d ->
+          S.get value_invalid
+          &&
+          match sel.range with
+          | Some _ -> (
+              Option.is_none (S.get anchor)
+              &&
+              match S.get highlighted with
+              | Some r -> in_range d r
+              | None -> false)
+          | None -> is_selected d);
+      is_unavailable = unavailable;
+      select;
+      set_focused = S.set set_is_focused;
+      focus_previous_page;
+      focus_next_page;
+      on_key;
+      previous_invalid;
+      next_invalid;
+      aria_label;
+      labelled_by;
+    }
+  in
+  S.on_mount (fun () ->
+      if auto_focus then focus_cell ();
+      match (sel.range, S.get root) with
+      | Some r, Some el ->
+          let virtual_press = ref false in
+          let down e =
+            virtual_press :=
+              Option.equal Float.equal
+                (Js.Undefined.toOption (width e))
+                (Some 0.)
+              && Option.equal Float.equal
+                   (Js.Undefined.toOption (height e))
+                   (Some 0.)
+          in
+          (* A pointer let go of outside the days, as a range is dragged or
+             begun, ends it as [commit_behavior] says; on a button -- the
+             paging ones -- it goes on. *)
+          let up e =
+            if !virtual_press then virtual_press := false
+            else (
+              S.set set_dragging false;
+              pressed := `none;
+              let focus_within =
+                match Js.Null.toOption active with
+                | Some a -> contains el a
+                | None -> false
+              in
+              let off_the_days =
+                match Js.Null.toOption (event_target e) with
+                | None -> true
+                | Some t ->
+                    (not (contains el t))
+                    || Option.is_none
+                         (Js.Null.toOption
+                            (closest t "button, [role=\"button\"]"))
+              in
+              if Option.is_some (S.get anchor) && focus_within && off_the_days
+              then finish_range r)
+          in
+          (* The focus leaving the calendar ends a range begun. *)
+          let out e =
+            if Option.is_some (S.get anchor) then
+              match Js.Null.toOption (event_related e) with
+              | Some t when contains el t -> ()
+              | Some _ | None -> finish_range r
+          in
+          (* A drag does not scroll the page under it. *)
+          let touch_move e = if S.get dragging then prevent e in
+          let held = listening ~passive:false ~capture:true in
+          let bubbling = listening ~passive:true ~capture:false in
+          window_listen "pointerdown" down;
+          window_listen "pointerup" up;
+          listen el "focusout" out bubbling;
+          listen el "touchmove" touch_move held;
+          S.on_cleanup (fun () ->
+              window_unlisten "pointerdown" down;
+              window_unlisten "pointerup" up;
+              unlisten el "focusout" out bubbling;
+              unlisten el "touchmove" touch_move held;
+              Option.iter clear_timeout !touch_timer)
+      | _ -> ());
+  <Calendar_context.Provider value=inner>
+    <div
+      id
+      role=`application
+      ref=(fun e -> S.set set_root (Some (as_element e)))
+      ?aria_label=(label ())
+      ?aria_labelledby=(S.get labelled_by)
+      ?aria_describedby=(S.get aria_describedby)
+      data_disabled=(state (S.get is_disabled))
+      data_invalid=(state (S.get value_invalid))
+      ?as_=(S.drawn_as others)
+      props=(S.undrawn others)>
+      <span style=visually_hidden>
+        <h2>(Jsx.string (Option.value (label ()) ~default:""))</h2>
+      </span>
+      (children ())
+      <span style=visually_hidden>
+        <button
+          type_=`button
+          aria_label=(S.get translations).next
+          disabled=(S.get next_invalid || S.get is_disabled)
+          tabindex="-1"
+          on_click=(fun _ -> focus_next_page ())
+        />
+      </span>
+      (if Option.is_some sel.range then
+         <span id=(id ^ "-range-prompt") style=visually_hidden>
+           (Jsx.string
+              (let t = S.get translations in
+               if Option.is_some (S.get anchor) then
+                 t.finish_range_selection_prompt
+               else t.start_range_selection_prompt))
+         </span>
+       else Jsx.nothing)
+      <span style=visually_hidden aria_live=`polite>
+        (Jsx.string (S.get announced))
+      </span>
+    </div>
+  </Calendar_context.Provider>
+
+(* What a picker around a calendar gives it: its date or its range, and the
+   dates it may choose. A calendar takes each where it is given none of its
+   own, as React Aria's takes its picker's. *)
+module Given = struct
+  type value =
+    | Single of C.t option S.accessor * (C.t -> unit)
+    | Range of range option S.accessor * (range -> unit)
+
+  type t = {
+    value : value;
+    min_value : C.t option S.accessor;
+    max_value : C.t option S.accessor;
+    is_date_unavailable : (C.t -> bool) option S.accessor;
+    is_disabled : bool S.accessor;
+    is_read_only : bool S.accessor;
+    is_invalid : bool S.accessor;
+    default_focused_value : C.t option S.accessor;
+    first_day_of_week : day_of_week option S.accessor;
+    page_behavior : [ `visible | `single ] option S.accessor;
+  }
+
+  module Given_context = Solidtype.Context.Make_optional (struct
+    type nonrec t = t
+  end)
+
+  module Provider = Given_context.Provider
+
+  let use = Given_context.use
+end
+
+(* The props every root takes beside its value. *)
+module Common = struct
+  type t
+  type predicate
+
+  external focused_value : t -> C.t option = "focusedValue" [@@mel.get]
+
+  external default_focused_value : t -> C.t option = "defaultFocusedValue"
+  [@@mel.get]
+
+  external on_focus_change : t -> ((C.t -> unit)[@u]) option = "onFocusChange"
+  [@@mel.get]
+
+  external min_value : t -> C.t option = "minValue" [@@mel.get]
+  external max_value : t -> C.t option = "maxValue" [@@mel.get]
+
+  external unavailable_given : t -> predicate option = "isDateUnavailable"
+  [@@mel.get]
+
+  (* A single or several dates' predicate takes the date alone, and leaves
+     the anchor JavaScript passes it. *)
+  external is_date_unavailable : t -> C.t -> C.t option -> bool
+    = "isDateUnavailable"
+  [@@mel.send]
+
+  external visible_duration : t -> duration option = "visibleDuration"
+  [@@mel.get]
+
+  external page_behavior : t -> [ `visible | `single ] option = "pageBehavior"
+  [@@mel.get]
+
+  external selection_alignment : t -> [ `start | `center | `end_ ] option
+    = "selectionAlignment"
+  [@@mel.get]
+
+  external first_day_of_week : t -> day_of_week option = "firstDayOfWeek"
+  [@@mel.get]
+
+  external weeks_in_month : t -> int option = "weeksInMonth" [@@mel.get]
+  external is_disabled : t -> bool option = "isDisabled" [@@mel.get]
+  external is_read_only : t -> bool option = "isReadOnly" [@@mel.get]
+  external is_invalid : t -> bool option = "isInvalid" [@@mel.get]
+  external auto_focus : t -> bool option = "autoFocus" [@@mel.get]
+  external aria_label : t -> string option = "aria-label" [@@mel.get]
+  external aria_labelledby : t -> string option = "aria-labelledby" [@@mel.get]
+
+  external aria_describedby : t -> string option = "aria-describedby"
+  [@@mel.get]
+
+  external translations : t -> translations option = "translations" [@@mel.get]
+  external children : t -> Jsx.element = "children" [@@mel.get]
+
+  (* The props a root takes for itself; the rest it passes on. *)
+  let own =
+    [|
+      "value";
+      "defaultValue";
+      "onChange";
+      "focusedValue";
+      "defaultFocusedValue";
+      "onFocusChange";
+      "minValue";
+      "maxValue";
+      "isDateUnavailable";
+      "visibleDuration";
+      "pageBehavior";
+      "selectionAlignment";
+      "firstDayOfWeek";
+      "weeksInMonth";
+      "isDisabled";
+      "isReadOnly";
+      "isInvalid";
+      "autoFocus";
+      "aria-label";
+      "aria-labelledby";
+      "aria-describedby";
+      "translations";
+      "allowsNonContiguousRanges";
+      "commitBehavior";
+      "children";
+    |]
+
+  (* A prop given, else what a picker around it gives. *)
+  let own_else given own (from : Given.t -> 'a option S.accessor) =
+    S.accessor (fun () ->
+        match own () with
+        | Some v -> Some v
+        | None -> ( match given with Some g -> S.get (from g) | None -> None))
+
+  let make ~selection (props : t) =
+    let given = Given.use () in
+    let own_flag get (from : Given.t -> bool S.accessor) =
+      S.accessor (fun () ->
+          match get props with
+          | Some v -> v
+          | None -> (
+              match given with Some g -> S.get (from g) | None -> false))
+    in
+    calendar ~selection
+      ~focused_value:(S.accessor (fun () -> focused_value props))
+      ~default_focused_value:
+        (S.untrack (fun () ->
+             S.get
+               (own_else given
+                  (fun () -> default_focused_value props)
+                  (fun g -> g.default_focused_value))))
+      ~on_focus_change:(fun d -> Jsx.call (on_focus_change props) d)
+      ~min_value:
+        (own_else given (fun () -> min_value props) (fun g -> g.min_value))
+      ~max_value:
+        (own_else given (fun () -> max_value props) (fun g -> g.max_value))
+      ~is_date_unavailable:
+        (S.accessor (fun () ->
+             match unavailable_given props with
+             | Some _ -> Some (fun d a -> is_date_unavailable props d a)
+             | None -> (
+                 match given with
+                 | Some g ->
+                     Option.map (fun f d _ -> f d) (S.get g.is_date_unavailable)
+                 | None -> None)))
+      ~visible_duration:
+        (S.accessor (fun () ->
+             Option.value (visible_duration props) ~default:(Months 1)))
+      ~page_behavior:
+        (S.accessor (fun () ->
+             Option.value
+               (S.get
+                  (own_else given
+                     (fun () -> page_behavior props)
+                     (fun g -> g.page_behavior)))
+               ~default:`visible))
+      ~selection_alignment:(S.accessor (fun () -> selection_alignment props))
+      ~first_day_of_week:
+        (own_else given
+           (fun () -> first_day_of_week props)
+           (fun g -> g.first_day_of_week))
+      ~weeks_in_month:(S.accessor (fun () -> weeks_in_month props))
+      ~is_disabled:(own_flag is_disabled (fun g -> g.is_disabled))
+      ~is_read_only:(own_flag is_read_only (fun g -> g.is_read_only))
+      ~is_invalid:(own_flag is_invalid (fun g -> g.is_invalid))
+      ~auto_focus:
+        (S.untrack (fun () ->
+             (* A picker's calendar takes the focus as it opens. *)
+             Option.value (auto_focus props) ~default:(Option.is_some given)))
+      ~aria_label:(S.accessor (fun () -> aria_label props))
+      ~aria_labelledby:(S.accessor (fun () -> aria_labelledby props))
+      ~aria_describedby:(S.accessor (fun () -> aria_describedby props))
+      ~translations:(S.accessor (fun () -> translations props))
+      ~children:(fun () -> children props)
+      ~others:(S.omit props own)
+end
+
+(* The calendar a date chosen is told in: the value's, else the
+   Gregorian. *)
+let told_in = function
+  | Some v -> C.calendar v
+  | None -> D.create_calendar "gregory"
+
+module Root = struct
+  module Props = struct
+    type t = Common.t
+
+    external check :
+      ?value:C.t Js.Nullable.t Solidtype.Check.value ->
+      ?default_value:C.t Solidtype.Check.value ->
+      ?on_change:(C.t -> unit) ->
+      ?focused_value:C.t Solidtype.Check.value ->
+      ?default_focused_value:C.t Solidtype.Check.value ->
+      ?on_focus_change:(C.t -> unit) ->
+      ?min_value:C.t Solidtype.Check.value ->
+      ?max_value:C.t Solidtype.Check.value ->
+      ?is_date_unavailable:(C.t -> bool) ->
+      ?visible_duration:duration Solidtype.Check.value ->
+      ?page_behavior:[ `visible | `single ] Solidtype.Check.value ->
+      ?selection_alignment:[ `start | `center | `end_ ] Solidtype.Check.value ->
+      ?first_day_of_week:day_of_week Solidtype.Check.value ->
+      ?weeks_in_month:int Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?is_read_only:bool Solidtype.Check.value ->
+      ?is_invalid:bool Solidtype.Check.value ->
+      ?auto_focus:bool Solidtype.Check.value ->
+      ?aria_label:string Solidtype.Check.value ->
+      ?aria_labelledby:string Solidtype.Check.value ->
+      ?aria_describedby:string Solidtype.Check.value ->
+      ?translations:translations Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> C.t Js.Nullable.t option = "value" [@@mel.get]
+    external default_value : t -> C.t option = "defaultValue" [@@mel.get]
+
+    external on_change : t -> ((C.t -> unit)[@u]) option = "onChange"
+    [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let picker =
+      match Given.use () with
+      | Some { value = Single (v, change); _ } -> Some (v, change)
+      | Some { value = Range _; _ } | None -> None
+    in
+    let selection _ normalize =
+      let kept, set_kept =
+        S.create_signal (S.untrack (fun () -> Props.default_value props))
+      in
+      let current () =
+        match (Props.value props, picker) with
+        | Some v, _ -> Js.Nullable.toOption v
+        | None, Some (v, _) -> S.get v
+        | None, None -> S.get kept
+      in
+      {
+        chosen = S.accessor (fun () -> Option.to_list (current ()));
+        choose =
+          (fun d ->
+            match normalize d with
+            | None -> ()
+            | Some d ->
+                let d = D.to_calendar d (told_in (current ())) in
+                if Option.is_none (Props.value props) then
+                  S.set set_kept (Some d);
+                Jsx.call (Props.on_change props) d;
+                Option.iter (fun (_, change) -> change d) picker);
+        is_multiple = false;
+        range = None;
+      }
+    in
+    Common.make ~selection props
+
+  let component = Jsx.component make
+end
+
+module Root_multiple = struct
+  module Props = struct
+    type t = Common.t
+
+    external check :
+      ?value:C.t array Solidtype.Check.value ->
+      ?default_value:C.t array Solidtype.Check.value ->
+      ?on_change:(C.t array -> unit) ->
+      ?focused_value:C.t Solidtype.Check.value ->
+      ?default_focused_value:C.t Solidtype.Check.value ->
+      ?on_focus_change:(C.t -> unit) ->
+      ?min_value:C.t Solidtype.Check.value ->
+      ?max_value:C.t Solidtype.Check.value ->
+      ?is_date_unavailable:(C.t -> bool) ->
+      ?visible_duration:duration Solidtype.Check.value ->
+      ?page_behavior:[ `visible | `single ] Solidtype.Check.value ->
+      ?selection_alignment:[ `start | `center | `end_ ] Solidtype.Check.value ->
+      ?first_day_of_week:day_of_week Solidtype.Check.value ->
+      ?weeks_in_month:int Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?is_read_only:bool Solidtype.Check.value ->
+      ?is_invalid:bool Solidtype.Check.value ->
+      ?auto_focus:bool Solidtype.Check.value ->
+      ?aria_label:string Solidtype.Check.value ->
+      ?aria_labelledby:string Solidtype.Check.value ->
+      ?aria_describedby:string Solidtype.Check.value ->
+      ?translations:translations Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> C.t array option = "value" [@@mel.get]
+    external default_value : t -> C.t array option = "defaultValue" [@@mel.get]
+
+    external on_change : t -> ((C.t array -> unit)[@u]) option = "onChange"
+    [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let selection _ normalize =
+      let kept, set_kept =
+        S.create_signal
+          (S.untrack (fun () ->
+               Option.value (Props.default_value props) ~default:[||]))
+      in
+      let current () =
+        match Props.value props with Some v -> v | None -> S.get kept
+      in
+      {
+        chosen = S.accessor (fun () -> Array.to_list (current ()));
+        choose =
+          (fun d ->
+            match normalize d with
+            | None -> ()
+            | Some d ->
+                let now = current () in
+                let d =
+                  D.to_calendar d
+                    (told_in
+                       (if Array.length now > 0 then Some now.(0) else None))
+                in
+                let next =
+                  if Array.exists (fun v -> same_day v d) now then
+                    Js.Array.filter ~f:(fun v -> not (same_day v d)) now
+                  else Array.append now [| d |]
+                in
+                if Option.is_none (Props.value props) then S.set set_kept next;
+                Jsx.call (Props.on_change props) next);
+        is_multiple = true;
+        range = None;
+      }
+    in
+    Common.make ~selection props
+
+  let component = Jsx.component make
+end
+
+module Root_range = struct
+  module Props = struct
+    type t = Common.t
+
+    external check :
+      ?value:range Js.Nullable.t Solidtype.Check.value ->
+      ?default_value:range Solidtype.Check.value ->
+      ?on_change:(range option -> unit) ->
+      ?allows_non_contiguous_ranges:bool Solidtype.Check.value ->
+      ?commit_behavior:[ `clear | `reset | `select ] Solidtype.Check.value ->
+      ?focused_value:C.t Solidtype.Check.value ->
+      ?default_focused_value:C.t Solidtype.Check.value ->
+      ?on_focus_change:(C.t -> unit) ->
+      ?min_value:C.t Solidtype.Check.value ->
+      ?max_value:C.t Solidtype.Check.value ->
+      ?is_date_unavailable:(C.t -> C.t option -> bool) ->
+      ?visible_duration:duration Solidtype.Check.value ->
+      ?page_behavior:[ `visible | `single ] Solidtype.Check.value ->
+      ?selection_alignment:[ `start | `center | `end_ ] Solidtype.Check.value ->
+      ?first_day_of_week:day_of_week Solidtype.Check.value ->
+      ?weeks_in_month:int Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?is_read_only:bool Solidtype.Check.value ->
+      ?is_invalid:bool Solidtype.Check.value ->
+      ?auto_focus:bool Solidtype.Check.value ->
+      ?aria_label:string Solidtype.Check.value ->
+      ?aria_labelledby:string Solidtype.Check.value ->
+      ?aria_describedby:string Solidtype.Check.value ->
+      ?translations:translations Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> range Js.Nullable.t option = "value" [@@mel.get]
+    external default_value : t -> range option = "defaultValue" [@@mel.get]
+
+    external on_change : t -> ((range option -> unit)[@u]) option = "onChange"
+    [@@mel.get]
+
+    external non_contiguous : t -> bool option = "allowsNonContiguousRanges"
+    [@@mel.get]
+
+    external commit_behavior : t -> [ `clear | `reset | `select ] option
+      = "commitBehavior"
+    [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let picker =
+      match Given.use () with
+      | Some { value = Range (v, change); _ } -> Some (v, change)
+      | Some { value = Single _; _ } | None -> None
+    in
+    let selection _ _ =
+      let kept, set_kept =
+        S.create_signal (S.untrack (fun () -> Props.default_value props))
+      in
+      let current () =
+        match (Props.value props, picker) with
+        | Some v, _ -> Js.Nullable.toOption v
+        | None, Some (v, _) -> S.get v
+        | None, None -> S.get kept
+      in
+      let set v =
+        if Option.is_none (Props.value props) then S.set set_kept v;
+        Jsx.call (Props.on_change props) v;
+        match (v, picker) with
+        | Some r, Some (_, change) -> change r
+        | (Some _ | None), _ -> ()
+      in
+      {
+        chosen =
+          S.accessor (fun () ->
+              match current () with Some r -> [ r.start; r.end_ ] | None -> []);
+        choose = (fun _ -> ());
+        is_multiple = true;
+        range =
+          Some
+            {
+              (* Each end in the calendar of the value's, else the
+                 Gregorian. *)
+              commit =
+                (fun s e ->
+                  let prior = current () in
+                  set
+                    (Some
+                       {
+                         start =
+                           D.to_calendar s
+                             (told_in (Option.map (fun r -> r.start) prior));
+                         end_ =
+                           D.to_calendar e
+                             (told_in (Option.map (fun r -> r.end_) prior));
+                       }));
+              clear = (fun () -> set None);
+              non_contiguous =
+                S.accessor (fun () ->
+                    Option.value (Props.non_contiguous props) ~default:false);
+              commit_behavior =
+                S.accessor (fun () ->
+                    Option.value (Props.commit_behavior props) ~default:`select);
+            };
+      }
+    in
+    Common.make ~selection props
+
+  let component = Jsx.component make
+end
+
+(* What a view of [by] holds from [d]: the end of its last day. *)
+let offset_start start = function Some by -> shift start by 1 | None -> start
+
+module Heading = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?offset:duration Solidtype.Check.value ->
+      ?format:Dt.DateTimeFormatOptions.t Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.H2.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.H2.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external offset : t -> duration option = "offset" [@@mel.get]
+
+    external format : t -> Dt.DateTimeFormatOptions.t option = "format"
+    [@@mel.get]
+
+    external children : t -> Jsx.element option = "children" [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let c = within "Calendar.Heading" in
+    let f = c.public in
+    let text () =
+      let start = offset_start (S.get f.visible_start) (Props.offset props) in
+      let tz = S.get f.time_zone in
+      let given = Props.format props in
+      let pick get default =
+        match Option.bind given get with Some v -> Some v | None -> default
+      in
+      let days =
+        match S.get f.visible_duration with
+        | Days _ | Weeks _ -> true
+        | Months _ -> false
+      in
+      let format =
+        formatter (S.get f.locale)
+          (Dt.DateTimeFormatOptions.make
+             ?day:
+               (pick Dt.DateTimeFormatOptions.day
+                  (if days then Some "numeric" else None))
+             ?month:(pick Dt.DateTimeFormatOptions.month (Some "long"))
+             ?year:(pick Dt.DateTimeFormatOptions.year (Some "numeric"))
+             ?era:(pick Dt.DateTimeFormatOptions.era (era_of start))
+             ~calendar:(Dt.Calendar.identifier (C.calendar start))
+             ~time_zone:tz ())
+      in
+      if days then
+        Dt.DateFormatter.format_range format (C.to_date start tz)
+          (C.to_date (S.get f.visible_end) tz)
+      else Dt.DateFormatter.format format (C.to_date start tz)
+    in
+    <h2
+      aria_hidden=true
+      ?as_=(S.drawn_as props)
+      props=(S.undrawn (S.omit props [| "offset"; "format"; "children" |]))>
+      (match Props.children props with
+      | Some c -> c
+      | None -> Jsx.string (text ()))
+    </h2>
+
+  let component = Jsx.component make
+end
+
+(* A button that pages the calendar, disabled where it would show nothing
+   in its range; while it is disabled with the focus in it, the focus moves
+   to the grid. *)
+module Page_button = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Button.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external children : t -> Jsx.element = "children" [@@mel.get]
+
+    external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
+    [@@mel.get]
+
+    external ref : t -> ((Dom.htmlButtonElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+  end
+
+  let make ~name ~invalid ~page (props : Props.t) =
+    let c = within name in
+    let element = ref None in
+    let disabled () = S.get c.public.is_disabled || S.get invalid in
+    S.create_effect (fun () ->
+        if disabled () then
+          match (!element, Js.Null.toOption active) with
+          | Some b, Some a when a == b ->
+              c.set_focused true;
+              c.public.focus ()
+          | _ -> ());
+    <button
+      type_=`button
+      aria_label=(if String.equal name "Calendar.Previous" then
+                    (S.get c.translations).previous
+                  else (S.get c.translations).next)
+      disabled=(disabled ())
+      data_disabled=(state (disabled ()))
+      ref=(fun e ->
+            element := Some (as_element e);
+            Jsx.call (Props.ref props) e)
+      on_click=(fun e ->
+                 Jsx.call (Props.on_click props) e;
+                 page c ())
+      ?as_=(S.drawn_as props)
+      props=(S.undrawn (S.omit props [| "children"; "onClick"; "ref" |]))>
+      (Props.children props)
+    </button>
+end
+
+module Previous = struct
+  module Props = Page_button.Props
+
+  let make props =
+    let c = within "Calendar.Previous" in
+    Page_button.make ~name:"Calendar.Previous" ~invalid:c.previous_invalid
+      ~page:(fun c () -> c.focus_previous_page ())
+      props
+
+  let component = Jsx.component make
+end
+
+module Next = struct
+  module Props = Page_button.Props
+
+  let make props =
+    let c = within "Calendar.Next" in
+    Page_button.make ~name:"Calendar.Next" ~invalid:c.next_invalid
+      ~page:(fun c () -> c.focus_next_page ())
+      props
+
+  let component = Jsx.component make
+end
+
+(* What a grid's parts read of it: the month it shows, its weeks and the
+   names of its days. *)
+type grid = {
+  grid_start : C.t S.accessor;
+  weeks : int S.accessor;
+  weekday_names : string array S.accessor;
+}
+
+module Grid_context = Solidtype.Context.Make_optional (struct
+  type t = grid
+end)
+
+let in_grid part =
+  match Grid_context.use () with
+  | Some g -> g
+  | None -> invalid_arg (part ^ " is used inside a Calendar.Grid")
+
+module Grid = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?offset:duration Solidtype.Check.value ->
+      ?weekday_style:[ `narrow | `short | `long ] Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Table.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Table.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external offset : t -> duration option = "offset" [@@mel.get]
+
+    external weekday_style : t -> [ `narrow | `short | `long ] option
+      = "weekdayStyle"
+    [@@mel.get]
+
+    external children : t -> Jsx.element = "children" [@@mel.get]
+
+    external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyDown"
+    [@@mel.get]
+
+    external on_focus_in : t -> ((Dom.focusEvent -> unit)[@u]) option
+      = "onFocusIn"
+    [@@mel.get]
+
+    external on_focus_out : t -> ((Dom.focusEvent -> unit)[@u]) option
+      = "onFocusOut"
+    [@@mel.get]
+
+    external ref : t -> ((Dom.htmlTableElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+  end
+
+  let own =
+    [|
+      "offset";
+      "weekdayStyle";
+      "children";
+      "onKeyDown";
+      "onFocusIn";
+      "onFocusOut";
+      "ref";
+    |]
+
+  let make (props : Props.t) =
+    let c = within "Calendar.Grid" in
+    let f = c.public in
+    let grid_start =
+      S.create_memo (fun () ->
+          offset_start (S.get f.visible_start) (Props.offset props))
+    in
+    let grid_end = S.accessor (fun () -> end_of_month (S.get grid_start)) in
+    let first () = S.get c.first_day in
+    let weeks =
+      S.accessor (fun () ->
+          match S.get f.visible_duration with
+          | Weeks w -> w
+          | Days d -> (d + 6) / 7
+          | Months _ -> (
+              match S.get c.weeks_in_month with
+              | Some n -> n
+              | None ->
+                  D.get_weeks_in_month (S.get grid_start) (S.get f.locale)
+                    ?first_day_of_week:(first ()) ()))
+    in
+    let weekday_names =
+      S.create_memo (fun () ->
+          let tz = S.get f.time_zone in
+          let style =
+            Option.value (Props.weekday_style props) ~default:`narrow
+          in
+          let format =
+            formatter (S.get f.locale)
+              (Dt.DateTimeFormatOptions.make ~weekday:style ~time_zone:tz ())
+          in
+          let day_view, count =
+            match S.get f.visible_duration with
+            | Days n when n < 7 -> (true, n)
+            | Days _ | Weeks _ | Months _ -> (false, 7)
+          in
+          let from =
+            if day_view then S.get grid_start
+            else start_of_week (D.today tz) (S.get f.locale) (first ())
+          in
+          Array.init count (fun i ->
+              Dt.DateFormatter.format format (C.to_date (days i from) tz)))
+    in
+    let label () =
+      match
+        List.filter_map Fun.id
+          [
+            S.get c.aria_label;
+            Some
+              (visible_description ~locale:(S.get f.locale)
+                 ~time_zone:(S.get f.time_zone)
+                 ~translations:(S.get c.translations) ~aria:true
+                 (S.get grid_start)
+                 (match S.get f.visible_duration with
+                 | Months _ -> S.get grid_end
+                 | Weeks _ | Days _ -> S.get f.visible_end));
+          ]
+      with
+      | [] -> None
+      | l -> Some (String.concat ", " l)
+    in
+    let id = S.create_unique_id () in
+    let table = ref None in
+    <Grid_context.Provider value={ grid_start; weeks; weekday_names }>
+      <table
+        id
+        role=`grid
+        ?aria_label=(label ())
+        ?aria_labelledby=(Option.map
+                            (fun l -> id ^ " " ^ l)
+                            (S.get c.labelled_by))
+        ?aria_readonly=(if S.get f.is_read_only then Some true else None)
+        ?aria_disabled=(if S.get f.is_disabled then Some true else None)
+        ?aria_multiselectable=(if c.multiple then Some true else None)
+        on_key_down=(fun e ->
+                      Jsx.call (Props.on_key_down props) e;
+                      c.on_key e)
+        on_focus_in=(fun e ->
+                      Jsx.call (Props.on_focus_in props) e;
+                      c.set_focused true)
+        ref=(fun e ->
+              table := Some (as_element e);
+              Jsx.call (Props.ref props) e)
+        on_focus_out=(fun e ->
+                       Jsx.call (Props.on_focus_out props) e;
+                       match (Js.Null.toOption (related e), !table) with
+                       | Some t, Some g when contains g t -> ()
+                       | _ -> c.set_focused false)
+        ?as_=(S.drawn_as props)
+        props=(S.undrawn (S.omit props own))>
+        (Props.children props)
+      </table>
+    </Grid_context.Provider>
+
+  let component = Jsx.component make
+end
+
+module Grid_header = struct
+  module Props = struct
+    type t
+
+    external check :
+      children:
+        ( string Solidtype.Solid.accessor -> Solidtype.Jsx.element,
+          [ `render ] )
+        Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Thead.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (unit -> unit) Solidtype.Html.Thead.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    (* Its children, a function each day's name is drawn by, called once a
+       name, inside Index. *)
+    external draw : t -> string S.accessor -> Jsx.element = "children"
+    [@@mel.send]
+  end
+
+  let make (props : Props.t) =
+    let g = in_grid "Calendar.Grid_header" in
+    <thead
+      aria_hidden=true
+      ?as_=(S.drawn_as props)
+      props=(S.undrawn (S.omit props [| "children" |]))>
+      <tr>
+        <Index each=(S.get g.weekday_names)>
+          (fun name _ -> Props.draw props name)
+        </Index>
+      </tr>
+    </thead>
+
+  let component = Jsx.component make
+end
+
+module Header_cell = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?as_:(Solidtype.Html.Th.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Th.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external children : t -> Jsx.element = "children" [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    <th
+      ?as_=(S.drawn_as props) props=(S.undrawn (S.omit props [| "children" |]))>
+      (Props.children props)
+    </th>
+
+  let component = Jsx.component make
+end
+
+(* The dates of a grid's week, as React Stately lays them out: a week from
+   its first day, or a day view's days, and none where a calendar's dates
+   end. *)
+let dates_in_week (f : calendar) ~first ~week from =
+  let date = C.add from (Dt.DateDuration.make ~weeks:week ()) in
+  let count =
+    match S.get f.visible_duration with Days n when n < 7 -> n | _ -> 7
+  in
+  let leading, date =
+    if count = 7 then
+      let date = start_of_week date (S.get f.locale) first in
+      (D.get_day_of_week date (S.get f.locale) ?first_day_of_week:first (), date)
+    else (0, date)
+  in
+  let rec fill acc date n =
+    if n >= count then List.rev acc
+    else
+      let next = days 1 date in
+      if same_day date next then
+        List.rev_append acc
+          (List.init (count - n) (fun i -> if i = 0 then Some date else None))
+      else fill (Some date :: acc) next (n + 1)
+  in
+  Array.of_list (List.init leading (fun _ -> None) @ fill [] date leading)
+
+module Grid_body = struct
+  module Props = struct
+    type t
+
+    external check :
+      children:
+        ( C.t Solidtype.Solid.accessor -> Solidtype.Jsx.element,
+          [ `render ] )
+        Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Tbody.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (unit -> unit) Solidtype.Html.Tbody.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    (* Its children, a function each date is drawn by, called once a
+       position, inside Index. *)
+    external draw : t -> C.t S.accessor -> Jsx.element = "children" [@@mel.send]
+  end
+
+  let make (props : Props.t) =
+    let c = within "Calendar.Grid_body" in
+    let g = in_grid "Calendar.Grid_body" in
+    let weeks = S.accessor (fun () -> Array.init (S.get g.weeks) Fun.id) in
+    <tbody
+      ?as_=(S.drawn_as props) props=(S.undrawn (S.omit props [| "children" |]))>
+      <Index each=(S.get weeks)>
+        (fun week _ ->
+          <tr>
+            <Index
+              each=(dates_in_week c.public ~first:(S.get c.first_day)
+                      ~week:(S.get week) (S.get g.grid_start))>
+              (fun date _ ->
+                <Solidtype.Show.Some some=(S.get date) fallback=(<td />)>
+                  (fun date -> Props.draw props date)
+                </Solidtype.Show.Some>)
+            </Index>
+          </tr>)
+      </Index>
+    </tbody>
+
+  let component = Jsx.component make
+end
+
+module Cell_context = Solidtype.Context.Make_optional (struct
+  type t = cell
+end)
+
+module Cell = struct
+  module Context = struct
+    let use () =
+      match Cell_context.use () with
+      | Some c -> c
+      | None ->
+          invalid_arg "Calendar.Cell.Context.use is used inside a Calendar.Cell"
+  end
+
+  module Props = struct
+    type t
+
+    external check :
+      date:C.t Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:
+         ( cell -> Solidtype.Jsx.element,
+           [ `elements | `render ] )
+         Solidtype.Check.children ->
+      unit ->
+      unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external date : t -> C.t = "date" [@@mel.get]
+    external children : t -> cell Jsx.children option = "children" [@@mel.get]
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
+    external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
+    [@@mel.get]
+
+    external on_mouse_down : t -> ((Dom.mouseEvent -> unit)[@u]) option
+      = "onMouseDown"
+    [@@mel.get]
+
+    external on_focus : t -> ((Dom.focusEvent -> unit)[@u]) option = "onFocus"
+    [@@mel.get]
+
+    external on_pointer_down : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerDown"
+    [@@mel.get]
+
+    external on_pointer_up : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerUp"
+    [@@mel.get]
+
+    external on_pointer_enter : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerEnter"
+    [@@mel.get]
+
+    external on_context_menu : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onContextMenu"
+    [@@mel.get]
+  end
+
+  let own =
+    [|
+      "date";
+      "children";
+      "ref";
+      "onClick";
+      "onMouseDown";
+      "onFocus";
+      "onPointerDown";
+      "onPointerUp";
+      "onPointerEnter";
+      "onContextMenu";
+    |]
+
+  let touch e =
+    match Js.Undefined.toOption (pointer_type e) with
+    | Some "touch" -> true
+    | Some _ | None -> false
+
+  let make (props : Props.t) =
+    let c = within "Calendar.Cell" in
+    let g = in_grid "Calendar.Cell" in
+    let f = c.public in
+    let date = S.accessor (fun () -> Props.date props) in
+    let tz () = S.get f.time_zone in
+    let outside_month =
+      S.accessor (fun () ->
+          match S.get f.visible_duration with
+          | Days _ | Weeks _ -> false
+          | Months _ -> not (D.is_same_month (S.get g.grid_start) (S.get date)))
+    in
+    let outside_range =
+      S.accessor (fun () ->
+          before (S.get date) (S.get f.visible_start)
+          || after (S.get date) (S.get f.visible_end))
+    in
+    let disabled =
+      S.accessor (fun () ->
+          S.get f.is_disabled || S.get outside_range || S.get outside_month
+          || out_of_range (S.get date) ~min:(S.get f.min_value)
+               ~max:(S.get f.max_value))
+    in
+    let unavailable = S.accessor (fun () -> c.is_unavailable (S.get date)) in
+    let selectable =
+      S.accessor (fun () -> not (S.get disabled || S.get unavailable))
+    in
+    let invalid =
+      S.accessor (fun () ->
+          c.is_value_invalid (S.get date) && not (S.get disabled))
+    in
+    let selected =
+      S.accessor (fun () ->
+          S.get invalid || (c.is_selected (S.get date) && S.get selectable))
+    in
+    let focused =
+      S.accessor (fun () ->
+          S.get f.is_focused
+          && same_day (S.get date) (S.get f.focused_date)
+          && not (S.get outside_month))
+    in
+    let today = S.accessor (fun () -> D.is_today (S.get date) (tz ())) in
+    let formatted =
+      S.accessor (fun () ->
+          let d = S.get date in
+          Dt.DateFormatter.format_to_parts
+            (formatter (S.get f.locale)
+               (Dt.DateTimeFormatOptions.make ~day:"numeric" ~time_zone:(tz ())
+                  ~calendar:(Dt.Calendar.identifier (C.calendar d))
+                  ()))
+            (C.to_date d (tz ()))
+          |> Js.Array.find ~f:(fun p ->
+              match Dt.DateTimeFormatPart.type_ p with
+              | `day -> true
+              | _ -> false)
+          |> Option.map Dt.DateTimeFormatPart.value
+          |> Option.value ~default:(string_of_int (C.day d)))
+    in
+    let label () =
+      let d = S.get date in
+      let t = S.get c.translations in
+      let named =
+        Dt.DateFormatter.format
+          (formatter (S.get f.locale)
+             (Dt.DateTimeFormatOptions.make ~weekday:`long ~day:"numeric"
+                ~month:"long" ~year:"numeric" ?era:(era_of d) ~time_zone:(tz ())
+                ()))
+          (C.to_date d (tz ()))
+      in
+      (* An end of a range chosen is told the whole range first. *)
+      let named =
+        match (S.get c.anchor, S.get c.highlighted) with
+        | None, Some (s, e)
+          when c.is_range
+               && (same_day d s || same_day d e)
+               && not (String.equal (S.get c.range_description) "") ->
+            S.get c.range_description ^ ", " ^ named
+        | _ -> named
+      in
+      let said =
+        if S.get today then
+          if S.get selected then t.today_date_selected named
+          else t.today_date named
+        else if S.get selected then t.date_selected named
+        else named
+      in
+      match (S.get f.min_value, S.get f.max_value) with
+      | Some m, _ when same_day d m -> said ^ ", " ^ t.minimum_date
+      | _, Some m when same_day d m -> said ^ ", " ^ t.maximum_date
+      | _ -> said
+    in
+    let cell =
+      {
+        date;
+        formatted_date = formatted;
+        is_selected = selected;
+        is_focused = focused;
+        is_disabled = disabled;
+        is_unavailable = unavailable;
+        is_outside_month = outside_month;
+        is_outside_visible_range = outside_range;
+        is_today = today;
+        is_invalid = invalid;
+        is_selection_start =
+          S.accessor (fun () ->
+              match S.get c.highlighted with
+              | Some (s, _) -> same_day (S.get date) s
+              | None -> false);
+        is_selection_end =
+          S.accessor (fun () ->
+              match S.get c.highlighted with
+              | Some (_, e) -> same_day (S.get date) e
+              | None -> false);
+      }
+    in
+    let element = ref None in
+    (* The focused date's button takes the focus as it moves, while the focus
+       is in the grid. *)
+    S.create_effect (fun () ->
+        if S.get focused then
+          match (!element, Js.Null.toOption active) with
+          | Some b, Some a when a == b -> ()
+          | Some b, _ -> focus_element b
+          | None, _ -> ());
+    <Cell_context.Provider value=cell>
+      <td
+        role=`gridcell
+        ?aria_disabled=(if S.get selectable then None else Some true)
+        ?aria_selected=(if S.get selected then Some true else None)
+        ?aria_invalid=(if S.get invalid then Some "true" else None)>
+        <div
+          role=`button
+          ?tabindex=(if S.get disabled then None
+                     else if same_day (S.get date) (S.get f.focused_date) then
+                       Some "0"
+                     else Some "-1")
+          ?aria_disabled=(if S.get selectable then None else Some true)
+          aria_label=(label ())
+          ?aria_invalid=(if S.get invalid then Some "true" else None)
+          data_selected=(state (S.get selected))
+          data_today=(state (S.get today))
+          data_unavailable=(state (S.get unavailable))
+          data_disabled=(state (S.get disabled))
+          data_outside_month=(state (S.get outside_month))
+          data_outside_visible_range=(state (S.get outside_range))
+          data_focused=(state (S.get focused))
+          data_invalid=(state (S.get invalid))
+          data_selection_start=(state
+                                  (c.is_range && S.get cell.is_selection_start))
+          data_selection_end=(state (c.is_range && S.get cell.is_selection_end))
+          ?aria_describedby=(if
+                               c.is_range && S.get focused && S.get selectable
+                               && not (S.get f.is_read_only)
+                             then Some c.prompt_id
+                             else None)
+          on_pointer_down=(fun e ->
+                            Jsx.call (Props.on_pointer_down props) e;
+                            (* A touch keeps its pointer to the day it began
+                             on, unless let go, so a drag reaches the days it
+                             crosses. *)
+                            let el = pointer_element e in
+                            (match Js.Undefined.toOption (capture el) with
+                            | Some _ when has_capture el (pointer_id e) ->
+                                release_capture el (pointer_id e)
+                            | Some _ | None -> ());
+                            if
+                              c.is_range
+                              && button e = 0
+                              && S.get selectable
+                              && not (S.get f.is_read_only)
+                            then c.press_start ~touch:(touch e) (S.get date))
+          on_pointer_up=(fun e ->
+                          Jsx.call (Props.on_pointer_up props) e;
+                          if
+                            c.is_range
+                            && button e = 0
+                            && S.get selectable
+                            && not (S.get f.is_read_only)
+                          then c.press_up (S.get date))
+          on_pointer_enter=(fun e ->
+                             Jsx.call (Props.on_pointer_enter props) e;
+                             if c.is_range && S.get selectable then
+                               c.hover ~touch:(touch e) (S.get date))
+          on_context_menu=(fun e ->
+                            Jsx.call (Props.on_context_menu props) e;
+                            (* A long press holds a day, not a menu. *)
+                            prevent_pointer e)
+          ref=(fun e ->
+                element := Some (as_element e);
+                Jsx.call (Props.ref props) e)
+          on_mouse_down=(fun e ->
+                          Jsx.call (Props.on_mouse_down props) e;
+                          (* A press focuses its date as the calendar moves the
+                           focus, not as the browser does. *)
+                          prevent_mouse e)
+          on_click=(fun e ->
+                     Jsx.call (Props.on_click props) e;
+                     (* A press chooses its day, where it can be chosen, and
+                      focuses it, an unavailable or a read-only one too, so
+                      the arrows move on from it. *)
+                     if not (S.get disabled) then (
+                       (* A range is chosen by the pointer's presses, and by a
+                        screen reader's click, which has no pointer. *)
+                       if
+                         S.get selectable
+                         && (not (S.get f.is_read_only))
+                         && ((not c.is_range) || detail e = 0)
+                       then c.select (S.get date);
+                       f.set_focused_date (S.get date);
+                       c.set_focused true))
+          on_focus=(fun e ->
+                     Jsx.call (Props.on_focus props) e;
+                     if not (S.get disabled) then (
+                       f.set_focused_date (S.get date);
+                       c.set_focused true))
+          ?as_=(S.drawn_as props)
+          props=(S.undrawn (S.omit props own))>
+          (match Props.children props with
+          | Some children -> Jsx.draw children cell
+          | None -> Jsx.string (S.get formatted))
+        </div>
+      </td>
+    </Cell_context.Provider>
+
+  let component = Jsx.component make
+end

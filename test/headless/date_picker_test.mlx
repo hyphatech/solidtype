@@ -1,0 +1,240 @@
+(* The headless date picker as a caller meets it: a field whose trigger opens a
+   dialog of a calendar, focused on the field's day; a day chosen there the
+   field's value, the popover closed and the focus back on the trigger;
+   Escape closing it; its trigger disabled with the picker; a time kept as a
+   day is chosen; and no violation axe finds. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Date_field = Solidtype_headless.Date_field
+module Date_picker = Solidtype_headless.Date_picker
+module Calendar = Solidtype_headless.Calendar
+module I18n = Solidtype_kobalte.I18n
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module Date_time = D.Types.CalendarDateTime
+module E = Jest.Expect
+module H = Harness
+open Harness.Syntax
+
+external query : Dom.element -> string -> Dom.element Js.null = "querySelector"
+[@@mel.send]
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+let find selector = Js.Null.toOption (query H.body selector)
+
+let one selector =
+  match find selector with
+  | Some e -> e
+  | None -> Js.Exn.raiseError ("no " ^ selector)
+
+let all selector = Js.Array.from (query_all H.body selector)
+
+let day n =
+  match
+    Js.Array.find
+      ~f:(fun b ->
+        String.equal (H.text b) (string_of_int n)
+        && Option.is_none (H.attribute b "data-outside-month"))
+      (all "[role=dialog] [role=gridcell] > [role=button]")
+  with
+  | Some b -> b
+  | None -> Js.Exn.raiseError ("no day " ^ string_of_int n)
+
+let segments () =
+  all "[role=spinbutton]" |> Array.map H.text |> Array.to_list
+  |> String.concat " "
+
+let calendar () =
+  <Calendar.Root aria_label="Date">
+    <Calendar.Grid>
+      <Calendar.Grid_body>
+        (fun date -> <Calendar.Cell date=(S.get date) />)
+      </Calendar.Grid_body>
+    </Calendar.Grid>
+  </Calendar.Root>
+
+let inside () =
+  Jsx.fragment
+    [|
+      <Date_field.Label>"Date"</Date_field.Label>;
+      <Date_picker.Group>
+        <Date_field.Input>
+          (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+        </Date_field.Input>
+        <Date_picker.Trigger>"Open"</Date_picker.Trigger>
+      </Date_picker.Group>;
+      <Date_picker.Content>(calendar ())</Date_picker.Content>;
+    |]
+
+let picker ?is_disabled ?(told = ref []) () =
+  H.render (fun () ->
+      <I18n.I18nProvider locale="en-US">
+        <Date_picker.Root
+          default_value=(Date.make 2026 11 21)
+          ?is_disabled
+          on_change=(fun d ->
+                      told :=
+                        (match d with
+                        | Some d -> Date.to_string d ()
+                        | None -> "none")
+                        :: !told)>
+          (inside ())
+        </Date_picker.Root>
+      </I18n.I18nProvider>)
+
+let trigger () = one "button[aria-haspopup=dialog]"
+
+let () =
+  Jest.describe "Date_picker" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.test "is a field whose group holds the trigger" (fun () ->
+          picker ();
+          let group = one "[role=group]" in
+          E.(
+            expect
+              ( segments (),
+                H.attribute (one "[role=presentation]") "role",
+                Option.is_some (H.attribute group "aria-labelledby"),
+                H.attribute (trigger ()) "aria-label",
+                H.attribute (trigger ()) "aria-expanded",
+                find "[role=dialog]" )
+            |> toEqual
+                 ( "11 21 2026",
+                   Some "presentation",
+                   true,
+                   Some "Calendar",
+                   Some "false",
+                   None )));
+      Jest.testPromise
+        "opens a calendar focused on its day, and a day chosen is its value"
+        (fun () ->
+          let told = ref [] in
+          picker ~told ();
+          let user = H.setup () in
+          let* () = H.click user (trigger ()) in
+          let* () = H.frame () in
+          let opened =
+            ( H.attribute (trigger ()) "aria-expanded",
+              H.text H.focused,
+              Option.is_some (find "[role=dialog]") )
+          in
+          let* () = H.click user (day 9) in
+          let* () = H.frame () in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( opened,
+                  !told,
+                  segments (),
+                  find "[role=dialog]",
+                  H.focused == trigger () )
+              |> toEqual
+                   ( (Some "true", "21", true),
+                     [ "2026-11-09" ],
+                     "11 9 2026",
+                     None,
+                     true )));
+      Jest.testPromise "closes by Escape, its value kept" (fun () ->
+          let told = ref [] in
+          picker ~told ();
+          let user = H.setup () in
+          let* () = H.click user (trigger ()) in
+          let* () = H.frame () in
+          let* () = H.keyboard user "{ArrowRight}{Escape}" in
+          let* () = H.frame () in
+          Js.Promise.resolve
+            E.(
+              expect (find "[role=dialog]", !told, segments ())
+              |> toEqual (None, [], "11 21 2026")));
+      Jest.test "disables its trigger with the picker" (fun () ->
+          picker ~is_disabled:true ();
+          E.(expect (H.attribute (trigger ()) "disabled") |> toEqual (Some "")));
+      Jest.testPromise "keeps the time of its value as a day is chosen"
+        (fun () ->
+          let told = ref [] in
+          H.render (fun () ->
+              <I18n.I18nProvider locale="en-US">
+                <Date_picker.Root_date_time
+                  default_value=(Date_time.make 2026 11 21 ~hour:9 ~minute:30 ())
+                  on_change=(fun d ->
+                              told :=
+                                (match d with
+                                | Some d -> Date_time.to_string d ()
+                                | None -> "none")
+                                :: !told)>
+                  (inside ())
+                </Date_picker.Root_date_time>
+              </I18n.I18nProvider>);
+          let user = H.setup () in
+          let* () = H.click user (trigger ()) in
+          let* () = H.frame () in
+          let* () = H.click user (day 3) in
+          Js.Promise.resolve
+            E.(expect !told |> toEqual [ "2026-11-03T09:30:00" ]));
+      Jest.testPromise "chooses a range in its range calendar" (fun () ->
+          let told = ref [] in
+          H.render (fun () ->
+              <I18n.I18nProvider locale="en-US">
+                <Date_picker.Root_range
+                  default_value=({
+                                   start = Date.make 2026 11 21;
+                                   end_ = Date.make 2026 11 23;
+                                 }
+                                  : Date.t Date_field.range)
+                  on_change=(fun r ->
+                              told :=
+                                (match r with
+                                | Some { start; end_ } ->
+                                    Date.to_string start () ^ ".."
+                                    ^ Date.to_string end_ ()
+                                | None -> "none")
+                                :: !told)>
+                  <Date_field.Label>"Trip"</Date_field.Label>
+                  <Date_picker.Group>
+                    <Date_field.Input slot="start">
+                      (fun segment ->
+                        <Date_field.Segment segment=(S.get segment) />)
+                    </Date_field.Input>
+                    <Date_field.Input slot="end">
+                      (fun segment ->
+                        <Date_field.Segment segment=(S.get segment) />)
+                    </Date_field.Input>
+                    <Date_picker.Trigger>"Open"</Date_picker.Trigger>
+                  </Date_picker.Group>
+                  <Date_picker.Content>
+                    <Calendar.Root_range aria_label="Trip">
+                      <Calendar.Grid>
+                        <Calendar.Grid_body>
+                          (fun date -> <Calendar.Cell date=(S.get date) />)
+                        </Calendar.Grid_body>
+                      </Calendar.Grid>
+                    </Calendar.Root_range>
+                  </Date_picker.Content>
+                </Date_picker.Root_range>
+              </I18n.I18nProvider>);
+          let user = H.setup () in
+          let* () = H.click user (trigger ()) in
+          let* () = H.frame () in
+          let shown = H.text H.focused in
+          let* () = H.click user (day 3) in
+          let* () = H.click user (day 6) in
+          let* () = H.frame () in
+          Js.Promise.resolve
+            E.(
+              expect (shown, !told, segments (), find "[role=dialog]")
+              |> toEqual
+                   ( "21",
+                     [ "2026-11-03..2026-11-06" ],
+                     "11 3 2026 11 6 2026",
+                     None )));
+      Jest.testPromise "has no violation axe finds, open" (fun () ->
+          picker ();
+          let user = H.setup () in
+          let* () = H.click user (trigger ()) in
+          let* () = H.frame () in
+          let* found = H.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))

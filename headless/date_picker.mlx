@@ -1,0 +1,1461 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module D = Solidtype_internationalized_date
+module Dt = D.Types
+module C = Dt.CalendarDate
+module I18n = Solidtype_kobalte.I18n
+module K = Solidtype_kobalte.Types
+module Popover = Solidtype_kobalte.Popover
+
+(* An element a picker draws as the HTML element Kobalte anchors a popover
+   to, which each is. *)
+external as_html_element : _ Dom.htmlElement_like -> Dom.htmlElement
+  = "%identity"
+
+external prevent : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+type translations = { calendar : string }
+
+let english = { calendar = "Calendar" }
+
+let translated =
+  [
+    ("ar-AE", { calendar = {js|التقويم|js} });
+    ("bg-BG", { calendar = {js|Календар|js} });
+    ("cs-CZ", { calendar = {js|Kalendář|js} });
+    ("da-DK", { calendar = "Kalender" });
+    ("de-DE", { calendar = "Kalender" });
+    ("el-GR", { calendar = {js|Ημερολόγιο|js} });
+    ("en-US", { calendar = "Calendar" });
+    ("es-ES", { calendar = "Calendario" });
+    ("et-EE", { calendar = "Kalender" });
+    ("fi-FI", { calendar = "Kalenteri" });
+    ("fr-FR", { calendar = "Calendrier" });
+    ("he-IL", { calendar = {js|לוח שנה|js} });
+    ("hr-HR", { calendar = "Kalendar" });
+    ("hu-HU", { calendar = {js|Naptár|js} });
+    ("it-IT", { calendar = "Calendario" });
+    ("ja-JP", { calendar = {js|カレンダー|js} });
+    ("ko-KR", { calendar = {js|달력|js} });
+    ("lt-LT", { calendar = "Kalendorius" });
+    ("lv-LV", { calendar = {js|Kalendārs|js} });
+    ("nb-NO", { calendar = "Kalender" });
+    ("nl-NL", { calendar = "Kalender" });
+    ("pl-PL", { calendar = "Kalendarz" });
+    ("pt-BR", { calendar = {js|Calendário|js} });
+    ("pt-PT", { calendar = {js|Calendário|js} });
+    ("ro-RO", { calendar = "Calendar" });
+    ("ru-RU", { calendar = {js|Календарь|js} });
+    ("sk-SK", { calendar = {js|Kalendár|js} });
+    ("sl-SI", { calendar = "Koledar" });
+    ("sr-SP", { calendar = "Kalendar" });
+    ("sv-SE", { calendar = "Kalender" });
+    ("tr-TR", { calendar = "Takvim" });
+    ("uk-UA", { calendar = {js|Календар|js} });
+    ("zh-CN", { calendar = {js|日历|js} });
+    ("zh-TW", { calendar = {js|日曆|js} });
+  ]
+
+let locale_language locale =
+  match String.index_opt locale '-' with
+  | Some i -> String.sub locale 0 i
+  | None -> locale
+
+(* A locale's entry of [table]: its own, else its language's, else the first
+   of its language, else [default], as \@internationalized/string finds a
+   locale's strings. *)
+let localized table locale ~default =
+  match List.assoc_opt locale table with
+  | Some p -> p
+  | None -> (
+      let language = locale_language locale in
+      match List.assoc_opt language table with
+      | Some p -> p
+      | None -> (
+          let prefix = language ^ "-" in
+          let n = String.length prefix in
+          match
+            List.find_opt
+              (fun (k, _) ->
+                String.length k > n && String.equal (String.sub k 0 n) prefix)
+              table
+          with
+          | Some (_, p) -> p
+          | None -> default))
+
+let translations_for locale = localized translated locale ~default:english
+
+(* A provider's locale, or en-GB, as the field and the calendar read it. *)
+let use_locale () =
+  let i18n = I18n.use_locale () in
+  let provided = I18n.use_locale () == i18n in
+  S.accessor (fun () ->
+      if provided then K.I18n_UseLocale.locale i18n () else "en-GB")
+
+type 'v state = {
+  value : 'v option S.accessor;
+  date_value : C.t option S.accessor;
+  time_value : 'v option S.accessor;
+  set_date_value : C.t -> unit;
+  set_time_value : 'v -> unit;
+  is_open : bool S.accessor;
+  set_open : bool -> unit;
+  has_time : bool S.accessor;
+}
+
+(* What the parts read of the picker above. *)
+type picker = {
+  open_ : bool S.accessor;
+  open_to : bool -> unit;
+  button_id : string;
+  dialog_id : string;
+  set_group : Dom.htmlElement -> unit;
+  disabled : bool S.accessor;
+  read_only : bool S.accessor;
+  words : translations S.accessor;
+  set_placement : string -> unit;
+  set_gutter : float -> unit;
+}
+
+module Picker_context = Solidtype.Context.Make_optional (struct
+  type t = picker
+end)
+
+let within part =
+  match Picker_context.use () with
+  | Some p -> p
+  | None -> invalid_arg (part ^ " is used inside a Date_picker root")
+
+type context = {
+  is_open : bool S.accessor;
+  set_open : bool -> unit;
+  is_disabled : bool S.accessor;
+  is_read_only : bool S.accessor;
+}
+
+module Context = struct
+  let of_picker p =
+    {
+      is_open = p.open_;
+      set_open = p.open_to;
+      is_disabled = p.disabled;
+      is_read_only = p.read_only;
+    }
+
+  let use () = of_picker (within "Date_picker.Context.use")
+  let find () = Option.map of_picker (Picker_context.use ())
+end
+
+(* What a root reads of its kind of value: its date, and a date at its time,
+   or at the start of the day where it has none. *)
+type 'v kind = {
+  date_of : 'v -> C.t;
+  at : C.t -> 'v option -> 'v;
+  timed : bool S.accessor;
+}
+
+module Common = struct
+  type t
+
+  external is_open : t -> bool option = "isOpen" [@@mel.get]
+  external default_open : t -> bool option = "defaultOpen" [@@mel.get]
+
+  external on_open_change : t -> ((bool -> unit)[@u]) option = "onOpenChange"
+  [@@mel.get]
+
+  external should_close_on_select : t -> bool option = "shouldCloseOnSelect"
+  [@@mel.get]
+
+  external first_day_of_week : t -> Calendar.day_of_week option
+    = "firstDayOfWeek"
+  [@@mel.get]
+
+  external page_behavior : t -> [ `visible | `single ] option = "pageBehavior"
+  [@@mel.get]
+
+  external is_disabled : t -> bool option = "isDisabled" [@@mel.get]
+  external is_read_only : t -> bool option = "isReadOnly" [@@mel.get]
+
+  external picker_translations : t -> translations option = "pickerTranslations"
+  [@@mel.get]
+
+  (* The props a picker takes for itself; the rest its field takes. *)
+  let own =
+    [|
+      "value";
+      "defaultValue";
+      "onChange";
+      "isOpen";
+      "defaultOpen";
+      "onOpenChange";
+      "shouldCloseOnSelect";
+      "firstDayOfWeek";
+      "pageBehavior";
+      "pickerTranslations";
+      "children";
+      "as";
+    |]
+end
+
+(* What both kinds of picker draw around their field: Kobalte's popover root,
+   anchored to the group, and the context its parts read. *)
+let shell ~(is_open : bool S.accessor) ~(set_open : bool -> unit)
+    (props : Common.t) (draw : unit -> Jsx.element) =
+  let locale = use_locale () in
+  let group, set_group = S.create_signal None in
+  let placement, set_placement = S.create_signal "bottom" in
+  let gutter, set_gutter = S.create_signal 8. in
+  let p =
+    {
+      open_ = is_open;
+      open_to = set_open;
+      button_id = S.create_unique_id ();
+      dialog_id = S.create_unique_id ();
+      set_group = (fun e -> S.set set_group (Some e));
+      disabled =
+        S.accessor (fun () ->
+            Option.value (Common.is_disabled props) ~default:false);
+      read_only =
+        S.accessor (fun () ->
+            Option.value (Common.is_read_only props) ~default:false);
+      words =
+        S.accessor (fun () ->
+            match Common.picker_translations props with
+            | Some t -> t
+            | None -> translations_for (S.get locale));
+      set_placement = S.set set_placement;
+      set_gutter = S.set set_gutter;
+    }
+  in
+  <Popover.Root
+    open_=(S.get is_open)
+    on_open_change=set_open
+    anchor_ref=(S.accessor (fun () -> S.get group))
+    modal=true
+    placement=(S.get placement)
+    gutter=(S.get gutter)
+    force_mount=true>
+    <Picker_context.Provider value=p>(draw ())</Picker_context.Provider>
+  </Popover.Root>
+
+(* A picker's popover open, as it is given, else as it keeps it. *)
+let opened (props : Common.t) =
+  let kept, set_kept =
+    S.create_signal
+      (S.untrack (fun () ->
+           Option.value (Common.default_open props) ~default:false))
+  in
+  let is_open =
+    S.accessor (fun () ->
+        match Common.is_open props with Some o -> o | None -> S.get kept)
+  in
+  let set o =
+    if Option.is_none (Common.is_open props) then S.set set_kept o;
+    Jsx.call (Common.on_open_change props) o
+  in
+  (is_open, set)
+
+(* A picker of any kind of value, as React Stately's date picker keeps one: its
+   value, the date and the time chosen apart while it has none, and whether
+   its popover is open. [field] draws the root's date field, given its value,
+   what it is told and what it holds. *)
+let picker (type v) ~(kind : v kind)
+    ~(value : v Js.Nullable.t option S.accessor) ~(default_value : v option)
+    ~(on_change : v option -> unit) ~(placeholder_value : v option S.accessor)
+    ~(min_value : v option S.accessor) ~(max_value : v option S.accessor)
+    ~(is_date_unavailable : (v -> bool) option S.accessor)
+    ~(children : unit -> v state Jsx.children)
+    ~(as_ :
+       v state -> (Solidtype.Html.Div.props -> Jsx.element) option S.accessor)
+    (props : Common.t)
+    ~(field :
+       value:v Js.Nullable.t S.accessor ->
+       on_change:(v option -> unit) ->
+       as_:(Solidtype.Html.Div.props -> Jsx.element) option S.accessor ->
+       (unit -> Jsx.element) ->
+       Jsx.element) =
+  let kept, set_kept = S.create_signal default_value in
+  let current () =
+    match S.get value with
+    | Some v -> Js.Nullable.toOption v
+    | None -> S.get kept
+  in
+  let set_value v =
+    if Option.is_none (S.get value) then S.set set_kept v;
+    on_change v
+  in
+  let is_open, set_open_raw = opened props in
+  let selected_date, set_selected_date = S.create_signal None in
+  let selected_time, set_selected_time = S.create_signal None in
+  let date_value =
+    S.accessor (fun () ->
+        match current () with
+        | Some v -> Some (kind.date_of v)
+        | None -> S.get selected_date)
+  in
+  let time_value =
+    S.accessor (fun () ->
+        match current () with
+        | Some v when S.get kind.timed -> Some v
+        | Some _ | None -> S.get selected_time)
+  in
+  (* A time to put a date chosen at: the one chosen, else the value's or the
+     placeholder's, else the start of the day. *)
+  let time_for () =
+    match S.get time_value with
+    | Some t -> Some t
+    | None -> S.get placeholder_value
+  in
+  let commit d t =
+    set_value (Some (kind.at d t));
+    S.set set_selected_date None;
+    S.set set_selected_time None
+  in
+  let should_close () =
+    Option.value (Common.should_close_on_select props) ~default:true
+  in
+  let set_date_value d =
+    let close = should_close () in
+    if S.get kind.timed then
+      if Option.is_some (S.get time_value) || close then commit d (time_for ())
+      else S.set set_selected_date (Some d)
+    else set_value (Some (kind.at d None));
+    if close then set_open_raw false
+  in
+  let set_time_value t =
+    match S.get date_value with
+    | Some d -> commit d (Some t)
+    | None -> S.set set_selected_time (Some t)
+  in
+  (* A date chosen without its time is put at the placeholder's as the popover
+     closes; a time without its date waits for the popover to open again. *)
+  let set_open o =
+    (if (not o) && Option.is_none (current ()) && S.get kind.timed then
+       match S.get selected_date with
+       | Some d -> commit d (time_for ())
+       | None -> ());
+    set_open_raw o
+  in
+  let disabled =
+    S.accessor (fun () ->
+        Option.value (Common.is_disabled props) ~default:false)
+  in
+  let read_only =
+    S.accessor (fun () ->
+        Option.value (Common.is_read_only props) ~default:false)
+  in
+  let state =
+    {
+      value = S.accessor current;
+      date_value;
+      time_value;
+      set_date_value;
+      set_time_value;
+      is_open;
+      set_open;
+      has_time = kind.timed;
+    }
+  in
+  let midnight d = kind.date_of (kind.at d None) in
+  let inside () =
+    let f = Date_field.Context.use () in
+    let given : Calendar.Given.t =
+      {
+        value = Single (date_value, set_date_value);
+        min_value =
+          S.accessor (fun () -> Option.map kind.date_of (S.get min_value));
+        max_value =
+          S.accessor (fun () -> Option.map kind.date_of (S.get max_value));
+        is_date_unavailable =
+          S.accessor (fun () ->
+              Option.map
+                (fun u d -> u (kind.at (midnight d) (S.get placeholder_value)))
+                (S.get is_date_unavailable));
+        is_disabled = disabled;
+        is_read_only = read_only;
+        is_invalid = f.is_invalid;
+        default_focused_value =
+          S.accessor (fun () ->
+              match S.get date_value with
+              | Some _ -> None
+              | None -> Option.map kind.date_of (S.get placeholder_value));
+        first_day_of_week =
+          S.accessor (fun () -> Common.first_day_of_week props);
+        page_behavior = S.accessor (fun () -> Common.page_behavior props);
+      }
+    in
+    <Calendar.Given.Provider value=given>
+      (Jsx.draw (children ()) state)
+    </Calendar.Given.Provider>
+  in
+  shell ~is_open ~set_open props (fun () ->
+      field
+        ~value:(S.accessor (fun () -> Js.Nullable.fromOption (current ())))
+        ~on_change:set_value ~as_:(as_ state) inside)
+
+module Root = struct
+  module V = C
+
+  module Props = struct
+    type t = Common.t
+    type predicate
+
+    external check :
+      ?value:V.t Js.Nullable.t Solidtype.Check.value ->
+      ?default_value:V.t Solidtype.Check.value ->
+      ?on_change:(V.t option -> unit) ->
+      ?placeholder_value:V.t Solidtype.Check.value ->
+      ?min_value:V.t Solidtype.Check.value ->
+      ?max_value:V.t Solidtype.Check.value ->
+      ?is_date_unavailable:(V.t -> bool) ->
+      ?should_force_leading_zeros:bool Solidtype.Check.value ->
+      ?is_required:bool Solidtype.Check.value ->
+      ?is_invalid:bool Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?is_read_only:bool Solidtype.Check.value ->
+      ?name:string Solidtype.Check.value ->
+      ?auto_focus:bool Solidtype.Check.value ->
+      ?aria_label:string Solidtype.Check.value ->
+      ?aria_labelledby:string Solidtype.Check.value ->
+      ?aria_describedby:string Solidtype.Check.value ->
+      ?translations:Date_field.translations Solidtype.Check.value ->
+      ?is_open:bool Solidtype.Check.value ->
+      ?default_open:bool Solidtype.Check.value ->
+      ?on_open_change:(bool -> unit) ->
+      ?should_close_on_select:bool Solidtype.Check.value ->
+      ?first_day_of_week:Calendar.day_of_week Solidtype.Check.value ->
+      ?page_behavior:[ `visible | `single ] Solidtype.Check.value ->
+      ?picker_translations:translations Solidtype.Check.value ->
+      children:
+        ( V.t state -> Jsx.element,
+          [ `elements | `render ] )
+        Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> V.t state -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (unit -> unit) Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> V.t Js.Nullable.t option = "value" [@@mel.get]
+    external default_value : t -> V.t option = "defaultValue" [@@mel.get]
+
+    external on_change : t -> ((V.t option -> unit)[@u]) option = "onChange"
+    [@@mel.get]
+
+    external placeholder_value : t -> V.t option = "placeholderValue"
+    [@@mel.get]
+
+    external min_value : t -> V.t option = "minValue" [@@mel.get]
+    external max_value : t -> V.t option = "maxValue" [@@mel.get]
+
+    external unavailable_given : t -> predicate option = "isDateUnavailable"
+    [@@mel.get]
+
+    external is_date_unavailable : t -> V.t -> bool = "isDateUnavailable"
+    [@@mel.send]
+
+    external children : t -> V.t state Jsx.children = "children" [@@mel.get]
+
+    (* A root drawn by [as_] is given its state, which a style draws it of. *)
+    external as_given : t -> predicate option = "as" [@@mel.get]
+
+    external draw_as :
+      t -> Solidtype.Html.Div.props -> V.t state -> Solidtype.Jsx.element = "as"
+    [@@mel.send]
+  end
+
+  let make (props : Props.t) =
+    picker
+      ~kind:
+        {
+          date_of = Fun.id;
+          at = (fun d _ -> d);
+          timed = S.accessor (fun () -> false);
+        }
+      ~value:(S.accessor (fun () -> Props.value props))
+      ~default_value:(S.untrack (fun () -> Props.default_value props))
+      ~on_change:(fun v -> Jsx.call (Props.on_change props) v)
+      ~placeholder_value:(S.accessor (fun () -> Props.placeholder_value props))
+      ~min_value:(S.accessor (fun () -> Props.min_value props))
+      ~max_value:(S.accessor (fun () -> Props.max_value props))
+      ~is_date_unavailable:
+        (S.accessor (fun () ->
+             Option.map
+               (fun _ d -> Props.is_date_unavailable props d)
+               (Props.unavailable_given props)))
+      ~children:(fun () -> Props.children props)
+      ~as_:(fun state ->
+        S.accessor (fun () ->
+            Option.map
+              (fun _ p -> Props.draw_as props p state)
+              (Props.as_given props)))
+      props
+      ~field:(fun ~value ~on_change ~as_ child ->
+        <Date_field.Root
+          value=(S.get value)
+          on_change
+          input_role=`presentation
+          ?as_=(S.get as_)
+          data_open=(Jsx.flag (S.get (within "Date_picker").open_))
+          props=(S.omit props Common.own)>
+          (child ())
+        </Date_field.Root>)
+
+  let component = Jsx.component make
+end
+
+module Root_date_time = struct
+  module V = Dt.CalendarDateTime
+
+  module Props = struct
+    type t = Common.t
+    type predicate
+
+    external check :
+      ?value:V.t Js.Nullable.t Solidtype.Check.value ->
+      ?default_value:V.t Solidtype.Check.value ->
+      ?on_change:(V.t option -> unit) ->
+      ?placeholder_value:V.t Solidtype.Check.value ->
+      ?granularity:[ `day | `hour | `minute | `second ] Solidtype.Check.value ->
+      ?hour_cycle:[ `h12 | `h24 ] Solidtype.Check.value ->
+      ?min_value:V.t Solidtype.Check.value ->
+      ?max_value:V.t Solidtype.Check.value ->
+      ?is_date_unavailable:(V.t -> bool) ->
+      ?should_force_leading_zeros:bool Solidtype.Check.value ->
+      ?is_required:bool Solidtype.Check.value ->
+      ?is_invalid:bool Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?is_read_only:bool Solidtype.Check.value ->
+      ?name:string Solidtype.Check.value ->
+      ?auto_focus:bool Solidtype.Check.value ->
+      ?aria_label:string Solidtype.Check.value ->
+      ?aria_labelledby:string Solidtype.Check.value ->
+      ?aria_describedby:string Solidtype.Check.value ->
+      ?translations:Date_field.translations Solidtype.Check.value ->
+      ?is_open:bool Solidtype.Check.value ->
+      ?default_open:bool Solidtype.Check.value ->
+      ?on_open_change:(bool -> unit) ->
+      ?should_close_on_select:bool Solidtype.Check.value ->
+      ?first_day_of_week:Calendar.day_of_week Solidtype.Check.value ->
+      ?page_behavior:[ `visible | `single ] Solidtype.Check.value ->
+      ?picker_translations:translations Solidtype.Check.value ->
+      children:
+        ( V.t state -> Jsx.element,
+          [ `elements | `render ] )
+        Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> V.t state -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (unit -> unit) Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> V.t Js.Nullable.t option = "value" [@@mel.get]
+    external default_value : t -> V.t option = "defaultValue" [@@mel.get]
+
+    external on_change : t -> ((V.t option -> unit)[@u]) option = "onChange"
+    [@@mel.get]
+
+    external placeholder_value : t -> V.t option = "placeholderValue"
+    [@@mel.get]
+
+    external min_value : t -> V.t option = "minValue" [@@mel.get]
+    external max_value : t -> V.t option = "maxValue" [@@mel.get]
+
+    external unavailable_given : t -> predicate option = "isDateUnavailable"
+    [@@mel.get]
+
+    external is_date_unavailable : t -> V.t -> bool = "isDateUnavailable"
+    [@@mel.send]
+
+    external children : t -> V.t state Jsx.children = "children" [@@mel.get]
+
+    (* A root drawn by [as_] is given its state, which a style draws it of. *)
+    external as_given : t -> predicate option = "as" [@@mel.get]
+
+    external draw_as :
+      t -> Solidtype.Html.Div.props -> V.t state -> Solidtype.Jsx.element = "as"
+    [@@mel.send]
+
+    external granularity : t -> [ `day | `hour | `minute | `second ] option
+      = "granularity"
+    [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    picker
+      ~kind:
+        {
+          date_of = (fun v -> D.to_calendar_date v);
+          at =
+            (fun d t ->
+              match t with
+              | Some t -> D.to_calendar_date_time d ~time:t ()
+              | None -> D.to_calendar_date_time d ());
+          timed =
+            S.accessor (fun () ->
+                match Props.granularity props with
+                | Some `day -> false
+                | Some (`hour | `minute | `second) | None -> true);
+        }
+      ~value:(S.accessor (fun () -> Props.value props))
+      ~default_value:(S.untrack (fun () -> Props.default_value props))
+      ~on_change:(fun v -> Jsx.call (Props.on_change props) v)
+      ~placeholder_value:(S.accessor (fun () -> Props.placeholder_value props))
+      ~min_value:(S.accessor (fun () -> Props.min_value props))
+      ~max_value:(S.accessor (fun () -> Props.max_value props))
+      ~is_date_unavailable:
+        (S.accessor (fun () ->
+             Option.map
+               (fun _ d -> Props.is_date_unavailable props d)
+               (Props.unavailable_given props)))
+      ~children:(fun () -> Props.children props)
+      ~as_:(fun state ->
+        S.accessor (fun () ->
+            Option.map
+              (fun _ p -> Props.draw_as props p state)
+              (Props.as_given props)))
+      props
+      ~field:(fun ~value ~on_change ~as_ child ->
+        <Date_field.Root_date_time
+          value=(S.get value)
+          on_change
+          input_role=`presentation
+          ?as_=(S.get as_)
+          data_open=(Jsx.flag (S.get (within "Date_picker").open_))
+          props=(S.omit props Common.own)>
+          (child ())
+        </Date_field.Root_date_time>)
+
+  let component = Jsx.component make
+end
+
+module Root_zoned = struct
+  module V = Dt.ZonedDateTime
+
+  module Props = struct
+    type t = Common.t
+    type predicate
+
+    external check :
+      ?value:V.t Js.Nullable.t Solidtype.Check.value ->
+      ?default_value:V.t Solidtype.Check.value ->
+      ?on_change:(V.t option -> unit) ->
+      placeholder_value:V.t Solidtype.Check.value ->
+      ?granularity:[ `day | `hour | `minute | `second ] Solidtype.Check.value ->
+      ?hour_cycle:[ `h12 | `h24 ] Solidtype.Check.value ->
+      ?hide_time_zone:bool Solidtype.Check.value ->
+      ?min_value:V.t Solidtype.Check.value ->
+      ?max_value:V.t Solidtype.Check.value ->
+      ?is_date_unavailable:(V.t -> bool) ->
+      ?should_force_leading_zeros:bool Solidtype.Check.value ->
+      ?is_required:bool Solidtype.Check.value ->
+      ?is_invalid:bool Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?is_read_only:bool Solidtype.Check.value ->
+      ?name:string Solidtype.Check.value ->
+      ?auto_focus:bool Solidtype.Check.value ->
+      ?aria_label:string Solidtype.Check.value ->
+      ?aria_labelledby:string Solidtype.Check.value ->
+      ?aria_describedby:string Solidtype.Check.value ->
+      ?translations:Date_field.translations Solidtype.Check.value ->
+      ?is_open:bool Solidtype.Check.value ->
+      ?default_open:bool Solidtype.Check.value ->
+      ?on_open_change:(bool -> unit) ->
+      ?should_close_on_select:bool Solidtype.Check.value ->
+      ?first_day_of_week:Calendar.day_of_week Solidtype.Check.value ->
+      ?page_behavior:[ `visible | `single ] Solidtype.Check.value ->
+      ?picker_translations:translations Solidtype.Check.value ->
+      children:
+        ( V.t state -> Jsx.element,
+          [ `elements | `render ] )
+        Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> V.t state -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (unit -> unit) Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> V.t Js.Nullable.t option = "value" [@@mel.get]
+    external default_value : t -> V.t option = "defaultValue" [@@mel.get]
+
+    external on_change : t -> ((V.t option -> unit)[@u]) option = "onChange"
+    [@@mel.get]
+
+    external placeholder_value : t -> V.t option = "placeholderValue"
+    [@@mel.get]
+
+    external min_value : t -> V.t option = "minValue" [@@mel.get]
+    external max_value : t -> V.t option = "maxValue" [@@mel.get]
+
+    external unavailable_given : t -> predicate option = "isDateUnavailable"
+    [@@mel.get]
+
+    external is_date_unavailable : t -> V.t -> bool = "isDateUnavailable"
+    [@@mel.send]
+
+    external children : t -> V.t state Jsx.children = "children" [@@mel.get]
+
+    (* A root drawn by [as_] is given its state, which a style draws it of. *)
+    external as_given : t -> predicate option = "as" [@@mel.get]
+
+    external draw_as :
+      t -> Solidtype.Html.Div.props -> V.t state -> Solidtype.Jsx.element = "as"
+    [@@mel.send]
+
+    external granularity : t -> [ `day | `hour | `minute | `second ] option
+      = "granularity"
+    [@@mel.get]
+
+    external placeholder_value_given : t -> V.t = "placeholderValue" [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    picker
+      ~kind:
+        {
+          date_of = (fun v -> D.to_calendar_date v);
+          at =
+            (fun d t ->
+              let t =
+                match t with
+                | Some t -> t
+                | None -> Props.placeholder_value_given props
+              in
+              Dt.ZonedDateTime.set t
+                (Dt.ZonedDateTime_Set.make ~era:(C.era d) ~year:(C.year d)
+                   ~month:(C.month d) ~day:(C.day d) ())
+                ());
+          timed =
+            S.accessor (fun () ->
+                match Props.granularity props with
+                | Some `day -> false
+                | Some (`hour | `minute | `second) | None -> true);
+        }
+      ~value:(S.accessor (fun () -> Props.value props))
+      ~default_value:(S.untrack (fun () -> Props.default_value props))
+      ~on_change:(fun v -> Jsx.call (Props.on_change props) v)
+      ~placeholder_value:(S.accessor (fun () -> Props.placeholder_value props))
+      ~min_value:(S.accessor (fun () -> Props.min_value props))
+      ~max_value:(S.accessor (fun () -> Props.max_value props))
+      ~is_date_unavailable:
+        (S.accessor (fun () ->
+             Option.map
+               (fun _ d -> Props.is_date_unavailable props d)
+               (Props.unavailable_given props)))
+      ~children:(fun () -> Props.children props)
+      ~as_:(fun state ->
+        S.accessor (fun () ->
+            Option.map
+              (fun _ p -> Props.draw_as props p state)
+              (Props.as_given props)))
+      props
+      ~field:(fun ~value ~on_change ~as_ child ->
+        <Date_field.Root_zoned
+          placeholder_value=(Props.placeholder_value_given props)
+          value=(S.get value)
+          on_change
+          input_role=`presentation
+          ?as_=(S.get as_)
+          data_open=(Jsx.flag (S.get (within "Date_picker").open_))
+          props=(S.omit props Common.own)>
+          (child ())
+        </Date_field.Root_zoned>)
+
+  let component = Jsx.component make
+end
+
+type 'v range_state = {
+  range : 'v Date_field.range option S.accessor;
+  date_range : Calendar.range option S.accessor;
+      (* The range's dates, else the dates chosen apart from times. *)
+  time_range : ('v option * 'v option) S.accessor;
+  set_date_range : Calendar.range -> unit;
+  set_time : [ `start | `end_ ] -> 'v -> unit;
+  range_open : bool S.accessor;
+  set_range_open : bool -> unit;
+  range_has_time : bool S.accessor;
+}
+
+(* A picker of a range, as React Stately's range picker keeps one: its
+   range, the dates and the times chosen apart while it has none, and whether
+   its popover is open. *)
+let range_picker (type v) ~(kind : v kind)
+    ~(value : v Date_field.range Js.Nullable.t option S.accessor)
+    ~(default_value : v Date_field.range option)
+    ~(on_change : v Date_field.range option -> unit)
+    ~(placeholder_value : v option S.accessor)
+    ~(min_value : v option S.accessor) ~(max_value : v option S.accessor)
+    ~(is_date_unavailable : (v -> bool) option S.accessor)
+    ~(children : unit -> v range_state Jsx.children)
+    ~(as_ :
+       v range_state ->
+       (Solidtype.Html.Div.props -> Jsx.element) option S.accessor)
+    (props : Common.t)
+    ~(field :
+       value:v Date_field.range Js.Nullable.t S.accessor ->
+       on_change:(v Date_field.range option -> unit) ->
+       as_:(Solidtype.Html.Div.props -> Jsx.element) option S.accessor ->
+       (unit -> Jsx.element) ->
+       Jsx.element) =
+  let kept, set_kept = S.create_signal default_value in
+  let current () =
+    match S.get value with
+    | Some v -> Js.Nullable.toOption v
+    | None -> S.get kept
+  in
+  let set_value v =
+    if Option.is_none (S.get value) then S.set set_kept v;
+    on_change v
+  in
+  let is_open, set_open_raw = opened props in
+  let chosen_dates, set_chosen_dates = S.create_signal None in
+  let chosen_times, set_chosen_times = S.create_signal (None, None) in
+  let date_range =
+    S.accessor (fun () ->
+        match current () with
+        | Some (r : v Date_field.range) ->
+            Some
+              ({ start = kind.date_of r.start; end_ = kind.date_of r.end_ }
+                : Calendar.range)
+        | None -> S.get chosen_dates)
+  in
+  let time_range =
+    S.accessor (fun () ->
+        match current () with
+        | Some r when S.get kind.timed -> (Some r.start, Some r.end_)
+        | Some _ | None -> S.get chosen_times)
+  in
+  let or_placeholder = function
+    | Some t -> Some t
+    | None -> S.get placeholder_value
+  in
+  let commit (d : Calendar.range) (ts, te) =
+    set_value
+      (Some { Date_field.start = kind.at d.start ts; end_ = kind.at d.end_ te });
+    S.set set_chosen_dates None;
+    S.set set_chosen_times (None, None)
+  in
+  let should_close () =
+    Option.value (Common.should_close_on_select props) ~default:true
+  in
+  let set_date_range (d : Calendar.range) =
+    let close = should_close () in
+    if S.get kind.timed then
+      let ts, te = S.get time_range in
+      if close || (Option.is_some ts && Option.is_some te) then
+        commit d (or_placeholder ts, or_placeholder te)
+      else S.set set_chosen_dates (Some d)
+    else
+      set_value
+        (Some
+           {
+             Date_field.start = kind.at d.start None;
+             end_ = kind.at d.end_ None;
+           });
+    if close then set_open_raw false
+  in
+  let set_time which t =
+    let ts, te = S.get time_range in
+    let times =
+      match which with `start -> (Some t, te) | `end_ -> (ts, Some t)
+    in
+    match (S.get date_range, times) with
+    | Some d, (Some _, Some _) -> commit d times
+    | _ -> S.set set_chosen_times times
+  in
+  (* Dates chosen without their times are put at the placeholder's as the
+     popover closes. *)
+  let set_open o =
+    (if (not o) && Option.is_none (current ()) && S.get kind.timed then
+       match S.get chosen_dates with
+       | Some d ->
+           let ts, te = S.get time_range in
+           commit d (or_placeholder ts, or_placeholder te)
+       | None -> ());
+    set_open_raw o
+  in
+  let disabled =
+    S.accessor (fun () ->
+        Option.value (Common.is_disabled props) ~default:false)
+  in
+  let read_only =
+    S.accessor (fun () ->
+        Option.value (Common.is_read_only props) ~default:false)
+  in
+  let state =
+    {
+      range = S.accessor current;
+      date_range;
+      time_range;
+      set_date_range;
+      set_time;
+      range_open = is_open;
+      set_range_open = set_open;
+      range_has_time = kind.timed;
+    }
+  in
+  let midnight d = kind.date_of (kind.at d None) in
+  let inside () =
+    let f = Date_field.Context.use () in
+    let given : Calendar.Given.t =
+      {
+        value = Range (date_range, set_date_range);
+        min_value =
+          S.accessor (fun () -> Option.map kind.date_of (S.get min_value));
+        max_value =
+          S.accessor (fun () -> Option.map kind.date_of (S.get max_value));
+        is_date_unavailable =
+          S.accessor (fun () ->
+              Option.map
+                (fun u d -> u (kind.at (midnight d) (S.get placeholder_value)))
+                (S.get is_date_unavailable));
+        is_disabled = disabled;
+        is_read_only = read_only;
+        is_invalid = f.is_invalid;
+        default_focused_value =
+          S.accessor (fun () ->
+              match S.get date_range with
+              | Some _ -> None
+              | None -> Option.map kind.date_of (S.get placeholder_value));
+        first_day_of_week =
+          S.accessor (fun () -> Common.first_day_of_week props);
+        page_behavior = S.accessor (fun () -> Common.page_behavior props);
+      }
+    in
+    <Calendar.Given.Provider value=given>
+      (Jsx.draw (children ()) state)
+    </Calendar.Given.Provider>
+  in
+  shell ~is_open ~set_open props (fun () ->
+      field
+        ~value:(S.accessor (fun () -> Js.Nullable.fromOption (current ())))
+        ~on_change:set_value ~as_:(as_ state) inside)
+
+module Root_range = struct
+  module V = C
+
+  module Props = struct
+    type t = Common.t
+    type predicate
+
+    external check :
+      ?value:V.t Date_field.range Js.Nullable.t Solidtype.Check.value ->
+      ?default_value:V.t Date_field.range Solidtype.Check.value ->
+      ?on_change:(V.t Date_field.range option -> unit) ->
+      ?start_name:string Solidtype.Check.value ->
+      ?end_name:string Solidtype.Check.value ->
+      ?placeholder_value:V.t Solidtype.Check.value ->
+      ?min_value:V.t Solidtype.Check.value ->
+      ?max_value:V.t Solidtype.Check.value ->
+      ?is_date_unavailable:(V.t -> bool) ->
+      ?should_force_leading_zeros:bool Solidtype.Check.value ->
+      ?is_required:bool Solidtype.Check.value ->
+      ?is_invalid:bool Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?is_read_only:bool Solidtype.Check.value ->
+      ?auto_focus:bool Solidtype.Check.value ->
+      ?aria_labelledby:string Solidtype.Check.value ->
+      ?aria_describedby:string Solidtype.Check.value ->
+      ?translations:Date_field.translations Solidtype.Check.value ->
+      ?is_open:bool Solidtype.Check.value ->
+      ?default_open:bool Solidtype.Check.value ->
+      ?on_open_change:(bool -> unit) ->
+      ?should_close_on_select:bool Solidtype.Check.value ->
+      ?first_day_of_week:Calendar.day_of_week Solidtype.Check.value ->
+      ?page_behavior:[ `visible | `single ] Solidtype.Check.value ->
+      ?picker_translations:translations Solidtype.Check.value ->
+      children:
+        ( V.t range_state -> Jsx.element,
+          [ `elements | `render ] )
+        Solidtype.Check.children ->
+      ?as_:
+        (Solidtype.Html.Div.props -> V.t range_state -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (unit -> unit) Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> V.t Date_field.range Js.Nullable.t option = "value"
+    [@@mel.get]
+
+    external default_value : t -> V.t Date_field.range option = "defaultValue"
+    [@@mel.get]
+
+    external on_change : t -> ((V.t Date_field.range option -> unit)[@u]) option
+      = "onChange"
+    [@@mel.get]
+
+    external placeholder_value : t -> V.t option = "placeholderValue"
+    [@@mel.get]
+
+    external min_value : t -> V.t option = "minValue" [@@mel.get]
+    external max_value : t -> V.t option = "maxValue" [@@mel.get]
+
+    external unavailable_given : t -> predicate option = "isDateUnavailable"
+    [@@mel.get]
+
+    external is_date_unavailable : t -> V.t -> bool = "isDateUnavailable"
+    [@@mel.send]
+
+    external children : t -> V.t range_state Jsx.children = "children"
+    [@@mel.get]
+
+    external as_given : t -> predicate option = "as" [@@mel.get]
+
+    external draw_as :
+      t -> Solidtype.Html.Div.props -> V.t range_state -> Solidtype.Jsx.element
+      = "as"
+    [@@mel.send]
+  end
+
+  let make (props : Props.t) =
+    range_picker
+      ~kind:
+        {
+          date_of = Fun.id;
+          at = (fun d _ -> d);
+          timed = S.accessor (fun () -> false);
+        }
+      ~value:(S.accessor (fun () -> Props.value props))
+      ~default_value:(S.untrack (fun () -> Props.default_value props))
+      ~on_change:(fun v -> Jsx.call (Props.on_change props) v)
+      ~placeholder_value:(S.accessor (fun () -> Props.placeholder_value props))
+      ~min_value:(S.accessor (fun () -> Props.min_value props))
+      ~max_value:(S.accessor (fun () -> Props.max_value props))
+      ~is_date_unavailable:
+        (S.accessor (fun () ->
+             Option.map
+               (fun _ d -> Props.is_date_unavailable props d)
+               (Props.unavailable_given props)))
+      ~children:(fun () -> Props.children props)
+      ~as_:(fun state ->
+        S.accessor (fun () ->
+            Option.map
+              (fun _ p -> Props.draw_as props p state)
+              (Props.as_given props)))
+      props
+      ~field:(fun ~value ~on_change ~as_ child ->
+        <Date_field.Root_range
+          value=(S.get value)
+          on_change
+          ?as_=(S.get as_)
+          data_open=(Jsx.flag (S.get (within "Date_picker").open_))
+          props=(S.omit props Common.own)>
+          (child ())
+        </Date_field.Root_range>)
+
+  let component = Jsx.component make
+end
+
+module Root_range_date_time = struct
+  module V = Dt.CalendarDateTime
+
+  module Props = struct
+    type t = Common.t
+    type predicate
+
+    external check :
+      ?value:V.t Date_field.range Js.Nullable.t Solidtype.Check.value ->
+      ?default_value:V.t Date_field.range Solidtype.Check.value ->
+      ?on_change:(V.t Date_field.range option -> unit) ->
+      ?start_name:string Solidtype.Check.value ->
+      ?end_name:string Solidtype.Check.value ->
+      ?placeholder_value:V.t Solidtype.Check.value ->
+      ?granularity:[ `day | `hour | `minute | `second ] Solidtype.Check.value ->
+      ?hour_cycle:[ `h12 | `h24 ] Solidtype.Check.value ->
+      ?min_value:V.t Solidtype.Check.value ->
+      ?max_value:V.t Solidtype.Check.value ->
+      ?is_date_unavailable:(V.t -> bool) ->
+      ?should_force_leading_zeros:bool Solidtype.Check.value ->
+      ?is_required:bool Solidtype.Check.value ->
+      ?is_invalid:bool Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?is_read_only:bool Solidtype.Check.value ->
+      ?auto_focus:bool Solidtype.Check.value ->
+      ?aria_labelledby:string Solidtype.Check.value ->
+      ?aria_describedby:string Solidtype.Check.value ->
+      ?translations:Date_field.translations Solidtype.Check.value ->
+      ?is_open:bool Solidtype.Check.value ->
+      ?default_open:bool Solidtype.Check.value ->
+      ?on_open_change:(bool -> unit) ->
+      ?should_close_on_select:bool Solidtype.Check.value ->
+      ?first_day_of_week:Calendar.day_of_week Solidtype.Check.value ->
+      ?page_behavior:[ `visible | `single ] Solidtype.Check.value ->
+      ?picker_translations:translations Solidtype.Check.value ->
+      children:
+        ( V.t range_state -> Jsx.element,
+          [ `elements | `render ] )
+        Solidtype.Check.children ->
+      ?as_:
+        (Solidtype.Html.Div.props -> V.t range_state -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (unit -> unit) Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> V.t Date_field.range Js.Nullable.t option = "value"
+    [@@mel.get]
+
+    external default_value : t -> V.t Date_field.range option = "defaultValue"
+    [@@mel.get]
+
+    external on_change : t -> ((V.t Date_field.range option -> unit)[@u]) option
+      = "onChange"
+    [@@mel.get]
+
+    external placeholder_value : t -> V.t option = "placeholderValue"
+    [@@mel.get]
+
+    external min_value : t -> V.t option = "minValue" [@@mel.get]
+    external max_value : t -> V.t option = "maxValue" [@@mel.get]
+
+    external unavailable_given : t -> predicate option = "isDateUnavailable"
+    [@@mel.get]
+
+    external is_date_unavailable : t -> V.t -> bool = "isDateUnavailable"
+    [@@mel.send]
+
+    external children : t -> V.t range_state Jsx.children = "children"
+    [@@mel.get]
+
+    external as_given : t -> predicate option = "as" [@@mel.get]
+
+    external draw_as :
+      t -> Solidtype.Html.Div.props -> V.t range_state -> Solidtype.Jsx.element
+      = "as"
+    [@@mel.send]
+
+    external granularity : t -> [ `day | `hour | `minute | `second ] option
+      = "granularity"
+    [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    range_picker
+      ~kind:
+        {
+          date_of = (fun v -> D.to_calendar_date v);
+          at =
+            (fun d t ->
+              match t with
+              | Some t -> D.to_calendar_date_time d ~time:t ()
+              | None -> D.to_calendar_date_time d ());
+          timed =
+            S.accessor (fun () ->
+                match Props.granularity props with
+                | Some `day -> false
+                | Some (`hour | `minute | `second) | None -> true);
+        }
+      ~value:(S.accessor (fun () -> Props.value props))
+      ~default_value:(S.untrack (fun () -> Props.default_value props))
+      ~on_change:(fun v -> Jsx.call (Props.on_change props) v)
+      ~placeholder_value:(S.accessor (fun () -> Props.placeholder_value props))
+      ~min_value:(S.accessor (fun () -> Props.min_value props))
+      ~max_value:(S.accessor (fun () -> Props.max_value props))
+      ~is_date_unavailable:
+        (S.accessor (fun () ->
+             Option.map
+               (fun _ d -> Props.is_date_unavailable props d)
+               (Props.unavailable_given props)))
+      ~children:(fun () -> Props.children props)
+      ~as_:(fun state ->
+        S.accessor (fun () ->
+            Option.map
+              (fun _ p -> Props.draw_as props p state)
+              (Props.as_given props)))
+      props
+      ~field:(fun ~value ~on_change ~as_ child ->
+        <Date_field.Root_range_date_time
+          value=(S.get value)
+          on_change
+          ?as_=(S.get as_)
+          data_open=(Jsx.flag (S.get (within "Date_picker").open_))
+          props=(S.omit props Common.own)>
+          (child ())
+        </Date_field.Root_range_date_time>)
+
+  let component = Jsx.component make
+end
+
+module Root_range_zoned = struct
+  module V = Dt.ZonedDateTime
+
+  module Props = struct
+    type t = Common.t
+    type predicate
+
+    external check :
+      ?value:V.t Date_field.range Js.Nullable.t Solidtype.Check.value ->
+      ?default_value:V.t Date_field.range Solidtype.Check.value ->
+      ?on_change:(V.t Date_field.range option -> unit) ->
+      ?start_name:string Solidtype.Check.value ->
+      ?end_name:string Solidtype.Check.value ->
+      placeholder_value:V.t Solidtype.Check.value ->
+      ?granularity:[ `day | `hour | `minute | `second ] Solidtype.Check.value ->
+      ?hour_cycle:[ `h12 | `h24 ] Solidtype.Check.value ->
+      ?hide_time_zone:bool Solidtype.Check.value ->
+      ?min_value:V.t Solidtype.Check.value ->
+      ?max_value:V.t Solidtype.Check.value ->
+      ?is_date_unavailable:(V.t -> bool) ->
+      ?should_force_leading_zeros:bool Solidtype.Check.value ->
+      ?is_required:bool Solidtype.Check.value ->
+      ?is_invalid:bool Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?is_read_only:bool Solidtype.Check.value ->
+      ?auto_focus:bool Solidtype.Check.value ->
+      ?aria_labelledby:string Solidtype.Check.value ->
+      ?aria_describedby:string Solidtype.Check.value ->
+      ?translations:Date_field.translations Solidtype.Check.value ->
+      ?is_open:bool Solidtype.Check.value ->
+      ?default_open:bool Solidtype.Check.value ->
+      ?on_open_change:(bool -> unit) ->
+      ?should_close_on_select:bool Solidtype.Check.value ->
+      ?first_day_of_week:Calendar.day_of_week Solidtype.Check.value ->
+      ?page_behavior:[ `visible | `single ] Solidtype.Check.value ->
+      ?picker_translations:translations Solidtype.Check.value ->
+      children:
+        ( V.t range_state -> Jsx.element,
+          [ `elements | `render ] )
+        Solidtype.Check.children ->
+      ?as_:
+        (Solidtype.Html.Div.props -> V.t range_state -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (unit -> unit) Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> V.t Date_field.range Js.Nullable.t option = "value"
+    [@@mel.get]
+
+    external default_value : t -> V.t Date_field.range option = "defaultValue"
+    [@@mel.get]
+
+    external on_change : t -> ((V.t Date_field.range option -> unit)[@u]) option
+      = "onChange"
+    [@@mel.get]
+
+    external placeholder_value : t -> V.t option = "placeholderValue"
+    [@@mel.get]
+
+    external min_value : t -> V.t option = "minValue" [@@mel.get]
+    external max_value : t -> V.t option = "maxValue" [@@mel.get]
+
+    external unavailable_given : t -> predicate option = "isDateUnavailable"
+    [@@mel.get]
+
+    external is_date_unavailable : t -> V.t -> bool = "isDateUnavailable"
+    [@@mel.send]
+
+    external children : t -> V.t range_state Jsx.children = "children"
+    [@@mel.get]
+
+    external as_given : t -> predicate option = "as" [@@mel.get]
+
+    external draw_as :
+      t -> Solidtype.Html.Div.props -> V.t range_state -> Solidtype.Jsx.element
+      = "as"
+    [@@mel.send]
+
+    external granularity : t -> [ `day | `hour | `minute | `second ] option
+      = "granularity"
+    [@@mel.get]
+
+    external placeholder_value_given : t -> V.t = "placeholderValue" [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    range_picker
+      ~kind:
+        {
+          date_of = (fun v -> D.to_calendar_date v);
+          at =
+            (fun d t ->
+              let t =
+                match t with
+                | Some t -> t
+                | None -> Props.placeholder_value_given props
+              in
+              Dt.ZonedDateTime.set t
+                (Dt.ZonedDateTime_Set.make ~era:(C.era d) ~year:(C.year d)
+                   ~month:(C.month d) ~day:(C.day d) ())
+                ());
+          timed =
+            S.accessor (fun () ->
+                match Props.granularity props with
+                | Some `day -> false
+                | Some (`hour | `minute | `second) | None -> true);
+        }
+      ~value:(S.accessor (fun () -> Props.value props))
+      ~default_value:(S.untrack (fun () -> Props.default_value props))
+      ~on_change:(fun v -> Jsx.call (Props.on_change props) v)
+      ~placeholder_value:(S.accessor (fun () -> Props.placeholder_value props))
+      ~min_value:(S.accessor (fun () -> Props.min_value props))
+      ~max_value:(S.accessor (fun () -> Props.max_value props))
+      ~is_date_unavailable:
+        (S.accessor (fun () ->
+             Option.map
+               (fun _ d -> Props.is_date_unavailable props d)
+               (Props.unavailable_given props)))
+      ~children:(fun () -> Props.children props)
+      ~as_:(fun state ->
+        S.accessor (fun () ->
+            Option.map
+              (fun _ p -> Props.draw_as props p state)
+              (Props.as_given props)))
+      props
+      ~field:(fun ~value ~on_change ~as_ child ->
+        <Date_field.Root_range_zoned
+          placeholder_value=(Props.placeholder_value_given props)
+          value=(S.get value)
+          on_change
+          ?as_=(S.get as_)
+          data_open=(Jsx.flag (S.get (within "Date_picker").open_))
+          props=(S.omit props Common.own)>
+          (child ())
+        </Date_field.Root_range_zoned>)
+
+  let component = Jsx.component make
+end
+
+(* The field's group of segments and the button that opens the popover, as
+   React Aria's date picker names it. *)
+module Group = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external children : t -> Jsx.element = "children" [@@mel.get]
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
+    external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyDown"
+    [@@mel.get]
+
+    external on_key_up : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyUp"
+    [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let p = within "Date_picker.Group" in
+    let f = Date_field.Context.use () in
+    <div
+      role=`group
+      ?aria_labelledby=(S.get f.labelled_by)
+      ?aria_describedby=(S.get f.described_by)
+      ?aria_disabled=(if S.get p.disabled then Some true else None)
+      ref=(fun e ->
+            p.set_group (as_html_element e);
+            Jsx.call (Props.ref props) e)
+      on_key_down=(fun e ->
+                    (* The keys go to the popover while it is open. *)
+                    if not (S.get p.open_) then
+                      Jsx.call (Props.on_key_down props) e)
+      on_key_up=(fun e ->
+                  if not (S.get p.open_) then Jsx.call (Props.on_key_up props) e)
+      ?as_=(S.drawn_as props)
+      props=(S.undrawn
+               (S.omit props [| "children"; "ref"; "onKeyDown"; "onKeyUp" |]))>
+      (Props.children props)
+    </div>
+
+  let component = Jsx.component make
+end
+
+module Trigger = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Button.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external children : t -> Jsx.element = "children" [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let p = within "Date_picker.Trigger" in
+    let f = Date_field.Context.use () in
+    <Popover.Trigger
+      id=p.button_id
+      aria_label=(S.get p.words).calendar
+      aria_labelledby=(match S.get f.labelled_by with
+                      | Some l -> p.button_id ^ " " ^ l
+                      | None -> p.button_id)
+      ?aria_describedby=(S.get f.described_by)
+      disabled=(S.get p.disabled || S.get p.read_only)
+      ?as_=(S.drawn_as props)
+      props=(S.undrawn (S.omit props [| "children" |]))>
+      (Props.children props)
+    </Popover.Trigger>
+
+  let component = Jsx.component make
+end
+
+module Content = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?placement:string Solidtype.Check.value ->
+      ?offset:float Solidtype.Check.value ->
+      ?kept:bool Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external placement : t -> string option = "placement" [@@mel.get]
+    external offset : t -> float option = "offset" [@@mel.get]
+    external kept : t -> bool option = "kept" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
+
+    external on_open_auto_focus : t -> ((Dom.event -> unit)[@u]) option
+      = "onOpenAutoFocus"
+    [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let p = within "Date_picker.Content" in
+    let f = Date_field.Context.use () in
+    S.create_computed (fun () ->
+        p.set_placement (Option.value (Props.placement props) ~default:"bottom"));
+    S.create_computed (fun () ->
+        p.set_gutter (Option.value (Props.offset props) ~default:8.));
+    <Show
+      when_=(S.get p.open_ || Option.value (Props.kept props) ~default:false)>
+      <Popover.Portal ref=(fun e -> Top_layer.place e)>
+        <Popover.Content
+          id=p.dialog_id
+          aria_labelledby=(match S.get f.labelled_by with
+                          | Some l -> p.button_id ^ " " ^ l
+                          | None -> p.button_id)
+          on_open_auto_focus=(fun e ->
+                               Jsx.call (Props.on_open_auto_focus props) e;
+                               (* The calendar inside takes the focus, as it
+                                is drawn, on its focused day. *)
+                               prevent e)
+          ?as_=(S.drawn_as props)
+          props=(S.undrawn
+                   (S.omit props
+                      [|
+                        "placement";
+                        "offset";
+                        "kept";
+                        "children";
+                        "onOpenAutoFocus";
+                      |]))>
+          (Props.children props)
+        </Popover.Content>
+      </Popover.Portal>
+    </Show>
+
+  let component = Jsx.component make
+end

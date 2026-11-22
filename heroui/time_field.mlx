@@ -102,6 +102,7 @@ module Group = struct
         data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
         data_invalid=(Jsx.flag (S.get f.invalid))
         data_disabled=(Jsx.flag (S.get f.disabled))
+        ?aria_disabled=(if S.get f.disabled then Some true else None)
         ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
         props=(Props.others props)>
         (Jsx.draw (S.get children) (state ()))
@@ -153,6 +154,7 @@ module Input = struct
       data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
       data_invalid=(Jsx.flag (S.get f.invalid))
       data_disabled=(Jsx.flag (S.get f.disabled))
+      ?aria_disabled=(if S.get f.disabled then Some true else None)
       props=(Props.others props)>
       (fun segment ->
         let literals side =
@@ -634,6 +636,16 @@ let field (type v) ~(kind : v kind) ~(fallback : v S.accessor)
     </Kobalte.Root>
   </Context.Provider>
 
+(* A field's locale is a provider's, else en-GB, as a date field's is: Kobalte's
+   would be the browser's, so a time field beside a date field in a picker
+   could read another clock. *)
+module In_locale = struct
+  let%component make ~(children : Jsx.element) () =
+    let i18n = I18n.use_locale () in
+    if I18n.use_locale () == i18n then S.get children
+    else <I18n.I18nProvider locale="en-GB">(S.get children)</I18n.I18nProvider>
+end
+
 let%component make ?(value : Time.t Js.Nullable.t option)
     ?(default_value : Time.t option)
     ?(on_change : (Time.t option -> unit) option)
@@ -651,18 +663,20 @@ let%component make ?(value : Time.t Js.Nullable.t option)
     ~(children : state Jsx.children)
     ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
     () =
-  field ~kind:time_kind
-    ~fallback:
-      (S.accessor (fun () ->
-           Option.value (S.get placeholder_value) ~default:(Time.make ())))
-    ~value ~default_value ~on_change ~placeholder_value ~min_value ~max_value
-    ~hide_time_zone:(S.accessor (fun () -> true))
-    ~granularity ~hour_cycle ~should_force_leading_zeros ~is_required
-    ~is_invalid:(fun () -> S.get is_invalid)
-    ~is_disabled ~is_read_only
-    ~name:(fun () -> S.get name)
-    ~aria_label ~full_width ~class_ ~on_blur ~on_focus_out ~given_ref ~children
-    ~as_ ~others:(Props.others props)
+  <In_locale>
+    (field ~kind:time_kind
+       ~fallback:
+         (S.accessor (fun () ->
+              Option.value (S.get placeholder_value) ~default:(Time.make ())))
+       ~value ~default_value ~on_change ~placeholder_value ~min_value ~max_value
+       ~hide_time_zone:(S.accessor (fun () -> true))
+       ~granularity ~hour_cycle ~should_force_leading_zeros ~is_required
+       ~is_invalid:(fun () -> S.get is_invalid)
+       ~is_disabled ~is_read_only
+       ~name:(fun () -> S.get name)
+       ~aria_label ~full_width ~class_ ~on_blur ~on_focus_out ~given_ref
+       ~children ~as_ ~others:(Props.others props))
+  </In_locale>
 [@@element div]
 
 module Date_time = struct
@@ -685,17 +699,20 @@ module Date_time = struct
       ?(as_ :
          (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
       =
-    field ~kind:date_time_kind ~fallback:placeholder_value ~value ~default_value
-      ~on_change
-      ~placeholder_value:(S.accessor (fun () -> Some (S.get placeholder_value)))
-      ~min_value ~max_value
-      ~hide_time_zone:(S.accessor (fun () -> true))
-      ~granularity ~hour_cycle ~should_force_leading_zeros ~is_required
-      ~is_invalid:(fun () -> S.get is_invalid)
-      ~is_disabled ~is_read_only
-      ~name:(fun () -> S.get name)
-      ~aria_label ~full_width ~class_ ~on_blur ~on_focus_out ~given_ref
-      ~children ~as_ ~others:(Props.others props)
+    <In_locale>
+      (field ~kind:date_time_kind ~fallback:placeholder_value ~value
+         ~default_value ~on_change
+         ~placeholder_value:
+           (S.accessor (fun () -> Some (S.get placeholder_value)))
+         ~min_value ~max_value
+         ~hide_time_zone:(S.accessor (fun () -> true))
+         ~granularity ~hour_cycle ~should_force_leading_zeros ~is_required
+         ~is_invalid:(fun () -> S.get is_invalid)
+         ~is_disabled ~is_read_only
+         ~name:(fun () -> S.get name)
+         ~aria_label ~full_width ~class_ ~on_blur ~on_focus_out ~given_ref
+         ~children ~as_ ~others:(Props.others props))
+    </In_locale>
   [@@element div]
 end
 
@@ -719,15 +736,18 @@ module Zoned = struct
       ?(as_ :
          (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
       =
-    field ~kind:zoned_kind ~fallback:placeholder_value ~value ~default_value
-      ~on_change
-      ~placeholder_value:(S.accessor (fun () -> Some (S.get placeholder_value)))
-      ~min_value ~max_value ~hide_time_zone ~granularity ~hour_cycle
-      ~should_force_leading_zeros ~is_required
-      ~is_invalid:(fun () -> S.get is_invalid)
-      ~is_disabled ~is_read_only
-      ~name:(fun () -> S.get name)
-      ~aria_label ~full_width ~class_ ~on_blur ~on_focus_out ~given_ref
-      ~children ~as_ ~others:(Props.others props)
+    <In_locale>
+      (field ~kind:zoned_kind ~fallback:placeholder_value ~value ~default_value
+         ~on_change
+         ~placeholder_value:
+           (S.accessor (fun () -> Some (S.get placeholder_value)))
+         ~min_value ~max_value ~hide_time_zone ~granularity ~hour_cycle
+         ~should_force_leading_zeros ~is_required
+         ~is_invalid:(fun () -> S.get is_invalid)
+         ~is_disabled ~is_read_only
+         ~name:(fun () -> S.get name)
+         ~aria_label ~full_width ~class_ ~on_blur ~on_focus_out ~given_ref
+         ~children ~as_ ~others:(Props.others props))
+    </In_locale>
   [@@element div]
 end

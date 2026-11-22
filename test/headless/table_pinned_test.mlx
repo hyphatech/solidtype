@@ -231,4 +231,52 @@ let () =
               |> toEqual
                    ( [| "0px"; "0px"; "120px"; "120px"; "120px" |],
                      [| "100px"; "100px"; "120px"; "220px"; "220px" |],
-                     (Some "", Some "") ))))
+                     (Some "", Some "") )));
+      Jest.testPromise
+        "is what scrolls across, and keeps its pinned columns in view, when \
+         resizable" (fun () ->
+          H.render (fun () ->
+              <Virtualizer
+                layout=(Virtualizer.table_layout ~heading_size:40. ~row_size:40.
+                          ())>
+                <Table.Resizable_container data_client_width="200">
+                  <Table.Root
+                    aria_label="Wide"
+                    data_client_height="200"
+                    data_client_width="200"
+                    data_scroll_width="420">
+                    <Table.Header>
+                      <Table.Column
+                        id="name"
+                        is_row_header=true
+                        pinned=`start
+                        width=(Table.Pixels 120.)>
+                        "Name"
+                      </Table.Column>
+                      <Table.Column id="role" width=(Table.Pixels 150.)>
+                        "Role"
+                      </Table.Column>
+                      <Table.Column id="email" width=(Table.Pixels 150.)>
+                        "Email"
+                      </Table.Column>
+                    </Table.Header>
+                    <Table.Body>
+                      <Table.Row id="1">
+                        <Table.Cell>"Kate"</Table.Cell>
+                        <Table.Cell>"CEO"</Table.Cell>
+                        <Table.Cell>"kate@acme.com"</Table.Cell>
+                      </Table.Row>
+                    </Table.Body>
+                  </Table.Root>
+                </Table.Resizable_container>
+              </Virtualizer>);
+          let lefts () =
+            Array.map left_of [| H.by_text "Name"; H.by_text "Kate" |]
+          in
+          set_scroll_left (table ()) 100.;
+          ignore (dispatch (table ()) (scroll_event "scroll") : bool);
+          let* () = H.frame () in
+          Js.Promise.resolve
+            E.(
+              expect (H.attribute (table ()) "style", lefts ())
+              |> toEqual (None, [| "100px"; "100px" |]))))

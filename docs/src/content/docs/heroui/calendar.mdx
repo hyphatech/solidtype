@@ -1,0 +1,303 @@
+---
+title: Calendar
+description: Composable date picker with month grid, navigation, and year picker support.
+---
+
+import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/calendar_usage.jsx";
+import ExUsageCode from "@islands/calendar_usage.mlx?raw";
+import * as ExDisabled from "@islands/calendar_disabled.jsx";
+import ExDisabledCode from "@islands/calendar_disabled.mlx?raw";
+import * as ExReadOnly from "@islands/calendar_read_only.jsx";
+import ExReadOnlyCode from "@islands/calendar_read_only.mlx?raw";
+import * as ExDefaultValue from "@islands/calendar_default_value.jsx";
+import ExDefaultValueCode from "@islands/calendar_default_value.mlx?raw";
+import * as ExYearPicker from "@islands/calendar_year_picker.jsx";
+import ExYearPickerCode from "@islands/calendar_year_picker.mlx?raw";
+import * as ExControlled from "@islands/calendar_controlled.jsx";
+import ExControlledCode from "@islands/calendar_controlled.mlx?raw";
+import * as ExMinMax from "@islands/calendar_min_max.jsx";
+import ExMinMaxCode from "@islands/calendar_min_max.mlx?raw";
+import * as ExUnavailable from "@islands/calendar_unavailable.jsx";
+import ExUnavailableCode from "@islands/calendar_unavailable.mlx?raw";
+import * as ExWeeksInMonth from "@islands/calendar_weeks_in_month.jsx";
+import ExWeeksInMonthCode from "@islands/calendar_weeks_in_month.mlx?raw";
+import * as ExWeekView from "@islands/calendar_week_view.jsx";
+import ExWeekViewCode from "@islands/calendar_week_view.mlx?raw";
+import * as ExDayView from "@islands/calendar_day_view.jsx";
+import ExDayViewCode from "@islands/calendar_day_view.mlx?raw";
+import * as ExMultiple from "@islands/calendar_multiple.jsx";
+import ExMultipleCode from "@islands/calendar_multiple.mlx?raw";
+import * as ExFocusedValue from "@islands/calendar_focused_value.jsx";
+import ExFocusedValueCode from "@islands/calendar_focused_value.mlx?raw";
+import * as ExIndicators from "@islands/calendar_indicators.jsx";
+import ExIndicatorsCode from "@islands/calendar_indicators.mlx?raw";
+import * as ExCustomIcons from "@islands/calendar_custom_icons.jsx";
+import ExCustomIconsCode from "@islands/calendar_custom_icons.mlx?raw";
+import * as ExMultipleMonths from "@islands/calendar_multiple_months.jsx";
+import ExMultipleMonthsCode from "@islands/calendar_multiple_months.mlx?raw";
+import * as ExBooking from "@islands/calendar_booking.jsx";
+import ExBookingCode from "@islands/calendar_booking.mlx?raw";
+import * as ExInternational from "@islands/calendar_international.jsx";
+import ExInternationalCode from "@islands/calendar_international.mlx?raw";
+import * as ExTailwind from "@islands/calendar_tailwind.jsx";
+import ExTailwindCode from "@islands/calendar_tailwind.mlx?raw";
+import * as Demo from "@islands/calendar_demo.jsx";
+
+Its value is a `CalendarDate` of `solidtype-internationalized-date`, made by
+`CalendarDate.make 2026 11 21`, `parse_date "2026-11-21"` or `today zone`;
+several dates are `Calendar.Multiple`'s.
+
+Its weeks start on Monday and its days are written as `en-GB` writes them,
+whatever the browser reads, unless an `I18n.I18nProvider` names another
+locale. React's follows the browser.
+
+Original HeroUI documentation: [Calendar](https://heroui.com/en/docs/react/components/calendar).
+
+## Usage
+
+<Example code={ExUsageCode} title="calendar_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI Calendar twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two calendars:
+a marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Anatomy
+
+```ocaml
+<Calendar aria_label="Event date">
+  <Calendar.Header>
+    <Calendar.Heading />
+    <Calendar.Nav_button slot=`previous />
+    <Calendar.Nav_button slot=`next />
+  </Calendar.Header>
+  <Calendar.Grid>
+    <Calendar.Grid_header>
+      (fun day -> <Calendar.Header_cell>(Jsx.string (S.get day))</Calendar.Header_cell>)
+    </Calendar.Grid_header>
+    <Calendar.Grid_body>
+      (fun date -> <Calendar.Cell date=(S.get date) />)
+    </Calendar.Grid_body>
+  </Calendar.Grid>
+</Calendar>
+```
+
+## Examples
+
+### Disabled
+
+<Example code={ExDisabledCode} title="calendar_disabled.mlx"><ExDisabled.make client:visible /></Example>
+
+### Read Only
+
+A press on a day of a read-only calendar focuses it, and the arrows move on
+from it.
+
+<Example code={ExReadOnlyCode} title="calendar_read_only.mlx"><ExReadOnly.make client:visible /></Example>
+
+### Default Value
+
+<Example code={ExDefaultValueCode} title="calendar_default_value.mlx"><ExDefaultValue.make client:visible /></Example>
+
+### Year Picker
+
+`Calendar.Year_picker_trigger`, `Calendar.Year_picker_grid`, and their body
+and cell parts provide an integrated year navigation pattern.
+
+<Example code={ExYearPickerCode} title="calendar_year_picker.mlx"><ExYearPicker.make client:visible /></Example>
+
+### Controlled
+
+Use controlled `value` and `focused_value` for external state coordination
+and custom shortcuts.
+
+<Example code={ExControlledCode} title="calendar_controlled.mlx"><ExControlled.make client:visible /></Example>
+
+### Min and Max Dates
+
+<Example code={ExMinMaxCode} title="calendar_min_max.mlx"><ExMinMax.make client:visible /></Example>
+
+### Unavailable Dates
+
+Use `is_date_unavailable` to block dates such as weekends, holidays, or
+booked slots. A press on an unavailable day focuses it without choosing it.
+
+<Example code={ExUnavailableCode} title="calendar_unavailable.mlx"><ExUnavailable.make client:visible /></Example>
+
+### Weeks in Month
+
+Set `weeks_in_month` to a fixed value, for example `6`, to keep the grid's
+height as months change.
+
+<Example code={ExWeeksInMonthCode} title="calendar_weeks_in_month.mlx"><ExWeeksInMonth.make client:visible /></Example>
+
+### Week View
+
+`` visible_duration=(Calendar.Weeks n) `` shows one or more weeks at a time,
+and its buttons page by them; `` page_behavior=`single `` pages a week at a
+time. Its grid is named by the days it shows.
+
+<Example code={ExWeekViewCode} title="calendar_week_view.mlx"><ExWeekView.make client:visible /></Example>
+
+### Day View
+
+`` visible_duration=(Calendar.Days n) `` shows a run of days, and its buttons
+page by them; `` page_behavior=`single `` pages a day at a time.
+
+<Example code={ExDayViewCode} title="calendar_day_view.mlx"><ExDayView.make client:visible /></Example>
+
+### Multiple Selection
+
+`Calendar.Multiple` chooses several dates: its `value`, `default_value` and
+`on_change` are arrays.
+
+<Example code={ExMultipleCode} title="calendar_multiple.mlx"><ExMultiple.make client:visible /></Example>
+
+### Focused Value
+
+`focused_value` and `on_focus_change` control which date is focused.
+
+<Example code={ExFocusedValueCode} title="calendar_focused_value.mlx"><ExFocusedValue.make client:visible /></Example>
+
+### Cell Indicators
+
+`Calendar.Cell`'s children are drawn of its state, and
+`Calendar.Cell_indicator` marks a day.
+
+<Example code={ExIndicatorsCode} title="calendar_indicators.mlx"><ExIndicators.make client:visible /></Example>
+
+### Custom Navigation Icons
+
+Children of `Calendar.Nav_button` replace the chevrons.
+
+<Example code={ExCustomIconsCode} title="calendar_custom_icons.mlx"><ExCustomIcons.make client:visible /></Example>
+
+### Multiple Months
+
+`visible_duration` and `offset` show several months side by side.
+
+<Example code={ExMultipleMonthsCode} title="calendar_multiple_months.mlx"><ExMultipleMonths.make client:visible /></Example>
+
+### Real-World Example
+
+<Example code={ExBookingCode} title="calendar_booking.mlx"><ExBooking.make client:visible /></Example>
+
+### International Calendars
+
+An `I18n.I18nProvider` locale with a calendar extension shows that calendar;
+`on_change` gives a date in the calendar of the value given, else the
+Gregorian.
+
+<Example code={ExInternationalCode} title="calendar_international.mlx"><ExInternational.make client:visible /></Example>
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={ExTailwindCode} title="calendar_tailwind.mlx"><ExTailwind.make client:visible /></Example>
+
+## Styling Reference
+
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
+### CSS Classes
+
+- `.calendar` - Root container.
+- `.calendar--week-view`, `.calendar--day-view` - A week's or a day's view.
+- `.calendar__header` - Header row containing nav buttons and heading.
+- `.calendar__heading` - Current month label.
+- `.calendar__nav-button` - Previous/next navigation controls.
+- `.calendar__grid` - Main day grid.
+- `.calendar__grid-header` - Weekday header row wrapper.
+- `.calendar__grid-body` - Date rows wrapper.
+- `.calendar__header-cell` - Weekday header cell.
+- `.calendar__cell` - Interactive day cell.
+- `.calendar__cell-indicator` - Dot indicator inside a day cell.
+- `.calendar-year-picker__trigger` - Year picker toggle button.
+- `.calendar-year-picker__trigger-heading` - Heading text inside year picker trigger.
+- `.calendar-year-picker__trigger-indicator` - Indicator icon inside year picker trigger.
+- `.calendar-year-picker__year-grid` - Overlay grid of selectable years.
+- `.calendar-year-picker__year-cell` - Individual year option.
+
+### Interactive States
+
+- **Selected**: `[data-selected="true"]`
+- **Today**: `[data-today="true"]`
+- **Unavailable**: `[data-unavailable="true"]`
+- **Outside month**: `[data-outside-month="true"]`
+- **Hovered**: `[data-hovered="true"]`
+- **Pressed**: `[data-pressed="true"]`
+- **Focus visible**: `[data-focus-visible="true"]`
+- **Disabled**: `[data-disabled="true"]`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Calendar
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `value` | `value` | `CalendarDate.t Js.Nullable.t` | | Controlled selected date; null controls it empty |
+| `defaultValue` | `default_value` | `CalendarDate.t` | | Initial selected date (uncontrolled) |
+| `onChange` | `on_change` | `CalendarDate.t -> unit` | | Called when a date is chosen |
+| `selectionMode` | — | | | `Calendar.Multiple` chooses several dates |
+| `focusedValue` | `focused_value` | `CalendarDate.t` | | Controlled focused date |
+| `defaultFocusedValue` | `default_focused_value` | `CalendarDate.t` | its value, else today | Initial focused date |
+| `onFocusChange` | `on_focus_change` | `CalendarDate.t -> unit` | | Called when focus moves to another date |
+| `minValue` | `min_value` | `CalendarDate.t` | 1900-01-01 in its calendar | Earliest selectable date |
+| `maxValue` | `max_value` | `CalendarDate.t` | 2099-12-31 in its calendar | Latest selectable date |
+| `weeksInMonth` | `weeks_in_month` | `int` | the month's | The number of weeks in a month's grid |
+| `isDateUnavailable` | `is_date_unavailable` | `CalendarDate.t -> bool` | | Marks dates as unavailable |
+| `firstDayOfWeek` | `first_day_of_week` | `` [ `sun \| `mon \| `tue \| `wed \| `thu \| `fri \| `sat ] `` | the locale's | The first day of its weeks |
+| `pageBehavior` | `page_behavior` | `` [ `visible \| `single ] `` | `` `visible `` | Whether paging moves by what is shown or by one unit |
+| `selectionAlignment` | `selection_alignment` | `` [ `start \| `center \| `end_ ] `` | `` `center `` | Where the focused date stands in what is shown at first |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Disables interaction and selection |
+| `isReadOnly` | `is_read_only` | `bool` | `false` | Days are focused but not chosen |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Marks the calendar as invalid |
+| `visibleDuration` | `visible_duration` | `Calendar.duration` | `Months 1` | `Months n`, `Weeks n` or `Days n` |
+| `defaultYearPickerOpen` | `default_year_picker_open` | `bool` | `false` | Initial open state of the year picker |
+| `isYearPickerOpen` | `is_year_picker_open` | `bool` | | Controlled open state of the year picker |
+| `onYearPickerOpenChange` | `on_year_picker_open_change` | `bool -> unit` | | Called when the year picker opens or closes |
+| `aria-label` | `aria_label` | `string` | | Its name, beside the dates it shows |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+
+### Composition Parts
+
+| React | solidtype | Description |
+|---|---|---|
+| `Calendar.Header` | `Calendar.Header` | Header container for navigation and heading |
+| `Calendar.Heading` | `Calendar.Heading` | The dates shown; `offset` and `format` |
+| `Calendar.NavButton` | `Calendar.Nav_button` | `` slot=`previous `` or `` slot=`next `` |
+| `Calendar.Grid` | `Calendar.Grid` | Day grid for one month; `offset` and `weekday_style` |
+| `Calendar.GridHeader` | `Calendar.Grid_header` | Weekday header, a function of each day's name |
+| `Calendar.GridBody` | `Calendar.Grid_body` | Date cells, a function of each date |
+| `Calendar.HeaderCell` | `Calendar.Header_cell` | Weekday label cell |
+| `Calendar.Cell` | `Calendar.Cell` | A day, its children drawn of its state |
+| `Calendar.CellIndicator` | `Calendar.Cell_indicator` | A dot marking a day |
+| `Calendar.YearPickerTrigger` | `Calendar.Year_picker_trigger` | Opens and closes the year picker |
+| `Calendar.YearPickerTriggerHeading` | `Calendar.Year_picker_trigger_heading` | The month shown, in the trigger |
+| `Calendar.YearPickerTriggerIndicator` | `Calendar.Year_picker_trigger_indicator` | The trigger's chevron |
+| `Calendar.YearPickerGrid` | `Calendar.Year_picker_grid` | The years; `format` and `visible_years` |
+| `Calendar.YearPickerGridBody` | `Calendar.Year_picker_grid_body` | The years' cells, or a function of each year |
+| `Calendar.YearPickerCell` | `Calendar.Year_picker_cell` | A year |
+
+### Calendar.Cell's state
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `formattedDate` | `formatted_date` | `string S.accessor` | Its day of the month |
+| `isSelected` | `is_selected` | `bool S.accessor` | Whether the date is chosen |
+| `isUnavailable` | `is_unavailable` | `bool S.accessor` | Whether the date is unavailable |
+| `isDisabled` | `is_disabled` | `bool S.accessor` | Whether the cell is disabled |
+| `isOutsideMonth` | `is_outside_month` | `bool S.accessor` | Whether the date belongs to another month |
+| `isToday` | `is_today` | `bool S.accessor` | Whether the date is today |

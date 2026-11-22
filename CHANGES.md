@@ -1,11 +1,76 @@
 # Changes
 
-## Unreleased
+## 0.13.0 (2026-11-22)
 
 - Breaking: the skill, `skills/solidtype`, is no longer installed. The
   documentation for an agent is `llms.txt` and every page in Markdown, in
   `$(opam var solidtype:doc)`, and the README's *With an agent* gives the
   line for a project's `AGENTS.md` that sends an agent there.
+- `Time_field`'s clock is a provider's locale's, else `en-GB`'s, as a
+  `Date_field`'s is, never the browser's: a picker's time field and date
+  field now read one clock.
+- HeroUI's `DateRangePicker`, `Date_range_picker`, composed as HeroUI's
+  is: a `Date_field.Group` of two `Date_field.Input`s given their `slot`,
+  `"start"` and `"end"`, a `Range_separator` between them, and a
+  `Range_calendar` in its `Popover`. Its range is told once both ends are
+  there, each end sent with a form by `start_name` and `end_name`, and it
+  is invalid with its end before its start. `Solidtype_headless.Date_field`
+  gains range roots, `Root_range` and its kinds, and
+  `Solidtype_headless.Date_picker` range pickers on them.
+- HeroUI's `DatePicker`, `Date_picker`, composed as HeroUI's is: a
+  `Date_field.Group` whose `Date_picker.Trigger` opens a `Calendar` in a
+  `Date_picker.Popover`. Of a date, a date with a time, `Date_time`, or one
+  in a zone, `Zoned`; a day chosen keeps the value's time, and the
+  picker's state draws a time field in the popover. The calendar takes the
+  picker's date, range and state, and the focus as it opens.
+  `Solidtype_headless.Date_picker` is the picker itself, and a headless
+  `Calendar` inside one takes what it gives by `Calendar.Given`.
+- HeroUI's `RangeCalendar`, `Range_calendar`, on Calendar's parts: a press
+  or Enter on a day begins a range, shown to the day hovered or focused,
+  and a second ends it; a drag chooses the days it crosses, and one from an
+  end of the range moves it; Escape lets a range begun go. A range begun
+  reaches no further than the nearest unavailable day unless
+  `allows_non_contiguous_ranges`, and `is_date_unavailable` is given its
+  first date. `Solidtype_headless.Calendar.Root_range` is the range itself.
+- HeroUI's `Calendar`: a month's grid of days to choose a date from,
+  `Calendar.Multiple` for several, its locale's in its order, first day of
+  the week and calendar, day before month unless an `I18nProvider` names
+  another locale. The arrows move the focus, Page Up and Down a month, or a
+  year with Shift, Home and End to the week's or month's ends; Enter, Space
+  or a press choose. A month, `Weeks n` or `Days n` shown, several months
+  side by side by `offset`, a fixed `weeks_in_month`; `min_value`,
+  `max_value` and unavailable days, disabled, read-only and invalid; and
+  HeroUI's year picker. A press on a day it cannot choose focuses it, where
+  React's leaves its focus where it was. `Solidtype_headless.Calendar` is the
+  calendar itself, for another design system to dress.
+- The headless `Date_field` and `Calendar` tell a reader in their locale's
+  words, React Aria's, unless `translations` are given.
+- HeroUI's `Date_field`: a date's segments, its locale's in its order and
+  calendar -- `mm/dd/yyyy` in `en-US`, a Buddhist year in `th-TH` -- typed
+  into, stepped by the arrows, Page Up and Down, Home and End, and erased by
+  Backspace; told as soon as its segments make a date, a date that is none,
+  February 30, made one as focus leaves. A `CalendarDate`, or with
+  `Date_field.Date_time` a `CalendarDateTime` to a `granularity`, on a
+  12- or 24-hour clock, or with `Date_field.Zoned` a `ZonedDateTime`, its
+  zone's name shown and its hour stepped by the zone's rules, each given back
+  as its kind and sent to a form whole. Invalid before `min_value`, after
+  `max_value` or on a day `is_date_unavailable` refuses, which a `Form`
+  refuses to submit; variants, prefix, suffix, an input container, disabled,
+  read-only and required. It is day before month, `dd/mm/yyyy`, whatever the
+  browser reads, unless an `I18nProvider` names another locale.
+  `Solidtype_headless.Date_field` is the field itself, for another design
+  system to dress, and `solidtype-headless` now depends on
+  `solidtype-internationalized-date`.
+- `Types.ResolvedDateTimeFormatOptions`, in Kobalte's and
+  \@internationalized/date's bindings, reads what a formatter resolved to: its
+  calendar, its clock, each field's form.
+- HeroUI's `Time_field.Group` and `Time_field.Input` are `aria-disabled` while
+  the field is disabled, as React Aria's group is.
+- A virtualized table that resizes its columns, the headless `Table`'s, and so
+  HeroUI's `Table` and `Data_grid` given `allows_column_resize`, scrolls across
+  its columns itself and keeps its pinned columns in view, where it grew to its
+  columns' width, its container scrolled instead, and a pinned column scrolled
+  away with the rest.
 
 ## 0.12.0 (2026-11-20)
 

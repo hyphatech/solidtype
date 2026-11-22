@@ -505,8 +505,20 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
   grid of tags removed by their button or the keys, the focus moved on; the
   group's `is_disabled` disables its tags, as HeroUI documents and its own
   does not
-- [ ] Toolbar, InputOTP, DateField, Calendar, RangeCalendar, DatePicker,
-  DateRangePicker
+- [x] DateField, which Kobalte lacks: made headless of Kobalte's spin
+  button, its segments React Stately's date field ported, a date, a date with
+  a time or one in a zone, as TimeField's three roots
+- [x] Calendar, which Kobalte lacks: made headless as React Stately's
+  calendar keeps its state, its grid React Aria's, one date or several;
+  HeroUI's year picker in the port
+- [x] RangeCalendar, on the headless calendar's range, as React Stately
+  chooses one: anchored, hovered, dragged and moved by an end
+- [x] DatePicker, which Kobalte lacks: made headless as React Stately's
+  date picker keeps its state, its field the date field's and its calendar
+  given the picker's date
+- [x] DateRangePicker, on the headless date field's range and the headless
+  picker, its range calendar given the picker's range
+- [ ] Toolbar, InputOTP
 
 ## Verification
 

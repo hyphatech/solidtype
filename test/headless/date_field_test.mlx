@@ -1,0 +1,398 @@
+(* The headless DateField as a caller meets it: the reader's locale's segments
+   in its order and its calendar, named by the field's label; a date typed
+   segment by segment and told once whole, stepped by the keys from its
+   placeholder, erased, and a date that is none made one as focus leaves; a
+   time on a date, on a 12-hour clock, and one in a zone, its name after it and
+   its hour stepped through an hour its clocks repeat; invalid out of its
+   range; disabled and read-only; what a form is sent and given back by a
+   reset; and no violation axe finds. Kyiv's clocks go back from 04:00 to
+   03:00 on 25 October 2026. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Date_field = Solidtype_headless.Date_field
+module I18n = Solidtype_kobalte.I18n
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module Date_time = D.Types.CalendarDateTime
+module Zoned = D.Types.ZonedDateTime
+module E = Jest.Expect
+module H = Harness
+open Harness.Syntax
+
+external query : Dom.element -> string -> Dom.element Js.null = "querySelector"
+[@@mel.send]
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external input_value : Dom.element -> string = "value" [@@mel.get]
+external form_reset : Dom.element -> unit = "reset" [@@mel.send]
+
+let input () =
+  match H.all_by_role "group" with
+  | [| g |] -> g
+  | _ -> Js.Exn.raiseError "no one group"
+
+(* Each segment's part and text, a literal by its text alone. *)
+let segments () =
+  Js.Array.from (query_all (input ()) "[data-type]")
+  |> Array.map (fun e ->
+      match H.attribute e "data-type" with
+      | Some "literal" -> H.text e
+      | Some t -> t ^ "=" ^ H.text e
+      | None -> "")
+  |> Array.to_list |> String.concat ""
+
+let segment kind =
+  match Js.Null.toOption (query (input ()) ("[data-type=" ^ kind ^ "]")) with
+  | Some e -> e
+  | None -> Js.Exn.raiseError ("no " ^ kind ^ " segment")
+
+let hidden () =
+  match Js.Null.toOption (query H.body "input[type=hidden]") with
+  | Some e -> input_value e
+  | None -> Js.Exn.raiseError "no hidden input"
+
+let inside () =
+  Jsx.fragment
+    [|
+      <Date_field.Label>"Date"</Date_field.Label>;
+      <Date_field.Input>
+        (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+      </Date_field.Input>;
+      <Date_field.Description>"When it starts"</Date_field.Description>;
+    |]
+
+let date ?(locale = "en-US") ?value ?default_value ?placeholder_value ?min_value
+    ?is_disabled ?is_read_only ?(told = ref []) () =
+  let body () =
+    <Date_field.Root
+      ?value
+      ?default_value
+      ?placeholder_value
+      ?min_value
+      ?is_disabled
+      ?is_read_only
+      name="start"
+      on_change=(fun v ->
+                  told :=
+                    (match v with
+                    | Some d -> Date.to_string d ()
+                    | None -> "none")
+                    :: !told)>
+      (inside ())
+    </Date_field.Root>
+  in
+  H.render (fun () -> <I18n.I18nProvider locale>(body ())</I18n.I18nProvider>)
+
+let lri = {js|⁦|js}
+let pdi = {js|⁩|js}
+
+let () =
+  Jest.describe "Date_field" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.test "shows the locale's segments, named by the field's label"
+        (fun () ->
+          date ();
+          let month = segment "month" in
+          let label =
+            match Js.Null.toOption (query H.body "span") with
+            | Some l -> H.attribute l "id"
+            | None -> None
+          in
+          E.(
+            expect
+              ( segments (),
+                Option.equal String.equal
+                  (H.attribute (input ()) "aria-labelledby")
+                  label,
+                H.attribute month "role",
+                H.attribute month "aria-label",
+                Option.equal String.equal
+                  (H.attribute month "aria-labelledby")
+                  (Option.map
+                     (fun l ->
+                       Option.value (H.attribute month "id") ~default:""
+                       ^ " " ^ l)
+                     label),
+                H.attribute month "data-placeholder",
+                Option.is_some (H.attribute month "aria-describedby"),
+                H.attribute (segment "day") "aria-describedby" )
+            |> toEqual
+                 ( "month=mm/day=dd/year=yyyy",
+                   true,
+                   Some "spinbutton",
+                   Some "month, ",
+                   true,
+                   Some "",
+                   true,
+                   None )));
+      Jest.test
+        "is day before month where no provider names a locale, whatever the \
+         browser reads" (fun () ->
+          H.render (fun () ->
+              <Date_field.Root default_value=(Date.make 2026 11 21)>
+                (inside ())
+              </Date_field.Root>);
+          E.(expect (segments ()) |> toEqual "day=21/month=11/year=2026"));
+      Jest.test "writes the segments in the locale's order and calendar"
+        (fun () ->
+          date ~locale:"de-DE"
+            ~value:(Js.Nullable.return (Date.make 2026 11 21))
+            ();
+          let german = segments () in
+          H.cleanup ();
+          date ~locale:"th-TH"
+            ~value:(Js.Nullable.return (Date.make 2026 11 21))
+            ();
+          E.(
+            expect (german, segments ())
+            |> toEqual ("day=21.month=11.year=2026", "day=21/month=11/year=2569")));
+      Jest.testPromise "tells a date as soon as its segments make one"
+        (fun () ->
+          let told = ref [] in
+          date ~told ();
+          let user = H.setup () in
+          let* () = H.click user (segment "month") in
+          let* () = H.keyboard user "1" in
+          let partly = (segments (), !told) in
+          let* () = H.keyboard user "225" in
+          let* () = H.keyboard user "2026" in
+          Js.Promise.resolve
+            E.(
+              expect (partly, segments (), !told, hidden ())
+              |> toEqual
+                   ( ("month=1/day=dd/year=yyyy", []),
+                     "month=12/day=25/year=2026",
+                     [ "2026-12-25"; "0202-12-25"; "0020-12-25"; "0002-12-25" ],
+                     "2026-12-25" )));
+      Jest.testPromise
+        "steps a segment from its placeholder, by a page and to its ends"
+        (fun () ->
+          date ~placeholder_value:(Date.make 2026 3 10) ();
+          let user = H.setup () in
+          let* () = H.click user (segment "month") in
+          let* () = H.keyboard user "{ArrowUp}" in
+          let first = segments () in
+          let* () = H.keyboard user "{ArrowUp}{PageUp}" in
+          let paged = segments () in
+          let* () = H.keyboard user "{End}" in
+          let last = segments () in
+          let* () = H.keyboard user "{ArrowUp}" in
+          Js.Promise.resolve
+            E.(
+              expect (first, paged, last, segments ())
+              |> toEqual
+                   ( "month=3/day=dd/year=yyyy",
+                     "month=6/day=dd/year=yyyy",
+                     "month=12/day=dd/year=yyyy",
+                     "month=1/day=dd/year=yyyy" )));
+      Jest.testPromise "moves between segments by the arrows and Backspace"
+        (fun () ->
+          date ~default_value:(Date.make 2026 11 21) ();
+          let user = H.setup () in
+          let* () = H.click user (segment "day") in
+          let* () = H.keyboard user "{ArrowRight}" in
+          let right = H.attribute H.focused "data-type" in
+          let* () = H.keyboard user "{ArrowLeft}{ArrowLeft}" in
+          let left = H.attribute H.focused "data-type" in
+          let* () = H.click user (segment "day") in
+          let* () = H.keyboard user "{Backspace}" in
+          let one = segments () in
+          let* () = H.keyboard user "{Backspace}" in
+          let erased = segments () in
+          let* () = H.keyboard user "{Backspace}" in
+          Js.Promise.resolve
+            E.(
+              expect
+                (right, left, one, erased, H.attribute H.focused "data-type")
+              |> toEqual
+                   ( Some "year",
+                     Some "month",
+                     "month=11/day=2/year=2026",
+                     "month=11/day=dd/year=2026",
+                     Some "month" )));
+      Jest.testPromise "makes a date of one that is none as focus leaves"
+        (fun () ->
+          let told = ref [] in
+          date ~told ~placeholder_value:(Date.make 2026 1 1) ();
+          let user = H.setup () in
+          let* () = H.click user (segment "month") in
+          let* () = H.keyboard user "2" in
+          let* () = H.keyboard user "30" in
+          let* () = H.keyboard user "2026" in
+          let typed = (segments (), !told) in
+          let* () = H.tab user in
+          Js.Promise.resolve
+            E.(
+              expect (typed, segments (), !told)
+              |> toEqual
+                   ( ("month=2/day=30/year=2026", []),
+                     "month=2/day=28/year=2026",
+                     [ "2026-02-28" ] )));
+      Jest.test "is invalid before its least date" (fun () ->
+          date
+            ~value:(Js.Nullable.return (Date.make 2026 1 1))
+            ~min_value:(Date.make 2026 6 1) ();
+          E.(
+            expect
+              ( H.attribute (input ()) "data-invalid",
+                H.attribute (segment "day") "aria-invalid",
+                Option.is_some (H.attribute (segment "day") "aria-describedby")
+              )
+            |> toEqual (Some "", Some "true", true)));
+      Jest.testPromise "tells none once every segment is erased" (fun () ->
+          let told = ref [] in
+          date ~told ~default_value:(Date.make 2026 11 21) ();
+          let user = H.setup () in
+          let* () = H.click user (segment "year") in
+          let* () =
+            H.keyboard user "{Backspace}{Backspace}{Backspace}{Backspace}"
+          in
+          let* () =
+            H.keyboard user "{Backspace}{Backspace}{Backspace}{Backspace}"
+          in
+          let* () = H.keyboard user "{Backspace}{Backspace}{Backspace}" in
+          Js.Promise.resolve
+            E.(
+              expect !told
+              |> toEqual [ "none"; "0002-11-21"; "0020-11-21"; "0202-11-21" ]));
+      Jest.testPromise
+        "cannot be focused while disabled, nor changed while read-only"
+        (fun () ->
+          date ~is_disabled:true ();
+          let disabled =
+            ( H.attribute (segment "month") "tabindex",
+              H.attribute (segment "month") "contenteditable",
+              H.attribute (input ()) "aria-disabled" )
+          in
+          H.cleanup ();
+          let told = ref [] in
+          date ~told ~is_read_only:true
+            ~value:(Js.Nullable.return (Date.make 2026 11 21))
+            ();
+          let user = H.setup () in
+          let* () = H.click user (segment "month") in
+          let* () = H.keyboard user "{ArrowUp}5" in
+          Js.Promise.resolve
+            E.(
+              expect
+                (disabled, H.attribute H.focused "data-type", segments (), !told)
+              |> toEqual
+                   ( (None, Some "false", Some "true"),
+                     Some "month",
+                     "month=11/day=21/year=2026",
+                     [] )));
+      Jest.testPromise "gives a form reset back its first value" (fun () ->
+          let told = ref [] in
+          H.render (fun () ->
+              <form>
+                <Date_field.Root
+                  default_value=(Date.make 2026 11 21)
+                  name="start"
+                  on_change=(fun v ->
+                              told :=
+                                Option.fold ~none:"none"
+                                  ~some:(fun d -> Date.to_string d ())
+                                  v
+                                :: !told)>
+                  (inside ())
+                </Date_field.Root>
+              </form>);
+          let user = H.setup () in
+          let* () = H.click user (segment "day") in
+          let* () = H.keyboard user "{ArrowUp}" in
+          let stepped = hidden () in
+          (match Js.Null.toOption (query H.body "form") with
+          | Some form -> form_reset form
+          | None -> Js.Exn.raiseError "no form");
+          Js.Promise.resolve
+            E.(
+              expect (stepped, hidden (), segments ())
+              |> toEqual
+                   ("2026-11-22", "2026-11-21", "day=21/month=11/year=2026")));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          date ~value:(Js.Nullable.return (Date.make 2026 11 21)) ();
+          let* found = H.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))
+
+let () =
+  Jest.describe "Date_field, of a date and a time" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise "shows its time to its granularity on a 12-hour clock"
+        (fun () ->
+          let told = ref [] in
+          H.render (fun () ->
+              <I18n.I18nProvider locale="en-US">
+                <Date_field.Root_date_time
+                  placeholder_value=(Date_time.make 2026 11 21 ())
+                  on_change=(fun v ->
+                              told :=
+                                Option.fold ~none:"none"
+                                  ~some:(fun d -> Date_time.to_string d ())
+                                  v
+                                :: !told)>
+                  (inside ())
+                </Date_field.Root_date_time>
+              </I18n.I18nProvider>);
+          let shown = segments () in
+          let user = H.setup () in
+          let* () = H.click user (segment "month") in
+          let* () = H.keyboard user "11212026930p" in
+          Js.Promise.resolve
+            E.(
+              expect (shown, segments (), !told)
+              |> toEqual
+                   ( "month=mm/day=dd/year=yyyy, " ^ lri
+                     ^ {js|hour=––:minute=––|js} ^ pdi ^ " dayPeriod=AM",
+                     "month=11/day=21/year=2026, " ^ lri ^ "hour=9:minute=30"
+                     ^ pdi ^ " dayPeriod=PM",
+                     [
+                       "2026-11-21T21:30:00";
+                       "2026-11-21T09:30:00";
+                       "2026-11-21T09:03:00";
+                     ] ))))
+
+let () =
+  Jest.describe "Date_field, in a zone" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise "shows its zone and steps through an hour it repeats"
+        (fun () ->
+          let kyiv = "Europe/Kyiv" in
+          let at hour =
+            D.to_zoned (Date_time.make 2026 10 25 ~hour ()) kyiv ()
+          in
+          let told = ref [] in
+          H.render (fun () ->
+              <I18n.I18nProvider locale="en-GB">
+                <Date_field.Root_zoned
+                  default_value=(at 2)
+                  placeholder_value=(at 0)
+                  granularity=`hour
+                  on_change=(fun v ->
+                              told :=
+                                Option.fold ~none:"none"
+                                  ~some:(fun d -> Zoned.to_string d ())
+                                  v
+                                :: !told)>
+                  (inside ())
+                </Date_field.Root_zoned>
+              </I18n.I18nProvider>);
+          let user = H.setup () in
+          let* () = H.click user (segment "hour") in
+          let* () = H.keyboard user "{ArrowUp}{ArrowUp}" in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( H.text (segment "timeZoneName"),
+                  H.attribute (segment "timeZoneName") "role",
+                  !told )
+              |> toEqual
+                   ( "EET",
+                     Some "textbox",
+                     [
+                       "2026-10-25T03:00:00+02:00[Europe/Kyiv]";
+                       "2026-10-25T03:00:00+03:00[Europe/Kyiv]";
+                     ] ))))

@@ -1,0 +1,320 @@
+---
+title: RangeCalendar
+description: Composable date range picker with month grid, navigation, and year picker support.
+---
+
+import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/range_calendar_usage.jsx";
+import ExUsageCode from "@islands/range_calendar_usage.mlx?raw";
+import * as ExDisabled from "@islands/range_calendar_disabled.jsx";
+import ExDisabledCode from "@islands/range_calendar_disabled.mlx?raw";
+import * as ExYearPicker from "@islands/range_calendar_year_picker.jsx";
+import ExYearPickerCode from "@islands/range_calendar_year_picker.mlx?raw";
+import * as ExDefaultValue from "@islands/range_calendar_default_value.jsx";
+import ExDefaultValueCode from "@islands/range_calendar_default_value.mlx?raw";
+import * as ExControlled from "@islands/range_calendar_controlled.jsx";
+import ExControlledCode from "@islands/range_calendar_controlled.mlx?raw";
+import * as ExMinMax from "@islands/range_calendar_min_max.jsx";
+import ExMinMaxCode from "@islands/range_calendar_min_max.mlx?raw";
+import * as ExUnavailable from "@islands/range_calendar_unavailable.jsx";
+import ExUnavailableCode from "@islands/range_calendar_unavailable.mlx?raw";
+import * as ExAnchorUnavailable from "@islands/range_calendar_anchor_unavailable.jsx";
+import ExAnchorUnavailableCode from "@islands/range_calendar_anchor_unavailable.mlx?raw";
+import * as ExWeeksInMonth from "@islands/range_calendar_weeks_in_month.jsx";
+import ExWeeksInMonthCode from "@islands/range_calendar_weeks_in_month.mlx?raw";
+import * as ExWeekView from "@islands/range_calendar_week_view.jsx";
+import ExWeekViewCode from "@islands/range_calendar_week_view.mlx?raw";
+import * as ExDayView from "@islands/range_calendar_day_view.jsx";
+import ExDayViewCode from "@islands/range_calendar_day_view.mlx?raw";
+import * as ExNonContiguous from "@islands/range_calendar_non_contiguous.jsx";
+import ExNonContiguousCode from "@islands/range_calendar_non_contiguous.mlx?raw";
+import * as ExReadOnly from "@islands/range_calendar_read_only.jsx";
+import ExReadOnlyCode from "@islands/range_calendar_read_only.mlx?raw";
+import * as ExInvalid from "@islands/range_calendar_invalid.jsx";
+import ExInvalidCode from "@islands/range_calendar_invalid.mlx?raw";
+import * as ExFocusedValue from "@islands/range_calendar_focused_value.jsx";
+import ExFocusedValueCode from "@islands/range_calendar_focused_value.mlx?raw";
+import * as ExIndicators from "@islands/range_calendar_indicators.jsx";
+import ExIndicatorsCode from "@islands/range_calendar_indicators.mlx?raw";
+import * as ExBooking from "@islands/range_calendar_booking.jsx";
+import ExBookingCode from "@islands/range_calendar_booking.mlx?raw";
+import * as ExMultipleMonths from "@islands/range_calendar_multiple_months.jsx";
+import ExMultipleMonthsCode from "@islands/range_calendar_multiple_months.mlx?raw";
+import * as ExInternational from "@islands/range_calendar_international.jsx";
+import ExInternationalCode from "@islands/range_calendar_international.mlx?raw";
+import * as ExTailwind from "@islands/range_calendar_tailwind.jsx";
+import ExTailwindCode from "@islands/range_calendar_tailwind.mlx?raw";
+import * as Demo from "@islands/range_calendar_demo.jsx";
+
+Its value is a `Range_calendar.range`, `{ start; end_ }`, of
+`CalendarDate`s of `solidtype-internationalized-date`. `on_change` is told
+the range chosen, or `None` where `` commit_behavior=`clear `` clears it.
+
+Its weeks start on Monday and its days are written as `en-GB` writes them,
+whatever the browser reads, unless an `I18n.I18nProvider` names another
+locale. React's follows the browser.
+
+Original HeroUI documentation: [RangeCalendar](https://heroui.com/en/docs/react/components/range-calendar).
+
+## Usage
+
+<Example code={ExUsageCode} title="range_calendar_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI RangeCalendar twice, under the same props: in solidtype on
+the left, in React on the right. Below them, every attribute of the two
+calendars: a marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Anatomy
+
+```ocaml
+<Range_calendar aria_label="Trip dates">
+  <Range_calendar.Header>
+    <Range_calendar.Heading />
+    <Range_calendar.Nav_button slot=`previous />
+    <Range_calendar.Nav_button slot=`next />
+  </Range_calendar.Header>
+  <Range_calendar.Grid>
+    <Range_calendar.Grid_header>
+      (fun day ->
+        <Range_calendar.Header_cell>(Jsx.string (S.get day))</Range_calendar.Header_cell>)
+    </Range_calendar.Grid_header>
+    <Range_calendar.Grid_body>
+      (fun date -> <Range_calendar.Cell date=(S.get date) />)
+    </Range_calendar.Grid_body>
+  </Range_calendar.Grid>
+</Range_calendar>
+```
+
+A press on a day begins a range, and the days shown run to the one hovered
+or focused until a second press ends it. A drag chooses the days it crosses,
+and a drag from an end of the range chosen moves that end. Enter begins and
+ends a range by the keys, and Escape lets a range begun go.
+
+## Examples
+
+### Disabled
+
+<Example code={ExDisabledCode} title="range_calendar_disabled.mlx"><ExDisabled.make client:visible /></Example>
+
+### Year Picker
+
+`Range_calendar.Year_picker_trigger`, `Range_calendar.Year_picker_grid`, and
+their body and cell parts provide an integrated year navigation pattern.
+
+<Example code={ExYearPickerCode} title="range_calendar_year_picker.mlx"><ExYearPicker.make client:visible /></Example>
+
+### Default Value
+
+<Example code={ExDefaultValueCode} title="range_calendar_default_value.mlx"><ExDefaultValue.make client:visible /></Example>
+
+### Controlled
+
+Use controlled `value` and `focused_value` for external state coordination
+and custom shortcuts.
+
+<Example code={ExControlledCode} title="range_calendar_controlled.mlx"><ExControlled.make client:visible /></Example>
+
+### Min and Max Dates
+
+<Example code={ExMinMaxCode} title="range_calendar_min_max.mlx"><ExMinMax.make client:visible /></Example>
+
+### Unavailable Dates
+
+Use `is_date_unavailable` to block dates such as weekends, holidays, or
+booked slots. A range begun reaches no further than the nearest unavailable
+day.
+
+<Example code={ExUnavailableCode} title="range_calendar_unavailable.mlx"><ExUnavailable.make client:visible /></Example>
+
+### Anchor-Based Unavailable Dates
+
+While a range is begun, `is_date_unavailable` is given its first date beside
+each date, `Some anchor`, else `None`. Use it to limit which end dates are
+valid, for example within 7 days of the start.
+
+<Example code={ExAnchorUnavailableCode} title="range_calendar_anchor_unavailable.mlx"><ExAnchorUnavailable.make client:visible /></Example>
+
+### Weeks in Month
+
+Set `weeks_in_month` to a fixed value, for example `6`, to keep the grid's
+height as months change.
+
+<Example code={ExWeeksInMonthCode} title="range_calendar_weeks_in_month.mlx"><ExWeeksInMonth.make client:visible /></Example>
+
+### Week View
+
+`` visible_duration=(Range_calendar.Weeks n) `` shows one or more weeks at a
+time, and its buttons page by them; `` page_behavior=`single `` pages a week
+at a time. Its grid is named by the days it shows.
+
+<Example code={ExWeekViewCode} title="range_calendar_week_view.mlx"><ExWeekView.make client:visible /></Example>
+
+### Day View
+
+`` visible_duration=(Range_calendar.Days n) `` shows a run of days, and its
+buttons page by them; `` page_behavior=`single `` pages a day at a time.
+
+<Example code={ExDayViewCode} title="range_calendar_day_view.mlx"><ExDayView.make client:visible /></Example>
+
+### Allows Non-Contiguous Ranges
+
+`allows_non_contiguous_ranges` lets a range cross unavailable dates.
+
+<Example code={ExNonContiguousCode} title="range_calendar_non_contiguous.mlx"><ExNonContiguous.make client:visible /></Example>
+
+### Read Only
+
+<Example code={ExReadOnlyCode} title="range_calendar_read_only.mlx"><ExReadOnly.make client:visible /></Example>
+
+### Invalid
+
+<Example code={ExInvalidCode} title="range_calendar_invalid.mlx"><ExInvalid.make client:visible /></Example>
+
+### Focused Value
+
+`focused_value` and `on_focus_change` control which date is focused.
+
+<Example code={ExFocusedValueCode} title="range_calendar_focused_value.mlx"><ExFocusedValue.make client:visible /></Example>
+
+### Cell Indicators
+
+`Range_calendar.Cell`'s children are drawn of its state, and
+`Range_calendar.Cell_indicator` marks a day.
+
+<Example code={ExIndicatorsCode} title="range_calendar_indicators.mlx"><ExIndicators.make client:visible /></Example>
+
+### Real-World Example
+
+<Example code={ExBookingCode} title="range_calendar_booking.mlx"><ExBooking.make client:visible /></Example>
+
+### Multiple Months
+
+`visible_duration` and `offset` show several months side by side.
+
+<Example code={ExMultipleMonthsCode} title="range_calendar_multiple_months.mlx"><ExMultipleMonths.make client:visible /></Example>
+
+### International Calendars
+
+An `I18n.I18nProvider` locale with a calendar extension shows that calendar;
+`on_change` gives dates in the calendar of the value given, else the
+Gregorian.
+
+<Example code={ExInternationalCode} title="range_calendar_international.mlx"><ExInternational.make client:visible /></Example>
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={ExTailwindCode} title="range_calendar_tailwind.mlx"><ExTailwind.make client:visible /></Example>
+
+## Styling Reference
+
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
+### CSS Classes
+
+- `.range-calendar` - Root container.
+- `.range-calendar--week-view`, `.range-calendar--day-view` - A week's or a day's view.
+- `.range-calendar__header` - Header row containing nav buttons and heading.
+- `.range-calendar__heading` - Current month label.
+- `.range-calendar__nav-button` - Previous/next navigation controls.
+- `.range-calendar__grid` - Main day grid.
+- `.range-calendar__grid-header` - Weekday header row wrapper.
+- `.range-calendar__grid-body` - Date rows wrapper.
+- `.range-calendar__header-cell` - Weekday header cell.
+- `.range-calendar__cell` - Interactive day cell.
+- `.range-calendar__cell-button` - A day's content, chosen at the range's ends.
+- `.range-calendar__cell-indicator` - Dot indicator inside a day cell.
+- `.calendar-year-picker__trigger` - Year picker toggle button.
+- `.calendar-year-picker__year-grid` - Overlay grid of selectable years.
+- `.calendar-year-picker__year-cell` - Individual year option.
+
+### Interactive States
+
+- **Selected**: `[data-selected="true"]`
+- **Selection start**: `[data-selection-start="true"]`
+- **Selection end**: `[data-selection-end="true"]`
+- **Today**: `[data-today="true"]`
+- **Unavailable**: `[data-unavailable="true"]`
+- **Outside month**: `[data-outside-month="true"]`
+- **Hovered**: `[data-hovered="true"]`
+- **Pressed**: `[data-pressed="true"]`
+- **Focus visible**: `[data-focus-visible="true"]`
+- **Disabled**: `[data-disabled="true"]`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Range_calendar
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `value` | `value` | `range Js.Nullable.t` | | Controlled selected range; null controls it empty |
+| `defaultValue` | `default_value` | `range` | | Initial selected range (uncontrolled) |
+| `onChange` | `on_change` | `range option -> unit` | | Called when a range is chosen, or cleared |
+| `allowsNonContiguousRanges` | `allows_non_contiguous_ranges` | `bool` | `false` | Allows ranges that span unavailable dates |
+| `commitBehavior` | `commit_behavior` | `` [ `select \| `reset \| `clear ] `` | `` `select `` | What a range begun becomes as the pointer is let go outside the days, or the focus leaves |
+| `focusedValue` | `focused_value` | `CalendarDate.t` | | Controlled focused date |
+| `defaultFocusedValue` | `default_focused_value` | `CalendarDate.t` | its start, else today | Initial focused date |
+| `onFocusChange` | `on_focus_change` | `CalendarDate.t -> unit` | | Called when focus moves to another date |
+| `minValue` | `min_value` | `CalendarDate.t` | 1900-01-01 in its calendar | Earliest selectable date |
+| `maxValue` | `max_value` | `CalendarDate.t` | 2099-12-31 in its calendar | Latest selectable date |
+| `weeksInMonth` | `weeks_in_month` | `int` | the month's | The number of weeks in a month's grid |
+| `isDateUnavailable` | `is_date_unavailable` | `CalendarDate.t -> CalendarDate.t option -> bool` | | Marks dates as unavailable, given a range begun's first date |
+| `firstDayOfWeek` | `first_day_of_week` | `` [ `sun \| `mon \| `tue \| `wed \| `thu \| `fri \| `sat ] `` | the locale's | The first day of its weeks |
+| `pageBehavior` | `page_behavior` | `` [ `visible \| `single ] `` | `` `visible `` | Whether paging moves by what is shown or by one unit |
+| `selectionAlignment` | `selection_alignment` | `` [ `start \| `center \| `end_ ] `` | `` `center ``, or `` `start `` for a range longer than a view | Where the range stands in what is shown at first |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Disables interaction and selection |
+| `isReadOnly` | `is_read_only` | `bool` | `false` | Days are focused but not chosen |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Marks the calendar as invalid |
+| `visibleDuration` | `visible_duration` | `Range_calendar.duration` | `Months 1` | `Months n`, `Weeks n` or `Days n` |
+| `defaultYearPickerOpen` | `default_year_picker_open` | `bool` | `false` | Initial open state of the year picker |
+| `isYearPickerOpen` | `is_year_picker_open` | `bool` | | Controlled open state of the year picker |
+| `onYearPickerOpenChange` | `on_year_picker_open_change` | `bool -> unit` | | Called when the year picker opens or closes |
+| `aria-label` | `aria_label` | `string` | | Its name, beside the dates it shows |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+
+### Composition Parts
+
+They are [Calendar](/solidtype/heroui/calendar/)'s parts, drawn in the
+range's look.
+
+| React | solidtype | Description |
+|---|---|---|
+| `RangeCalendar.Header` | `Range_calendar.Header` | Header container for navigation and heading |
+| `RangeCalendar.Heading` | `Range_calendar.Heading` | The dates shown; `offset` and `format` |
+| `RangeCalendar.NavButton` | `Range_calendar.Nav_button` | `` slot=`previous `` or `` slot=`next `` |
+| `RangeCalendar.Grid` | `Range_calendar.Grid` | Day grid for one month; `offset` and `weekday_style` |
+| `RangeCalendar.GridHeader` | `Range_calendar.Grid_header` | Weekday header, a function of each day's name |
+| `RangeCalendar.GridBody` | `Range_calendar.Grid_body` | Date cells, a function of each date |
+| `RangeCalendar.HeaderCell` | `Range_calendar.Header_cell` | Weekday label cell |
+| `RangeCalendar.Cell` | `Range_calendar.Cell` | A day, its children drawn of its state |
+| `RangeCalendar.CellIndicator` | `Range_calendar.Cell_indicator` | A dot marking a day |
+| `RangeCalendar.YearPickerTrigger` | `Range_calendar.Year_picker_trigger` | Opens and closes the year picker |
+| `RangeCalendar.YearPickerTriggerHeading` | `Range_calendar.Year_picker_trigger_heading` | The month shown, in the trigger |
+| `RangeCalendar.YearPickerTriggerIndicator` | `Range_calendar.Year_picker_trigger_indicator` | The trigger's chevron |
+| `RangeCalendar.YearPickerGrid` | `Range_calendar.Year_picker_grid` | The years; `format` and `visible_years` |
+| `RangeCalendar.YearPickerGridBody` | `Range_calendar.Year_picker_grid_body` | The years' cells, or a function of each year |
+| `RangeCalendar.YearPickerCell` | `Range_calendar.Year_picker_cell` | A year |
+
+### Range_calendar.Cell's state
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `formattedDate` | `formatted_date` | `string S.accessor` | Its day of the month |
+| `isSelected` | `is_selected` | `bool S.accessor` | Whether the date is in the range shown |
+| `isSelectionStart` | `is_selection_start` | `bool S.accessor` | Whether the date starts the range shown |
+| `isSelectionEnd` | `is_selection_end` | `bool S.accessor` | Whether the date ends the range shown |
+| `isUnavailable` | `is_unavailable` | `bool S.accessor` | Whether the date is unavailable |
+| `isDisabled` | `is_disabled` | `bool S.accessor` | Whether the cell is disabled |
+| `isOutsideMonth` | `is_outside_month` | `bool S.accessor` | Whether the date belongs to another month |

@@ -1,0 +1,76 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Range_calendar = Solidtype_heroui.Range_calendar
+module Date_field = Solidtype_heroui.Date_field
+module Date_range_picker = Solidtype_heroui.Date_range_picker
+module Label = Solidtype_heroui.Label
+module I18n = Solidtype_kobalte.I18n
+module Toggle = Controls.Toggle
+module D = Solidtype_internationalized_date
+
+let make () =
+  let disabled, set_disabled = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Toggle
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=date-range-picker]"
+      solidtype=(<I18n.I18nProvider locale="en-US">
+                   <Date_range_picker
+                     class_="w-80"
+                     start_name="startDate"
+                     end_name="endDate"
+                     is_disabled=(S.get disabled)
+                     default_value={
+                                     start = D.parse_date "2026-11-21";
+                                     end_ = D.parse_date "2026-11-25";
+                                   }>
+                     <Label>"Trip dates"</Label>
+                     <Date_field.Group full_width=true>
+                       <Date_field.Input slot="start">
+                         (fun segment ->
+                           <Date_field.Segment segment=(S.get segment) />)
+                       </Date_field.Input>
+                       <Date_range_picker.Range_separator />
+                       <Date_field.Input slot="end">
+                         (fun segment ->
+                           <Date_field.Segment segment=(S.get segment) />)
+                       </Date_field.Input>
+                       <Date_field.Suffix>
+                         <Date_range_picker.Trigger>
+                           <Date_range_picker.Trigger_indicator />
+                         </Date_range_picker.Trigger>
+                       </Date_field.Suffix>
+                     </Date_field.Group>
+                     <Date_range_picker.Popover>
+                       <Range_calendar aria_label="Trip dates">
+                         <Range_calendar.Header>
+                           <Range_calendar.Heading />
+                           <Range_calendar.Nav_button slot=`previous />
+                           <Range_calendar.Nav_button slot=`next />
+                         </Range_calendar.Header>
+                         <Range_calendar.Grid>
+                           <Range_calendar.Grid_header>
+                             (fun day ->
+                               <Range_calendar.Header_cell>
+                                 (Jsx.string (S.get day))
+                               </Range_calendar.Header_cell>)
+                           </Range_calendar.Grid_header>
+                           <Range_calendar.Grid_body>
+                             (fun date ->
+                               <Range_calendar.Cell date=(S.get date) />)
+                           </Range_calendar.Grid_body>
+                         </Range_calendar.Grid>
+                       </Range_calendar>
+                     </Date_range_picker.Popover>
+                   </Date_range_picker>
+                 </I18n.I18nProvider>)
+      react=(fun host ->
+              Heroui_react.date_range_picker host
+                (Heroui_react.date_range_picker_props
+                   ~is_disabled:(S.get disabled) ()))
+    />
+  </section>

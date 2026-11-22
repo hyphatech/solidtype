@@ -1,0 +1,50 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Range_calendar = Solidtype_heroui.Range_calendar
+module I18n = Solidtype_kobalte.I18n
+module Toggle = Controls.Toggle
+module D = Solidtype_internationalized_date
+
+let make () =
+  let disabled, set_disabled = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Toggle
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=range-calendar]"
+      solidtype=(<I18n.I18nProvider locale="en-US">
+                   <Range_calendar
+                     aria_label="Trip dates"
+                     is_disabled=(S.get disabled)
+                     default_value={
+                                     Range_calendar.start =
+                                       D.parse_date "2026-11-09";
+                                     end_ = D.parse_date "2026-11-13";
+                                   }>
+                     <Range_calendar.Header>
+                       <Range_calendar.Heading />
+                       <Range_calendar.Nav_button slot=`previous />
+                       <Range_calendar.Nav_button slot=`next />
+                     </Range_calendar.Header>
+                     <Range_calendar.Grid>
+                       <Range_calendar.Grid_header>
+                         (fun day ->
+                           <Range_calendar.Header_cell>
+                             (Jsx.string (S.get day))
+                           </Range_calendar.Header_cell>)
+                       </Range_calendar.Grid_header>
+                       <Range_calendar.Grid_body>
+                         (fun date -> <Range_calendar.Cell date=(S.get date) />)
+                       </Range_calendar.Grid_body>
+                     </Range_calendar.Grid>
+                   </Range_calendar>
+                 </I18n.I18nProvider>)
+      react=(fun host ->
+              Heroui_react.range_calendar host
+                (Heroui_react.range_calendar_props ~is_disabled:(S.get disabled)
+                   ()))
+    />
+  </section>

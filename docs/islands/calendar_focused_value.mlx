@@ -1,0 +1,56 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Calendar = Solidtype_heroui.Calendar
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module Description = Solidtype_heroui.Description
+module Button = Solidtype_heroui.Button
+
+let make () =
+  let focused, set_focused = S.create_signal (D.parse_date "2025-06-15") in
+  <div class_="flex flex-col items-center gap-4">
+    <Calendar
+      aria_label="Event date"
+      focused_value=(S.get focused)
+      on_focus_change=(S.set set_focused)>
+      <Calendar.Header>
+        <Calendar.Heading />
+        <Calendar.Nav_button slot=`previous />
+        <Calendar.Nav_button slot=`next />
+      </Calendar.Header>
+      <Calendar.Grid>
+        <Calendar.Grid_header>
+          (fun day ->
+            <Calendar.Header_cell>
+              (Jsx.string (S.get day))
+            </Calendar.Header_cell>)
+        </Calendar.Grid_header>
+        <Calendar.Grid_body>
+          (fun date -> <Calendar.Cell date=(S.get date) />)
+        </Calendar.Grid_body>
+      </Calendar.Grid>
+    </Calendar>
+    <Description class_="text-center">
+      (Jsx.string ("Focused: " ^ Date.to_string (S.get focused) ()))
+    </Description>
+    <div class_="flex flex-wrap justify-center gap-2">
+      <Button
+        size=`sm
+        variant=`secondary
+        on_click=(fun _ -> S.set set_focused (D.parse_date "2025-01-01"))>
+        "Go to Jan"
+      </Button>
+      <Button
+        size=`sm
+        variant=`secondary
+        on_click=(fun _ -> S.set set_focused (D.parse_date "2025-06-15"))>
+        "Go to Jun"
+      </Button>
+      <Button
+        size=`sm
+        variant=`secondary
+        on_click=(fun _ -> S.set set_focused (D.parse_date "2025-12-25"))>
+        "Go to Christmas"
+      </Button>
+    </div>
+  </div>

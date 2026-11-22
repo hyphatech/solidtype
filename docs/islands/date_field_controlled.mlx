@@ -1,0 +1,43 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Date_field = Solidtype_heroui.Date_field
+module D = Solidtype_internationalized_date
+
+let make () =
+  let value, set_value = S.create_signal None in
+  <div class_="flex flex-col gap-4">
+    <Date_field
+      class_="w-[256px]"
+      name="date"
+      value=(Js.Nullable.fromOption (S.get value))
+      on_change=(S.set set_value)>
+      <Label>"Date"</Label>
+      <Date_field.Group>
+        <Date_field.Input>
+          (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+        </Date_field.Input>
+      </Date_field.Group>
+      <Description>
+        (Jsx.string
+           ("Current value: "
+           ^
+           match S.get value with
+           | Some d -> D.Types.CalendarDate.to_string d ()
+           | None -> "(empty)"))
+      </Description>
+    </Date_field>
+    <div class_="flex gap-2">
+      <Button
+        variant=`tertiary
+        on_click=(fun _ ->
+                     S.set set_value (Some (D.today (D.get_local_time_zone ()))))>
+        "Set today"
+      </Button>
+      <Button variant=`tertiary on_click=(fun _ -> S.set set_value None)>
+        "Clear"
+      </Button>
+    </div>
+  </div>

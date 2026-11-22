@@ -1,0 +1,241 @@
+(* The headless calendar of a range as a caller meets it: a range begun by a
+   press and shown to the day hovered, ended by a second press; chosen by a
+   drag, and an end of it moved by one; by the keys, the focus moved on as it
+   begins, and let go by Escape; reaching no further than an unavailable day,
+   and asking which days it may end on given where it began;
+   its ends marked and told the whole range; and no violation axe finds. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Calendar = Solidtype_headless.Calendar
+module I18n = Solidtype_kobalte.I18n
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module E = Jest.Expect
+module H = Harness
+open Harness.Syntax
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+let all selector = Js.Array.from (query_all H.body selector)
+
+let day n =
+  match
+    Js.Array.find
+      ~f:(fun b ->
+        String.equal (H.text b) (string_of_int n)
+        && Option.is_none (H.attribute b "data-outside-month"))
+      (all "[role=gridcell] > [role=button]")
+  with
+  | Some b -> b
+  | None -> Js.Exn.raiseError ("no day " ^ string_of_int n)
+
+(* The days of the month shown that carry [attribute]. *)
+let marked attribute =
+  all ("[role=gridcell] > [role=button][" ^ attribute ^ "]")
+  |> Js.Array.filter ~f:(fun b ->
+      Option.is_none (H.attribute b "data-outside-month"))
+  |> Array.map H.text |> Array.to_list |> String.concat " "
+
+let told_of = function
+  | None -> "none"
+  | Some ({ start; end_ } : Calendar.range) ->
+      Date.to_string start () ^ ".." ^ Date.to_string end_ ()
+
+let range ?default_value ?is_date_unavailable ?allows_non_contiguous_ranges
+    ?(told = ref []) () =
+  H.render (fun () ->
+      <I18n.I18nProvider locale="en-US">
+        <Calendar.Root_range
+          aria_label="Trip"
+          default_focused_value=(Date.make 2026 11 21)
+          ?default_value
+          ?is_date_unavailable
+          ?allows_non_contiguous_ranges
+          on_change=(fun r -> told := told_of r :: !told)>
+          <Calendar.Heading />
+          <Calendar.Grid>
+            <Calendar.Grid_header>
+              (fun name ->
+                <Calendar.Header_cell>
+                  (Jsx.string (S.get name))
+                </Calendar.Header_cell>)
+            </Calendar.Grid_header>
+            <Calendar.Grid_body>
+              (fun date -> <Calendar.Cell date=(S.get date) />)
+            </Calendar.Grid_body>
+          </Calendar.Grid>
+        </Calendar.Root_range>
+      </I18n.I18nProvider>)
+
+let () =
+  Jest.describe "Calendar.Root_range" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise "begins a range by a press, shown to the day hovered"
+        (fun () ->
+          let told = ref [] in
+          range ~told ();
+          let user = H.setup () in
+          let* () = H.click user (day 3) in
+          let* () = H.hover user (day 6) in
+          let shown = (marked "data-selected", !told) in
+          let* () = H.click user (day 6) in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( shown,
+                  !told,
+                  marked "data-selected",
+                  marked "data-selection-start",
+                  marked "data-selection-end" )
+              |> toEqual
+                   ( ("3 4 5 6", []),
+                     [ "2026-11-03..2026-11-06" ],
+                     "3 4 5 6",
+                     "3",
+                     "6" )));
+      Jest.testPromise
+        "ends a range begun after the day pressed, its ends in order" (fun () ->
+          let told = ref [] in
+          range ~told ();
+          let user = H.setup () in
+          let* () = H.click user (day 12) in
+          let* () = H.click user (day 9) in
+          Js.Promise.resolve
+            E.(expect !told |> toEqual [ "2026-11-09..2026-11-12" ]));
+      Jest.testPromise "chooses the days a drag crosses" (fun () ->
+          let told = ref [] in
+          range ~told ();
+          let user = H.setup () in
+          let* () =
+            H.pointer user
+              [|
+                H.pointer_action ~keys:"[MouseLeft>]" ~target:(day 10);
+                H.move_to ~target:(day 11);
+                H.move_to ~target:(day 13);
+                H.pointer_action ~keys:"[/MouseLeft]" ~target:(day 13);
+              |]
+          in
+          Js.Promise.resolve
+            E.(
+              expect (!told, marked "data-selected")
+              |> toEqual ([ "2026-11-10..2026-11-13" ], "10 11 12 13")));
+      Jest.testPromise "moves an end of the range chosen by a drag" (fun () ->
+          let told = ref [] in
+          range ~told
+            ~default_value:
+              { start = Date.make 2026 11 3; end_ = Date.make 2026 11 6 }
+            ();
+          let user = H.setup () in
+          let* () =
+            H.pointer user
+              [|
+                H.pointer_action ~keys:"[MouseLeft>]" ~target:(day 6);
+                H.move_to ~target:(day 8);
+                H.move_to ~target:(day 9);
+                H.pointer_action ~keys:"[/MouseLeft]" ~target:(day 9);
+              |]
+          in
+          Js.Promise.resolve
+            E.(expect !told |> toEqual [ "2026-11-03..2026-11-09" ]));
+      Jest.testPromise "begins by Enter, moving the focus on, and ends by Enter"
+        (fun () ->
+          let told = ref [] in
+          range ~told ();
+          let user = H.setup () in
+          H.focus (day 21);
+          let* () = H.keyboard user "{Enter}" in
+          let moved = H.text H.focused in
+          let* () = H.keyboard user "{ArrowRight}{Enter}" in
+          Js.Promise.resolve
+            E.(
+              expect (moved, !told)
+              |> toEqual ("22", [ "2026-11-21..2026-11-23" ])));
+      Jest.testPromise "lets a range begun go by Escape" (fun () ->
+          let told = ref [] in
+          range ~told ();
+          let user = H.setup () in
+          H.focus (day 21);
+          let* () = H.keyboard user "{Enter}{ArrowRight}" in
+          let begun = marked "data-selected" in
+          let* () = H.keyboard user "{Escape}" in
+          Js.Promise.resolve
+            E.(
+              expect (begun, marked "data-selected", !told)
+              |> toEqual ("21 22 23", "", [])));
+      Jest.testPromise "reaches no further than the nearest unavailable day"
+        (fun () ->
+          range ~is_date_unavailable:(fun d _ -> Date.day d = 15) ();
+          let user = H.setup () in
+          let* () = H.click user (day 12) in
+          let* () = H.hover user (day 18) in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( H.attribute (day 16) "data-disabled",
+                  H.attribute (day 14) "data-disabled",
+                  marked "data-selected" )
+              |> toEqual (Some "", None, "12")));
+      Jest.testPromise "asks which days a range begun on a day may end on"
+        (fun () ->
+          let told = ref [] in
+          range ~told
+            ~is_date_unavailable:(fun d anchor ->
+              match anchor with
+              | Some a -> abs_float (Date.compare d a) > 3.
+              | None -> false)
+            ();
+          let user = H.setup () in
+          let* () = H.click user (day 10) in
+          let reach =
+            ( H.attribute (day 13) "data-unavailable",
+              H.attribute (day 14) "data-unavailable",
+              H.attribute (day 7) "data-unavailable",
+              H.attribute (day 6) "data-unavailable" )
+          in
+          let* () = H.click user (day 13) in
+          Js.Promise.resolve
+            E.(
+              expect (reach, !told, H.attribute (day 14) "data-unavailable")
+              |> toEqual
+                   ( (None, Some "", None, Some ""),
+                     [ "2026-11-10..2026-11-13" ],
+                     None )));
+      Jest.testPromise "crosses an unavailable day where a range may" (fun () ->
+          let told = ref [] in
+          range ~told
+            ~is_date_unavailable:(fun d _ -> Date.day d = 15)
+            ~allows_non_contiguous_ranges:true ();
+          let user = H.setup () in
+          let* () = H.click user (day 12) in
+          let* () = H.click user (day 18) in
+          Js.Promise.resolve
+            E.(expect !told |> toEqual [ "2026-11-12..2026-11-18" ]));
+      Jest.test "tells each end the whole range, and selects several days"
+        (fun () ->
+          range
+            ~default_value:
+              { start = Date.make 2026 11 3; end_ = Date.make 2026 11 6 }
+            ();
+          E.(
+            expect
+              ( H.attribute (day 3) "aria-label",
+                H.attribute (day 4) "aria-label",
+                H.attribute
+                  (List.hd (Array.to_list (all "[role=grid]")))
+                  "aria-multiselectable" )
+            |> toEqual
+                 ( Some
+                     "Selected Range: Tuesday, November 3 to Friday, November \
+                      6, 2026, Tuesday, November 3, 2026 selected",
+                   Some "Wednesday, November 4, 2026 selected",
+                   Some "true" )));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          range
+            ~default_value:
+              { start = Date.make 2026 11 3; end_ = Date.make 2026 11 6 }
+            ();
+          let* v = H.accessibility_violations () in
+          Js.Promise.resolve E.(expect v |> toEqual [||])))

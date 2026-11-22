@@ -1,0 +1,35 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Range_calendar = Solidtype_heroui.Range_calendar
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module Description = Solidtype_heroui.Description
+
+let make () =
+  let now = D.today (D.get_local_time_zone ()) in
+  let max_date = Date.add now (D.Types.DateDuration.make ~months:3 ()) in
+  <div class_="flex flex-col items-center gap-4">
+    <Range_calendar
+      aria_label="Appointment date" max_value=max_date min_value=now>
+      <Range_calendar.Header>
+        <Range_calendar.Heading />
+        <Range_calendar.Nav_button slot=`previous />
+        <Range_calendar.Nav_button slot=`next />
+      </Range_calendar.Header>
+      <Range_calendar.Grid>
+        <Range_calendar.Grid_header>
+          (fun day ->
+            <Range_calendar.Header_cell>
+              (Jsx.string (S.get day))
+            </Range_calendar.Header_cell>)
+        </Range_calendar.Grid_header>
+        <Range_calendar.Grid_body>
+          (fun date -> <Range_calendar.Cell date=(S.get date) />)
+        </Range_calendar.Grid_body>
+      </Range_calendar.Grid>
+    </Range_calendar>
+    <Description class_="text-center">
+      (Jsx.string
+         ("Select a date between today and " ^ Date.to_string max_date ()))
+    </Description>
+  </div>

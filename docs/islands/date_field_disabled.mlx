@@ -1,0 +1,31 @@
+module S = Solidtype.Solid
+module Description = Solidtype_heroui.Description
+module D = Solidtype_internationalized_date
+module Label = Solidtype_heroui.Label
+module Date_field = Solidtype_heroui.Date_field
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <Date_field
+      is_disabled=true
+      class_="w-[256px]"
+      name="date"
+      value=(Js.Nullable.return (D.today (D.get_local_time_zone ())))>
+      <Label>"Date"</Label>
+      <Date_field.Group>
+        <Date_field.Input>
+          (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+        </Date_field.Input>
+      </Date_field.Group>
+      <Description>"This date field is disabled"</Description>
+    </Date_field>
+    <Date_field is_disabled=true class_="w-[256px]" name="date-empty">
+      <Label>"Date"</Label>
+      <Date_field.Group>
+        <Date_field.Input>
+          (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+        </Date_field.Input>
+      </Date_field.Group>
+      <Description>"This date field is disabled"</Description>
+    </Date_field>
+  </div>

@@ -1,0 +1,309 @@
+(* HeroUI's DatePicker on the headless picker, beside the same picker in React:
+   every part -- its label, the field's group, input and segments, the
+   trigger and its icon, its description, and the popover and the calendar in
+   it -- at rest, opened by its trigger, a day chosen, and opened again and
+   closed by Escape; disabled, read-only, required and invalid. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Calendar = Solidtype_heroui.Calendar
+module Date_field = Solidtype_heroui.Date_field
+module Date_picker = Solidtype_heroui.Date_picker
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module I18n = Solidtype_kobalte.I18n
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type day
+
+external day :
+  year:int -> month:int -> day:int -> ?hour:int -> ?minute:int -> unit -> day
+  = ""
+[@@mel.obj]
+
+type props
+
+external props :
+  locale:string ->
+  ?default_value:(day[@mel.as "defaultValue"]) ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?is_read_only:(bool[@mel.as "isReadOnly"]) ->
+  ?is_required:(bool[@mel.as "isRequired"]) ->
+  ?is_invalid:(bool[@mel.as "isInvalid"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> ((string -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/DatePicker.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/DatePicker.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/DatePicker.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+(* What HeroUI's styles read of a part and what a reader reaches. Ids, and
+   what refers to them, are left out. *)
+let state =
+  [
+    "data-slot";
+    "class";
+    "role";
+    "aria-label";
+    "aria-hidden";
+    "aria-haspopup";
+    "aria-expanded";
+    "aria-selected";
+    "aria-disabled";
+    "aria-invalid";
+    "aria-readonly";
+    "aria-required";
+    "tabindex";
+    "disabled";
+    "type";
+    "data-open";
+    "data-pressed";
+    "data-selected";
+    "data-today";
+    "data-placeholder";
+    "data-disabled";
+    "data-invalid";
+    "data-readonly";
+    "data-required";
+  ]
+
+let shown () =
+  Js.Array.from
+    (query_all T.body
+       "[data-slot], [role=dialog], [role=spinbutton], [role=gridcell]")
+  |> Array.map (fun e ->
+      String.concat " "
+        (List.filter_map
+           (fun name ->
+             match T.attribute e name with
+             | Some "" | None -> None
+             | Some v -> Some (name ^ "=" ^ v))
+           state)
+      ^
+      match T.attribute e "role" with
+      | Some ("spinbutton" | "button") -> " " ^ text e
+      | Some _ | None -> "")
+
+let first selector =
+  match Js.Array.from (query_all T.body selector) with
+  | [||] -> Js.Exn.raiseError ("no " ^ selector)
+  | all -> all.(0)
+
+let cell n =
+  match
+    Js.Array.from
+      (query_all T.body
+         "[role=dialog] [data-slot=calendar-cell]:not([data-outside-month])")
+    |> Js.Array.find ~f:(fun e -> String.equal (text e) (string_of_int n))
+  with
+  | Some e -> e
+  | None -> Js.Exn.raiseError ("no day " ^ string_of_int n)
+
+let walk ~step told =
+  let user = T.setup () in
+  let at_rest = shown () in
+  let* () =
+    step (fun () -> T.click user (first "[data-slot=date-picker-trigger]"))
+  in
+  let* () = T.frame () in
+  let opened = shown () in
+  if Array.length (Js.Array.from (query_all T.body "[role=dialog]")) = 0 then
+    Js.Promise.resolve [ at_rest; opened ]
+  else
+    let* () = step (fun () -> T.click user (cell 9)) in
+    let* () = T.frame () in
+    let chosen = Array.append (shown ()) [| !told |] in
+    let* () =
+      step (fun () -> T.click user (first "[data-slot=date-picker-trigger]"))
+    in
+    let* () = T.frame () in
+    let* () = step (fun () -> T.keyboard user "{Escape}") in
+    let* () = T.frame () in
+    Js.Promise.resolve [ at_rest; opened; chosen; shown () ]
+
+let both ?(locale = "en-US") ?default_value ?is_disabled ?is_read_only
+    ?is_required ?is_invalid () =
+  let told = ref "" in
+  let ymd (y, m, d) = Date.make y m d in
+  T.render (fun () ->
+      <I18n.I18nProvider locale>
+        <Date_picker
+          class_="w-72"
+          name="date"
+          ?default_value=(Option.map ymd default_value)
+          ?is_disabled
+          ?is_read_only
+          ?is_required
+          ?is_invalid
+          on_change=(fun v ->
+                      told :=
+                        match v with
+                        | Some d -> Date.to_string d ()
+                        | None -> "none")>
+          <Label>"Date"</Label>
+          <Date_field.Group full_width=true>
+            <Date_field.Input>
+              (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+            </Date_field.Input>
+            <Date_field.Suffix>
+              <Date_picker.Trigger>
+                <Date_picker.Trigger_indicator />
+              </Date_picker.Trigger>
+            </Date_field.Suffix>
+          </Date_field.Group>
+          <Description>"When it starts"</Description>
+          <Date_picker.Popover>
+            <Calendar aria_label="Event date">
+              <Calendar.Header>
+                <Calendar.Heading />
+                <Calendar.Nav_button slot=`previous />
+                <Calendar.Nav_button slot=`next />
+              </Calendar.Header>
+              <Calendar.Grid>
+                <Calendar.Grid_header>
+                  (fun d ->
+                    <Calendar.Header_cell>
+                      (Jsx.string (S.get d))
+                    </Calendar.Header_cell>)
+                </Calendar.Grid_header>
+                <Calendar.Grid_body>
+                  (fun d -> <Calendar.Cell date=(S.get d) />)
+                </Calendar.Grid_body>
+              </Calendar.Grid>
+            </Calendar>
+          </Date_picker.Popover>
+        </Date_picker>
+      </I18n.I18nProvider>);
+  let* solidtype = walk ~step:(fun action -> action ()) told in
+  T.cleanup ();
+  let told' = ref "" in
+  let as_day (y, m, d) = day ~year:y ~month:m ~day:d () in
+  let _host =
+    Twin.render
+      (props ~locale
+         ?default_value:(Option.map as_day default_value)
+         ?is_disabled ?is_read_only ?is_required ?is_invalid ())
+      (fun iso -> told' := iso)
+  in
+  let* react = walk ~step:Twin.step told' in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+(* A picker of a date and a time, its day chosen in the popover. *)
+let with_time () =
+  let told = ref "" in
+  T.render (fun () ->
+      <I18n.I18nProvider locale="en-US">
+        <Date_picker.Date_time
+          class_="w-72"
+          name="date"
+          default_value=(D.Types.CalendarDateTime.make 2026 11 21 ~hour:9
+                           ~minute:30 ())
+          on_change=(fun v ->
+                      told :=
+                        match v with
+                        | Some d -> D.Types.CalendarDateTime.to_string d ()
+                        | None -> "none")>
+          <Label>"Date"</Label>
+          <Date_field.Group full_width=true>
+            <Date_field.Input>
+              (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+            </Date_field.Input>
+            <Date_field.Suffix>
+              <Date_picker.Trigger>
+                <Date_picker.Trigger_indicator />
+              </Date_picker.Trigger>
+            </Date_field.Suffix>
+          </Date_field.Group>
+          <Description>"When it starts"</Description>
+          <Date_picker.Popover>
+            <Calendar aria_label="Event date">
+              <Calendar.Header>
+                <Calendar.Heading />
+                <Calendar.Nav_button slot=`previous />
+                <Calendar.Nav_button slot=`next />
+              </Calendar.Header>
+              <Calendar.Grid>
+                <Calendar.Grid_header>
+                  (fun d ->
+                    <Calendar.Header_cell>
+                      (Jsx.string (S.get d))
+                    </Calendar.Header_cell>)
+                </Calendar.Grid_header>
+                <Calendar.Grid_body>
+                  (fun d -> <Calendar.Cell date=(S.get d) />)
+                </Calendar.Grid_body>
+              </Calendar.Grid>
+            </Calendar>
+          </Date_picker.Popover>
+        </Date_picker.Date_time>
+      </I18n.I18nProvider>);
+  let* solidtype = walk ~step:(fun action -> action ()) told in
+  T.cleanup ();
+  let told' = ref "" in
+  let _host =
+    Twin.render
+      (props ~locale:"en-US"
+         ~default_value:(day ~year:2026 ~month:11 ~day:21 ~hour:9 ~minute:30 ())
+         ())
+      (fun iso -> told' := iso)
+  in
+  let* react = walk ~step:Twin.step told' in
+  Twin.cleanup ();
+  Js.Promise.resolve ((solidtype, !told), (react, !told'))
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Date_picker" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "is every part, opened and a day chosen, as React's is"
+        (fun () ->
+          let* r = both ~default_value:(2026, 11, 21) () in
+          same r);
+      Jest.testPromise "opens empty on today, as React's does" (fun () ->
+          let* r = both () in
+          same r);
+      Jest.testPromise "is in another locale's order, as React's is" (fun () ->
+          let* r = both ~locale:"de-DE" ~default_value:(2026, 11, 21) () in
+          same r);
+      Jest.testPromise "is disabled, as React's is" (fun () ->
+          let* r = both ~is_disabled:true ~default_value:(2026, 11, 21) () in
+          same r);
+      Jest.testPromise "is read-only, as React's is" (fun () ->
+          let* r = both ~is_read_only:true ~default_value:(2026, 11, 21) () in
+          same r);
+      Jest.testPromise "keeps its time as a day is chosen, as React's does"
+        (fun () ->
+          let* (ours, ours_told), (theirs, theirs_told) = with_time () in
+          Js.Promise.resolve
+            E.(
+              expect (ours, ours_told, theirs_told)
+              |> toEqual (theirs, "2026-11-09T09:30:00", "2026-11-09T09:30:00")));
+      Jest.testPromise "is required and invalid, as React's is" (fun () ->
+          let* r =
+            both ~is_required:true ~is_invalid:true
+              ~default_value:(2026, 11, 21) ()
+          in
+          same r))

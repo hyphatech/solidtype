@@ -1,0 +1,333 @@
+(* HeroUI's Calendar on the headless calendar, beside the same calendar in
+   React: every part -- its header, heading, navigation buttons, grid, its
+   days' names and each day -- at rest, a day chosen, the focus moved by the
+   keys and paged by a button; in each state, of several dates, a week's view,
+   and with its year picker opened and a year chosen. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Calendar = Solidtype_heroui.Calendar
+module I18n = Solidtype_kobalte.I18n
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type day
+
+external day : year:int -> month:int -> day:int -> unit -> day = "" [@@mel.obj]
+
+type props
+
+external props :
+  locale:string ->
+  focused_value:(day[@mel.as "focusedValue"]) ->
+  ?default_value:(day[@mel.as "defaultValue"]) ->
+  ?min_value:(day[@mel.as "minValue"]) ->
+  ?max_value:(day[@mel.as "maxValue"]) ->
+  ?unavailable_days:(int array[@mel.as "unavailableDays"]) ->
+  ?multiple:bool ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?is_read_only:(bool[@mel.as "isReadOnly"]) ->
+  ?is_invalid:(bool[@mel.as "isInvalid"]) ->
+  ?weeks:int ->
+  ?weeks_in_month:(int[@mel.as "weeksInMonth"]) ->
+  ?year_picker:(bool[@mel.as "yearPicker"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> ((string -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/Calendar.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Calendar.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Calendar.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+(* What HeroUI's styles read of a part and what a reader reaches: its state as
+   React Aria writes it, its role, its name and its text. Ids, and what
+   refers to them, are left out. *)
+let state =
+  [
+    "data-slot";
+    "class";
+    "role";
+    "aria-label";
+    "aria-hidden";
+    "aria-selected";
+    "aria-disabled";
+    "aria-invalid";
+    "aria-readonly";
+    "aria-multiselectable";
+    "aria-expanded";
+    "tabindex";
+    "disabled";
+    "data-selected";
+    "data-today";
+    "data-unavailable";
+    "data-disabled";
+    "data-invalid";
+    "data-outside-month";
+    "data-outside-visible-range";
+    "data-focused";
+    "data-open";
+    "data-year";
+  ]
+
+let shown host =
+  Js.Array.from (query_all host "[data-slot], [role=gridcell], h2")
+  |> Array.map (fun e ->
+      String.concat " "
+        (List.filter_map
+           (fun name ->
+             match T.attribute e name with
+             | Some "" | None -> None
+             | Some v -> Some (name ^ "=" ^ v))
+           state)
+      ^
+      match T.attribute e "data-slot" with
+      | Some
+          ( "calendar-cell" | "calendar-heading" | "calendar-header-cell"
+          | "calendar-year-picker-year-cell" ) ->
+          " " ^ text e
+      | Some _ | None -> "")
+
+let cell host n =
+  match
+    Js.Array.from
+      (query_all host "[data-slot=calendar-cell]:not([data-outside-month])")
+    |> Js.Array.find ~f:(fun e -> String.equal (text e) (string_of_int n))
+  with
+  | Some e -> e
+  | None -> Js.Exn.raiseError ("no day " ^ string_of_int n)
+
+let first host selector =
+  match Js.Array.from (query_all host selector) with
+  | [||] -> Js.Exn.raiseError ("no " ^ selector)
+  | all -> all.(0)
+
+(* The calendar shown, then a day chosen, the focus moved on, and the next
+   page shown; or, with a year picker, opened and a year chosen. *)
+let walk ~year_picker ~day ~step host told =
+  let user = T.setup () in
+  let at_rest = shown host in
+  if year_picker then
+    let* () =
+      step (fun () ->
+          T.click user (first host "[data-slot=calendar-year-picker-trigger]"))
+    in
+    (* Both pickers focus the year a frame after they open, as HeroUI's
+       does. *)
+    let* () = T.frame () in
+    let opened = shown host in
+    let* () = step (fun () -> T.click user (first host "[data-year='2030']")) in
+    Js.Promise.resolve [ at_rest; opened; shown host ]
+  else
+    let* () = step (fun () -> T.click user (cell host day)) in
+    let chosen = Array.append (shown host) [| !told |] in
+    let* () = step (fun () -> T.keyboard user "{ArrowRight}") in
+    let moved = shown host in
+    let* () =
+      step (fun () ->
+          T.click user
+            (first host "[data-slot=calendar-nav-button]:last-of-type"))
+    in
+    Js.Promise.resolve [ at_rest; chosen; moved; shown host ]
+
+let ymd (y, m, d) = Date.make y m d
+
+let both ?(locale = "en-US") ?default_value ?min_value ?max_value
+    ?unavailable_days ?(multiple = false) ?is_disabled ?is_read_only ?is_invalid
+    ?weeks ?weeks_in_month ?(year_picker = false) () =
+  let day_pressed = match weeks with Some _ -> 17 | None -> 3 in
+  let told = ref "" in
+  let focused = (2026, 11, 21) in
+  let is_date_unavailable =
+    Option.map
+      (fun days d -> Array.exists (fun x -> x = Date.day d) days)
+      unavailable_days
+  in
+  let visible_duration = Option.map (fun w -> Calendar.Weeks w) weeks in
+  let inside () =
+    Jsx.fragment
+      [|
+        <Calendar.Header>
+          (if year_picker then
+             <Calendar.Year_picker_trigger>
+               <Calendar.Year_picker_trigger_heading />
+               <Calendar.Year_picker_trigger_indicator />
+             </Calendar.Year_picker_trigger>
+           else <Calendar.Heading />)
+          <Calendar.Nav_button slot=`previous />
+          <Calendar.Nav_button slot=`next />
+        </Calendar.Header>;
+        <Calendar.Grid>
+          <Calendar.Grid_header>
+            (fun d ->
+              <Calendar.Header_cell>
+                (Jsx.string (S.get d))
+              </Calendar.Header_cell>)
+          </Calendar.Grid_header>
+          <Calendar.Grid_body>
+            (fun d -> <Calendar.Cell date=(S.get d) />)
+          </Calendar.Grid_body>
+        </Calendar.Grid>;
+        (if year_picker then
+           <Calendar.Year_picker_grid>
+             <Calendar.Year_picker_grid_body />
+           </Calendar.Year_picker_grid>
+         else Jsx.nothing);
+      |]
+  in
+  T.render (fun () ->
+      <I18n.I18nProvider locale>
+        (if multiple then
+           <Calendar.Multiple
+             aria_label="Event date"
+             default_focused_value=(ymd focused)
+             ?default_value=(Option.map (fun d -> [| ymd d |]) default_value)
+             ?min_value=(Option.map ymd min_value)
+             ?max_value=(Option.map ymd max_value)
+             ?is_date_unavailable
+             ?is_disabled
+             ?is_read_only
+             ?is_invalid
+             ?visible_duration
+             ?weeks_in_month
+             on_change=(fun ds ->
+                         told :=
+                           String.concat ","
+                             (Array.to_list
+                                (Array.map (fun d -> Date.to_string d ()) ds)))>
+             (inside ())
+           </Calendar.Multiple>
+         else
+           <Calendar
+             aria_label="Event date"
+             default_focused_value=(ymd focused)
+             ?default_value=(Option.map ymd default_value)
+             ?min_value=(Option.map ymd min_value)
+             ?max_value=(Option.map ymd max_value)
+             ?is_date_unavailable
+             ?is_disabled
+             ?is_read_only
+             ?is_invalid
+             ?visible_duration
+             ?weeks_in_month
+             on_change=(fun d -> told := Date.to_string d ())>
+             (inside ())
+           </Calendar>)
+      </I18n.I18nProvider>);
+  let host = T.body in
+  let* solidtype =
+    walk ~year_picker ~day:day_pressed ~step:(fun action -> action ()) host told
+  in
+  T.cleanup ();
+  let told' = ref "" in
+  let as_day (y, m, d) = day ~year:y ~month:m ~day:d () in
+  let host =
+    Twin.render
+      (props ~locale ~focused_value:(as_day focused)
+         ?default_value:(Option.map as_day default_value)
+         ?min_value:(Option.map as_day min_value)
+         ?max_value:(Option.map as_day max_value)
+         ?unavailable_days ~multiple ?is_disabled ?is_read_only ?is_invalid
+         ?weeks ?weeks_in_month ~year_picker ())
+      (fun iso -> told' := iso)
+  in
+  let* react = walk ~year_picker ~day:day_pressed ~step:Twin.step host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+(* React's leaves its focus where it was as a day it cannot choose is
+   pressed, and its arrows then move a focus the page does not show; the
+   port focuses the day pressed, as the headless calendar's test holds. *)
+(* React's names a week's grid as ending with its month, November 15 to 30,
+   where the port names the week it shows, November 15 to 21. *)
+let same_but_grid_name (solidtype, react) =
+  let unnamed =
+    List.map
+      (Array.map (fun line ->
+           if Js.String.includes ~search:"data-slot=calendar-grid " line then
+             match Js.String.split ~sep:" aria-label=" line with
+             | [| before; _ |] -> before
+             | _ -> line
+           else line))
+  in
+  let grid_name lines =
+    Array.find_opt (Js.String.includes ~search:"data-slot=calendar-grid ") lines
+  in
+  Js.Promise.resolve
+    E.(
+      expect
+        (unnamed solidtype, Option.bind (List.nth_opt solidtype 0) grid_name)
+      |> toEqual
+           ( unnamed react,
+             Some
+               "data-slot=calendar-grid class=calendar__grid role=grid \
+                aria-label=Event date, November 15 to 21, 2026" ))
+
+let same_at_rest (solidtype, react) =
+  let first = function x :: _ -> x | [] -> [||] in
+  Js.Promise.resolve E.(expect (first solidtype) |> toEqual (first react))
+
+let () =
+  Jest.describe "Calendar" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "is every part, a day chosen and paged, as React's is"
+        (fun () ->
+          let* r = both () in
+          same r);
+      Jest.testPromise "shows its value, as React's does" (fun () ->
+          let* r = both ~default_value:(2026, 11, 9) () in
+          same r);
+      Jest.testPromise "is in another locale's order, as React's is" (fun () ->
+          let* r = both ~locale:"de-DE" () in
+          same r);
+      Jest.testPromise "disables days out of its range, as React's does"
+        (fun () ->
+          let* r = both ~min_value:(2026, 11, 5) ~max_value:(2026, 12, 10) () in
+          same r);
+      Jest.testPromise "marks unavailable days, as React's does" (fun () ->
+          let* r =
+            both ~unavailable_days:[| 3; 4 |] ~default_value:(2026, 11, 4) ()
+          in
+          same_at_rest r);
+      Jest.testPromise "is disabled, as React's is" (fun () ->
+          let* r = both ~is_disabled:true ~default_value:(2026, 11, 9) () in
+          same r);
+      Jest.testPromise "is read-only, as React's is" (fun () ->
+          let* r = both ~is_read_only:true ~default_value:(2026, 11, 9) () in
+          same_at_rest r);
+      Jest.testPromise "is invalid, as React's is" (fun () ->
+          let* r = both ~is_invalid:true ~default_value:(2026, 11, 9) () in
+          same r);
+      Jest.testPromise "chooses several dates, as React's does" (fun () ->
+          let* r = both ~multiple:true ~default_value:(2026, 11, 9) () in
+          same r);
+      Jest.testPromise "shows a week, as React's does" (fun () ->
+          let* r = both ~weeks:1 () in
+          same_but_grid_name r);
+      Jest.testPromise "shows six weeks, as React's does" (fun () ->
+          let* r = both ~weeks_in_month:6 () in
+          same r);
+      Jest.testPromise
+        "opens its year picker and chooses a year, as React's does" (fun () ->
+          let* r = both ~year_picker:true () in
+          same r))

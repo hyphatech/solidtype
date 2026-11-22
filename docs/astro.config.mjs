@@ -100,7 +100,7 @@ export default defineConfig({
             { label: "Colors", items: ["heroui/color-area", "heroui/color-field", "heroui/color-picker", "heroui/color-slider", "heroui/color-swatch", "heroui/color-swatch-picker"] },
             { label: "Controls", items: ["heroui/slider", "heroui/switch"] },
             { label: "Data Display", items: ["heroui/badge", "heroui/chip", "heroui/data-grid", "heroui/table", "heroui/trend-chip"] },
-            { label: "Date and Time", items: ["heroui/time-field"] },
+            { label: "Date and Time", items: ["heroui/calendar", "heroui/date-field", "heroui/date-picker", "heroui/date-range-picker", "heroui/range-calendar", "heroui/time-field"] },
             { label: "Feedback", items: ["heroui/alert", "heroui/meter", "heroui/progress-bar", "heroui/progress-circle", "heroui/skeleton", "heroui/spinner", "heroui/text-shimmer"] },
             { label: "Forms", items: ["heroui/checkbox", "heroui/checkbox-group", "heroui/description", "heroui/error-message", "heroui/field-error", "heroui/fieldset", "heroui/form", "heroui/input", "heroui/input-group", "heroui/label", "heroui/number-field", "heroui/number-stepper", "heroui/radio-group", "heroui/search-field", "heroui/text-area", "heroui/text-field"] },
             { label: "Layout", items: ["heroui/card", "heroui/separator", "heroui/surface"] },
@@ -157,14 +157,18 @@ export default defineConfig({
           codeSplitting: {
             groups: [
               { name: "react", test: /\/node_modules\/(react|react-dom|scheduler)\// },
-              // React Aria's components carry their hooks, past a chunk alone:
-              // a module each, split in two by name, for size.
+              // React Aria's hooks and the state and dates under them, before
+              // the components that import them, which would otherwise take
+              // them into their own chunks; the hooks split in two by area,
+              // for size.
+              { name: "internationalized", test: /\/node_modules\/@internationalized\// },
+              { name: "react-stately", test: /\/node_modules\/(@react-stately|react-stately|@react-types)\// },
+              { name: "react-aria-a", test: /\/node_modules\/react-aria\/dist\/[a-z]+\/[a-l]/ },
+              { name: "react-aria", test: /\/node_modules\/(@react-aria|react-aria)\// },
+              // React Aria's components, a module each, split in two by name,
+              // for size.
               { name: "react-aria-components-a", test: /\/node_modules\/react-aria-components\/dist\/[a-z]+\/[A-La-l]/ },
               { name: "react-aria-components", test: /\/node_modules\/react-aria-components\// },
-              {
-                name: "react-aria",
-                test: /\/node_modules\/(@react-aria|@react-stately|@react-types|react-aria|react-stately|@internationalized)\//,
-              },
               { name: "heroui-react", test: /\/node_modules\/@heroui\/react\// },
             ],
           },

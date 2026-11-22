@@ -57,6 +57,12 @@
 @import "@heroui/styles/components/textfield.css" layer(components);
 @import "@heroui/styles/components/search-field.css" layer(components);
 @import "@heroui/styles/components/textarea.css" layer(components);
+@import "@heroui/styles/components/calendar.css" layer(components);
+@import "@heroui/styles/components/calendar-year-picker.css" layer(components);
+@import "@heroui/styles/components/date-field.css" layer(components);
+@import "@heroui/styles/components/date-picker.css" layer(components);
+@import "@heroui/styles/components/date-range-picker.css" layer(components);
+@import "@heroui/styles/components/range-calendar.css" layer(components);
 @import "@heroui/styles/components/time-field.css" layer(components);
 @import "@heroui/styles/components/date-input-group.css" layer(components);
 @import "@heroui/styles/components/card.css" layer(components);

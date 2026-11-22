@@ -59,9 +59,16 @@ bun add $(opam show solidtype-rhp --field x-npm-depends)
 
 - [`Solidtype_headless`](/solidtype/reference/solidtype-headless/Solidtype_headless/index.html)
   -- the components Kobalte lacks, one module each:
-  [`Table`](/solidtype/reference/solidtype-headless/Solidtype_headless/Table/index.html),
+  [`Calendar`](/solidtype/reference/solidtype-headless/Solidtype_headless/Calendar/index.html),
+  [`Color_picker`](/solidtype/reference/solidtype-headless/Solidtype_headless/Color_picker/index.html),
   [`Color_swatch_picker`](/solidtype/reference/solidtype-headless/Solidtype_headless/Color_swatch_picker/index.html),
+  [`Data_grid`](/solidtype/reference/solidtype-headless/Solidtype_headless/Data_grid/index.html),
+  [`Date_field`](/solidtype/reference/solidtype-headless/Solidtype_headless/Date_field/index.html),
+  [`Date_picker`](/solidtype/reference/solidtype-headless/Solidtype_headless/Date_picker/index.html),
   [`Load_more_sentinel`](/solidtype/reference/solidtype-headless/Solidtype_headless/Load_more_sentinel/index.html),
+  [`Table`](/solidtype/reference/solidtype-headless/Solidtype_headless/Table/index.html),
+  [`Tag_group`](/solidtype/reference/solidtype-headless/Solidtype_headless/Tag_group/index.html),
+  [`Top_layer`](/solidtype/reference/solidtype-headless/Solidtype_headless/Top_layer/index.html),
   [`Virtualizer`](/solidtype/reference/solidtype-headless/Solidtype_headless/Virtualizer/index.html);
   and Kobalte's own, fixed:
   [`Color_area`](/solidtype/reference/solidtype-headless/Solidtype_headless/Color_area/index.html),

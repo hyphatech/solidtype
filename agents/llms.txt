@@ -107,6 +107,11 @@ Each component's page gives HeroUI's own examples in OCaml, and a table of its p
 - [Data Grid](pages/heroui/data-grid.md): A grid of records given as data, with sorting, selection, column resizing, pinned columns, drag and drop, virtualization and loading more, on HeroUI's Table.
 - [Table](pages/heroui/table.md): Tables display structured data in rows and columns with support for sorting, selection, column resizing, and infinite scrolling.
 - [TrendChip](pages/heroui/trend-chip.md): A chip that shows a change, its arrow and colour from its trend.
+- [Calendar](pages/heroui/calendar.md): Composable date picker with month grid, navigation, and year picker support.
+- [DateField](pages/heroui/date-field.md): Date input field with labels, descriptions, and validation.
+- [DatePicker](pages/heroui/date-picker.md): Composable date picker built on React Aria DatePicker with DateField and Calendar composition parts.
+- [DateRangePicker](pages/heroui/date-range-picker.md): Composable date range picker built on React Aria DateRangePicker with DateField and RangeCalendar composition parts.
+- [RangeCalendar](pages/heroui/range-calendar.md): Composable date range picker with month grid, navigation, and year picker support.
 - [TimeField](pages/heroui/time-field.md): Time input field with labels, descriptions, and validation.
 - [Alert](pages/heroui/alert.md): Display important messages and notifications to users with status indicators.
 - [Meter](pages/heroui/meter.md): A meter represents a quantity within a known range, or a fractional value.

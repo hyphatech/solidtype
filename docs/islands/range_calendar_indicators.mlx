@@ -1,0 +1,40 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Range_calendar = Solidtype_heroui.Range_calendar
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+
+let dates_with_events = [ 3; 7; 12; 15; 21; 28 ]
+
+let make () =
+  <Range_calendar aria_label="Trip dates">
+    <Range_calendar.Header>
+      <Range_calendar.Heading />
+      <Range_calendar.Nav_button slot=`previous />
+      <Range_calendar.Nav_button slot=`next />
+    </Range_calendar.Header>
+    <Range_calendar.Grid>
+      <Range_calendar.Grid_header>
+        (fun day ->
+          <Range_calendar.Header_cell>
+            (Jsx.string (S.get day))
+          </Range_calendar.Header_cell>)
+      </Range_calendar.Grid_header>
+      <Range_calendar.Grid_body>
+        (fun date ->
+          <Range_calendar.Cell date=(S.get date)>
+            (fun (cell : Range_calendar.cell) ->
+              let d = S.get date in
+              Jsx.fragment
+                [|
+                  Jsx.string (S.get cell.formatted_date);
+                  (if
+                     D.is_today d (D.get_local_time_zone ())
+                     || List.mem (Date.day d) dates_with_events
+                   then <Range_calendar.Cell_indicator />
+                   else Jsx.nothing);
+                |])
+          </Range_calendar.Cell>)
+      </Range_calendar.Grid_body>
+    </Range_calendar.Grid>
+  </Range_calendar>

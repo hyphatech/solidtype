@@ -1,0 +1,287 @@
+---
+title: DateField
+description: Date input field with labels, descriptions, and validation.
+---
+
+import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/date_field_usage.jsx";
+import ExUsageCode from "@islands/date_field_usage.mlx?raw";
+import * as ExPrefixIcon from "@islands/date_field_prefix_icon.jsx";
+import ExPrefixIconCode from "@islands/date_field_prefix_icon.mlx?raw";
+import * as ExSuffixIcon from "@islands/date_field_suffix_icon.jsx";
+import ExSuffixIconCode from "@islands/date_field_suffix_icon.mlx?raw";
+import * as ExPrefixSuffix from "@islands/date_field_prefix_suffix.jsx";
+import ExPrefixSuffixCode from "@islands/date_field_prefix_suffix.mlx?raw";
+import * as ExVariants from "@islands/date_field_variants.jsx";
+import ExVariantsCode from "@islands/date_field_variants.mlx?raw";
+import * as ExSurface from "@islands/date_field_surface.jsx";
+import ExSurfaceCode from "@islands/date_field_surface.mlx?raw";
+import * as ExDescription from "@islands/date_field_description.jsx";
+import ExDescriptionCode from "@islands/date_field_description.mlx?raw";
+import * as ExRequired from "@islands/date_field_required.jsx";
+import ExRequiredCode from "@islands/date_field_required.mlx?raw";
+import * as ExDisabled from "@islands/date_field_disabled.jsx";
+import ExDisabledCode from "@islands/date_field_disabled.mlx?raw";
+import * as ExFullWidth from "@islands/date_field_full_width.jsx";
+import ExFullWidthCode from "@islands/date_field_full_width.mlx?raw";
+import * as ExInvalid from "@islands/date_field_invalid.jsx";
+import ExInvalidCode from "@islands/date_field_invalid.mlx?raw";
+import * as ExGranularity from "@islands/date_field_granularity.jsx";
+import ExGranularityCode from "@islands/date_field_granularity.mlx?raw";
+import * as ExControlled from "@islands/date_field_controlled.jsx";
+import ExControlledCode from "@islands/date_field_controlled.mlx?raw";
+import * as ExZoned from "@islands/date_field_zoned.jsx";
+import ExZonedCode from "@islands/date_field_zoned.mlx?raw";
+import * as ExForm from "@islands/date_field_form.jsx";
+import ExFormCode from "@islands/date_field_form.mlx?raw";
+import * as ExWithValidation from "@islands/date_field_with_validation.jsx";
+import ExWithValidationCode from "@islands/date_field_with_validation.mlx?raw";
+import * as ExTailwind from "@islands/date_field_tailwind.jsx";
+import ExTailwindCode from "@islands/date_field_tailwind.mlx?raw";
+import * as Demo from "@islands/date_field_demo.jsx";
+
+Its value is a `CalendarDate` of `solidtype-internationalized-date`, made by
+`CalendarDate.make 2026 11 21`, `parse_date "2026-11-21"` or `today zone`; a
+date with a time is `Date_field.Date_time`'s, and one in a zone
+`Date_field.Zoned`'s.
+
+Its segments are day before month, `dd/mm/yyyy`, whatever the browser reads,
+unless an `I18n.I18nProvider` names another locale:
+`<I18n.I18nProvider locale="en-US">` gives `mm/dd/yyyy`. React's follows the
+browser.
+
+Original HeroUI documentation: [DateField](https://heroui.com/en/docs/react/components/date-field).
+
+## Usage
+
+<Example code={ExUsageCode} title="date_field_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI DateField twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two fields: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Anatomy
+
+```ocaml
+<Date_field>
+  <Label />
+  <Date_field.Group>
+    <Date_field.Input>
+      (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+    </Date_field.Input>
+  </Date_field.Group>
+  <Description />
+  <Field_error />
+</Date_field>
+```
+
+`Date_field` combines label, date input, description, and error into a single
+accessible component.
+
+## Examples
+
+### With Icons
+
+Add prefix or suffix icons to enhance the date field.
+
+<Example code={ExPrefixIconCode} title="date_field_prefix_icon.mlx"><ExPrefixIcon.make client:visible /></Example>
+
+<Example code={ExSuffixIconCode} title="date_field_suffix_icon.mlx"><ExSuffixIcon.make client:visible /></Example>
+
+<Example code={ExPrefixSuffixCode} title="date_field_prefix_suffix.mlx"><ExPrefixSuffix.make client:visible /></Example>
+
+### Variants
+
+`Date_field.Group` takes two variants: `` `primary ``, the default, with a
+shadow, and `` `secondary ``, a lower emphasis without one, for a surface.
+
+<Example code={ExVariantsCode} title="date_field_variants.mlx"><ExVariants.make client:visible /></Example>
+
+### In Surface
+
+When used inside a [Surface](/solidtype/heroui/surface/) component, use
+`` variant=`secondary `` on `Date_field.Group` to apply the lower emphasis
+variant suitable for surface backgrounds.
+
+<Example code={ExSurfaceCode} title="date_field_surface.mlx"><ExSurface.make client:visible /></Example>
+
+### With Description
+
+<Example code={ExDescriptionCode} title="date_field_description.mlx"><ExDescription.make client:visible /></Example>
+
+### Required Field
+
+<Example code={ExRequiredCode} title="date_field_required.mlx"><ExRequired.make client:visible /></Example>
+
+### Disabled State
+
+<Example code={ExDisabledCode} title="date_field_disabled.mlx"><ExDisabled.make client:visible /></Example>
+
+### Full Width
+
+<Example code={ExFullWidthCode} title="date_field_full_width.mlx"><ExFullWidth.make client:visible /></Example>
+
+### Validation
+
+Use `is_invalid` together with `Field_error` to surface validation messages.
+
+<Example code={ExInvalidCode} title="date_field_invalid.mlx"><ExInvalid.make client:visible /></Example>
+
+### Granularity
+
+`granularity` is the smallest unit a field with a time shows, `` `minute `` by
+default; `` `day `` shows the date alone.
+
+<Example code={ExGranularityCode} title="date_field_granularity.mlx"><ExGranularity.make client:visible /></Example>
+
+### Controlled
+
+Control the value to synchronize with other components or state management.
+
+<Example code={ExControlledCode} title="date_field_controlled.mlx"><ExControlled.make client:visible /></Example>
+
+### Times and Zones
+
+`Date_field.Date_time` and `Date_field.Zoned` edit a `CalendarDateTime` or a
+`ZonedDateTime`, and give back the same kind. A zoned field needs a
+`placeholder_value`, the zone a date typed while it is empty is in; it shows
+the zone's name after the time, and its hour steps through an hour its clocks
+repeat. The second field below is in Kyiv on the night its clocks go back.
+
+<Example code={ExZonedCode} title="date_field_zoned.mlx"><ExZoned.make client:visible /></Example>
+
+### Form Example
+
+Complete form example with validation and submission handling. The button has
+no pending state while the date is sent.
+
+<Example code={ExFormCode} title="date_field_form.mlx"><ExForm.make client:visible /></Example>
+
+### With Validation
+
+A field is invalid while its value is before `min_value`, after `max_value` or
+a day `is_date_unavailable` refuses, and while the application says so by
+`is_invalid`.
+
+<Example code={ExWithValidationCode} title="date_field_with_validation.mlx"><ExWithValidation.make client:visible /></Example>
+
+### Render Function
+
+`as_` overrides the default DOM element with a function of its props and its
+state, as [Composition](/solidtype/heroui/composition/#custom-dom-element)
+shows.
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={ExTailwindCode} title="date_field_tailwind.mlx"><ExTailwind.make client:visible /></Example>
+
+## Styling Reference
+
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
+### CSS Classes
+
+- `.date-field` - Root container with minimal styling (`flex flex-col gap-1`)
+- `.date-field--full-width` - Full width modifier
+- `.date-input-group` - Root container styling of `Date_field.Group`
+- `.date-input-group--primary`, `.date-input-group--secondary` - Variants
+- `.date-input-group__input` - Input wrapper styling
+- `.date-input-group__input-container` - Scrollable container for grouping
+  multiple inputs
+- `.date-input-group__segment` - Individual date segment styling
+- `.date-input-group__prefix` - Prefix element styling
+- `.date-input-group__suffix` - Suffix element styling
+
+Child components ([Label](/solidtype/heroui/label/),
+[Description](/solidtype/heroui/description/),
+[FieldError](/solidtype/heroui/field-error/)) have their own CSS classes and
+styling. See their respective documentation for customization options.
+
+### Interactive States
+
+DateField automatically manages these data attributes based on its state:
+
+- **Invalid**: `[data-invalid="true"]` - Automatically hides the description
+  slot when invalid
+- **Required**: `[data-required="true"]` - Applied when `is_required` is true
+- **Disabled**: `[data-disabled="true"]` - Applied when `is_disabled` is true
+- **Read-only**: `[data-readonly="true"]` - Applied when `is_read_only` is true
+
+`Date_field.Group`'s states:
+
+- **Hover**: `[data-hovered="true"]`
+- **Focus Within**: `[data-focus-within="true"]`
+- **Focus Visible**: `[data-focus-visible="true"]`
+- **Invalid**: `[data-invalid="true"]`
+- **Disabled**: `[data-disabled="true"]`
+- **Segment Focus**: `[data-focused="true"]` on segment elements
+- **Segment Placeholder**: `[data-placeholder="true"]` on segment elements
+- **Segment Type**: `[data-type="literal"]`, and a zoned field's zone
+  `[data-type="timeZoneName"]`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### DateField
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `value` | `value` | `CalendarDate.t Js.Nullable.t` | | Current value (controlled); null controls it empty |
+| `defaultValue` | `default_value` | `CalendarDate.t` | | Default value (uncontrolled) |
+| `onChange` | `on_change` | `CalendarDate.t option -> unit` | | Called as soon as its segments make a date other than its value, and with `None` once every segment is erased |
+| `placeholderValue` | `placeholder_value` | `CalendarDate.t` | today | What an arrow key steps an empty segment from |
+| `minValue` | `min_value` | `CalendarDate.t` | | The earliest date it is valid at |
+| `maxValue` | `max_value` | `CalendarDate.t` | | The latest date it is valid at |
+| `isDateUnavailable` | `is_date_unavailable` | `CalendarDate.t -> bool` | | A day it is invalid at |
+| `shouldForceLeadingZeros` | `should_force_leading_zeros` | `bool` | the locale's | Whether to always show leading zeros in the month, day and hour |
+| `isRequired` | `is_required` | `bool` | `false` | Whether user input is required before form submission |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Whether the value is invalid |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether the input is disabled |
+| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether the input can be selected but not changed |
+| `name` | `name` | `string` | | Its name in a form, which is sent its value as `@internationalized/date` writes it, `2026-11-21` |
+| `autoFocus` | `auto_focus` | `bool` | `false` | Whether its first segment is focused as it is drawn |
+| `aria-label` | `aria_label` | `string` | | Accessibility label when no visible label is present |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether the date field should take full width of its container |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called once focus leaves it for an element outside it |
+| `validate`, `validationBehavior` | — | | | A field validates nothing beyond its range: it is invalid as the application says, and out of its range at once |
+| `granularity`, `hourCycle`, `hideTimeZone` | — | | | A date alone has no time: `Date_field.Date_time`'s and `Date_field.Zoned`'s |
+
+### DateField.Date_time, DateField.Zoned
+
+A DateField whose value is a `CalendarDateTime` or a `ZonedDateTime`. Each
+takes DateField's props, its value and range of its own kind, and:
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `granularity` | `granularity` | `` [ `day \| `hour \| `minute \| `second ] `` | `` `minute `` | The smallest unit displayed, a time to the minute even while it is empty, where React's empty field with no placeholder shows a date alone |
+| `hourCycle` | `hour_cycle` | `` [ `h12 \| `h24 ] `` | the locale's | Whether to display time in 12 or 24 hour format |
+| `placeholderValue` | `placeholder_value` | `CalendarDateTime.t`, `ZonedDateTime.t` | today at midnight; required for a zoned field | What a date typed while it is empty is put on, a zoned one's zone too |
+| `hideTimeZone` | `hide_time_zone` | `bool` | `false` | Whether a zoned field hides its zone's name |
+| `name` | `name` | `string` | | Its name in a form, which is sent its value whole, `2026-11-21T09:30:00+02:00[Europe/Kyiv]` |
+
+### DateField.Group
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Visual variant of the component. `` `primary `` is the default style with shadow. `` `secondary `` is a lower emphasis variant without shadow, suitable for use in surfaces |
+| `fullWidth` | `full_width` | `bool` | its field's | Whether it takes its container's width |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+
+### DateField.Input, DateField.Segment, DateField.InputContainer, DateField.Prefix, DateField.Suffix
+
+Each takes `class_`, added after HeroUI's class; the input, a function of each
+segment, rendering it; a segment, the `segment` it is; an input container, a
+prefix and a suffix, their `children`.

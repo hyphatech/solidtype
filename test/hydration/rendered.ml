@@ -12,6 +12,9 @@ let select () = Solidtype.Server.render_to_string Select_island.make
 (* A HeroUI TimeField, Kobalte's, as the server renders it. *)
 let time_field () = Solidtype.Server.render_to_string Time_field_island.make
 
+(* A HeroUI DateField, on the headless field, as the server renders it. *)
+let date_field () = Solidtype.Server.render_to_string Date_field_island.make
+
 (* A HeroUI CheckboxGroup, with its label and description, as the server
    renders it. *)
 let checkbox_group () =

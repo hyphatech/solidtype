@@ -18,6 +18,14 @@ module E = Jest.Expect
 module T = Testing
 open Testing.Syntax
 
+(* React's field reads jsdom's locale, en-US, where the port's reads en-GB
+   without a provider: both are compared in en-US. *)
+let render_en_us f =
+  T.render (fun () ->
+      <Solidtype_kobalte.I18n.I18nProvider locale="en-US">
+        (f ())
+      </Solidtype_kobalte.I18n.I18nProvider>)
+
 let kyiv = "Europe/Kyiv"
 
 type clock
@@ -107,6 +115,7 @@ let state =
     "data-focus-within";
     "aria-hidden";
     "aria-readonly";
+    "aria-disabled";
   ]
 
 let shown host =
@@ -115,10 +124,10 @@ let shown host =
       String.concat " "
         (List.filter_map
            (fun name ->
-             (* Kobalte's field is a group, React Aria's root a bare element
-                around its own group. *)
+             (* Kobalte's field is a group, disabled as one, React Aria's root
+                a bare element around its own group. *)
              if
-               String.equal name "role"
+               (String.equal name "role" || String.equal name "aria-disabled")
                && Option.equal String.equal
                     (T.attribute e "data-slot")
                     (Some "time-field")
@@ -194,7 +203,7 @@ let both ?(kind = Of_day) ?default_value ?granularity ?hour_cycle
     ?hide_time_zone ?is_disabled ?is_invalid ?is_required ?is_read_only ?variant
     () =
   let told = ref "" in
-  T.render (fun () ->
+  render_en_us (fun () ->
       match kind with
       | Of_day ->
           <Time_field
@@ -302,7 +311,7 @@ let draw_of_state ~disabled ~read_only ~invalid ~required =
       (Solidtype.Jsx.string (T.words flags))
     </span>
   in
-  T.render (fun () ->
+  render_en_us (fun () ->
       <Time_field
         aria_label="Field"
         is_disabled=disabled
@@ -415,7 +424,7 @@ let () =
       Jest.test "tells it is left once focus leaves it" (fun () ->
           let solidtype =
             T.blurs ~root:"[data-slot=time-field]" (fun on_blur ->
-                T.render (fun () ->
+                render_en_us (fun () ->
                     <Time_field on_blur>(inside ())</Time_field>))
           in
           (* React's TimeField tells its onBlur more than once on the way
@@ -435,7 +444,7 @@ let () =
       Jest.test "is sent to a form as @internationalized/date writes it"
         (fun () ->
           let sent_of field =
-            T.render field;
+            render_en_us field;
             let v = sent () in
             T.cleanup ();
             v
@@ -479,7 +488,7 @@ let () =
         (fun () ->
           let told = ref "" in
           let value, set_value = S.create_signal Js.Nullable.null in
-          T.render (fun () ->
+          render_en_us (fun () ->
               <Time_field.Zoned
                 value=(S.get value)
                 placeholder_value=(in_kyiv ~hour:0 ~minute:0)
@@ -499,7 +508,7 @@ let () =
       Jest.testPromise "moves a time its zone skips to the hour after it"
         (fun () ->
           let told = ref "" in
-          T.render (fun () ->
+          render_en_us (fun () ->
               <Time_field.Zoned
                 placeholder_value=(in_kyiv ~hour:0 ~minute:0)
                 hour_cycle=`h24
@@ -517,7 +526,7 @@ let () =
 (* A field of hours and minutes, 24 hours to the day, so no segment is AM or
    PM, told each change. *)
 let field ~default_value ~told () =
-  T.render (fun () ->
+  render_en_us (fun () ->
       <Time_field
         default_value
         hour_cycle=`h24
@@ -537,7 +546,7 @@ let () =
       Jest.testPromise
         "is typed into, then emptied by the null it is controlled by" (fun () ->
           let time, set_time = S.create_signal Js.Nullable.null in
-          T.render (fun () ->
+          render_en_us (fun () ->
               <Time_field
                 value=(S.get time)
                 hour_cycle=`h24
@@ -580,7 +589,7 @@ let () =
       Jest.afterEach T.cleanup;
       (* Kobalte's segment writes a colon of its own beside the literal. *)
       Jest.test "draws one between each part, as React's does" (fun () ->
-          T.render (fun () ->
+          render_en_us (fun () ->
               <Time_field
                 default_value=(Time.make ~hour:9 ~minute:30 ())
                 granularity=`second
@@ -590,7 +599,7 @@ let () =
           E.(expect (colons ()) |> toEqual 2));
       Jest.test "draws one when it comes to show fewer parts" (fun () ->
           let granularity, set_granularity = S.create_signal `second in
-          T.render (fun () ->
+          render_en_us (fun () ->
               <Time_field
                 default_value=(Time.make ~hour:9 ~minute:30 ())
                 granularity=(S.get granularity)
@@ -608,7 +617,7 @@ let () =
          beside their own" (fun () ->
           let told = ref [] in
           let tell name = told := name :: !told in
-          T.render (fun () ->
+          render_en_us (fun () ->
               <Time_field
                 hour_cycle=`h24
                 title="Start"
@@ -666,7 +675,7 @@ let () =
   Jest.describe "Time_field's segment, given content_editable" (fun () ->
       Jest.afterEach T.cleanup;
       Jest.test "stays uneditable in a disabled field" (fun () ->
-          T.render (fun () ->
+          render_en_us (fun () ->
               <Time_field
                 default_value=(Time.make ~hour:9 ~minute:30 ())
                 hour_cycle=`h24

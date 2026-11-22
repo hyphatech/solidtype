@@ -27,8 +27,10 @@
     is {!Date_time}'s, and a time in a zone {!Zoned}'s, each given back as the
     kind it was given: the three share the parts below. A [value] of
     [Js.Nullable.null] controls a field empty, as React's [null] does, and
-    [on_change] is told [None] once every segment is erased. A part is used
-    inside a field: elsewhere it raises [Invalid_argument] as it is made. *)
+    [on_change] is told [None] once every segment is erased. Its locale is the
+    one an [I18nProvider] names, else [en-GB], whatever the browser reads, as a
+    {!Date_field}'s is. A part is used inside a field: elsewhere it raises
+    [Invalid_argument] as it is made. *)
 
 module S := Solidtype.Solid
 module Jsx := Solidtype.Jsx

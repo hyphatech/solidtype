@@ -1,0 +1,17 @@
+module S = Solidtype.Solid
+module Label = Solidtype_heroui.Label
+module Date_field = Solidtype_heroui.Date_field
+module Gravity = Solidtype_gravity_icons
+
+let make () =
+  <Date_field class_="w-[256px]" name="date">
+    <Label>"Date"</Label>
+    <Date_field.Group>
+      <Date_field.Prefix>
+        <Gravity.Calendar class_="size-4 text-muted" />
+      </Date_field.Prefix>
+      <Date_field.Input>
+        (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+      </Date_field.Input>
+    </Date_field.Group>
+  </Date_field>

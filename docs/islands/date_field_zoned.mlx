@@ -1,0 +1,44 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Date_field = Solidtype_heroui.Date_field
+module D = Solidtype_internationalized_date
+
+let kyiv at = D.parse_zoned_date_time (at ^ "[Europe/Kyiv]") ()
+
+let make () =
+  let meeting, set_meeting = S.create_signal (Some (kyiv "2026-10-25T02:30")) in
+  <div class_="flex flex-col gap-4">
+    <Date_field.Date_time
+      class_="w-[256px]"
+      name="reminder"
+      default_value=(D.parse_date_time "2026-11-21T09:30")>
+      <Label>"Reminder"</Label>
+      <Date_field.Group>
+        <Date_field.Input>
+          (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+        </Date_field.Input>
+      </Date_field.Group>
+    </Date_field.Date_time>
+    <Date_field.Zoned
+      class_="w-[320px]"
+      name="meeting"
+      value=(Js.Nullable.fromOption (S.get meeting))
+      on_change=(S.set set_meeting)
+      placeholder_value=(kyiv "2026-10-25T00:00")
+      hour_cycle=`h24>
+      <Label>"Meeting in Kyiv"</Label>
+      <Date_field.Group>
+        <Date_field.Input>
+          (fun segment -> <Date_field.Segment segment=(S.get segment) />)
+        </Date_field.Input>
+      </Date_field.Group>
+      <Description>
+        (Jsx.string
+           (match S.get meeting with
+           | Some m -> D.Types.ZonedDateTime.to_string m ()
+           | None -> "(empty)"))
+      </Description>
+    </Date_field.Zoned>
+  </div>

@@ -1,0 +1,547 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Headless = Solidtype_headless.Date_field
+module D = Solidtype_internationalized_date
+
+type segment = Headless.segment
+
+(* A group's classes, which the parts inside it read. *)
+module Group_context = Solidtype.Context.Make_optional (struct
+  type t = Styles.DateInputGroup.slots S.accessor
+end)
+
+(* What the parts read of the field above: whether it takes its container's
+   width. *)
+module Field_context = Solidtype.Context.Make_optional (struct
+  type t = bool option S.accessor
+end)
+
+let in_group part =
+  match Group_context.use () with
+  | Some slots -> slots
+  | None -> invalid_arg (part ^ " is used inside a Date_field.Group")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Group = struct
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_focus_within : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+    is_invalid : bool Solidtype.Solid.accessor;
+  }
+
+  let%component make ?(variant : [ `primary | `secondary ] option)
+      ?(full_width : bool option) ?(class_ : string option)
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
+    let f = Headless.Context.use () in
+    let field_width =
+      Option.value (Field_context.use ()) ~default:(S.accessor (fun () -> None))
+    in
+    (* A group is as wide as it says, else as its field is. *)
+    let full_width =
+      S.accessor (fun () ->
+          match S.get full_width with
+          | Some w -> Some w
+          | None -> S.get field_width)
+    in
+    let i = Interaction.create ~disabled:(fun () -> S.get f.is_disabled) () in
+    let slots =
+      S.accessor (fun () ->
+          Styles.DateInputGroup.slots
+            (Styles.DateInputGroup.options ?full_width:(S.get full_width)
+               ?variant:(S.get variant) ()))
+    in
+    let state () =
+      {
+        is_hovered = S.accessor (fun () -> Interaction.hovered i);
+        is_focus_within = S.accessor (fun () -> Interaction.focused i);
+        is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
+        is_disabled = f.is_disabled;
+        is_invalid = f.is_invalid;
+      }
+    in
+    (* In a date picker the group is the picker's, which names the field and
+       anchors its popover. *)
+    <Group_context.Provider value=slots>
+      (match Solidtype_headless.Date_picker.Context.find () with
+      | Some _ ->
+          <Solidtype_headless.Date_picker.Group
+            ref=(fun e -> Interaction.watch i e)
+            class_=(after
+                      (Styles.DateInputGroup.base (S.get slots))
+                      (S.get class_))
+            data_slot="date-input-group"
+            data_hovered=(Jsx.flag (Interaction.hovered i))
+            data_focus_within=(Jsx.flag (Interaction.focused i))
+            data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+            data_invalid=(Jsx.flag (S.get f.is_invalid))
+            data_disabled=(Jsx.flag (S.get f.is_disabled))
+            ?aria_disabled=(if S.get f.is_disabled then Some true else None)
+            ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
+            props=(Props.others props)>
+            (Jsx.draw (S.get children) (state ()))
+          </Solidtype_headless.Date_picker.Group>
+      | None ->
+          <div
+            role=`group
+            ref=(fun e -> Interaction.watch i e)
+            class_=(after
+                      (Styles.DateInputGroup.base (S.get slots))
+                      (S.get class_))
+            data_slot="date-input-group"
+            data_hovered=(Jsx.flag (Interaction.hovered i))
+            data_focus_within=(Jsx.flag (Interaction.focused i))
+            data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+            data_invalid=(Jsx.flag (S.get f.is_invalid))
+            data_disabled=(Jsx.flag (S.get f.is_disabled))
+            ?aria_disabled=(if S.get f.is_disabled then Some true else None)
+            ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
+            props=(Props.others props)>
+            (Jsx.draw (S.get children) (state ()))
+          </div>)
+    </Group_context.Provider>
+  [@@element div]
+end
+
+module Prefix = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
+    let slots = in_group "Date_field.Prefix" in
+    <div
+      class_=(after (Styles.DateInputGroup.prefix (S.get slots)) (S.get class_))
+      data_slot="date-input-group-prefix"
+      props=(Props.others props)>
+      (S.get children)
+    </div>
+  [@@element div]
+end
+
+module Suffix = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
+    let slots = in_group "Date_field.Suffix" in
+    <div
+      class_=(after (Styles.DateInputGroup.suffix (S.get slots)) (S.get class_))
+      data_slot="date-input-group-suffix"
+      props=(Props.others props)>
+      (S.get children)
+    </div>
+  [@@element div]
+end
+
+module Input_container = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
+    let slots = in_group "Date_field.Input_container" in
+    <div
+      class_=(after
+                (Styles.DateInputGroup.input_container (S.get slots))
+                (S.get class_))
+      data_slot="date-input-group-input-container"
+      props=(Props.others props)>
+      (S.get children)
+    </div>
+  [@@element div]
+end
+
+module Input = struct
+  let%component make ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : segment S.accessor -> Jsx.element) () =
+    let f = Headless.Context.use () in
+    let slots = in_group "Date_field.Input" in
+    let i = Interaction.create ~disabled:(fun () -> S.get f.is_disabled) () in
+    <Headless.Input
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
+      class_=(after (Styles.DateInputGroup.input (S.get slots)) (S.get class_))
+      data_slot="date-input-group-input"
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_focus_within=(Jsx.flag (Interaction.focused i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      data_invalid=(Jsx.flag (S.get f.is_invalid))
+      data_disabled=(Jsx.flag (S.get f.is_disabled))
+      data_readonly=(Jsx.flag (S.get f.is_read_only))
+      props=(Props.others props)>
+      (fun segment -> children segment)
+    </Headless.Input>
+  [@@element div]
+end
+
+module Segment = struct
+  let%component make ~(segment : segment) ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option) () =
+    let f = Headless.Context.use () in
+    let slots = in_group "Date_field.Segment" in
+    let i =
+      Interaction.create
+        ~disabled:(fun () ->
+          S.get f.is_disabled
+          || match (S.get segment).type_ with `literal -> true | _ -> false)
+        ()
+    in
+    <Headless.Segment
+      segment=(S.get segment)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
+      class_=(after
+                (Styles.DateInputGroup.segment (S.get slots))
+                (S.get class_))
+      data_slot="date-input-group-segment"
+      data_placeholder=(Jsx.flag (S.get segment).is_placeholder)
+      data_invalid=(Jsx.flag (S.get f.is_invalid))
+      data_readonly=(Jsx.flag (S.get f.is_read_only))
+      data_disabled=(Jsx.flag (S.get f.is_disabled))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_focused=(Jsx.flag (Interaction.focused i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      props=(Props.others props)
+    />
+  [@@element div]
+end
+
+(* What its children are drawn of: React Aria's render props for a date
+   field. *)
+type state = {
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_invalid : bool Solidtype.Solid.accessor;
+  is_read_only : bool Solidtype.Solid.accessor;
+  is_required : bool Solidtype.Solid.accessor;
+}
+
+(* What a root reads of its kind of value: how two compare. *)
+type 'v kind = { compare : 'v -> 'v -> float }
+
+(* A field's label, description and error, the headless field's parts with
+   HeroUI's classes, as React Aria's date field gives them their elements: its
+   label a span naming its segments, and its error shown while it is
+   invalid. *)
+let fields draw =
+  let f = Headless.Context.use () in
+  let label : Label.slot =
+   fun classes others children ->
+    <Headless.Label class_=(classes ()) data_slot="label" props=others>
+      (children ())
+    </Headless.Label>
+  in
+  let description : Description.slot =
+   fun classes others children ->
+    <Headless.Description
+      class_=(classes ())
+      slot="description"
+      data_slot="description"
+      props=others>
+      (children ())
+    </Headless.Description>
+  in
+  let error : Field_error.slot =
+   fun classes others children ->
+    <Show when_=(S.get f.is_invalid)>
+      <Headless.Error_message
+        class_=(classes ())
+        slot="errorMessage"
+        data_slot="field-error"
+        data_visible="true"
+        props=others>
+        (children ())
+      </Headless.Error_message>
+    </Show>
+  in
+  <Label.Slot.Provider value=label>
+    <Description.Slot.Provider value=description>
+      <Field_error.Slot.Provider value=error>
+        (draw ())
+      </Field_error.Slot.Provider>
+    </Description.Slot.Provider>
+  </Label.Slot.Provider>
+
+let inside ~(children : state Jsx.children S.accessor) ~is_required =
+  let f = Headless.Context.use () in
+  let state =
+    {
+      is_disabled = f.is_disabled;
+      is_invalid = f.is_invalid;
+      is_read_only = f.is_read_only;
+      is_required;
+    }
+  in
+  fields (fun () -> Jsx.draw (S.get children) state)
+
+(* What each root shares about its value, its form and its state, given its
+   kind of value: the value it keeps, which the headless field is given, its
+   state as HeroUI's styles read it, and what it draws inside. *)
+type 'v root = {
+  current : 'v option S.accessor;
+  change : 'v option -> unit;
+  invalid : bool S.accessor;
+  in_form : Form.field;
+  leave : Dom.focusEvent -> unit;
+}
+
+let root (type v) ~(kind : v kind) ~(value : v Js.Nullable.t option S.accessor)
+    ~(default_value : v option S.accessor)
+    ~(on_change : v option -> unit option) ~(min_value : v option S.accessor)
+    ~(max_value : v option S.accessor) ~(is_date_unavailable : v -> bool option)
+    ~is_invalid ~name ~(on_blur : Dom.focusEvent -> unit option) : v root =
+  let current, set =
+    Field.controlled
+      ~value:(fun () -> Option.map Js.Nullable.toOption (S.get value))
+      ~default:(S.get default_value)
+      ~on_change:(fun v -> ignore (on_change v : unit option))
+  in
+  (* Out of its range or unavailable, as the headless field reads it, so a
+     form refuses it as React Aria's native validation does. *)
+  let out () =
+    match S.get current with
+    | None -> false
+    | Some v ->
+        (match S.get min_value with
+          | Some m -> kind.compare v m < 0.
+          | None -> false)
+        || (match S.get max_value with
+          | Some m -> kind.compare v m > 0.
+          | None -> false)
+        || Option.value (is_date_unavailable v) ~default:false
+  in
+  let in_form = Form.field ~name ~invalid:(fun () -> is_invalid () || out ()) in
+  {
+    current;
+    change =
+      (fun v ->
+        in_form.changed ();
+        set v);
+    invalid =
+      S.accessor (fun () ->
+          is_invalid () || out () || Option.is_some (S.get in_form.error));
+    in_form;
+    leave =
+      Field.on_leave (fun e ->
+          in_form.left ();
+          ignore (on_blur e : unit option));
+  }
+
+let nullable = function
+  | Some v -> Js.Nullable.return v
+  | None -> Js.Nullable.null
+
+let%component make ?(value : D.Types.CalendarDate.t Js.Nullable.t option)
+    ?(default_value : D.Types.CalendarDate.t option)
+    ?(on_change : (D.Types.CalendarDate.t option -> unit) option)
+    ?(placeholder_value : D.Types.CalendarDate.t option)
+    ?(min_value : D.Types.CalendarDate.t option)
+    ?(max_value : D.Types.CalendarDate.t option)
+    ?(is_date_unavailable : (D.Types.CalendarDate.t -> bool) option)
+    ?(should_force_leading_zeros : bool option) ?(is_required : bool = false)
+    ?(is_invalid : bool = false) ?(is_disabled : bool = false)
+    ?(is_read_only : bool = false) ?(name : string option)
+    ?(auto_focus : bool option) ?(aria_label : string option)
+    ?(full_width : bool option) ?(class_ : string option)
+    ?(on_blur : (Dom.focusEvent -> unit) option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
+  let r =
+    root
+      ~kind:{ compare = D.Types.CalendarDate.compare }
+      ~value ~default_value ~on_change ~min_value ~max_value
+      ~is_date_unavailable
+      ~is_invalid:(fun () -> S.get is_invalid)
+      ~name:(fun () -> S.get name)
+      ~on_blur
+  in
+  let state =
+    { is_disabled; is_invalid = r.invalid; is_read_only; is_required }
+  in
+  <Field_context.Provider value=full_width>
+    <Headless.Root
+      value=(nullable (S.get r.current))
+      ?default_value=(S.get default_value)
+      on_change=r.change
+      ?placeholder_value=(S.get placeholder_value)
+      ?min_value=(S.get min_value)
+      ?max_value=(S.get max_value)
+      is_date_unavailable=(fun d ->
+                            Option.value (is_date_unavailable d) ~default:false)
+      ?should_force_leading_zeros=(S.get should_force_leading_zeros)
+      is_required=(S.get is_required)
+      is_invalid=(S.get r.invalid)
+      is_disabled=(S.get is_disabled)
+      is_read_only=(S.get is_read_only)
+      ?name=(S.get name)
+      ?auto_focus=(S.get auto_focus)
+      ?aria_label=(S.get aria_label)
+      class_=(Styles.DateField.classes
+                (Styles.DateField.options ?full_width:(S.get full_width)
+                   ?class_:(S.get class_) ()))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            r.in_form.root e)
+      on_focus_out=r.leave
+      data_slot="date-field"
+      data_invalid=(Jsx.flag (S.get r.invalid))
+      data_disabled=(Jsx.flag (S.get is_disabled))
+      data_readonly=(Jsx.flag (S.get is_read_only))
+      data_required=(Jsx.flag (S.get is_required))
+      ?as_=(Option.map (fun f p -> f p state) (S.get as_))
+      props=(Props.others props)>
+      <Field_error.Message.Provider value=r.in_form.error>
+        (inside ~children ~is_required)
+      </Field_error.Message.Provider>
+    </Headless.Root>
+  </Field_context.Provider>
+[@@element div]
+
+module Date_time = struct
+  module V = D.Types.CalendarDateTime
+
+  let%component make ?(value : V.t Js.Nullable.t option)
+      ?(default_value : V.t option) ?(on_change : (V.t option -> unit) option)
+      ?(placeholder_value : V.t option) ?(min_value : V.t option)
+      ?(max_value : V.t option) ?(is_date_unavailable : (V.t -> bool) option)
+      ?(granularity : [ `day | `hour | `minute | `second ] option)
+      ?(hour_cycle : [ `h12 | `h24 ] option)
+      ?(should_force_leading_zeros : bool option) ?(is_required : bool = false)
+      ?(is_invalid : bool = false) ?(is_disabled : bool = false)
+      ?(is_read_only : bool = false) ?(name : string option)
+      ?(auto_focus : bool option) ?(aria_label : string option)
+      ?(full_width : bool option) ?(class_ : string option)
+      ?(on_blur : (Dom.focusEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
+    let r =
+      root ~kind:{ compare = V.compare } ~value ~default_value ~on_change
+        ~min_value ~max_value ~is_date_unavailable
+        ~is_invalid:(fun () -> S.get is_invalid)
+        ~name:(fun () -> S.get name)
+        ~on_blur
+    in
+    let state =
+      { is_disabled; is_invalid = r.invalid; is_read_only; is_required }
+    in
+    <Field_context.Provider value=full_width>
+      <Headless.Root_date_time
+        value=(nullable (S.get r.current))
+        ?default_value=(S.get default_value)
+        on_change=r.change
+        ?placeholder_value=(S.get placeholder_value)
+        ?min_value=(S.get min_value)
+        ?max_value=(S.get max_value)
+        is_date_unavailable=(fun d ->
+                              Option.value (is_date_unavailable d)
+                                ~default:false)
+        ?granularity=(S.get granularity)
+        ?hour_cycle=(S.get hour_cycle)
+        ?should_force_leading_zeros=(S.get should_force_leading_zeros)
+        is_required=(S.get is_required)
+        is_invalid=(S.get r.invalid)
+        is_disabled=(S.get is_disabled)
+        is_read_only=(S.get is_read_only)
+        ?name=(S.get name)
+        ?auto_focus=(S.get auto_focus)
+        ?aria_label=(S.get aria_label)
+        class_=(Styles.DateField.classes
+                  (Styles.DateField.options ?full_width:(S.get full_width)
+                     ?class_:(S.get class_) ()))
+        ref=(fun e ->
+              ignore (given_ref e : unit option);
+              r.in_form.root e)
+        on_focus_out=r.leave
+        data_slot="date-field"
+        data_invalid=(Jsx.flag (S.get r.invalid))
+        data_disabled=(Jsx.flag (S.get is_disabled))
+        data_readonly=(Jsx.flag (S.get is_read_only))
+        data_required=(Jsx.flag (S.get is_required))
+        ?as_=(Option.map (fun f p -> f p state) (S.get as_))
+        props=(Props.others props)>
+        <Field_error.Message.Provider value=r.in_form.error>
+          (inside ~children ~is_required)
+        </Field_error.Message.Provider>
+      </Headless.Root_date_time>
+    </Field_context.Provider>
+  [@@element div]
+end
+
+module Zoned = struct
+  module V = D.Types.ZonedDateTime
+
+  let%component make ?(value : V.t Js.Nullable.t option)
+      ?(default_value : V.t option) ?(on_change : (V.t option -> unit) option)
+      ~(placeholder_value : V.t) ?(min_value : V.t option)
+      ?(max_value : V.t option) ?(is_date_unavailable : (V.t -> bool) option)
+      ?(granularity : [ `day | `hour | `minute | `second ] option)
+      ?(hour_cycle : [ `h12 | `h24 ] option) ?(hide_time_zone : bool option)
+      ?(should_force_leading_zeros : bool option) ?(is_required : bool = false)
+      ?(is_invalid : bool = false) ?(is_disabled : bool = false)
+      ?(is_read_only : bool = false) ?(name : string option)
+      ?(auto_focus : bool option) ?(aria_label : string option)
+      ?(full_width : bool option) ?(class_ : string option)
+      ?(on_blur : (Dom.focusEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
+    let r =
+      root ~kind:{ compare = V.compare } ~value ~default_value ~on_change
+        ~min_value ~max_value ~is_date_unavailable
+        ~is_invalid:(fun () -> S.get is_invalid)
+        ~name:(fun () -> S.get name)
+        ~on_blur
+    in
+    let state =
+      { is_disabled; is_invalid = r.invalid; is_read_only; is_required }
+    in
+    <Field_context.Provider value=full_width>
+      <Headless.Root_zoned
+        value=(nullable (S.get r.current))
+        ?default_value=(S.get default_value)
+        on_change=r.change
+        placeholder_value=(S.get placeholder_value)
+        ?min_value=(S.get min_value)
+        ?max_value=(S.get max_value)
+        is_date_unavailable=(fun d ->
+                              Option.value (is_date_unavailable d)
+                                ~default:false)
+        ?granularity=(S.get granularity)
+        ?hour_cycle=(S.get hour_cycle)
+        ?hide_time_zone=(S.get hide_time_zone)
+        ?should_force_leading_zeros=(S.get should_force_leading_zeros)
+        is_required=(S.get is_required)
+        is_invalid=(S.get r.invalid)
+        is_disabled=(S.get is_disabled)
+        is_read_only=(S.get is_read_only)
+        ?name=(S.get name)
+        ?auto_focus=(S.get auto_focus)
+        ?aria_label=(S.get aria_label)
+        class_=(Styles.DateField.classes
+                  (Styles.DateField.options ?full_width:(S.get full_width)
+                     ?class_:(S.get class_) ()))
+        ref=(fun e ->
+              ignore (given_ref e : unit option);
+              r.in_form.root e)
+        on_focus_out=r.leave
+        data_slot="date-field"
+        data_invalid=(Jsx.flag (S.get r.invalid))
+        data_disabled=(Jsx.flag (S.get is_disabled))
+        data_readonly=(Jsx.flag (S.get is_read_only))
+        data_required=(Jsx.flag (S.get is_required))
+        ?as_=(Option.map (fun f p -> f p state) (S.get as_))
+        props=(Props.others props)>
+        <Field_error.Message.Provider value=r.in_form.error>
+          (inside ~children ~is_required)
+        </Field_error.Message.Provider>
+      </Headless.Root_zoned>
+    </Field_context.Provider>
+  [@@element div]
+end

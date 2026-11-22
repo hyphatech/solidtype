@@ -1,0 +1,74 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Range_calendar = Solidtype_heroui.Range_calendar
+module D = Solidtype_internationalized_date
+module Date = D.Types.CalendarDate
+module Button = Solidtype_heroui.Button
+
+let blocked_dates = [ 5; 6; 12; 13; 14; 20 ]
+let weekend date = D.is_weekend date "en-GB"
+
+let make () =
+  let selected, set_selected = S.create_signal None in
+  let is_date_unavailable date _ =
+    weekend date || List.mem (Date.day date) blocked_dates
+  in
+  <div class_="flex flex-col items-center gap-4">
+    <Range_calendar
+      aria_label="Booking range"
+      is_date_unavailable
+      min_value=(D.today (D.get_local_time_zone ()))
+      value=(Js.Nullable.fromOption (S.get selected))
+      on_change=(S.set set_selected)>
+      <Range_calendar.Header>
+        <Range_calendar.Heading />
+        <Range_calendar.Nav_button slot=`previous />
+        <Range_calendar.Nav_button slot=`next />
+      </Range_calendar.Header>
+      <Range_calendar.Grid>
+        <Range_calendar.Grid_header>
+          (fun day ->
+            <Range_calendar.Header_cell>
+              (Jsx.string (S.get day))
+            </Range_calendar.Header_cell>)
+        </Range_calendar.Grid_header>
+        <Range_calendar.Grid_body>
+          (fun date ->
+            <Range_calendar.Cell date=(S.get date)>
+              (fun (cell : Range_calendar.cell) ->
+                let d = S.get date in
+                Jsx.fragment
+                  [|
+                    Jsx.string (S.get cell.formatted_date);
+                    (if
+                       (not (S.get cell.is_unavailable))
+                       && (not (weekend d))
+                       && List.mem (Date.day d) blocked_dates
+                     then <Range_calendar.Cell_indicator />
+                     else Jsx.nothing);
+                  |])
+            </Range_calendar.Cell>)
+        </Range_calendar.Grid_body>
+      </Range_calendar.Grid>
+    </Range_calendar>
+    <div class_="flex flex-col gap-2 text-center">
+      <div class_="flex items-center justify-center gap-4 text-xs text-muted">
+        <span class_="flex items-center gap-1">
+          <span class_="size-2 rounded-full bg-muted" /> "Blocked dates"
+        </span>
+        <span class_="flex items-center gap-1">
+          <span class_="size-2 rounded-full bg-default" /> "Weekend/Unavailable"
+        </span>
+      </div>
+      <Solidtype.Show.Some some=(S.get selected)>
+        (fun r ->
+          <Button size=`sm variant=`primary>
+            (Jsx.string
+               ("Book "
+               ^ Date.to_string (S.get r).start ()
+               ^ " -> "
+               ^ Date.to_string (S.get r).end_ ()))
+          </Button>)
+      </Solidtype.Show.Some>
+    </div>
+  </div>

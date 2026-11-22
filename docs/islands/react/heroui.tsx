@@ -2,7 +2,9 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorField, ColorPicker, ColorSlider, ColorSwatch, ColorSwatchPicker, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Table, Tabs, Tag, TagGroup, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
+import { CalendarDate } from "@internationalized/date";
+import { I18nProvider } from "react-aria-components";
+import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Calendar, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorField, ColorPicker, ColorSlider, ColorSwatch, ColorSwatchPicker, ComboBox, DateField, DatePicker, DateRangePicker, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RangeCalendar, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Table, Tabs, Tag, TagGroup, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -522,6 +524,150 @@ export function timeField(host: HTMLElement, { variant, is_disabled }: TimeField
           <TimeField.Input>{(segment) => <TimeField.Segment segment={segment} />}</TimeField.Input>
         </TimeField.Group>
       </TimeField>,
+    ),
+  );
+}
+
+type DateFieldProps = {
+  variant: "primary" | "secondary";
+  is_disabled: boolean;
+};
+
+export function dateField(host: HTMLElement, { variant, is_disabled }: DateFieldProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <DateField isDisabled={is_disabled} className="w-56" name="date">
+        <Label>Date</Label>
+        <DateField.Group variant={variant}>
+          <DateField.Input>{(segment) => <DateField.Segment segment={segment} />}</DateField.Input>
+        </DateField.Group>
+      </DateField>,
+    ),
+  );
+}
+
+type DatePickerProps = { is_disabled: boolean };
+
+export function datePicker(host: HTMLElement, { is_disabled }: DatePickerProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <I18nProvider locale="en-US">
+        <DatePicker className="w-72" name="date" isDisabled={is_disabled} defaultValue={new CalendarDate(2026, 11, 21)}>
+          <Label>Date</Label>
+          <DateField.Group fullWidth>
+            <DateField.Input>{(segment) => <DateField.Segment segment={segment} />}</DateField.Input>
+            <DateField.Suffix>
+              <DatePicker.Trigger>
+                <DatePicker.TriggerIndicator />
+              </DatePicker.Trigger>
+            </DateField.Suffix>
+          </DateField.Group>
+          <DatePicker.Popover>
+            <Calendar aria-label="Event date">
+              <Calendar.Header>
+                <Calendar.Heading />
+                <Calendar.NavButton slot="previous" />
+                <Calendar.NavButton slot="next" />
+              </Calendar.Header>
+              <Calendar.Grid>
+                <Calendar.GridHeader>{(day) => <Calendar.HeaderCell>{day}</Calendar.HeaderCell>}</Calendar.GridHeader>
+                <Calendar.GridBody>{(date) => <Calendar.Cell date={date} />}</Calendar.GridBody>
+              </Calendar.Grid>
+            </Calendar>
+          </DatePicker.Popover>
+        </DatePicker>
+      </I18nProvider>,
+    ),
+  );
+}
+
+type DateRangePickerProps = { is_disabled: boolean };
+
+export function dateRangePicker(host: HTMLElement, { is_disabled }: DateRangePickerProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <I18nProvider locale="en-US">
+        <DateRangePicker
+          className="w-80"
+          startName="startDate"
+          endName="endDate"
+          isDisabled={is_disabled}
+          defaultValue={{ start: new CalendarDate(2026, 11, 21), end: new CalendarDate(2026, 11, 25) }}
+        >
+          <Label>Trip dates</Label>
+          <DateField.Group fullWidth>
+            <DateField.Input slot="start">{(segment) => <DateField.Segment segment={segment} />}</DateField.Input>
+            <DateRangePicker.RangeSeparator />
+            <DateField.Input slot="end">{(segment) => <DateField.Segment segment={segment} />}</DateField.Input>
+            <DateField.Suffix>
+              <DateRangePicker.Trigger>
+                <DateRangePicker.TriggerIndicator />
+              </DateRangePicker.Trigger>
+            </DateField.Suffix>
+          </DateField.Group>
+          <DateRangePicker.Popover>
+            <RangeCalendar aria-label="Trip dates">
+              <RangeCalendar.Header>
+                <RangeCalendar.Heading />
+                <RangeCalendar.NavButton slot="previous" />
+                <RangeCalendar.NavButton slot="next" />
+              </RangeCalendar.Header>
+              <RangeCalendar.Grid>
+                <RangeCalendar.GridHeader>{(day) => <RangeCalendar.HeaderCell>{day}</RangeCalendar.HeaderCell>}</RangeCalendar.GridHeader>
+                <RangeCalendar.GridBody>{(date) => <RangeCalendar.Cell date={date} />}</RangeCalendar.GridBody>
+              </RangeCalendar.Grid>
+            </RangeCalendar>
+          </DateRangePicker.Popover>
+        </DateRangePicker>
+      </I18nProvider>,
+    ),
+  );
+}
+
+type RangeCalendarProps = { is_disabled: boolean };
+
+export function rangeCalendar(host: HTMLElement, { is_disabled }: RangeCalendarProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <I18nProvider locale="en-US">
+        <RangeCalendar
+          aria-label="Trip dates"
+          isDisabled={is_disabled}
+          defaultValue={{ start: new CalendarDate(2026, 11, 9), end: new CalendarDate(2026, 11, 13) }}
+        >
+          <RangeCalendar.Header>
+            <RangeCalendar.Heading />
+            <RangeCalendar.NavButton slot="previous" />
+            <RangeCalendar.NavButton slot="next" />
+          </RangeCalendar.Header>
+          <RangeCalendar.Grid>
+            <RangeCalendar.GridHeader>{(day) => <RangeCalendar.HeaderCell>{day}</RangeCalendar.HeaderCell>}</RangeCalendar.GridHeader>
+            <RangeCalendar.GridBody>{(date) => <RangeCalendar.Cell date={date} />}</RangeCalendar.GridBody>
+          </RangeCalendar.Grid>
+        </RangeCalendar>
+      </I18nProvider>,
+    ),
+  );
+}
+
+type CalendarProps = { is_disabled: boolean };
+
+export function calendar(host: HTMLElement, { is_disabled }: CalendarProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <I18nProvider locale="en-US">
+        <Calendar aria-label="Event date" isDisabled={is_disabled} defaultFocusedValue={new CalendarDate(2026, 11, 21)}>
+          <Calendar.Header>
+            <Calendar.Heading />
+            <Calendar.NavButton slot="previous" />
+            <Calendar.NavButton slot="next" />
+          </Calendar.Header>
+          <Calendar.Grid>
+            <Calendar.GridHeader>{(day) => <Calendar.HeaderCell>{day}</Calendar.HeaderCell>}</Calendar.GridHeader>
+            <Calendar.GridBody>{(date) => <Calendar.Cell date={date} />}</Calendar.GridBody>
+          </Calendar.Grid>
+        </Calendar>
+      </I18nProvider>,
     ),
   );
 }

@@ -10,7 +10,6 @@ type t_blob
 type t_number_format_part
 type t_readable_stream
 type t_resolved_collator_options
-type t_resolved_date_time_format_options
 type t_resolved_number_format_options
 type t_uint8_array
 type t_accordion_context_value
@@ -124,6 +123,7 @@ type t_color_wheel_context_value_on_drag
 type t_combobox_data_set
 type t_context_menu_context_value_set_anchor_rect
 type t_hover_card_data_set
+type t_resolved_date_time_format_options
 type t_date_time_format_part
 type t_date_time_format_format_range
 type t_selection_manager
@@ -190,11 +190,6 @@ end
 (* The standard library's ResolvedCollatorOptions, opaque. *)
 module ResolvedCollatorOptions : sig
   type t = t_resolved_collator_options
-end
-
-(* The standard library's ResolvedDateTimeFormatOptions, opaque. *)
-module ResolvedDateTimeFormatOptions : sig
-  type t = t_resolved_date_time_format_options
 end
 
 (* The standard library's ResolvedNumberFormatOptions, opaque. *)
@@ -1684,6 +1679,31 @@ end
 
 module HoverCardDataSet : sig
   type t = t_hover_card_data_set
+end
+
+module ResolvedDateTimeFormatOptions : sig
+  type t = t_resolved_date_time_format_options
+  external locale : t -> string = "locale" [@@mel.get]
+  external calendar : t -> string = "calendar" [@@mel.get]
+  external numbering_system : t -> string = "numberingSystem" [@@mel.get]
+  external time_zone : t -> string = "timeZone" [@@mel.get]
+  external hour12 : t -> bool option = "hour12" [@@mel.get]
+  external weekday : t -> string option = "weekday" [@@mel.get]
+  external era : t -> string option = "era" [@@mel.get]
+  external year : t -> string option = "year" [@@mel.get]
+  external month : t -> string option = "month" [@@mel.get]
+  external day : t -> string option = "day" [@@mel.get]
+  external hour : t -> string option = "hour" [@@mel.get]
+  external minute : t -> string option = "minute" [@@mel.get]
+  external second : t -> string option = "second" [@@mel.get]
+  external time_zone_name : t -> string option = "timeZoneName" [@@mel.get]
+  external format_matcher : t -> string option = "formatMatcher" [@@mel.get]
+  external date_style : t -> [ `long | `short | `full | `medium ] option = "dateStyle" [@@mel.get]
+  external time_style : t -> [ `long | `short | `full | `medium ] option = "timeStyle" [@@mel.get]
+  external hour_cycle : t -> [ `h11 | `h12 | `h23 | `h24 ] option = "hourCycle" [@@mel.get]
+  external day_period : t -> [ `long | `short | `narrow ] option = "dayPeriod" [@@mel.get]
+  external fractional_second_digits : t -> float option = "fractionalSecondDigits" [@@mel.get]
+  external make : locale:(string [@mel.as "locale"]) -> calendar:(string [@mel.as "calendar"]) -> numbering_system:(string [@mel.as "numberingSystem"]) -> time_zone:(string [@mel.as "timeZone"]) -> ?hour12:(bool [@mel.as "hour12"]) -> ?weekday:(string [@mel.as "weekday"]) -> ?era:(string [@mel.as "era"]) -> ?year:(string [@mel.as "year"]) -> ?month:(string [@mel.as "month"]) -> ?day:(string [@mel.as "day"]) -> ?hour:(string [@mel.as "hour"]) -> ?minute:(string [@mel.as "minute"]) -> ?second:(string [@mel.as "second"]) -> ?time_zone_name:(string [@mel.as "timeZoneName"]) -> ?format_matcher:(string [@mel.as "formatMatcher"]) -> ?date_style:([ `long | `short | `full | `medium ] [@mel.as "dateStyle"]) -> ?time_style:([ `long | `short | `full | `medium ] [@mel.as "timeStyle"]) -> ?hour_cycle:([ `h11 | `h12 | `h23 | `h24 ] [@mel.as "hourCycle"]) -> ?day_period:([ `long | `short | `narrow ] [@mel.as "dayPeriod"]) -> ?fractional_second_digits:(float [@mel.as "fractionalSecondDigits"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module DateTimeFormatPart : sig

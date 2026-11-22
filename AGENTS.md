@@ -75,6 +75,17 @@ headless/            solidtype-headless: the components Kobalte lacks, one
                      and a header kept in view, rows reordered by a drag or
                      the keys, and rows that hold rows,
                      each row's cells and rows tokens it draws once read
+  calendar           a month's grid of days to choose one date, several or
+                     a range from, the locale's, moved through and paged
+                     as React Stately's calendar is
+  date_field         a date's segments, the locale's in its order and
+                     calendar, each Kobalte's spin button, typed and stepped
+                     as React Stately's date field edits them, of a date, a
+                     date with a time or one in a zone, or two of them, a
+                     range
+  date_picker        a date field whose group's trigger opens a popover
+                     of a calendar choosing its date or its range, a time
+                     kept, as React Stately's pickers keep them
   color_picker       one colour its parts share, as React Aria's: the colour
                      components below read it, given no value of their own;
                      it draws nothing

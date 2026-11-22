@@ -1,0 +1,1300 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Index = Solidtype.Index
+module Headless = Solidtype_headless.Calendar
+module D = Solidtype_internationalized_date
+module Dt = D.Types
+module C = Dt.CalendarDate
+module I18n = Solidtype_kobalte.I18n
+module K = Solidtype_kobalte.Types
+module Gravity = Solidtype_gravity_icons
+
+external query : _ Dom.element_like -> string -> Dom.element Js.null
+  = "querySelector"
+[@@mel.send]
+
+external offset_top : Dom.element -> float = "offsetTop" [@@mel.get]
+external offset_height : Dom.element -> float = "offsetHeight" [@@mel.get]
+external focus : _ Dom.element_like -> unit = "focus" [@@mel.send]
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external prevent_key : Dom.keyboardEvent -> unit = "preventDefault" [@@mel.send]
+
+external default_prevented : Dom.keyboardEvent -> bool = "defaultPrevented"
+[@@mel.get]
+
+external request_frame : (float -> unit) -> int = "requestAnimationFrame"
+[@@mel.scope "window"]
+
+external cancel_frame : int -> unit = "cancelAnimationFrame"
+[@@mel.scope "window"]
+
+(* Intl's name of the year field, which names the year grid. *)
+type display_names
+type display_names_options
+
+external display_names_options :
+  type_:(string[@mel.as "type"]) -> unit -> display_names_options = ""
+[@@mel.obj]
+
+external display_names : string -> display_names_options -> display_names
+  = "DisplayNames"
+[@@mel.new] [@@mel.scope "Intl"]
+
+external display_name : display_names -> string -> string Js.Undefined.t = "of"
+[@@mel.send]
+
+type duration = Headless.duration = Months of int | Weeks of int | Days of int
+type day_of_week = Headless.day_of_week
+type cell = Headless.cell
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+(* A calendar's look: the name its slots take, HeroUI's class for each part,
+   and whether a day is a range's, its content in a button of its own. *)
+type look = {
+  name : string;
+  base : string;
+  header : string;
+  heading : string;
+  nav_button : string;
+  nav_button_icon : string;
+  grid : string;
+  grid_header : string;
+  grid_body : string;
+  header_cell : string;
+  cell : string;
+  cell_indicator : string;
+  range : bool;
+}
+
+let calendar_look =
+  let slots = Styles.Calendar.slots (Styles.Calendar.options ()) in
+  {
+    name = "calendar";
+    base = Styles.Calendar.base slots;
+    header = Styles.Calendar.header slots;
+    heading = Styles.Calendar.heading slots;
+    nav_button = Styles.Calendar.nav_button slots;
+    nav_button_icon = Styles.Calendar.nav_button_icon slots;
+    grid = Styles.Calendar.grid slots;
+    grid_header = Styles.Calendar.grid_header slots;
+    grid_body = Styles.Calendar.grid_body slots;
+    header_cell = Styles.Calendar.header_cell slots;
+    cell = Styles.Calendar.cell slots;
+    cell_indicator = Styles.Calendar.cell_indicator slots;
+    range = false;
+  }
+
+let range_look =
+  let slots = Styles.RangeCalendar.slots (Styles.RangeCalendar.options ()) in
+  {
+    name = "range-calendar";
+    base = Styles.RangeCalendar.base slots;
+    header = Styles.RangeCalendar.header slots;
+    heading = Styles.RangeCalendar.heading slots;
+    nav_button = Styles.RangeCalendar.nav_button slots;
+    nav_button_icon = Styles.RangeCalendar.nav_button_icon slots;
+    grid = Styles.RangeCalendar.grid slots;
+    grid_header = Styles.RangeCalendar.grid_header slots;
+    grid_body = Styles.RangeCalendar.grid_body slots;
+    header_cell = Styles.RangeCalendar.header_cell slots;
+    cell = Styles.RangeCalendar.cell slots;
+    cell_indicator = Styles.RangeCalendar.cell_indicator slots;
+    range = true;
+  }
+
+(* What the parts read of the calendar above: its look, the first day of its
+   week, its year picker. *)
+type root = {
+  look : look;
+  first_day : day_of_week option S.accessor;
+  year_picker_open : bool S.accessor;
+  set_year_picker_open : bool -> unit;
+  element : Dom.element option S.accessor;
+}
+
+module Root_context = Solidtype.Context.Make_optional (struct
+  type t = root
+end)
+
+let within part =
+  match Root_context.use () with
+  | Some r -> r
+  | None -> invalid_arg (part ^ " is used inside a Calendar")
+
+(* The locale a calendar is in: a provider's, else en-GB, as the headless
+   calendar reads it. *)
+let use_locale () =
+  let i18n = I18n.use_locale () in
+  let provided = I18n.use_locale () == i18n in
+  S.accessor (fun () ->
+      if provided then K.I18n_UseLocale.locale i18n () else "en-GB")
+
+(* HeroUI's range where none is given: 1900 to 2099 in the locale's
+   calendar. *)
+let default_range locale =
+  let cal =
+    D.create_calendar
+      (Dt.ResolvedDateTimeFormatOptions.calendar
+         (Dt.DateFormatter.resolved_options
+            (Dt.DateFormatter.make locale
+               ~options:(Dt.DateTimeFormatOptions.make ())
+               ())
+            ()))
+  in
+  (D.to_calendar (C.make 1900 1 1) cal, D.to_calendar (C.make 2099 12 31) cal)
+
+(* What its children are drawn of: React Aria's render props for a
+   calendar. *)
+type state = { is_disabled : bool S.accessor; is_invalid : bool S.accessor }
+
+(* What both roots share: HeroUI's classes, its range, its year picker and
+   its parts' context, around the headless root a root draws. *)
+let dress ~(visible_duration : duration option S.accessor)
+    ~(first_day_of_week : day_of_week option S.accessor)
+    ~(default_year_picker_open : bool)
+    ~(is_year_picker_open : bool option S.accessor)
+    ~(on_year_picker_open_change : bool -> unit option)
+    ~(class_ : string option S.accessor) ?(look = calendar_look) draw =
+  let kept, set_kept = S.create_signal default_year_picker_open in
+  let year_picker_open =
+    S.accessor (fun () ->
+        match S.get is_year_picker_open with Some o -> o | None -> S.get kept)
+  in
+  let element, set_element = S.create_signal None in
+  let locale = use_locale () in
+  let range = S.create_memo (fun () -> default_range (S.get locale)) in
+  let r =
+    {
+      look;
+      first_day = first_day_of_week;
+      year_picker_open;
+      set_year_picker_open =
+        (fun o ->
+          if Option.is_none (S.get is_year_picker_open) then S.set set_kept o;
+          ignore (on_year_picker_open_change o : unit option));
+      element;
+    }
+  in
+  let classes () =
+    after
+      (String.concat " "
+         (List.filter_map Fun.id
+            [
+              Some look.base;
+              (match S.get visible_duration with
+              | Some (Weeks _) -> Some (look.name ^ "--week-view")
+              | Some (Days _) -> Some (look.name ^ "--day-view")
+              | Some (Months _) | None -> None);
+            ]))
+      (S.get class_)
+  in
+  <Root_context.Provider value=r>
+    (draw ~classes ~range ~set_element:(fun e -> S.set set_element (Some e)))
+  </Root_context.Provider>
+
+(* Any element as the element it is. *)
+external as_element : _ Dom.element_like -> Dom.element = "%identity"
+
+(* Whether dates chosen are out of the range or unavailable, as React Aria's
+   calendar reads its value. *)
+let out ~dates ~min ~max ~unavailable =
+  List.exists
+    (fun d ->
+      Option.value (unavailable d) ~default:false
+      || (match min with Some m -> C.compare d m < 0. | None -> false)
+      || match max with Some m -> C.compare d m > 0. | None -> false)
+    dates
+
+(* What a picker around the calendar gives it, where it is given none of its
+   own: its range, its state and the days it refuses. *)
+type around = {
+  around_min : unit -> C.t option;
+  around_max : unit -> C.t option;
+  around_disabled : unit -> bool;
+  around_read_only : unit -> bool;
+  around_invalid : unit -> bool;
+  around_unavailable : unit -> (C.t -> bool) option;
+}
+
+let around () =
+  match Headless.Given.use () with
+  | Some g ->
+      {
+        around_min = (fun () -> S.get g.min_value);
+        around_max = (fun () -> S.get g.max_value);
+        around_disabled = (fun () -> S.get g.is_disabled);
+        around_read_only = (fun () -> S.get g.is_read_only);
+        around_invalid = (fun () -> S.get g.is_invalid);
+        around_unavailable = (fun () -> S.get g.is_date_unavailable);
+      }
+  | None ->
+      {
+        around_min = (fun () -> None);
+        around_max = (fun () -> None);
+        around_disabled = (fun () -> false);
+        around_read_only = (fun () -> false);
+        around_invalid = (fun () -> false);
+        around_unavailable = (fun () -> None);
+      }
+
+let%component make ?(value : C.t Js.Nullable.t option)
+    ?(default_value : C.t option) ?(on_change : (C.t -> unit) option)
+    ?(focused_value : C.t option) ?(default_focused_value : C.t option)
+    ?(on_focus_change : (C.t -> unit) option) ?(min_value : C.t option)
+    ?(max_value : C.t option)
+    ?is_date_unavailable:(is_date_unavailable_given : (C.t -> bool) option)
+    ?(visible_duration : duration option)
+    ?(page_behavior : [ `visible | `single ] option)
+    ?(selection_alignment : [ `start | `center | `end_ ] option)
+    ?(first_day_of_week : day_of_week option) ?(weeks_in_month : int option)
+    ?(is_disabled : bool option) ?(is_read_only : bool option)
+    ?(is_invalid : bool option) ?(auto_focus : bool option)
+    ?(aria_label : string option) ?(aria_labelledby : string option)
+    ?(default_year_picker_open : bool = false)
+    ?(is_year_picker_open : bool option)
+    ?(on_year_picker_open_change : (bool -> unit) option)
+    ?(class_ : string option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
+  let a = around () in
+  let picked =
+    match Headless.Given.use () with
+    | Some { value = Single (v, _); _ } -> Some v
+    | Some { value = Range _; _ } | None -> None
+  in
+  let is_disabled =
+    S.accessor (fun () ->
+        Option.value (S.get is_disabled) ~default:(a.around_disabled ()))
+  in
+  let is_read_only =
+    S.accessor (fun () ->
+        Option.value (S.get is_read_only) ~default:(a.around_read_only ()))
+  in
+  let is_invalid =
+    S.accessor (fun () ->
+        Option.value (S.get is_invalid) ~default:(a.around_invalid ()))
+  in
+  let is_date_unavailable d =
+    match is_date_unavailable_given d with
+    | Some b -> Some b
+    | None -> Option.map (fun f -> f d) (a.around_unavailable ())
+  in
+  let current, set =
+    Field.controlled
+      ~value:(fun () ->
+        match (S.get value, picked) with
+        | Some v, _ -> Some (Js.Nullable.toOption v)
+        | None, Some v -> Some (S.get v)
+        | None, None -> None)
+      ~default:(S.get default_value)
+      ~on_change:(Option.iter (fun d -> ignore (on_change d : unit option)))
+  in
+  dress ~visible_duration ~first_day_of_week
+    ~default_year_picker_open:
+      (S.untrack (fun () -> S.get default_year_picker_open))
+    ~is_year_picker_open ~on_year_picker_open_change ~class_
+    (fun ~classes ~range ~set_element ->
+      let min () =
+        match (S.get min_value, a.around_min ()) with
+        | Some m, _ | None, Some m -> m
+        | None, None -> fst (S.get range)
+      in
+      let max () =
+        match (S.get max_value, a.around_max ()) with
+        | Some m, _ | None, Some m -> m
+        | None, None -> snd (S.get range)
+      in
+      let invalid =
+        S.accessor (fun () ->
+            S.get is_invalid
+            || out
+                 ~dates:(Option.to_list (S.get current))
+                 ~min:(Some (min ()))
+                 ~max:(Some (max ()))
+                 ~unavailable:is_date_unavailable)
+      in
+      let state = { is_disabled; is_invalid = invalid } in
+      <Headless.Root
+        value=(Js.Nullable.fromOption (S.get current))
+        on_change=(fun d -> set (Some d))
+        ?focused_value=(S.get focused_value)
+        ?default_focused_value=(S.get default_focused_value)
+        on_focus_change=(fun d -> ignore (on_focus_change d : unit option))
+        min_value=(min ())
+        max_value=(max ())
+        is_date_unavailable=(fun d ->
+                              Option.value (is_date_unavailable d)
+                                ~default:false)
+        ?visible_duration=(S.get visible_duration)
+        ?page_behavior=(S.get page_behavior)
+        ?selection_alignment=(S.get selection_alignment)
+        ?first_day_of_week=(S.get first_day_of_week)
+        ?weeks_in_month=(S.get weeks_in_month)
+        is_disabled=(S.get is_disabled)
+        is_read_only=(S.get is_read_only)
+        is_invalid=(S.get is_invalid)
+        ?auto_focus=(S.get auto_focus)
+        ?aria_label=(S.get aria_label)
+        ?aria_labelledby=(S.get aria_labelledby)
+        class_=(classes ())
+        data_slot="calendar"
+        data_disabled=(Jsx.flag (S.get is_disabled))
+        data_invalid=(Jsx.flag (S.get invalid))
+        ref=(fun e ->
+              ignore (given_ref e : unit option);
+              set_element (as_element e))
+        ?as_=(Option.map (fun g p -> g p state) (S.get as_))
+        props=(Props.others props)>
+        (Jsx.draw (S.get children) state)
+      </Headless.Root>)
+[@@element div]
+
+module Multiple = struct
+  let%component make ?(value : C.t array option)
+      ?(default_value : C.t array option)
+      ?(on_change : (C.t array -> unit) option) ?(focused_value : C.t option)
+      ?(default_focused_value : C.t option)
+      ?(on_focus_change : (C.t -> unit) option) ?(min_value : C.t option)
+      ?(max_value : C.t option) ?(is_date_unavailable : (C.t -> bool) option)
+      ?(visible_duration : duration option)
+      ?(page_behavior : [ `visible | `single ] option)
+      ?(selection_alignment : [ `start | `center | `end_ ] option)
+      ?(first_day_of_week : day_of_week option) ?(weeks_in_month : int option)
+      ?(is_disabled : bool = false) ?(is_read_only : bool = false)
+      ?(is_invalid : bool = false) ?(auto_focus : bool option)
+      ?(aria_label : string option) ?(aria_labelledby : string option)
+      ?(default_year_picker_open : bool = false)
+      ?(is_year_picker_open : bool option)
+      ?(on_year_picker_open_change : (bool -> unit) option)
+      ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
+    let current, set =
+      Field.controlled
+        ~value:(fun () -> S.get value)
+        ~default:(Option.value (S.get default_value) ~default:[||])
+        ~on_change:(fun ds -> ignore (on_change ds : unit option))
+    in
+    dress ~visible_duration ~first_day_of_week
+      ~default_year_picker_open:
+        (S.untrack (fun () -> S.get default_year_picker_open))
+      ~is_year_picker_open ~on_year_picker_open_change ~class_
+      (fun ~classes ~range ~set_element ->
+        let min () =
+          match S.get min_value with Some m -> m | None -> fst (S.get range)
+        in
+        let max () =
+          match S.get max_value with Some m -> m | None -> snd (S.get range)
+        in
+        let invalid =
+          S.accessor (fun () ->
+              S.get is_invalid
+              || out
+                   ~dates:(Array.to_list (S.get current))
+                   ~min:(Some (min ()))
+                   ~max:(Some (max ()))
+                   ~unavailable:is_date_unavailable)
+        in
+        let state = { is_disabled; is_invalid = invalid } in
+        <Headless.Root_multiple
+          value=(S.get current)
+          on_change=set
+          ?focused_value=(S.get focused_value)
+          ?default_focused_value=(S.get default_focused_value)
+          on_focus_change=(fun d -> ignore (on_focus_change d : unit option))
+          min_value=(min ())
+          max_value=(max ())
+          is_date_unavailable=(fun d ->
+                                Option.value (is_date_unavailable d)
+                                  ~default:false)
+          ?visible_duration=(S.get visible_duration)
+          ?page_behavior=(S.get page_behavior)
+          ?selection_alignment=(S.get selection_alignment)
+          ?first_day_of_week=(S.get first_day_of_week)
+          ?weeks_in_month=(S.get weeks_in_month)
+          is_disabled=(S.get is_disabled)
+          is_read_only=(S.get is_read_only)
+          is_invalid=(S.get is_invalid)
+          ?auto_focus=(S.get auto_focus)
+          ?aria_label=(S.get aria_label)
+          ?aria_labelledby=(S.get aria_labelledby)
+          class_=(classes ())
+          data_slot="calendar"
+          data_disabled=(Jsx.flag (S.get is_disabled))
+          data_invalid=(Jsx.flag (S.get invalid))
+          ref=(fun e ->
+                ignore (given_ref e : unit option);
+                set_element (as_element e))
+          ?as_=(Option.map (fun g p -> g p state) (S.get as_))
+          props=(Props.others props)>
+          (Jsx.draw (S.get children) state)
+        </Headless.Root_multiple>)
+  [@@element div]
+end
+
+type range = Headless.range = { start : C.t; end_ : C.t }
+
+module Range = struct
+  let%component make ?(value : range Js.Nullable.t option)
+      ?(default_value : range option)
+      ?(on_change : (range option -> unit) option)
+      ?(allows_non_contiguous_ranges : bool option)
+      ?(commit_behavior : [ `clear | `reset | `select ] option)
+      ?(focused_value : C.t option) ?(default_focused_value : C.t option)
+      ?(on_focus_change : (C.t -> unit) option) ?(min_value : C.t option)
+      ?(max_value : C.t option)
+      ?is_date_unavailable:
+        (is_date_unavailable_given : (C.t -> C.t option -> bool) option)
+      ?(visible_duration : duration option)
+      ?(page_behavior : [ `visible | `single ] option)
+      ?(selection_alignment : [ `start | `center | `end_ ] option)
+      ?(first_day_of_week : day_of_week option) ?(weeks_in_month : int option)
+      ?(is_disabled : bool option) ?(is_read_only : bool option)
+      ?(is_invalid : bool option) ?(auto_focus : bool option)
+      ?(aria_label : string option) ?(aria_labelledby : string option)
+      ?(default_year_picker_open : bool = false)
+      ?(is_year_picker_open : bool option)
+      ?(on_year_picker_open_change : (bool -> unit) option)
+      ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
+    let a = around () in
+    let picked =
+      match Headless.Given.use () with
+      | Some { value = Range (v, _); _ } -> Some v
+      | Some { value = Single _; _ } | None -> None
+    in
+    let is_disabled =
+      S.accessor (fun () ->
+          Option.value (S.get is_disabled) ~default:(a.around_disabled ()))
+    in
+    let is_read_only =
+      S.accessor (fun () ->
+          Option.value (S.get is_read_only) ~default:(a.around_read_only ()))
+    in
+    let is_invalid =
+      S.accessor (fun () ->
+          Option.value (S.get is_invalid) ~default:(a.around_invalid ()))
+    in
+    let is_date_unavailable d anchor =
+      match is_date_unavailable_given d anchor with
+      | Some b -> Some b
+      | None -> Option.map (fun f -> f d) (a.around_unavailable ())
+    in
+    let current, set =
+      Field.controlled
+        ~value:(fun () ->
+          match (S.get value, picked) with
+          | Some v, _ -> Some (Js.Nullable.toOption v)
+          | None, Some v -> Some (S.get v)
+          | None, None -> None)
+        ~default:(S.get default_value)
+        ~on_change:(fun r -> ignore (on_change r : unit option))
+    in
+    dress ~visible_duration ~first_day_of_week
+      ~default_year_picker_open:
+        (S.untrack (fun () -> S.get default_year_picker_open))
+      ~is_year_picker_open ~on_year_picker_open_change ~class_ ~look:range_look
+      (fun ~classes ~range ~set_element ->
+        let min () =
+          match (S.get min_value, a.around_min ()) with
+          | Some m, _ | None, Some m -> m
+          | None, None -> fst (S.get range)
+        in
+        let max () =
+          match (S.get max_value, a.around_max ()) with
+          | Some m, _ | None, Some m -> m
+          | None, None -> snd (S.get range)
+        in
+        let invalid =
+          S.accessor (fun () ->
+              S.get is_invalid
+              || out
+                   ~dates:
+                     (match S.get current with
+                     | Some r -> [ r.start; r.end_ ]
+                     | None -> [])
+                   ~min:(Some (min ()))
+                   ~max:(Some (max ()))
+                   ~unavailable:(fun d -> is_date_unavailable d None))
+        in
+        let state = { is_disabled; is_invalid = invalid } in
+        <Headless.Root_range
+          value=(Js.Nullable.fromOption (S.get current))
+          on_change=set
+          ?allows_non_contiguous_ranges=(S.get allows_non_contiguous_ranges)
+          ?commit_behavior=(S.get commit_behavior)
+          ?focused_value=(S.get focused_value)
+          ?default_focused_value=(S.get default_focused_value)
+          on_focus_change=(fun d -> ignore (on_focus_change d : unit option))
+          min_value=(min ())
+          max_value=(max ())
+          is_date_unavailable=(fun d a ->
+                                Option.value (is_date_unavailable d a)
+                                  ~default:false)
+          ?visible_duration=(S.get visible_duration)
+          ?page_behavior=(S.get page_behavior)
+          ?selection_alignment=(S.get selection_alignment)
+          ?first_day_of_week=(S.get first_day_of_week)
+          ?weeks_in_month=(S.get weeks_in_month)
+          is_disabled=(S.get is_disabled)
+          is_read_only=(S.get is_read_only)
+          is_invalid=(S.get is_invalid)
+          ?auto_focus=(S.get auto_focus)
+          ?aria_label=(S.get aria_label)
+          ?aria_labelledby=(S.get aria_labelledby)
+          class_=(classes ())
+          data_slot="range-calendar"
+          data_disabled=(Jsx.flag (S.get is_disabled))
+          data_invalid=(Jsx.flag (S.get invalid))
+          ref=(fun e ->
+                ignore (given_ref e : unit option);
+                set_element (as_element e))
+          ?as_=(Option.map (fun g p -> g p state) (S.get as_))
+          props=(Props.others props)>
+          (Jsx.draw (S.get children) state)
+        </Headless.Root_range>)
+  [@@element div]
+end
+
+module Header = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
+    let r = within "Calendar.Header" in
+    <header
+      class_=(after r.look.header (S.get class_))
+      data_slot=(Jsx.data (r.look.name ^ "-header"))
+      props=(Props.others props)>
+      (S.get children)
+    </header>
+  [@@element header]
+end
+
+module Heading = struct
+  let%component make ?(offset : duration option)
+      ?(format : Dt.DateTimeFormatOptions.t option) ?(class_ : string option) ()
+      =
+    let r = within "Calendar.Heading" in
+    <Headless.Heading
+      ?offset=(S.get offset)
+      ?format=(S.get format)
+      class_=(after r.look.heading (S.get class_))
+      data_slot=(Jsx.data (r.look.name ^ "-heading"))
+      props=(Props.others props)
+    />
+  [@@element h2]
+end
+
+module Nav_button = struct
+  let%component make ~(slot : [ `previous | `next ]) ?(class_ : string option)
+      ?(children : Jsx.element option)
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option) () =
+    let r = within "Calendar.Nav_button" in
+    let c = Headless.Context.use () in
+    let disabled () =
+      match S.get slot with
+      | `previous -> S.get c.is_previous_disabled
+      | `next -> S.get c.is_next_disabled
+    in
+    let i = Interaction.create ~disabled () in
+    let icon () =
+      match S.get slot with
+      | `previous ->
+          <Gravity.Chevron_left
+            class_=r.look.nav_button_icon
+            data_slot=(Jsx.data (r.look.name ^ "-nav-button-icon"))
+            aria_hidden=true
+            role=`presentation
+          />
+      | `next ->
+          <Gravity.Chevron_right
+            class_=r.look.nav_button_icon
+            data_slot=(Jsx.data (r.look.name ^ "-nav-button-icon"))
+            aria_hidden=true
+            role=`presentation
+          />
+    in
+    let content () =
+      match S.get children with Some c -> c | None -> icon ()
+    in
+    match S.get slot with
+    | `previous ->
+        <Headless.Previous
+          slot="previous"
+          ref=(fun e ->
+                ignore (given_ref e : unit option);
+                Interaction.watch i e)
+          class_=(after r.look.nav_button (S.get class_))
+          data_slot=(Jsx.data (r.look.name ^ "-nav-button"))
+          data_hovered=(Jsx.flag (Interaction.hovered i))
+          data_pressed=(Jsx.flag (Interaction.pressed i))
+          data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+          data_disabled=(Jsx.flag (disabled ()))
+          data_focused=(Jsx.flag (Interaction.focused i))
+          ?tabindex=(if disabled () then None else Some "0")
+          props=(Props.others props)>
+          (content ())
+        </Headless.Previous>
+    | `next ->
+        <Headless.Next
+          slot="next"
+          ref=(fun e ->
+                ignore (given_ref e : unit option);
+                Interaction.watch i e)
+          class_=(after r.look.nav_button (S.get class_))
+          data_slot=(Jsx.data (r.look.name ^ "-nav-button"))
+          data_hovered=(Jsx.flag (Interaction.hovered i))
+          data_pressed=(Jsx.flag (Interaction.pressed i))
+          data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+          data_disabled=(Jsx.flag (disabled ()))
+          data_focused=(Jsx.flag (Interaction.focused i))
+          ?tabindex=(if disabled () then None else Some "0")
+          props=(Props.others props)>
+          (content ())
+        </Headless.Next>
+  [@@element button]
+end
+
+module Grid = struct
+  let%component make ?(offset : duration option)
+      ?(weekday_style : [ `narrow | `short | `long ] option)
+      ?(class_ : string option) ~(children : Jsx.element) () =
+    let r = within "Calendar.Grid" in
+    <Headless.Grid
+      ?offset=(S.get offset)
+      weekday_style=(Option.value (S.get weekday_style) ~default:`short)
+      class_=(after r.look.grid (S.get class_))
+      data_slot=(Jsx.data (r.look.name ^ "-grid"))
+      props=(Props.others props)>
+      (S.get children)
+    </Headless.Grid>
+  [@@element table]
+end
+
+(* A day view of a week or more, as HeroUI lays it out: rows from the start of
+   the week of its first day, each a week, none past its last day. *)
+let start_of_week d locale first =
+  C.subtract d
+    (Dt.DateDuration.make
+       ~days:(D.get_day_of_week d locale ?first_day_of_week:first ())
+       ())
+
+let day_view_rows start finish locale first =
+  let row from =
+    Array.init 7 (fun i ->
+        let d = C.add from (Dt.DateDuration.make ~days:i ()) in
+        if C.compare d finish > 0. then None else Some d)
+  in
+  let rec rows from acc =
+    if C.compare from finish > 0. then List.rev acc
+    else rows (C.add from (Dt.DateDuration.make ~weeks:1 ())) (row from :: acc)
+  in
+  Array.of_list (rows (start_of_week start locale first) [])
+
+let long_day_view (c : Headless.calendar) =
+  match S.get c.visible_duration with
+  | Days n -> n >= 7
+  | Months _ | Weeks _ -> false
+
+module Grid_header = struct
+  let%component make ?(class_ : string option)
+      ~(children : string S.accessor -> Jsx.element) () =
+    let r = within "Calendar.Grid_header" in
+    let c = Headless.Context.use () in
+    let classes () = after r.look.grid_header (S.get class_) in
+    if S.untrack (fun () -> long_day_view c) then
+      let names () =
+        let tz = S.get c.time_zone and l = S.get c.locale in
+        let format =
+          Dt.DateFormatter.make l
+            ~options:
+              (Dt.DateTimeFormatOptions.make ~weekday:`short ~time_zone:tz ())
+            ()
+        in
+        let from =
+          start_of_week (S.get c.visible_start) l (S.get r.first_day)
+        in
+        Array.init 7 (fun i ->
+            Dt.DateFormatter.format format
+              (C.to_date (C.add from (Dt.DateDuration.make ~days:i ())) tz))
+      in
+      <thead
+        aria_hidden=true
+        class_=(classes ())
+        data_slot=(Jsx.data (r.look.name ^ "-grid-header"))>
+        <tr><Index each=(names ())>(fun name _ -> children name)</Index></tr>
+      </thead>
+    else
+      <Headless.Grid_header
+        class_=(classes ())
+        data_slot=(Jsx.data (r.look.name ^ "-grid-header"))
+        props=(Props.others props)>
+        (fun name -> children name)
+      </Headless.Grid_header>
+  [@@element thead]
+end
+
+module Header_cell = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
+    let r = within "Calendar.Header_cell" in
+    <Headless.Header_cell
+      class_=(after r.look.header_cell (S.get class_))
+      data_slot=(Jsx.data (r.look.name ^ "-header-cell"))
+      props=(Props.others props)>
+      (S.get children)
+    </Headless.Header_cell>
+  [@@element th]
+end
+
+module Grid_body = struct
+  let%component make ?(class_ : string option)
+      ~(children : C.t S.accessor -> Jsx.element) () =
+    let r = within "Calendar.Grid_body" in
+    let c = Headless.Context.use () in
+    let classes () = after r.look.grid_body (S.get class_) in
+    if S.untrack (fun () -> long_day_view c) then
+      let rows () =
+        day_view_rows (S.get c.visible_start) (S.get c.visible_end)
+          (S.get c.locale) (S.get r.first_day)
+      in
+      <tbody
+        class_=(classes ()) data_slot=(Jsx.data (r.look.name ^ "-grid-body"))>
+        <Index each=(rows ())>
+          (fun row _ ->
+            <tr>
+              <Index each=(S.get row)>
+                (fun date _ ->
+                  <Solidtype.Show.Some some=(S.get date) fallback=(<td />)>
+                    (fun date -> children date)
+                  </Solidtype.Show.Some>)
+              </Index>
+            </tr>)
+        </Index>
+      </tbody>
+    else
+      <Headless.Grid_body
+        class_=(classes ())
+        data_slot=(Jsx.data (r.look.name ^ "-grid-body"))
+        props=(Props.others props)>
+        (fun date -> children date)
+      </Headless.Grid_body>
+  [@@element tbody]
+end
+
+module Cell = struct
+  let%component make ~(date : C.t) ?(class_ : string option)
+      ?(children : cell Jsx.children option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option) () =
+    let r = within "Calendar.Cell" in
+    let c = Headless.Context.use () in
+    let i = Interaction.create ~disabled:(fun () -> S.get c.is_disabled) () in
+    let state get = Jsx.flag (S.get (get (Headless.Cell.Context.use ()))) in
+    <Headless.Cell
+      date=(S.get date)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
+      class_=(after r.look.cell (S.get class_))
+      data_slot=(Jsx.data (r.look.name ^ "-cell"))
+      data_selected=(state (fun (x : cell) -> x.is_selected))
+      data_today=(state (fun (x : cell) -> x.is_today))
+      data_unavailable=(state (fun (x : cell) -> x.is_unavailable))
+      data_disabled=(state (fun (x : cell) -> x.is_disabled))
+      data_outside_month=(state (fun (x : cell) -> x.is_outside_month))
+      data_outside_visible_range=(state (fun (x : cell) ->
+                                      x.is_outside_visible_range))
+      data_focused=(state (fun (x : cell) -> x.is_focused))
+      data_invalid=(state (fun (x : cell) -> x.is_invalid))
+      data_selection_start=(state (fun (x : cell) -> x.is_selection_start))
+      data_selection_end=(state (fun (x : cell) -> x.is_selection_end))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_pressed=(Jsx.flag (Interaction.pressed i))
+      data_focus_visible=(Jsx.flag
+                            (Interaction.focus_visible i
+                            && S.get (Headless.Cell.Context.use ()).is_focused))
+      props=(Props.others props)>
+      (fun (cell : cell) ->
+        let content () =
+          match S.get children with
+          | Some given -> Jsx.draw given cell
+          | None -> Jsx.string (S.get cell.formatted_date)
+        in
+        (* A range's day is drawn in a button of its own, chosen at the
+           range's ends, as HeroUI's styles round them. *)
+        if r.look.range then
+          <span
+            class_="range-calendar__cell-button"
+            data_disabled=(Jsx.flag (S.get cell.is_disabled))
+            data_hovered=(Jsx.flag (Interaction.hovered i))
+            data_pressed=(Jsx.flag (Interaction.pressed i))
+            data_selected=(Jsx.flag
+                             (S.get cell.is_selection_start
+                             || S.get cell.is_selection_end))
+            data_slot="range-calendar-cell-button">
+            (content ())
+          </span>
+        else content ())
+    </Headless.Cell>
+  [@@element div]
+end
+
+module Cell_indicator = struct
+  let%component make ?(class_ : string option) () =
+    let r = within "Calendar.Cell_indicator" in
+    <span
+      aria_hidden=true
+      class_=(after r.look.cell_indicator (S.get class_))
+      data_slot=(Jsx.data (r.look.name ^ "-cell-indicator"))
+      props=(Props.others props)
+    />
+  [@@element span]
+end
+
+(* The heading of what the calendar shows, as React Aria's useCalendarHeading
+   writes it: a month and year, or the days of a week's or a day's view. *)
+let heading_text (c : Headless.calendar) ?offset ?format () =
+  let start =
+    match offset with
+    | Some (Months m) ->
+        C.add (S.get c.visible_start) (Dt.DateDuration.make ~months:m ())
+    | Some (Weeks w) ->
+        C.add (S.get c.visible_start) (Dt.DateDuration.make ~weeks:w ())
+    | Some (Days d) ->
+        C.add (S.get c.visible_start) (Dt.DateDuration.make ~days:d ())
+    | None -> S.get c.visible_start
+  in
+  let tz = S.get c.time_zone in
+  let pick get default =
+    match Option.bind format get with Some v -> Some v | None -> default
+  in
+  let days =
+    match S.get c.visible_duration with
+    | Days _ | Weeks _ -> true
+    | Months _ -> false
+  in
+  let f =
+    Dt.DateFormatter.make (S.get c.locale)
+      ~options:
+        (Dt.DateTimeFormatOptions.make
+           ?day:
+             (pick Dt.DateTimeFormatOptions.day
+                (if days then Some "numeric" else None))
+           ?month:(pick Dt.DateTimeFormatOptions.month (Some "long"))
+           ?year:(pick Dt.DateTimeFormatOptions.year (Some "numeric"))
+           ~calendar:(Dt.Calendar.identifier (C.calendar start))
+           ~time_zone:tz ())
+      ()
+  in
+  if days then
+    Dt.DateFormatter.format_range f (C.to_date start tz)
+      (C.to_date (S.get c.visible_end) tz)
+  else Dt.DateFormatter.format f (C.to_date start tz)
+
+(* What a year picker's trigger draws its children of. *)
+type trigger = {
+  is_open : bool S.accessor;
+  month_year : string S.accessor;
+  toggle : unit -> unit;
+}
+
+module Trigger_context = Solidtype.Context.Make_optional (struct
+  type t = trigger
+end)
+
+let in_trigger part =
+  match Trigger_context.use () with
+  | Some t -> t
+  | None -> invalid_arg (part ^ " is used inside a Calendar.Year_picker_trigger")
+
+let year_slots =
+  Styles.CalendarYearPicker.slots (Styles.CalendarYearPicker.options ())
+
+module Year_picker_trigger = struct
+  let%component make ?(class_ : string option)
+      ~(children : trigger Jsx.children)
+      ?(on_key_down : (Dom.keyboardEvent -> unit) option)
+      ?(on_click : (Dom.mouseEvent -> unit) option) () =
+    let r = within "Calendar.Year_picker_trigger" in
+    let c = Headless.Context.use () in
+    let i = Interaction.create ~disabled:(fun () -> S.get c.is_disabled) () in
+    let toggle () = r.set_year_picker_open (not (S.get r.year_picker_open)) in
+    let t =
+      {
+        is_open = r.year_picker_open;
+        month_year = S.accessor (fun () -> heading_text c ());
+        toggle;
+      }
+    in
+    <Trigger_context.Provider value=t>
+      <button
+        type_=`button
+        ref=(fun e -> Interaction.watch i e)
+        aria_expanded=(S.get r.year_picker_open)
+        aria_label=(S.get t.month_year ^ ", year selector")
+        class_=(after
+                  (Styles.CalendarYearPicker.trigger year_slots)
+                  (S.get class_))
+        data_open=(Jsx.flag (S.get r.year_picker_open))
+        data_slot="calendar-year-picker-trigger"
+        data_hovered=(Jsx.flag (Interaction.hovered i))
+        data_pressed=(Jsx.flag (Interaction.pressed i))
+        data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+        data_focused=(Jsx.flag (Interaction.focused i))
+        tabindex="0"
+        on_key_down=(fun e ->
+                      ignore (on_key_down e : unit option);
+                      if
+                        (not (default_prevented e))
+                        && String.equal (key e) "Escape"
+                        && S.get r.year_picker_open
+                      then (
+                        prevent_key e;
+                        r.set_year_picker_open false))
+        on_click=(fun e ->
+                   ignore (on_click e : unit option);
+                   toggle ())
+        props=(Props.others props)>
+        (Jsx.draw (S.get children) t)
+      </button>
+    </Trigger_context.Provider>
+  [@@element button]
+end
+
+module Year_picker_trigger_heading = struct
+  let%component make ?(offset : duration option)
+      ?(format : Dt.DateTimeFormatOptions.t option) ?(class_ : string option)
+      ?(children : trigger Jsx.children option) () =
+    let t = in_trigger "Calendar.Year_picker_trigger_heading" in
+    let c = Headless.Context.use () in
+    <span
+      class_=(after
+                (Styles.CalendarYearPicker.trigger_heading year_slots)
+                (S.get class_))
+      data_slot="calendar-year-picker-trigger-heading"
+      props=(Props.others props)>
+      (match S.get children with
+      | Some given -> Jsx.draw given t
+      | None ->
+          Jsx.string
+            (heading_text c ?offset:(S.get offset) ?format:(S.get format) ()))
+    </span>
+  [@@element span]
+end
+
+module Year_picker_trigger_indicator = struct
+  let%component make ?(class_ : string option)
+      ?(children : trigger Jsx.children option) () =
+    let t = in_trigger "Calendar.Year_picker_trigger_indicator" in
+    <span
+      aria_hidden=true
+      class_=(after
+                (Styles.CalendarYearPicker.trigger_indicator year_slots)
+                (S.get class_))
+      data_slot="calendar-year-picker-trigger-indicator"
+      props=(Props.others props)>
+      (match S.get children with
+      | Some given -> Jsx.draw given t
+      | None ->
+          <Gravity.Chevron_right
+            height="1em" width="1em" aria_hidden=true role=`presentation
+          />)
+    </span>
+  [@@element span]
+end
+
+(* A year as the year grid offers it. *)
+type year = {
+  year : int;
+  formatted_year : string;
+  is_current_year : bool;
+  is_open : bool;
+  is_selected : bool;
+  select_year : unit -> unit;
+}
+
+(* What a year grid's parts read of it. *)
+type year_grid = {
+  years : (int * C.t * string) array S.accessor;
+  focused_year : int S.accessor;
+  active_year : int S.accessor;
+  set_active_year : int -> unit;
+  select : int -> unit;
+  open_ : bool S.accessor;
+}
+
+module Year_context = Solidtype.Context.Make_optional (struct
+  type t = year_grid
+end)
+
+let in_years part =
+  match Year_context.use () with
+  | Some y -> y
+  | None -> invalid_arg (part ^ " is used inside a Calendar.Year_picker_grid")
+
+let current_year () = int_of_float (Js.Date.getFullYear (Js.Date.make ()))
+
+let year_of (g : year_grid) y =
+  let entry = Js.Array.find ~f:(fun (n, _, _) -> n = y) (S.get g.years) in
+  {
+    year = y;
+    formatted_year =
+      (match entry with Some (_, _, f) -> f | None -> string_of_int y);
+    is_current_year = y = current_year ();
+    is_open = S.get g.open_;
+    is_selected = y = S.get g.focused_year;
+    select_year = (fun () -> g.select y);
+  }
+
+module Year_picker_grid = struct
+  let%component make ?(format : Dt.DateTimeFormatOptions.t option)
+      ?(visible_years : int option) ?(class_ : string option)
+      ?(on_key_down : (Dom.keyboardEvent -> unit) option)
+      ~(children : Jsx.element) () =
+    let r = within "Calendar.Year_picker_grid" in
+    let c = Headless.Context.use () in
+    let years =
+      S.create_memo (fun () ->
+          let focused = S.get c.focused_date and tz = S.get c.time_zone in
+          let count =
+            match
+              (S.get visible_years, S.get c.min_value, S.get c.max_value)
+            with
+            | Some n, _, _ -> n
+            | None, Some lo, Some hi -> C.year hi - C.year lo + 1
+            | None, _, _ -> 20
+          in
+          let by n = Dt.DateDuration.make ~years:n () in
+          let lo = C.subtract focused (by (count / 2)) in
+          let hi = C.add focused (by (((count + 1) / 2) - 1)) in
+          let lo, hi =
+            match S.get c.max_value with
+            | Some m when C.compare hi m > 0. ->
+                (C.subtract m (by (count - 1)), m)
+            | Some _ | None -> (lo, hi)
+          in
+          let lo, hi =
+            match S.get c.min_value with
+            | Some m when C.compare lo m < 0. ->
+                let hi = C.add m (by (count - 1)) in
+                let hi =
+                  match S.get c.max_value with
+                  | Some x when C.compare hi x > 0. -> x
+                  | Some _ | None -> hi
+                in
+                (m, hi)
+            | Some _ | None -> (lo, hi)
+          in
+          let pick get default =
+            match Option.bind (S.get format) get with
+            | Some v -> Some v
+            | None -> default
+          in
+          let f =
+            Dt.DateFormatter.make (S.get c.locale)
+              ~options:
+                (Dt.DateTimeFormatOptions.make
+                   ?year:(pick Dt.DateTimeFormatOptions.year (Some "numeric"))
+                   ?era:
+                     (Option.bind (S.get format) Dt.DateTimeFormatOptions.era)
+                   ~calendar:(Dt.Calendar.identifier (C.calendar focused))
+                   ~time_zone:tz ())
+              ()
+          in
+          let rec walk d acc =
+            if C.compare d hi > 0. && not (D.is_same_year d hi) then
+              List.rev acc
+            else
+              let item = if C.compare d hi > 0. then hi else d in
+              walk
+                (C.add d (by 1))
+                (( C.year item,
+                   item,
+                   Dt.DateFormatter.format f (C.to_date item tz) )
+                :: acc)
+          in
+          Array.of_list (walk lo []))
+    in
+    let focused_year = S.accessor (fun () -> C.year (S.get c.focused_date)) in
+    let active, set_active =
+      S.create_signal (S.untrack (fun () -> S.get focused_year))
+    in
+    let element = ref None in
+    let focus_year y =
+      match !element with
+      | Some g -> (
+          match
+            Js.Null.toOption (query g ("[data-year='" ^ string_of_int y ^ "']"))
+          with
+          | Some cell -> focus cell
+          | None -> ())
+      | None -> ()
+    in
+    let select y =
+      match Js.Array.find ~f:(fun (n, _, _) -> n = y) (S.get years) with
+      | Some (_, d, _) ->
+          r.set_year_picker_open false;
+          c.set_focused_date d
+      | None -> ()
+    in
+    (* The grid lies over the day grid, as tall as it. *)
+    let top, set_top = S.create_signal None in
+    S.create_effect (fun () ->
+        ignore (S.get c.focused_date : C.t);
+        match S.get r.element with
+        | Some root -> (
+            match
+              Js.Null.toOption
+                (query root ("[data-slot='" ^ r.look.name ^ "-grid']"))
+            with
+            | Some grid ->
+                S.set set_top (Some (offset_top grid, offset_height grid))
+            | None -> ())
+        | None -> ());
+    (* As it opens, the focus goes to the focused date's year, a frame on. *)
+    let was_open = ref false in
+    S.create_effect (fun () ->
+        let now = S.get r.year_picker_open in
+        let opened = now && not !was_open in
+        was_open := now;
+        if opened then
+          let ys = S.untrack (fun () -> S.get years) in
+          if Array.length ys > 0 then (
+            let fy = S.untrack (fun () -> S.get focused_year) in
+            let target =
+              if Array.exists (fun (n, _, _) -> n = fy) ys then fy
+              else (fun (n, _, _) -> n) ys.(0)
+            in
+            S.set set_active target;
+            let frame = request_frame (fun _ -> focus_year target) in
+            S.on_cleanup (fun () -> cancel_frame frame)));
+    let on_key e =
+      ignore (on_key_down e : unit option);
+      if not (default_prevented e) then
+        if String.equal (key e) "Escape" && S.get r.year_picker_open then (
+          prevent_key e;
+          r.set_year_picker_open false)
+        else if S.get r.year_picker_open then
+          let ys = Array.map (fun (n, _, _) -> n) (S.get years) in
+          let n = Array.length ys in
+          match Js.Array.findIndex ~f:(fun y -> y = S.get active) ys with
+          | -1 -> ()
+          | at -> (
+              let next =
+                match key e with
+                | "ArrowRight" -> Some (min (at + 1) (n - 1))
+                | "ArrowLeft" -> Some (max (at - 1) 0)
+                | "ArrowDown" -> Some (min (at + 3) (n - 1))
+                | "ArrowUp" -> Some (max (at - 3) 0)
+                | "Home" -> Some 0
+                | "End" -> Some (n - 1)
+                | _ -> None
+              in
+              match next with
+              | Some i when i <> at ->
+                  prevent_key e;
+                  S.set set_active ys.(i);
+                  focus_year ys.(i)
+              | Some _ | None -> ())
+    in
+    let names =
+      S.accessor (fun () ->
+          match
+            display_names (S.get c.locale)
+              (display_names_options ~type_:"dateTimeField" ())
+          with
+          | n -> Js.Undefined.toOption (display_name n "year")
+          | exception Js.Exn.Error _ -> Some "year")
+    in
+    let g =
+      {
+        years;
+        focused_year;
+        active_year = active;
+        set_active_year = S.set set_active;
+        select;
+        open_ = r.year_picker_open;
+      }
+    in
+    <Year_context.Provider value=g>
+      <div
+        ref=(fun e -> element := Some (as_element e))
+        aria_hidden=(not (S.get r.year_picker_open))
+        ?aria_label=(S.get names)
+        class_=(after
+                  (Styles.CalendarYearPicker.year_grid year_slots)
+                  (S.get class_))
+        data_open=(Jsx.flag (S.get r.year_picker_open))
+        data_slot="calendar-year-picker-grid"
+        role=`listbox
+        tabindex="-1"
+        style=(match S.get top with
+              | Some (t, h) ->
+                  "top: " ^ Js.Float.toString t ^ "px; height: "
+                  ^ Js.Float.toString h ^ "px;"
+              | None -> "")
+        on_key_down=on_key
+        props=(Props.others props)>
+        (S.get children)
+      </div>
+    </Year_context.Provider>
+  [@@element div]
+end
+
+module Year_picker_cell = struct
+  let%component make ~(year : int) ?(class_ : string option)
+      ?(children : year Jsx.children option)
+      ?(on_focus : (Dom.focusEvent -> unit) option)
+      ?(on_click : (Dom.mouseEvent -> unit) option) () =
+    let g = in_years "Calendar.Year_picker_cell" in
+    let i = Interaction.create () in
+    let values () = year_of g (S.get year) in
+    let selected () = S.get year = S.get g.focused_year in
+    <button
+      type_=`button
+      ref=(fun e -> Interaction.watch i e)
+      aria_label=(values ()).formatted_year
+      class_=(after
+                (Styles.CalendarYearPicker.year_cell year_slots)
+                (S.get class_))
+      data_selected=(Jsx.flag (selected ()))
+      data_slot="calendar-year-picker-year-cell"
+      data_year=(Jsx.data (string_of_int (S.get year)))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_pressed=(Jsx.flag (Interaction.pressed i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      data_focused=(Jsx.flag (Interaction.focused i))
+      tabindex=(if S.get g.open_ && S.get year = S.get g.active_year then "0"
+                else "-1")
+      on_focus=(fun e ->
+                 ignore (on_focus e : unit option);
+                 g.set_active_year (S.get year))
+      on_click=(fun e ->
+                 ignore (on_click e : unit option);
+                 g.select (S.get year))
+      props=(Props.others props)>
+      (match S.get children with
+      | Some given -> Jsx.draw given (values ())
+      | None -> Jsx.string (values ()).formatted_year)
+    </button>
+  [@@element button]
+end
+
+module Year_picker_grid_body = struct
+  let%component make ?(children : year Jsx.children option) () =
+    let g = in_years "Calendar.Year_picker_grid_body" in
+    <Index each=(Array.map (fun (n, _, _) -> n) (S.get g.years))>
+      (fun y _ ->
+        match S.get children with
+        | Some given -> Jsx.draw given (year_of g (S.get y))
+        | None -> <Year_picker_cell year=(S.get y) />)
+    </Index>
+end
