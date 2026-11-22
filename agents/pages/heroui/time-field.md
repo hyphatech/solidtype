@@ -254,7 +254,7 @@ let make () =
       is_disabled=true
       class_="w-[256px]"
       name="time"
-      value=(Js.Nullable.return time_value)>
+      value=(Js.Null.return time_value)>
       <Label>"Time"</Label>
       <Time_field.Group>
         <Time_field.Input>
@@ -372,7 +372,7 @@ let make () =
     <Time_field
       class_="w-[256px]"
       name="time"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Time"</Label>
       <Time_field.Group>
@@ -430,7 +430,7 @@ let make () =
   <Time_field.Zoned
     class_="w-[256px]"
     name="meeting"
-    value=(Js.Nullable.fromOption (S.get value))
+    value=(Js.Null.fromOption (S.get value))
     placeholder_value=day
     on_change=(S.set set_value)>
     <Label>"Meeting in Kyiv"</Label>
@@ -503,7 +503,7 @@ let make () =
       name="time"
       min_value=min_time
       max_value=max_time
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Appointment time"</Label>
       <Time_field.Group>
@@ -566,7 +566,7 @@ let make () =
       name="time"
       min_value=min_time
       max_value=max_time
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Time"</Label>
       <Time_field.Group>
@@ -671,7 +671,7 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `Time.t Js.Nullable.t` | | Current value (controlled); null controls it empty |
+| `value` | `value` | `Time.t Js.Null.t` | | Current value (controlled); null controls it empty |
 | `defaultValue` | `default_value` | `Time.t` | | Default value (uncontrolled) |
 | `onChange` | `on_change` | `Time.t option -> unit` | | Called once every segment has its part and the time is another, and with `None` once every segment is erased |
 | `placeholderValue` | `placeholder_value` | `Time.t` | midnight | Placeholder time an arrow key steps an empty segment from |

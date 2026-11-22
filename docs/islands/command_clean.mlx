@@ -1,0 +1,78 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Command = Solidtype_heroui.Command
+module Kbd = Solidtype_heroui.Kbd
+module Gravity = Solidtype_gravity_icons
+
+let keys shortcut =
+  <div class_="ml-auto flex gap-1">
+    <For each=shortcut>
+      (fun key _ ->
+        <kbd
+          class_="flex size-5 items-center justify-center rounded bg-default \
+                  text-[11px] text-muted uppercase">
+          (Jsx.string key)
+        </kbd>)
+    </For>
+  </div>
+
+let make () =
+  <Command>
+    <Button variant=`outline>
+      "Clean "
+      <Kbd><Kbd.Abbr key_value=`command /> <Kbd.Content>"K"</Kbd.Content></Kbd>
+    </Button>
+    <Command.Backdrop>
+      <Command.Container size=`lg>
+        <Command.Dialog>
+          <Command.Header class_="flex-wrap gap-1 px-3 pt-2 pb-0">
+            <span
+              class_="inline-flex h-5 items-center rounded bg-default px-2 \
+                      text-xs font-medium text-muted capitalize">
+              "home"
+            </span>
+          </Command.Header>
+          <Command.Input_group>
+            <Command.Input_group.Input placeholder="What do you need?" />
+            <Command.Input_group.Clear_button />
+          </Command.Input_group>
+          <Command.List>
+            <Command.Group heading=(Jsx.string "Projects")>
+              <Command.Item id="search-projects">
+                <Gravity.Layout_cells_large />
+                <span>"Search Projects..."</span>
+                (keys [| "S"; "P" |])
+              </Command.Item>
+              <Command.Item>
+                <Gravity.Plus /> <span>"Create New Project..."</span>
+              </Command.Item>
+            </Command.Group>
+            <Command.Group heading=(Jsx.string "Teams")>
+              <Command.Item>
+                <Gravity.Persons />
+                <span>"Search Teams..."</span>
+                (keys [| {js|⇧|js}; "P" |])
+              </Command.Item>
+              <Command.Item>
+                <Gravity.Plus /> <span>"Create New Team..."</span>
+              </Command.Item>
+            </Command.Group>
+            <Command.Group heading=(Jsx.string "Help")>
+              <Command.Item>
+                <Gravity.File_text />
+                <span>"Search Docs..."</span>
+                (keys [| {js|⇧|js}; "D" |])
+              </Command.Item>
+              <Command.Item>
+                <Gravity.Comment /> <span>"Send Feedback..."</span>
+              </Command.Item>
+              <Command.Item>
+                <Gravity.Envelope /> <span>"Contact Support"</span>
+              </Command.Item>
+            </Command.Group>
+          </Command.List>
+        </Command.Dialog>
+      </Command.Container>
+    </Command.Backdrop>
+  </Command>

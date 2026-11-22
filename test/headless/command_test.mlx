@@ -1,0 +1,320 @@
+(* The headless Command as a caller meets it: a search that controls a menu of
+   items in groups, the focus kept in the search while the keys move through
+   the items shown, typing filtering them and focusing the first, Enter and a
+   press running one, Escape emptying the search before it goes further, its
+   words in the reader's language, the caller's attributes and ref kept, and no
+   violation axe finds. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Command = Solidtype_headless.Command
+module I18n = Solidtype_kobalte.I18n
+module E = Jest.Expect
+module H = Harness
+open Harness.Syntax
+
+external add_listener : Dom.document -> string -> (Dom.event -> unit) -> unit
+  = "addEventListener"
+[@@mel.send]
+
+external document : Dom.document = "document" [@@mel.scope "globalThis"]
+external key_of : Dom.event -> string = "key" [@@mel.get]
+external prevented : Dom.event -> bool = "defaultPrevented" [@@mel.get]
+external value : Dom.element -> string = "value" [@@mel.get]
+
+(* Two groups apart, "Change theme" disabled, and one item on its own, in a
+   palette that tells what ran. *)
+let palette ?(told = ref []) ?(got_ref = ref false) ?text
+    ?(on_input_change = fun (_ : string) -> ()) ?filter ?locale () =
+  let body () =
+    <Command.Root ?input_value=(Option.map S.get text) on_input_change ?filter>
+      <Command.Input
+        aria_label="Search commands"
+        class_="search"
+        ref=(fun _ -> got_ref := true)
+      />
+      <Command.List
+        on_action=(fun key -> told := ("list " ^ key) :: !told)
+        disabled_keys=[| "shortcuts" |]
+        render_empty_state=(fun () -> <p>"No results"</p>)
+        data_testid="list">
+        <Command.Group>
+          <Command.Heading>"Actions"</Command.Heading>
+          <Command.Item
+            id="file" on_action=(fun () -> told := "item file" :: !told)>
+            "Create new file..."
+          </Command.Item>
+          <Command.Item id="folder">"Create new folder..."</Command.Item>
+          <Command.Item id="assign"><span>"Assign to me"</span></Command.Item>
+        </Command.Group>
+        <Command.Separator />
+        <Command.Group>
+          <Command.Heading>"Settings"</Command.Heading>
+          <Command.Item id="preferences">"Preferences"</Command.Item>
+          <Command.Item id="theme" is_disabled=true>
+            "Change theme"
+          </Command.Item>
+          <Command.Item id="shortcuts">"Keyboard shortcuts"</Command.Item>
+        </Command.Group>
+        <Command.Separator />
+        <Command.Item id="help" text_value="Help">"Help center"</Command.Item>
+      </Command.List>
+    </Command.Root>
+  in
+  H.render (fun () ->
+      match locale with
+      | Some locale -> <I18n.I18nProvider locale>(body ())</I18n.I18nProvider>
+      | None -> body ())
+
+let input () = (H.all_by_role "searchbox").(0)
+let items () = Array.map H.text (H.all_by_role "menuitem")
+
+let headings () =
+  Array.map
+    (fun g ->
+      match H.attribute g "aria-labelledby" with
+      | Some id -> (
+          match Js.Null.toOption (H.by_id id) with
+          | Some h -> H.text h
+          | None -> "missing")
+      | None -> "none")
+    (H.all_by_role "group")
+
+let separators () = Array.length (H.all_by_role "separator")
+
+(* The item the search names as its active descendant. *)
+let at_focus () =
+  match H.attribute (input ()) "aria-activedescendant" with
+  | Some id -> (
+      match Js.Null.toOption (H.by_id id) with
+      | Some e -> H.text e
+      | None -> "missing")
+  | None -> "none"
+
+let keys user steps =
+  let rec go seen = function
+    | [] -> Js.Promise.resolve (List.rev seen)
+    | k :: rest ->
+        let* () = H.keyboard user k in
+        go (at_focus () :: seen) rest
+  in
+  go [] steps
+
+let () =
+  Jest.describe "Headless Command" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise "is a search that controls a menu of groups" (fun () ->
+          palette ();
+          let menu = (H.all_by_role "menu").(0) in
+          let i = input () in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( ( H.attribute i "aria-controls",
+                    H.attribute i "aria-autocomplete",
+                    H.attribute i "aria-activedescendant",
+                    H.attribute i "aria-label" ),
+                  H.attribute menu "aria-label",
+                  headings (),
+                  items (),
+                  ( separators (),
+                    Array.map
+                      (fun e -> H.attribute e "aria-disabled")
+                      (H.all_by_role "menuitem") ) )
+              |> toEqual
+                   ( ( H.attribute menu "id",
+                       Some "list",
+                       None,
+                       Some "Search commands" ),
+                     Some "Suggestions",
+                     [| "Actions"; "Settings" |],
+                     [|
+                       "Create new file...";
+                       "Create new folder...";
+                       "Assign to me";
+                       "Preferences";
+                       "Change theme";
+                       "Keyboard shortcuts";
+                       "Help center";
+                     |],
+                     ( 2,
+                       [|
+                         None; None; None; None; Some "true"; Some "true"; None;
+                       |] ) )));
+      Jest.testPromise
+        "is walked by the keys from the search, wrapping, disabled items passed"
+        (fun () ->
+          palette ();
+          let user = H.setup () in
+          let* () = H.click user (input ()) in
+          let* seen =
+            keys user
+              [
+                "{ArrowDown}";
+                "{ArrowDown}";
+                "{ArrowUp}";
+                "{ArrowUp}";
+                "{ArrowUp}";
+                "{ArrowUp}";
+                "{ArrowDown}";
+                "{Home}";
+                "{End}";
+              ]
+          in
+          let highlighted =
+            Array.map
+              (fun e -> H.attribute e "data-highlighted")
+              (H.all_by_role "menuitem")
+          in
+          Js.Promise.resolve
+            E.(
+              expect (seen, H.focused == input (), highlighted)
+              |> toEqual
+                   ( [
+                       "Create new file...";
+                       "Create new folder...";
+                       "Create new file...";
+                       "Help center";
+                       "Preferences";
+                       "Assign to me";
+                       "Preferences";
+                       "Create new file...";
+                       "Help center";
+                     ],
+                     true,
+                     [| None; None; None; None; None; None; Some "" |] )));
+      Jest.testPromise
+        "filters by typing, the first shown focused, the rest hidden" (fun () ->
+          palette ();
+          let user = H.setup () in
+          let* () = H.click user (input ()) in
+          let* () = H.keyboard user "fol" in
+          let typed = (items (), headings (), separators (), at_focus ()) in
+          let* () = H.keyboard user "{Backspace}" in
+          let deleted = at_focus () in
+          let* () = H.keyboard user "zz" in
+          let menu = (H.all_by_role "menu").(0) in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( typed,
+                  deleted,
+                  (items (), headings (), H.attribute menu "data-empty"),
+                  H.text menu )
+              |> toEqual
+                   ( ( [| "Create new folder..." |],
+                       [| "Actions" |],
+                       0,
+                       "Create new folder..." ),
+                     "none",
+                     ([| "No results" |], [||], Some ""),
+                     "No results" )));
+      Jest.testPromise "shows a separator only where it parts items shown"
+        (fun () ->
+          palette ();
+          let user = H.setup () in
+          let* () = H.click user (input ()) in
+          let* () = H.keyboard user "e" in
+          let both = separators () in
+          let* () = H.keyboard user "{Backspace}help" in
+          let alone = separators () in
+          let* () = H.keyboard user "{Control>}a{/Control}{Backspace}pre" in
+          Js.Promise.resolve
+            E.(
+              expect (both, alone, separators (), items ())
+              |> toEqual (2, 0, 0, [| "Preferences" |])));
+      Jest.testPromise "runs an item by Enter or a press, not a disabled one"
+        (fun () ->
+          let told = ref [] in
+          palette ~told ();
+          let user = H.setup () in
+          let* () = H.click user (input ()) in
+          let* () = H.keyboard user "{ArrowDown}{Enter}{ArrowDown}{Enter}" in
+          let* () = H.click user (H.by_text "Change theme") in
+          let* () = H.click user (H.by_text "Help center") in
+          Js.Promise.resolve
+            E.(
+              expect (List.rev !told, H.focused == input ())
+              |> toEqual
+                   ( [ "item file"; "list file"; "list folder"; "list help" ],
+                     true )));
+      Jest.testPromise "focuses the item the pointer is over" (fun () ->
+          palette ();
+          let user = H.setup () in
+          let* () = H.hover user (H.by_text "Preferences") in
+          let over = at_focus () in
+          let* () = H.hover user (H.by_text "Change theme") in
+          Js.Promise.resolve
+            E.(
+              expect (over, at_focus ())
+              |> toEqual ("Preferences", "Preferences")));
+      Jest.testPromise "empties the search by Escape before it goes further"
+        (fun () ->
+          palette ();
+          (* What a dialog around the palette is left: an Escape no part
+             handled. *)
+          let outside = ref 0 in
+          add_listener document "keydown" (fun e ->
+              if String.equal (key_of e) "Escape" && not (prevented e) then
+                incr outside);
+          let user = H.setup () in
+          let* () = H.click user (input ()) in
+          let* () = H.keyboard user "pre{ArrowDown}{Escape}" in
+          let first = (value (input ()), Array.length (items ()), !outside) in
+          let* () = H.keyboard user "{Escape}" in
+          Js.Promise.resolve
+            E.(
+              expect (first, at_focus (), !outside)
+              |> toEqual (("", 7, 0), "none", 1)));
+      Jest.testPromise "takes its text and its filter from the caller"
+        (fun () ->
+          let text, set_text = S.create_signal "" in
+          let asked = ref [] in
+          palette ~text
+            ~on_input_change:(fun t ->
+              asked := t :: !asked;
+              S.set set_text (String.uppercase_ascii t))
+            ~filter:(fun item typed ->
+              String.length typed > 0
+              && Char.equal item.[0] typed.[String.length typed - 1])
+            ();
+          let user = H.setup () in
+          let* () = H.click user (input ()) in
+          let* () = H.keyboard user "xp" in
+          Js.Promise.resolve
+            E.(
+              expect (List.rev !asked, value (input ()), items ())
+              |> toEqual ([ "x"; "Xp" ], "XP", [| "Preferences" |])));
+      Jest.testPromise "speaks the reader's language" (fun () ->
+          palette ~locale:"de-DE" ();
+          Js.Promise.resolve
+            E.(
+              expect (H.attribute (H.all_by_role "menu").(0) "aria-label")
+              |> toEqual (Some "Empfehlungen")));
+      Jest.testPromise "keeps the caller's attributes and ref" (fun () ->
+          let got_ref = ref false in
+          palette ~got_ref ();
+          Js.Promise.resolve
+            E.(
+              expect
+                ( H.attribute (input ()) "class",
+                  H.attribute (H.all_by_role "menu").(0) "data-testid",
+                  !got_ref )
+              |> toEqual (Some "search", Some "list", true)));
+      Jest.testPromise "outside a palette, refuses to be made" (fun () ->
+          let refused =
+            match H.render (fun () -> <Command.Input />) with
+            | () -> "made"
+            | exception Invalid_argument m -> m
+          in
+          Js.Promise.resolve
+            E.(
+              expect refused
+              |> toEqual "Command.Input is used inside a Command.Root"));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          palette ();
+          let user = H.setup () in
+          let* () = H.click user (input ()) in
+          let* () = H.keyboard user "{ArrowDown}" in
+          let* found = H.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))

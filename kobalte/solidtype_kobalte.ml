@@ -1429,7 +1429,7 @@ module Combobox = struct
   module Root = struct
     module Props = struct
       external check :
-        ?value:'option Js.Nullable.t Solidtype.Check.value ->
+        ?value:'option Js.Null.t Solidtype.Check.value ->
         ?default_value:'option Solidtype.Check.value ->
         ?on_change:('option Js.Nullable.t -> unit) ->
         ?id:string Solidtype.Check.value ->
@@ -2590,7 +2590,7 @@ module FileField = struct
         ?on_file_accept:(Types.File.t array -> unit) ->
         ?on_file_reject:(Types.FileRejection.t array -> unit) ->
         ?on_file_change:(Types.Details.t -> unit) ->
-        ?validate:(Types.File.t -> [ `TOO_MANY_FILES | `FILE_INVALID_TYPE | `FILE_TOO_LARGE | `FILE_TOO_SMALL ] array Js.Nullable.t) ->
+        ?validate:(Types.File.t -> [ `TOO_MANY_FILES | `FILE_INVALID_TYPE | `FILE_TOO_LARGE | `FILE_TOO_SMALL ] array Js.Null.t) ->
         ?id:string Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
         ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
@@ -3232,7 +3232,7 @@ module Menubar = struct
     module Props = struct
       external check :
         ?default_value:string Solidtype.Check.value ->
-        ?value:string Js.Nullable.t Solidtype.Check.value ->
+        ?value:string Js.Null.t Solidtype.Check.value ->
         ?on_value_change:(string Js.Nullable.t -> unit) ->
         ?loop:bool Solidtype.Check.value ->
         ?focus_on_alt:bool Solidtype.Check.value ->
@@ -3688,7 +3688,7 @@ module NavigationMenu = struct
         ?auto_focus_menu:bool Solidtype.Check.value ->
         ?on_auto_focus_menu_change:bool Solidtype.Solid.setter Solidtype.Check.value ->
         ?default_value:string Solidtype.Check.value ->
-        ?value:string Js.Nullable.t Solidtype.Check.value ->
+        ?value:string Js.Null.t Solidtype.Check.value ->
         ?on_value_change:(string Js.Nullable.t -> unit) ->
         ?loop:bool Solidtype.Check.value ->
         ?focus_on_alt:bool Solidtype.Check.value ->
@@ -4834,7 +4834,7 @@ module Search = struct
   module Root = struct
     module Props = struct
       external check :
-        ?value:'option Js.Nullable.t Solidtype.Check.value ->
+        ?value:'option Js.Null.t Solidtype.Check.value ->
         ?default_value:'option Solidtype.Check.value ->
         ?on_change:('option Js.Nullable.t -> unit) ->
         ?id:string Solidtype.Check.value ->
@@ -5354,7 +5354,7 @@ module Select = struct
   module Root = struct
     module Props = struct
       external check :
-        ?value:'option Js.Nullable.t Solidtype.Check.value ->
+        ?value:'option Js.Null.t Solidtype.Check.value ->
         ?default_value:'option Solidtype.Check.value ->
         ?on_change:('option Js.Nullable.t -> unit) ->
         ?id:string Solidtype.Check.value ->
@@ -6325,7 +6325,7 @@ module ToggleGroup = struct
   module Root = struct
     module Props = struct
       external check :
-        ?value:string Js.Nullable.t Solidtype.Check.value ->
+        ?value:string Js.Null.t Solidtype.Check.value ->
         ?default_value:string Solidtype.Check.value ->
         ?on_change:(string Js.Nullable.t -> unit) ->
         ?disabled:bool Solidtype.Check.value ->

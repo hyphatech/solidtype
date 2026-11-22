@@ -141,8 +141,7 @@ let make () =
                       name="time"
                       placeholder_value=(at_time ())
                       should_force_leading_zeros=(S.get leading_zeros)
-                      value=(Js.Nullable.fromOption
-                               (S.get picker.state.time_value))
+                      value=(Js.Null.fromOption (S.get picker.state.time_value))
                       on_change=(Option.iter picker.state.set_time_value)>
                       <Time_field.Group variant=`secondary>
                         <Time_field.Input>

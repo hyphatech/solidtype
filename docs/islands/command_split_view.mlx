@@ -1,0 +1,122 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Avatar = Solidtype_heroui.Avatar
+module Button = Solidtype_heroui.Button
+module Chip = Solidtype_heroui.Chip
+module Command = Solidtype_heroui.Command
+module Input = Solidtype_heroui.Input
+module Kbd = Solidtype_heroui.Kbd
+module Label = Solidtype_heroui.Label
+module Radio = Solidtype_heroui.Radio
+module Radio_group = Solidtype_heroui.Radio_group
+module Slider = Solidtype_heroui.Slider
+module Switch = Solidtype_heroui.Switch
+module Gravity = Solidtype_gravity_icons
+
+let components =
+  [|
+    ("Button", "Trigger actions", fun () -> <Gravity.Square />);
+    ("Input", "Retrieve user input", fun () -> <Gravity.Text />);
+    ("Radio", "Single choice input", fun () -> <Gravity.Circle_fill />);
+    ("Chip", "Annotate context", fun () -> <Gravity.Tag />);
+    ("Slider", "Free range picker", fun () -> <Gravity.Sliders />);
+    ("Avatar", "Illustrate the user", fun () -> <Gravity.Person_fill />);
+    ("Switch", "Toggle a setting", fun () -> <Gravity.Toggle_on />);
+  |]
+
+(* The component the focused item names, drawn beside the list. *)
+module Preview = struct
+  let%component make () =
+    let palette = Command.Context.use () in
+    <div class_="flex flex-1 items-center justify-center rounded-lg p-4">
+      (match S.get palette.focused_key with
+      | Some "Input" ->
+          <Input class_="w-48" placeholder="Your name" aria_label="Name" />
+      | Some "Radio" ->
+          <Radio_group default_value="a" aria_label="Plan">
+            <Radio value="a">
+              <Radio.Content>
+                <Radio.Control><Radio.Indicator /></Radio.Control> "Basic"
+              </Radio.Content>
+            </Radio>
+            <Radio value="b">
+              <Radio.Content>
+                <Radio.Control><Radio.Indicator /></Radio.Control> "Premium"
+              </Radio.Content>
+            </Radio>
+          </Radio_group>
+      | Some "Chip" -> <Chip color=`accent>"Chip"</Chip>
+      | Some "Slider" ->
+          <Slider class_="w-48" default_value=[| 40. |]>
+            <Label>"Volume"</Label>
+            <Slider.Track><Slider.Fill /> <Slider.Thumb /></Slider.Track>
+          </Slider>
+      | Some "Avatar" ->
+          <Avatar><Avatar.Fallback>"JD"</Avatar.Fallback></Avatar>
+      | Some "Switch" ->
+          <Switch>
+            <Switch.Content>
+              <Switch.Control><Switch.Thumb /></Switch.Control>
+              <Label>"Notifications"</Label>
+            </Switch.Content>
+          </Switch>
+      | Some _ | None -> <Button>"Primary"</Button>)
+    </div>
+end
+
+let make () =
+  <Command>
+    <Button variant=`outline>
+      "Split View "
+      <Kbd><Kbd.Abbr key_value=`command /> <Kbd.Content>"K"</Kbd.Content></Kbd>
+    </Button>
+    <Command.Backdrop>
+      <Command.Container size=`lg>
+        <Command.Dialog>
+          <Command.Input_group>
+            <Command.Input_group.Prefix>
+              <Gravity.Magnifier class_="size-4" />
+            </Command.Input_group.Prefix>
+            <Command.Input_group.Input
+              placeholder="Find components, packages, and interactions..."
+            />
+            <Command.Input_group.Clear_button />
+          </Command.Input_group>
+          <div class_="flex min-h-[308px]">
+            <Command.List class_="w-2/5 flex-none">
+              <Command.Group heading=(Jsx.string "Components")>
+                <For each=components>
+                  (fun (name, purpose, icon) _ ->
+                    <Command.Item
+                      id=name
+                      text_value=name
+                      class_="group rounded-xl data-[focused=true]:bg-blue-600 \
+                              data-[focused=true]:text-white">
+                      <div
+                        class_="flex size-8 shrink-0 items-center \
+                                justify-center rounded-lg bg-orange-500 \
+                                [&_svg]:text-white">
+                        (icon ())
+                      </div>
+                      <div class_="flex flex-col gap-0.5">
+                        <span class_="text-sm font-medium">
+                          (Jsx.string name)
+                        </span>
+                        <span
+                          class_="text-xs text-muted \
+                                  group-data-[focused=true]:text-white/70">
+                          (Jsx.string purpose)
+                        </span>
+                      </div>
+                    </Command.Item>)
+                </For>
+              </Command.Group>
+            </Command.List>
+            <div class_="w-px self-stretch bg-separator" />
+            <Preview />
+          </div>
+        </Command.Dialog>
+      </Command.Container>
+    </Command.Backdrop>
+  </Command>

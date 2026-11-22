@@ -143,6 +143,7 @@ Each component's page gives HeroUI's own examples in OCaml, and a table of its p
 - [AvatarGroup](pages/heroui/avatar-group.md): Display a stacked or grid group of avatars with overflow counting.
 - [Accordion](pages/heroui/accordion.md): A collapsible content panel for organizing information in a compact space.
 - [Breadcrumbs](pages/heroui/breadcrumbs.md): Navigation breadcrumbs showing the current page's location within a hierarchy.
+- [Command](pages/heroui/command.md): A command palette, a search that filters a menu of commands in a dialog.
 - [Disclosure](pages/heroui/disclosure.md): A disclosure is a collapsible section with a header containing a heading and a trigger button, and a panel that wraps the content.
 - [DisclosureGroup](pages/heroui/disclosure-group.md): Container that manages multiple Disclosure items with coordinated expanded states.
 - [Link](pages/heroui/link.md): A styled anchor component for navigation with built-in icon support.

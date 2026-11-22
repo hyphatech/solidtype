@@ -254,7 +254,11 @@ let backdrop ~slot ~portal_container ~class_ ~style ~ref:given_ref ~dismissable
         (shown ())
       </Kobalte.Root>
 
-let container (f : t) ~slot ~class_ ~placement ~ref:given_ref ~as_ ~others
+let placed = function
+  | Some placement -> Jsx.data (placement ())
+  | None -> Jsx.flag false
+
+let container ?placement (f : t) ~slot ~class_ ~ref:given_ref ~as_ ~others
     children =
   let o = f.overlay in
   <div
@@ -262,7 +266,7 @@ let container (f : t) ~slot ~class_ ~placement ~ref:given_ref ~as_ ~others
     ref=(fun e ->
           ignore (given_ref e : unit option);
           Overlay.watch o e)
-    data_placement=(Jsx.data (placement ()))
+    data_placement=(placed placement)
     data_slot=(Jsx.data slot)
     data_entering=(Jsx.flag (Overlay.entering o))
     data_exiting=(Jsx.flag (Overlay.exiting o))
@@ -271,8 +275,9 @@ let container (f : t) ~slot ~class_ ~placement ~ref:given_ref ~as_ ~others
     (children (overlay_state o))
   </div>
 
-let dialog ?(on_element = fun (_ : Dom.element) -> ()) (f : t) ~slot ~role
-    ~class_ ~placement ~ref:given_ref ~on_focus_out ~as_ ~others children =
+let dialog ?(on_element = fun (_ : Dom.element) -> ())
+    ?(focus_on_open = fun () -> None) ?placement ?aria_label (f : t) ~slot ~role
+    ~class_ ~ref:given_ref ~on_focus_out ~as_ ~others children =
   let content = ref None in
   Overlay.return_focus
     ~is_open:(fun () -> not (Overlay.exiting f.overlay))
@@ -282,11 +287,14 @@ let dialog ?(on_element = fun (_ : Dom.element) -> ()) (f : t) ~slot ~role
   (* React Aria's dialog takes the focus as it opens, where Kobalte gives it
      to the first button inside. *)
   let focus_dialog e =
-    match !content with
-    | Some c ->
+    match (focus_on_open (), !content) with
+    | Some inside, _ ->
+        prevent_default e;
+        Overlay.focus inside
+    | None, Some c ->
         prevent_default e;
         Overlay.focus c
-    | None -> ()
+    | None, None -> ()
   in
   <As_section
     as_=(Jsx.drawn_as
@@ -294,6 +302,7 @@ let dialog ?(on_element = fun (_ : Dom.element) -> ()) (f : t) ~slot ~role
            "section")
     class_=(class_ ())
     role
+    ?aria_label=(Option.map (fun name -> name ()) aria_label)
     ref=(fun e ->
           ignore (given_ref e : unit option);
           let e = as_element e in
@@ -317,7 +326,7 @@ let dialog ?(on_element = fun (_ : Dom.element) -> ()) (f : t) ~slot ~role
                      Option.is_none (Js.Null.toOption (related_target e))
                      && not (Overlay.exiting f.overlay)
                    then Overlay.focus (target e))
-    data_placement=(Jsx.data (placement ()))
+    data_placement=(placed placement)
     data_slot=(Jsx.data slot)
     props=others>
     (if

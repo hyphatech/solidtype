@@ -22,7 +22,7 @@ let make () =
     <Time_field
       class_="w-[256px]"
       name="time"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Time"</Label>
       <Time_field.Group>

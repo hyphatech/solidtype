@@ -86,6 +86,9 @@ headless/            solidtype-headless: the components Kobalte lacks, one
   date_picker        a date field whose group's trigger opens a popover
                      of a calendar choosing its date or its range, a time
                      kept, as React Stately's pickers keep them
+  command            a search that filters a menu of commands, the focus
+                     kept in the search while the keys move through those
+                     shown, as React Aria's autocomplete filters its menu
   color_picker       one colour its parts share, as React Aria's: the colour
                      components below read it, given no value of their own;
                      it draws nothing
@@ -150,7 +153,7 @@ heroui/              solidtype-heroui: HeroUI's components ported onto
   selection_indicator
                      what a tab's and a segment's indicator share: drawn in
                      the selected item, it starts where the last one was
-  segment trend_chip text_shimmer number_stepper
+  segment trend_chip text_shimmer number_stepper command
                      components HeroUI ships no stylesheet for, made as
                      every port is: their look a stylesheet each
   table.css          what HeroUI's table stylesheet does not draw: a column
@@ -534,14 +537,18 @@ break.
   its component and its check: its own options, then its children by
   kind, then its element's attributes' `check`, an `external` nothing
   calls. Its options map as an element's attributes do, and further: a
-  number is a `float`, since a slider's value is fractional; `null` is
-  `Js.Nullable.t`, since Kobalte reads `undefined` as uncontrolled and
-  `null` as controlled and empty; `undefined` is absence for an optional
-  prop, an optional argument, `?name`, then `()`, for a function the user
-  calls, and an `option` anywhere else; members of different JavaScript
-  kinds are `Types.Either.t`, built by `left` and `right`, which is each
-  value as it is; an option accessor that takes a key or a function
-  takes the function, and one that takes only a key,
+  number is a `float`, since a slider's value is fractional; `T | null`
+  given to Kobalte -- an option, an argument, what a callback returns -- is
+  `Js.Null.t`, since Kobalte reads `undefined` as uncontrolled and `null`
+  as controlled and empty, and `Js.Null.t` cannot hold `undefined`, so an
+  `option` becomes one only by `Js.Null.fromOption`, whose `None` is
+  `null`; read from Kobalte, or `T | null | undefined` given, it is
+  `Js.Nullable.t`, which takes whatever JavaScript holds; `undefined` is
+  absence for an optional prop, an optional argument, `?name`, then `()`,
+  for a function the user calls, and an `option` anywhere else; members
+  of different JavaScript kinds are `Types.Either.t`, built by `left` and
+  `right`, which is each value as it is; an option accessor that takes a
+  key or a function takes the function, and one that takes only a key,
   `optionGroupChildren`, a `string`; a root whose value turns on
   `multiple` is two modules, `Root` and `Root_multiple`; a named object
   type is a module of `Types`, with a getter per field, a curried
@@ -564,8 +571,10 @@ break.
   hooks its lists are made of are, from its root, as `Selection`. Why:
   Kobalte's parts are hundreds, and a binding by hand would be a second
   copy of its types; a component Kobalte lacks is made of its hooks. Test:
-  `make lint` runs the generator with `--check`, and
-  `test/kobalte/selection_test.mlx` makes a list of them.
+  `make lint` runs the generator with `--check`,
+  `test/kobalte/selection_test.mlx` makes a list of them, and
+  `test/does_not_compile.t` refuses `Js.Nullable.fromOption` where
+  `T | null` is given.
 - **HeroUI's variant functions are generated from @heroui/styles'
   declarations**, by `generate/heroui.ts` into `heroui/styles.ml` and its
   `.mli`, on the same core as Kobalte's: a module per function,

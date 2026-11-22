@@ -18,7 +18,7 @@ let make () =
       aria_label="Booking range"
       is_date_unavailable
       min_value=(D.today (D.get_local_time_zone ()))
-      value=(Js.Nullable.fromOption (S.get selected))
+      value=(Js.Null.fromOption (S.get selected))
       on_change=(S.set set_selected)>
       <Range_calendar.Header>
         <Range_calendar.Heading />

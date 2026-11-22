@@ -43,7 +43,7 @@ test("the release's plugin gives an application the extras' stylesheet, in the c
     .filter((file) => file.endsWith(".css"))
     .map((file) => readFileSync(join(assets, file), "utf8"))
     .join("\n");
-  for (const block of [".segment", ".trend-chip__indicator", ".text-shimmer"]) {
+  for (const block of [".segment", ".trend-chip__indicator", ".text-shimmer", ".command__dialog"]) {
     const at = css.indexOf(`  ${block} {`);
     expect(at, `${block} is in the stylesheet`).toBeGreaterThan(-1);
     const layer = css.slice(0, at).match(/@layer (\w+) \{(?![\s\S]*@layer \w+ \{)/)?.[1];

@@ -109,8 +109,8 @@ module Context : sig
 end
 
 (** A field of a date, a [<div>]. Its value is [value] while it is given one --
-    [Js.Nullable.null] keeps it empty -- else the one it keeps, [default_value]
-    at first, and each change calls [on_change], [None] once every segment is
+    [Js.Null.empty] keeps it empty -- else the one it keeps, [default_value] at
+    first, and each change calls [on_change], [None] once every segment is
     erased. A segment typed while it has none starts from [placeholder_value],
     else today. It is named by [aria_label] or [aria_labelledby], else by its
     {!Label}, and described by its {!Description} and {!Error_message};
@@ -125,7 +125,7 @@ module Root : sig
     type t
 
     val check :
-      ?value:D.Types.CalendarDate.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:D.Types.CalendarDate.t Js.Null.t Solidtype.Check.value ->
       ?default_value:D.Types.CalendarDate.t Solidtype.Check.value ->
       ?on_change:(D.Types.CalendarDate.t option -> unit) ->
       ?placeholder_value:D.Types.CalendarDate.t Solidtype.Check.value ->
@@ -164,7 +164,7 @@ module Root_date_time : sig
     type t
 
     val check :
-      ?value:D.Types.CalendarDateTime.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:D.Types.CalendarDateTime.t Js.Null.t Solidtype.Check.value ->
       ?default_value:D.Types.CalendarDateTime.t Solidtype.Check.value ->
       ?on_change:(D.Types.CalendarDateTime.t option -> unit) ->
       ?placeholder_value:D.Types.CalendarDateTime.t Solidtype.Check.value ->
@@ -207,7 +207,7 @@ module Root_zoned : sig
     type t
 
     val check :
-      ?value:D.Types.ZonedDateTime.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:D.Types.ZonedDateTime.t Js.Null.t Solidtype.Check.value ->
       ?default_value:D.Types.ZonedDateTime.t Solidtype.Check.value ->
       ?on_change:(D.Types.ZonedDateTime.t option -> unit) ->
       placeholder_value:D.Types.ZonedDateTime.t Solidtype.Check.value ->
@@ -247,13 +247,15 @@ end
     there, kept or given as a field's is; [on_change] is told it, and [None] as
     an end is erased. It is invalid while [is_invalid], while its end is before
     its start, and while either end is out of its range or unavailable; it is
-    described by the range as its locale tells it. *)
+    described by the range as its locale tells it. The arrows, Backspace in an
+    empty segment and a segment typed whole move through both ends' segments, as
+    React Aria's group does. *)
 module Root_range : sig
   module Props : sig
     type t
 
     val check :
-      ?value:D.Types.CalendarDate.t range Js.Nullable.t Solidtype.Check.value ->
+      ?value:D.Types.CalendarDate.t range Js.Null.t Solidtype.Check.value ->
       ?default_value:D.Types.CalendarDate.t range Solidtype.Check.value ->
       ?on_change:(D.Types.CalendarDate.t range option -> unit) ->
       ?start_name:string Solidtype.Check.value ->
@@ -288,8 +290,7 @@ module Root_range_date_time : sig
     type t
 
     val check :
-      ?value:
-        D.Types.CalendarDateTime.t range Js.Nullable.t Solidtype.Check.value ->
+      ?value:D.Types.CalendarDateTime.t range Js.Null.t Solidtype.Check.value ->
       ?default_value:D.Types.CalendarDateTime.t range Solidtype.Check.value ->
       ?on_change:(D.Types.CalendarDateTime.t range option -> unit) ->
       ?start_name:string Solidtype.Check.value ->
@@ -326,7 +327,7 @@ module Root_range_zoned : sig
     type t
 
     val check :
-      ?value:D.Types.ZonedDateTime.t range Js.Nullable.t Solidtype.Check.value ->
+      ?value:D.Types.ZonedDateTime.t range Js.Null.t Solidtype.Check.value ->
       ?default_value:D.Types.ZonedDateTime.t range Solidtype.Check.value ->
       ?on_change:(D.Types.ZonedDateTime.t range option -> unit) ->
       ?start_name:string Solidtype.Check.value ->

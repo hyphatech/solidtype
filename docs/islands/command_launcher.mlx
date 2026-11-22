@@ -1,0 +1,83 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Command = Solidtype_heroui.Command
+module Kbd = Solidtype_heroui.Kbd
+module Gravity = Solidtype_gravity_icons
+
+(* An icon on a square of its colour, and what kind of entry it is. *)
+let entry ~colour ~icon ~kind name =
+  <Command.Item class_="h-10">
+    <div
+      class_=("flex size-5 shrink-0 items-center justify-center rounded \
+               [&_svg]:size-3 [&_svg]:text-white " ^ colour)>
+      icon
+    </div>
+    <span>(Jsx.string name)</span>
+    <span class_="ml-auto text-[13px] text-muted">(Jsx.string kind)</span>
+  </Command.Item>
+
+let hint key =
+  <kbd
+    class_="flex h-5 items-center rounded bg-default px-1.5 text-[11px] \
+            text-muted">
+    (Jsx.string key)
+  </kbd>
+
+let make () =
+  <Command>
+    <Button variant=`outline>
+      "Launcher "
+      <Kbd><Kbd.Abbr key_value=`command /> <Kbd.Content>"K"</Kbd.Content></Kbd>
+    </Button>
+    <Command.Backdrop>
+      <Command.Container size=`lg>
+        <Command.Dialog>
+          <Command.Input_group>
+            <Command.Input_group.Input
+              placeholder="Search for apps and commands..."
+            />
+            <Command.Input_group.Clear_button />
+          </Command.Input_group>
+          <Command.List>
+            <Command.Group heading=(Jsx.string "Suggestions")>
+              (entry ~colour:"bg-violet-500" ~icon:<Gravity.Palette />
+                 ~kind:"Application" "Design Tool")
+              (entry ~colour:"bg-indigo-500" ~icon:<Gravity.Chart_line />
+                 ~kind:"Application" "Project Tracker")
+              (entry ~colour:"bg-sky-500" ~icon:<Gravity.Comment />
+                 ~kind:"Application" "Team Chat")
+              (entry ~colour:"bg-red-500" ~icon:<Gravity.Video />
+                 ~kind:"Application" "Video Platform")
+              (entry ~colour:"bg-amber-500" ~icon:<Gravity.Pencil />
+                 ~kind:"Application" "Notes")
+            </Command.Group>
+            <Command.Group heading=(Jsx.string "Commands")>
+              (entry
+                 ~colour:"rounded-md bg-gradient-to-b from-red-400 to-red-600"
+                 ~icon:<Gravity.Copy /> ~kind:"Command" "Clipboard History")
+              (entry
+                 ~colour:
+                   "rounded-md bg-gradient-to-b from-emerald-400 to-emerald-600"
+                 ~icon:<Gravity.Wrench /> ~kind:"Command" "Import Extension")
+              (entry
+                 ~colour:
+                   "rounded-md bg-gradient-to-b from-emerald-400 to-emerald-600"
+                 ~icon:<Gravity.Gear /> ~kind:"Command" "Manage Extensions")
+            </Command.Group>
+          </Command.List>
+          <Command.Footer class_="justify-between">
+            <div class_="flex items-center gap-2">
+              <span class_="text-xs font-medium">"Open Application"</span>
+              (hint {js|↵|js})
+            </div>
+            <div class_="flex items-center gap-2">
+              <div class_="h-3 w-px bg-border" />
+              <span class_="text-xs">"Actions"</span>
+              <div class_="flex gap-0.5">(hint {js|⌘|js}) (hint "K")</div>
+            </div>
+          </Command.Footer>
+        </Command.Dialog>
+      </Command.Container>
+    </Command.Backdrop>
+  </Command>

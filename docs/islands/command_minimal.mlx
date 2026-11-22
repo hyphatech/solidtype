@@ -1,0 +1,64 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Command = Solidtype_heroui.Command
+module Kbd = Solidtype_heroui.Kbd
+module Gravity = Solidtype_gravity_icons
+
+(* A command marked by a bar at its start while it is focused, its keys
+   beside it. *)
+let command ~icon ~keys name =
+  <Command.Item
+    class_="gap-3 rounded-none before:absolute before:inset-y-0 before:left-0 \
+            before:w-[3px] before:bg-[#5f6ad2] before:opacity-0 \
+            data-[focused=true]:before:opacity-100">
+    icon
+    <span>(Jsx.string name)</span>
+    <div class_="ml-auto flex gap-2">
+      <For each=keys>
+        (fun key _ ->
+          <kbd class_="font-mono text-[13px] text-muted">(Jsx.string key)</kbd>)
+      </For>
+    </div>
+  </Command.Item>
+
+let make () =
+  <Command>
+    <Button variant=`outline>
+      "Minimal "
+      <Kbd><Kbd.Abbr key_value=`command /> <Kbd.Content>"K"</Kbd.Content></Kbd>
+    </Button>
+    <Command.Backdrop>
+      <Command.Container size=`lg>
+        <Command.Dialog>
+          <Command.Header class_="px-4 pt-4 pb-0">
+            <div
+              class_="flex h-6 items-center rounded bg-default px-2 text-xs \
+                      text-muted">
+              "Issue - FUN-343"
+            </div>
+          </Command.Header>
+          <Command.Input_group>
+            <Command.Input_group.Input
+              class_="text-lg caret-[#6e5ed2]"
+              placeholder="Type a command or search..."
+            />
+            <Command.Input_group.Clear_button />
+          </Command.Input_group>
+          <Command.List>
+            (command ~icon:<Gravity.Person /> ~keys:[| "A" |] "Assign to...")
+            (command ~icon:<Gravity.Person /> ~keys:[| "I" |] "Assign to me")
+            (command ~icon:<Gravity.Circle_dashed /> ~keys:[| "S" |]
+               "Change status...")
+            (command ~icon:<Gravity.Chart_bar /> ~keys:[| "P" |]
+               "Change priority...")
+            (command ~icon:<Gravity.Tag /> ~keys:[| "L" |] "Change labels...")
+            (command ~icon:<Gravity.Trash_bin /> ~keys:[| {js|⇧|js}; "L" |]
+               "Remove label...")
+            (command ~icon:<Gravity.Clock /> ~keys:[| {js|⇧|js}; "D" |]
+               "Set due date...")
+          </Command.List>
+        </Command.Dialog>
+      </Command.Container>
+    </Command.Backdrop>
+  </Command>

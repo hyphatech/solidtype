@@ -26,7 +26,7 @@
     [Time.make ~hour:14 ~minute:30 ()] or [parse_time "14:30"]. A time on a date
     is {!Date_time}'s, and a time in a zone {!Zoned}'s, each given back as the
     kind it was given: the three share the parts below. A [value] of
-    [Js.Nullable.null] controls a field empty, as React's [null] does, and
+    [Js.Null.empty] controls a field empty, as React's [null] does, and
     [on_change] is told [None] once every segment is erased. Its locale is the
     one an [I18nProvider] names, else [en-GB], whatever the browser reads, as a
     {!Date_field}'s is. A part is used inside a field: elsewhere it raises
@@ -163,7 +163,7 @@ module Props : sig
 
   val check :
     ?value:
-      Solidtype_internationalized_date.Types.Time.t Js.Nullable.t
+      Solidtype_internationalized_date.Types.Time.t Js.Null.t
       Solidtype.Check.value ->
     ?default_value:
       Solidtype_internationalized_date.Types.Time.t Solidtype.Check.value ->
@@ -210,7 +210,7 @@ module Date_time : sig
 
     val check :
       ?value:
-        Solidtype_internationalized_date.Types.CalendarDateTime.t Js.Nullable.t
+        Solidtype_internationalized_date.Types.CalendarDateTime.t Js.Null.t
         Solidtype.Check.value ->
       ?default_value:
         Solidtype_internationalized_date.Types.CalendarDateTime.t
@@ -265,7 +265,7 @@ module Zoned : sig
 
     val check :
       ?value:
-        Solidtype_internationalized_date.Types.ZonedDateTime.t Js.Nullable.t
+        Solidtype_internationalized_date.Types.ZonedDateTime.t Js.Null.t
         Solidtype.Check.value ->
       ?default_value:
         Solidtype_internationalized_date.Types.ZonedDateTime.t

@@ -112,8 +112,8 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
             | `single -> false)
       fallback=(<Kobalte.Root
                   value=(match S.get keys with
-                        | [||] -> Js.Nullable.null
-                        | ks -> Js.Nullable.return ks.(0))
+                        | [||] -> Js.Null.empty
+                        | ks -> Js.Null.return ks.(0))
                   orientation=(S.get orientation)
                   disabled=(all_disabled ())
                   ?aria_label=(S.get aria_label)

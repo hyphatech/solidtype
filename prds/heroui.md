@@ -519,6 +519,9 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] DateRangePicker, on the headless date field's range and the headless
   picker, its range calendar given the picker's range
 - [ ] Toolbar, InputOTP
+- [x] Command, beyond HeroUI's set: made headless of Kobalte's list hooks, a
+  search that filters a menu as React Aria's autocomplete filters it, the
+  focus kept in the search; its look a stylesheet of its own
 
 ## Verification
 

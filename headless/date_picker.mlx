@@ -260,9 +260,9 @@ let opened (props : Common.t) =
    value, the date and the time chosen apart while it has none, and whether
    its popover is open. [field] draws the root's date field, given its value,
    what it is told and what it holds. *)
-let picker (type v) ~(kind : v kind)
-    ~(value : v Js.Nullable.t option S.accessor) ~(default_value : v option)
-    ~(on_change : v option -> unit) ~(placeholder_value : v option S.accessor)
+let picker (type v) ~(kind : v kind) ~(value : v Js.Null.t option S.accessor)
+    ~(default_value : v option) ~(on_change : v option -> unit)
+    ~(placeholder_value : v option S.accessor)
     ~(min_value : v option S.accessor) ~(max_value : v option S.accessor)
     ~(is_date_unavailable : (v -> bool) option S.accessor)
     ~(children : unit -> v state Jsx.children)
@@ -270,16 +270,14 @@ let picker (type v) ~(kind : v kind)
        v state -> (Solidtype.Html.Div.props -> Jsx.element) option S.accessor)
     (props : Common.t)
     ~(field :
-       value:v Js.Nullable.t S.accessor ->
+       value:v Js.Null.t S.accessor ->
        on_change:(v option -> unit) ->
        as_:(Solidtype.Html.Div.props -> Jsx.element) option S.accessor ->
        (unit -> Jsx.element) ->
        Jsx.element) =
   let kept, set_kept = S.create_signal default_value in
   let current () =
-    match S.get value with
-    | Some v -> Js.Nullable.toOption v
-    | None -> S.get kept
+    match S.get value with Some v -> Js.Null.toOption v | None -> S.get kept
   in
   let set_value v =
     if Option.is_none (S.get value) then S.set set_kept v;
@@ -391,7 +389,7 @@ let picker (type v) ~(kind : v kind)
   in
   shell ~is_open ~set_open props (fun () ->
       field
-        ~value:(S.accessor (fun () -> Js.Nullable.fromOption (current ())))
+        ~value:(S.accessor (fun () -> Js.Null.fromOption (current ())))
         ~on_change:set_value ~as_:(as_ state) inside)
 
 module Root = struct
@@ -402,7 +400,7 @@ module Root = struct
     type predicate
 
     external check :
-      ?value:V.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:V.t Js.Null.t Solidtype.Check.value ->
       ?default_value:V.t Solidtype.Check.value ->
       ?on_change:(V.t option -> unit) ->
       ?placeholder_value:V.t Solidtype.Check.value ->
@@ -436,7 +434,7 @@ module Root = struct
       (unit -> unit) Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external value : t -> V.t Js.Nullable.t option = "value" [@@mel.get]
+    external value : t -> V.t Js.Null.t option = "value" [@@mel.get]
     external default_value : t -> V.t option = "defaultValue" [@@mel.get]
 
     external on_change : t -> ((V.t option -> unit)[@u]) option = "onChange"
@@ -512,7 +510,7 @@ module Root_date_time = struct
     type predicate
 
     external check :
-      ?value:V.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:V.t Js.Null.t Solidtype.Check.value ->
       ?default_value:V.t Solidtype.Check.value ->
       ?on_change:(V.t option -> unit) ->
       ?placeholder_value:V.t Solidtype.Check.value ->
@@ -548,7 +546,7 @@ module Root_date_time = struct
       (unit -> unit) Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external value : t -> V.t Js.Nullable.t option = "value" [@@mel.get]
+    external value : t -> V.t Js.Null.t option = "value" [@@mel.get]
     external default_value : t -> V.t option = "defaultValue" [@@mel.get]
 
     external on_change : t -> ((V.t option -> unit)[@u]) option = "onChange"
@@ -636,7 +634,7 @@ module Root_zoned = struct
     type predicate
 
     external check :
-      ?value:V.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:V.t Js.Null.t Solidtype.Check.value ->
       ?default_value:V.t Solidtype.Check.value ->
       ?on_change:(V.t option -> unit) ->
       placeholder_value:V.t Solidtype.Check.value ->
@@ -673,7 +671,7 @@ module Root_zoned = struct
       (unit -> unit) Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external value : t -> V.t Js.Nullable.t option = "value" [@@mel.get]
+    external value : t -> V.t Js.Null.t option = "value" [@@mel.get]
     external default_value : t -> V.t option = "defaultValue" [@@mel.get]
 
     external on_change : t -> ((V.t option -> unit)[@u]) option = "onChange"
@@ -778,7 +776,7 @@ type 'v range_state = {
    range, the dates and the times chosen apart while it has none, and whether
    its popover is open. *)
 let range_picker (type v) ~(kind : v kind)
-    ~(value : v Date_field.range Js.Nullable.t option S.accessor)
+    ~(value : v Date_field.range Js.Null.t option S.accessor)
     ~(default_value : v Date_field.range option)
     ~(on_change : v Date_field.range option -> unit)
     ~(placeholder_value : v option S.accessor)
@@ -790,16 +788,14 @@ let range_picker (type v) ~(kind : v kind)
        (Solidtype.Html.Div.props -> Jsx.element) option S.accessor)
     (props : Common.t)
     ~(field :
-       value:v Date_field.range Js.Nullable.t S.accessor ->
+       value:v Date_field.range Js.Null.t S.accessor ->
        on_change:(v Date_field.range option -> unit) ->
        as_:(Solidtype.Html.Div.props -> Jsx.element) option S.accessor ->
        (unit -> Jsx.element) ->
        Jsx.element) =
   let kept, set_kept = S.create_signal default_value in
   let current () =
-    match S.get value with
-    | Some v -> Js.Nullable.toOption v
-    | None -> S.get kept
+    match S.get value with Some v -> Js.Null.toOption v | None -> S.get kept
   in
   let set_value v =
     if Option.is_none (S.get value) then S.set set_kept v;
@@ -926,7 +922,7 @@ let range_picker (type v) ~(kind : v kind)
   in
   shell ~is_open ~set_open props (fun () ->
       field
-        ~value:(S.accessor (fun () -> Js.Nullable.fromOption (current ())))
+        ~value:(S.accessor (fun () -> Js.Null.fromOption (current ())))
         ~on_change:set_value ~as_:(as_ state) inside)
 
 module Root_range = struct
@@ -937,7 +933,7 @@ module Root_range = struct
     type predicate
 
     external check :
-      ?value:V.t Date_field.range Js.Nullable.t Solidtype.Check.value ->
+      ?value:V.t Date_field.range Js.Null.t Solidtype.Check.value ->
       ?default_value:V.t Date_field.range Solidtype.Check.value ->
       ?on_change:(V.t Date_field.range option -> unit) ->
       ?start_name:string Solidtype.Check.value ->
@@ -972,7 +968,7 @@ module Root_range = struct
       (unit -> unit) Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external value : t -> V.t Date_field.range Js.Nullable.t option = "value"
+    external value : t -> V.t Date_field.range Js.Null.t option = "value"
     [@@mel.get]
 
     external default_value : t -> V.t Date_field.range option = "defaultValue"
@@ -1052,7 +1048,7 @@ module Root_range_date_time = struct
     type predicate
 
     external check :
-      ?value:V.t Date_field.range Js.Nullable.t Solidtype.Check.value ->
+      ?value:V.t Date_field.range Js.Null.t Solidtype.Check.value ->
       ?default_value:V.t Date_field.range Solidtype.Check.value ->
       ?on_change:(V.t Date_field.range option -> unit) ->
       ?start_name:string Solidtype.Check.value ->
@@ -1089,7 +1085,7 @@ module Root_range_date_time = struct
       (unit -> unit) Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external value : t -> V.t Date_field.range Js.Nullable.t option = "value"
+    external value : t -> V.t Date_field.range Js.Null.t option = "value"
     [@@mel.get]
 
     external default_value : t -> V.t Date_field.range option = "defaultValue"
@@ -1181,7 +1177,7 @@ module Root_range_zoned = struct
     type predicate
 
     external check :
-      ?value:V.t Date_field.range Js.Nullable.t Solidtype.Check.value ->
+      ?value:V.t Date_field.range Js.Null.t Solidtype.Check.value ->
       ?default_value:V.t Date_field.range Solidtype.Check.value ->
       ?on_change:(V.t Date_field.range option -> unit) ->
       ?start_name:string Solidtype.Check.value ->
@@ -1219,7 +1215,7 @@ module Root_range_zoned = struct
       (unit -> unit) Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external value : t -> V.t Date_field.range Js.Nullable.t option = "value"
+    external value : t -> V.t Date_field.range Js.Null.t option = "value"
     [@@mel.get]
 
     external default_value : t -> V.t Date_field.range option = "defaultValue"

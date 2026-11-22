@@ -20,7 +20,7 @@ let make () =
     <Color_field
       class_="w-[280px]"
       name="color"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Color"</Label>
       <Color_field.Group>

@@ -1,0 +1,974 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Selection = Solidtype_kobalte.Selection
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
+module Either = Types.Either
+module Delegate = Types.KeyboardDelegate
+module List_state = Types.ListState
+module Manager = Types.MultipleSelectionManager
+module Selectable_list = Types.Selection_CreateSelectableList
+
+(* Whether [other] follows [e] on the page, by DOM's bit for it. *)
+external position : _ Dom.element_like -> _ Dom.element_like -> int
+  = "compareDocumentPosition"
+[@@mel.send]
+
+type rect
+
+external bounds : _ Dom.element_like -> rect = "getBoundingClientRect"
+[@@mel.send]
+
+external top : rect -> float = "top" [@@mel.get]
+
+external client_height : _ Dom.element_like -> float = "clientHeight"
+[@@mel.get]
+
+external pressed : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external shift : Dom.keyboardEvent -> bool = "shiftKey" [@@mel.get]
+external composing : Dom.keyboardEvent -> bool = "isComposing" [@@mel.get]
+external prevent : Dom.keyboardEvent -> unit = "preventDefault" [@@mel.send]
+external prevent_mouse : Dom.mouseEvent -> unit = "preventDefault" [@@mel.send]
+
+external input_target : Dom.inputEvent -> Dom.htmlInputElement = "target"
+[@@mel.get]
+
+external input_value : Dom.htmlInputElement -> string = "value" [@@mel.get]
+
+(* How the text changed, an InputEvent's; [undefined] where the event is not
+   one, which is no typing forward. *)
+external input_type : Dom.inputEvent -> string Js.undefined = "inputType"
+[@@mel.get]
+
+external focus : Dom.htmlInputElement -> unit = "focus" [@@mel.send]
+external pointer_type : Dom.pointerEvent -> string = "pointerType" [@@mel.get]
+
+(* Kobalte's state, an attribute present and empty, or none. *)
+let state on = if on then Jsx.data "" else Jsx.flag false
+
+type translations = { suggestions : string; clear_search : string }
+
+let english = { suggestions = "Suggestions"; clear_search = "Clear search" }
+
+let translated =
+  [
+    ( "ar-AE",
+      { suggestions = {js|مقترحات|js}; clear_search = {js|مسح البحث|js} } );
+    ( "bg-BG",
+      {
+        suggestions = {js|Предложения|js};
+        clear_search = {js|Изчистване на търсене|js};
+      } );
+    ( "cs-CZ",
+      { suggestions = {js|Návrhy|js}; clear_search = {js|Vymazat hledání|js} }
+    );
+    ("da-DK", { suggestions = "Forslag"; clear_search = {js|Ryd søgning|js} });
+    ( "de-DE",
+      {
+        suggestions = "Empfehlungen";
+        clear_search = {js|Suche zurücksetzen|js};
+      } );
+    ( "el-GR",
+      {
+        suggestions = {js|Προτάσεις|js};
+        clear_search = {js|Απαλοιφή αναζήτησης|js};
+      } );
+    ("en-US", english);
+    ( "es-ES",
+      { suggestions = "Sugerencias"; clear_search = {js|Borrar búsqueda|js} } );
+    ( "et-EE",
+      { suggestions = "Soovitused"; clear_search = {js|Tühjenda otsing|js} } );
+    ( "fi-FI",
+      { suggestions = "Ehdotukset"; clear_search = {js|Tyhjennä haku|js} } );
+    ( "fr-FR",
+      { suggestions = "Suggestions"; clear_search = "Effacer la recherche" } );
+    ("he-IL", { suggestions = {js|הצעות|js}; clear_search = {js|נקה חיפוש|js} });
+    ( "hr-HR",
+      { suggestions = "Prijedlozi"; clear_search = {js|Obriši pretragu|js} } );
+    ( "hu-HU",
+      { suggestions = "Javaslatok"; clear_search = {js|Keresés törlése|js} } );
+    ( "it-IT",
+      { suggestions = "Suggerimenti"; clear_search = "Cancella ricerca" } );
+    ("ja-JP", { suggestions = {js|候補|js}; clear_search = {js|検索をクリア|js} });
+    ("ko-KR", { suggestions = {js|제안|js}; clear_search = {js|검색 지우기|js} });
+    ( "lt-LT",
+      {
+        suggestions = {js|Pasiūlymai|js};
+        clear_search = {js|Išvalyti iešką|js};
+      } );
+    ( "lv-LV",
+      { suggestions = "Ieteikumi"; clear_search = {js|Notīrīt meklēšanu|js} } );
+    ("nb-NO", { suggestions = "Forslag"; clear_search = {js|Tøm søk|js} });
+    ("nl-NL", { suggestions = "Suggesties"; clear_search = "Zoekactie wissen" });
+    ( "pl-PL",
+      {
+        suggestions = "Sugestie";
+        clear_search = {js|Wyczyść zawartość wyszukiwania|js};
+      } );
+    ( "pt-BR",
+      { suggestions = {js|Sugestões|js}; clear_search = "Limpar pesquisa" } );
+    ( "pt-PT",
+      { suggestions = {js|Sugestões|js}; clear_search = "Limpar pesquisa" } );
+    ( "ro-RO",
+      { suggestions = "Sugestii"; clear_search = {js|Ştergeţi căutarea|js} } );
+    ( "ru-RU",
+      {
+        suggestions = {js|Предложения|js};
+        clear_search = {js|Очистить поиск|js};
+      } );
+    ( "sk-SK",
+      {
+        suggestions = {js|Návrhy|js};
+        clear_search = {js|Vymazať vyhľadávanie|js};
+      } );
+    ( "sl-SI",
+      { suggestions = "Predlogi"; clear_search = {js|Počisti iskanje|js} } );
+    ( "sr-SP",
+      { suggestions = "Predlozi"; clear_search = {js|Obriši pretragu|js} } );
+    ( "sv-SE",
+      { suggestions = {js|Förslag|js}; clear_search = {js|Rensa sökning|js} } );
+    ( "tr-TR",
+      { suggestions = {js|Öneriler|js}; clear_search = {js|Aramayı temizle|js} }
+    );
+    ( "uk-UA",
+      {
+        suggestions = {js|Пропозиції|js};
+        clear_search = {js|Очистити пошук|js};
+      } );
+    ("zh-CN", { suggestions = {js|建议|js}; clear_search = {js|清除搜索|js} });
+    ("zh-TW", { suggestions = {js|建議|js}; clear_search = {js|清除搜尋條件|js} });
+  ]
+
+let locale_language locale =
+  match String.index_opt locale '-' with
+  | Some i -> String.sub locale 0 i
+  | None -> locale
+
+(* A locale's entry of [table]: its own, else its language's, else the first
+   of its language, else [default], as \@internationalized/string finds a
+   locale's strings. *)
+let localized table locale ~default =
+  match List.assoc_opt locale table with
+  | Some p -> p
+  | None -> (
+      let language = locale_language locale in
+      match List.assoc_opt language table with
+      | Some p -> p
+      | None -> (
+          let prefix = language ^ "-" in
+          let n = String.length prefix in
+          match
+            List.find_opt
+              (fun (k, _) ->
+                String.length k > n && String.equal (String.sub k 0 n) prefix)
+              table
+          with
+          | Some (_, p) -> p
+          | None -> default))
+
+let translations_for locale = localized translated locale ~default:english
+
+(* A provider's locale, or en-GB, so a page reads the same on the server and
+   in every browser. *)
+let use_locale () =
+  let i18n = I18n.use_locale () in
+  let provided = I18n.use_locale () == i18n in
+  S.accessor (fun () ->
+      if provided then Types.I18n_UseLocale.locale i18n () else "en-GB")
+
+type state = {
+  input_value : string S.accessor;
+  set_input_value : string -> unit;
+  is_empty : bool S.accessor;
+  focused_key : string option S.accessor;
+  is_disabled : string -> bool;
+  focus_input : unit -> unit;
+  translations : translations S.accessor;
+}
+
+type item = {
+  key : string S.accessor;
+  is_focused : bool S.accessor;
+  is_disabled : bool S.accessor;
+}
+
+(* An item as the palette keeps it while it is shown: its key, its element,
+   which says where it is on the page, and what runs it. *)
+type entry = {
+  entry_key : string S.accessor;
+  id : string;
+  element : Dom.htmlDivElement;
+  disabled : bool S.accessor;
+  run : unit -> unit;
+}
+
+(* What its list gives the palette: what runs as an item does, and which keys
+   it disables. *)
+type list_given = {
+  act : string -> unit;
+  disabled_keys : unit -> string array option;
+}
+
+type palette = {
+  text : string S.accessor;
+  set_text : string -> unit;
+  keeps : string -> bool;
+  translations_ : translations S.accessor;
+  list : Selectable_list.t;
+  input : Dom.htmlInputElement option S.accessor;
+  set_input : Dom.htmlInputElement option S.setter;
+  list_element : Dom.htmlDivElement option S.accessor;
+  set_list_element : Dom.htmlDivElement option S.setter;
+  list_id : string;
+  focused : string option S.accessor;
+  set_focused : string option -> unit;
+  shown : unit -> entry array;
+  is_empty_ : bool S.accessor;
+  add : entry -> unit;
+  drop : Dom.htmlDivElement -> unit;
+  add_separator : Dom.htmlDivElement -> unit;
+  drop_separator : Dom.htmlDivElement -> unit;
+  parting : Dom.htmlDivElement array S.accessor;
+  set_given : list_given -> unit;
+  act : string -> unit;
+  disabled_key : string -> bool;
+  item_id : string -> string option;
+  run_focused : unit -> bool;
+}
+
+module Palette_context = Solidtype.Context.Make_optional (struct
+  type t = palette
+end)
+
+(* A group as its items and heading read it: each item counts itself shown,
+   and its heading names it. *)
+type group = {
+  count : bool S.accessor -> unit;
+  heading_id : string;
+  heading_here : unit -> unit;
+}
+
+module Group_context = Solidtype.Context.Make_optional (struct
+  type t = group
+end)
+
+module Item_context = Solidtype.Context.Make_optional (struct
+  type t = item
+end)
+
+let in_palette part =
+  match Palette_context.use () with
+  | Some p -> p
+  | None -> invalid_arg (part ^ " is used inside a Command.Root")
+
+module Context = struct
+  let use () =
+    let p = in_palette "Command.Context.use" in
+    {
+      input_value = p.text;
+      set_input_value = p.set_text;
+      is_empty = p.is_empty_;
+      focused_key = p.focused;
+      is_disabled = p.disabled_key;
+      focus_input = (fun () -> Option.iter focus (S.get p.input));
+      translations = p.translations_;
+    }
+end
+
+(* An id on the page while the part that carries it is: a part counts itself
+   in as it is made and out as it goes. *)
+let named id =
+  let count, set_count = S.create_signal 0 in
+  let here () =
+    S.set set_count (S.get count + 1);
+    S.on_cleanup (fun () -> S.set set_count (S.get count - 1))
+  in
+  (here, fun () -> if S.get count > 0 then Some id else None)
+
+let in_order elements =
+  List.sort
+    (fun a b ->
+      if a == b then 0 else if position a b land 4 <> 0 then -1 else 1)
+    elements
+
+(* Where the keys move among the items shown: in their order on the page, a
+   disabled one passed over, a page the list's height on, as React Aria's menu
+   moves. Kobalte's list wraps at either end. *)
+let delegate ~(shown : unit -> entry array) ~list_element =
+  let usable () =
+    Js.Array.filter ~f:(fun e -> not (S.get e.disabled)) (shown ())
+  in
+  let index all k =
+    Js.Array.findIndex ~f:(fun e -> String.equal (S.get e.entry_key) k) all
+  in
+  let key e = Some (S.get e.entry_key) in
+  let first () = Option.bind (Array.find_opt (fun _ -> true) (usable ())) key in
+  let last () =
+    let all = usable () in
+    match Array.length all with 0 -> None | n -> key all.(n - 1)
+  in
+  let step k by =
+    let all = usable () in
+    match index all k with
+    | -1 -> None
+    | i when i + by >= 0 && i + by < Array.length all -> key all.(i + by)
+    | _ -> None
+  in
+  let page ~down k =
+    let all = usable () in
+    match (index all k, S.get list_element) with
+    | -1, _ | _, None -> None
+    | i, Some l ->
+        let height = client_height l in
+        let from = top (bounds all.(i).element) in
+        let within e =
+          let d = top (bounds e.element) -. from in
+          if down then d <= height else -.d <= height
+        in
+        let rec walk j best =
+          if j < 0 || j >= Array.length all then best
+          else if within all.(j) then walk (if down then j + 1 else j - 1) j
+          else best
+        in
+        let reached = walk i i in
+        if reached <> i then key all.(reached)
+        else if down then last ()
+        else first ()
+  in
+  Delegate.make
+    ~get_key_below:(fun k -> step k 1)
+    ~get_key_above:(fun k -> step k (-1))
+    ~get_key_page_below:(page ~down:true) ~get_key_page_above:(page ~down:false)
+    ~get_first_key:(fun _ _ -> first ())
+    ~get_last_key:(fun _ _ -> last ())
+    ()
+
+module Root = struct
+  let%component make ?(input_value : string option)
+      ?(default_input_value : string option)
+      ?(on_input_change : (string -> unit) option)
+      ?(filter : (string -> string -> bool) option)
+      ?(translations : translations option) ~(children : Jsx.element) () =
+    let kept, set_kept =
+      S.create_signal
+        (Option.value
+           (S.untrack (fun () -> S.get default_input_value))
+           ~default:"")
+    in
+    let text =
+      S.accessor (fun () ->
+          match S.get input_value with Some v -> v | None -> S.get kept)
+    in
+    let set_text v =
+      S.set set_kept v;
+      ignore (on_input_change v : unit option)
+    in
+    (* An item's text holding the search's, whatever its case or accents, as
+       React Aria's filter judges it, unless a filter is given. *)
+    let contains =
+      I18n.create_filter
+        ~options:(Types.CollatorOptions.make ~sensitivity:`base ())
+        ()
+    in
+    let keeps item_text =
+      let typed = S.get text in
+      String.equal typed ""
+      ||
+      match filter item_text typed with
+      | Some kept -> kept
+      | None -> Types.Filter.contains contains item_text typed
+    in
+    let locale = use_locale () in
+    let translations_ =
+      S.accessor (fun () ->
+          match S.get translations with
+          | Some t -> t
+          | None -> translations_for (S.get locale))
+    in
+    let listed, set_listed = S.create_signal [] in
+    let separators, set_separators = S.create_signal [] in
+    let given, set_given = S.create_signal None in
+    let disabled_key k =
+      match S.get given with
+      | Some g -> (
+          match g.disabled_keys () with
+          | Some keys -> Array.exists (String.equal k) keys
+          | None -> false)
+      | None -> false
+    in
+    let find k =
+      List.find_opt (fun e -> String.equal (S.get e.entry_key) k) (S.get listed)
+    in
+    (* The items shown in their order on the page, read as the keys move,
+       once each is in it. *)
+    let shown () =
+      let by_element = S.get listed in
+      in_order (List.map (fun e -> e.element) by_element)
+      |> List.filter_map (fun el ->
+          List.find_opt (fun e -> e.element == el) by_element)
+      |> Array.of_list
+    in
+    let keys =
+      S.create_memo (fun () ->
+          Array.of_list (List.map (fun e -> S.get e.entry_key) (S.get listed)))
+    in
+    let list_state =
+      Selection.create_list_state
+        (Types.CreateListStateProps.make ~data_source:(Either.right keys)
+           ~get_key:(Either.left Fun.id)
+           ~get_text_value:(Either.left (fun _ -> ""))
+           ~get_disabled:
+             (Either.left (fun k ->
+                  match find k with Some e -> S.get e.disabled | None -> true))
+           ~selection_mode:(Either.left `none) ())
+    in
+    let manager =
+      S.create_memo (fun () ->
+          Types.SelectionManager.to_multiple_selection_manager
+            (S.get (List_state.selection_manager list_state)))
+    in
+    let input, set_input = S.create_signal None in
+    let list_element, set_list_element = S.create_signal None in
+    let list =
+      Selection.create_selectable_list
+        (Types.CreateSelectableListProps.make
+           ~collection:(List_state.collection list_state)
+           ~selection_manager:(Either.right manager)
+           ~keyboard_delegate:(Either.left (delegate ~shown ~list_element))
+           ~should_focus_wrap:(Either.left true)
+           ~disallow_type_ahead:(Either.left true)
+           ~should_use_virtual_focus:(Either.left true) ())
+        input ~scroll_ref:list_element ()
+    in
+    let focused =
+      S.accessor (fun () -> S.get (Manager.focused_key (S.get manager)))
+    in
+    let set_focused key = Manager.set_focused_key (S.get manager) ?key () in
+    (* An item focused that is no longer shown leaves the focus with none, as
+       React Aria's autocomplete clears it. *)
+    S.create_effect (fun () ->
+        match S.get focused with
+        | Some k when not (Array.exists (String.equal k) (S.get keys)) ->
+            S.untrack (fun () -> set_focused None)
+        | Some _ | None -> ());
+    (* A separator parts what is shown: it follows an item shown with no
+       other separator since, and an item shown follows it. *)
+    (* Where a part is on the page is read once the palette is on it: it is
+       made whole before it is put there. *)
+    let settled, set_settled = S.create_signal false in
+    S.on_mount (fun () -> S.set set_settled true);
+    let parting =
+      S.create_memo (fun () ->
+          if not (S.get settled) then [||]
+          else
+            let items = List.map (fun e -> e.element) (S.get listed) in
+            let seps = S.get separators in
+            let _, _, parting =
+              List.fold_left
+                (fun (seen, pending, parting) el ->
+                  if List.exists (fun s -> s == el) seps then
+                    if seen then (false, Some el, parting)
+                    else (seen, pending, parting)
+                  else
+                    match pending with
+                    | Some s -> (true, None, s :: parting)
+                    | None -> (true, None, parting))
+                (false, None, [])
+                (in_order (items @ seps))
+            in
+            Array.of_list parting)
+    in
+    let p =
+      {
+        text;
+        set_text;
+        keeps;
+        translations_;
+        list;
+        input;
+        set_input;
+        list_element;
+        set_list_element;
+        list_id = S.create_unique_id ();
+        focused;
+        set_focused;
+        shown;
+        is_empty_ = S.accessor (fun () -> Array.length (S.get keys) = 0);
+        add = (fun e -> S.update set_listed (fun l -> e :: l));
+        drop =
+          (fun el ->
+            S.update set_listed (List.filter (fun e -> e.element != el)));
+        add_separator = (fun el -> S.update set_separators (fun l -> el :: l));
+        drop_separator =
+          (fun el -> S.update set_separators (List.filter (fun s -> s != el)));
+        parting;
+        set_given = (fun g -> S.set set_given (Some g));
+        act =
+          (fun k ->
+            match S.untrack (fun () -> S.get given) with
+            | Some g -> g.act k
+            | None -> ());
+        disabled_key;
+        item_id = (fun k -> Option.map (fun e -> e.id) (find k));
+        run_focused =
+          (fun () ->
+            match Option.bind (S.get focused) find with
+            | Some e when not (S.get e.disabled) ->
+                e.run ();
+                true
+            | Some _ | None -> false);
+      }
+    in
+    <Palette_context.Provider value=p>
+      (S.get children)
+    </Palette_context.Provider>
+end
+
+(* A child's text: a string's own, an element's content, as a reader hears
+   the item. *)
+external element_text : Jsx.element -> string Js.undefined = "textContent"
+[@@mel.get]
+
+let text_of child =
+  match Js.Types.classify child with
+  | JSString s -> s
+  | JSObject _ ->
+      Option.value (Js.Undefined.toOption (element_text child)) ~default:""
+  | JSFalse | JSTrue | JSNull | JSUndefined | JSNumber _ | JSFunction _
+  | JSSymbol _ | JSBigInt _ ->
+      ""
+
+module Input = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (unit -> unit) Solidtype.Html.Input.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external ref : t -> ((Dom.htmlInputElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
+    external on_input : t -> ((Dom.inputEvent -> unit)[@u]) option = "onInput"
+    [@@mel.get]
+
+    external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyDown"
+    [@@mel.get]
+  end
+
+  (* The props the input takes for itself; the rest it passes on. *)
+  let own = [| "ref"; "onInput"; "onKeyDown"; "value"; "type" |]
+
+  let make (props : Props.t) =
+    let p = in_palette "Command.Input" in
+    let first () =
+      Array.find_opt (fun e -> not (S.get e.disabled)) (p.shown ())
+      |> Option.map (fun e -> S.get e.entry_key)
+    in
+    let on_key_down e =
+      Jsx.call (Props.on_key_down props) e;
+      if not (composing e) then
+        match pressed e with
+        | "Escape" ->
+            (* A search with text is emptied, the key marked handled, so a
+               dialog around the palette stays open; an empty one leaves the
+               key to it. *)
+            if not (String.equal (S.get p.text) "") then (
+              prevent e;
+              p.set_text "";
+              p.set_focused None)
+        | "Enter" -> if p.run_focused () then prevent e
+        | ("Home" | "End") when shift e && Option.is_none (S.get p.focused) ->
+            ()
+        | "ArrowDown" | "ArrowUp" | "Home" | "End" | "PageDown" | "PageUp" ->
+            Selectable_list.on_key_down p.list e
+        | "ArrowLeft" | "ArrowRight" ->
+            (* The caret moves, and no item keeps the focus, as React Aria's
+               autocomplete lets a reader hear the text. *)
+            p.set_focused None
+        | _ -> ()
+    in
+    let on_input e =
+      Jsx.call (Props.on_input props) e;
+      p.set_text (input_value (input_target e));
+      (* Typing forward gives the first item shown the focus; deleting,
+         pasting or undoing leaves none focused, as React Aria's autocomplete
+         does. *)
+      match Js.Undefined.toOption (input_type e) with
+      | Some ("insertText" | "insertCompositionText" | "insertFromComposition")
+        ->
+          p.set_focused (first ())
+      | Some _ | None -> p.set_focused None
+    in
+    <input
+      type_="search"
+      ref=(fun e ->
+            S.set p.set_input (Some e);
+            S.on_cleanup (fun () -> S.set p.set_input None);
+            Jsx.call (Props.ref props) e)
+      value=(S.get p.text)
+      aria_autocomplete=`list
+      ?aria_controls=(if Option.is_some (S.get p.list_element) then
+                        Some p.list_id
+                      else None)
+      ?aria_activedescendant=(Option.bind (S.get p.focused) p.item_id)
+      autocomplete="off"
+      autocorrect=`off
+      spellcheck=false
+      enterkeyhint="go"
+      on_input
+      on_key_down
+      ?as_=(S.drawn_as props)
+      props=(S.undrawn (S.omit props own))
+    />
+
+  let component = Jsx.component make
+end
+
+module List = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?on_action:(string -> unit) ->
+      ?disabled_keys:string array Solidtype.Check.value ->
+      ?render_empty_state:(unit -> Solidtype.Jsx.element) ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external on_action : t -> ((string -> unit)[@u]) option = "onAction"
+    [@@mel.get]
+
+    external disabled_keys : t -> string array option = "disabledKeys"
+    [@@mel.get]
+
+    external render_empty_state : t -> Jsx.element S.accessor option
+      = "renderEmptyState"
+    [@@mel.get]
+
+    external children : t -> Jsx.element = "children" [@@mel.get]
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
+    external on_mouse_down : t -> ((Dom.mouseEvent -> unit)[@u]) option
+      = "onMouseDown"
+    [@@mel.get]
+  end
+
+  (* The props the list takes for itself; the rest it passes on. *)
+  let own =
+    [|
+      "onAction";
+      "disabledKeys";
+      "renderEmptyState";
+      "children";
+      "ref";
+      "onMouseDown";
+    |]
+
+  let make (props : Props.t) =
+    let p = in_palette "Command.List" in
+    p.set_given
+      {
+        act = (fun k -> Jsx.call (Props.on_action props) k);
+        disabled_keys = (fun () -> Props.disabled_keys props);
+      };
+    let resolved = S.children (fun () -> Props.children props) in
+    <div
+      id=p.list_id
+      role=`menu
+      ref=(fun e ->
+            S.set p.set_list_element (Some e);
+            S.on_cleanup (fun () -> S.set p.set_list_element None);
+            Jsx.call (Props.ref props) e)
+      aria_label=(S.get p.translations_).suggestions
+      data_empty=(state (S.get p.is_empty_))
+      on_mouse_down=(fun e ->
+                      Jsx.call (Props.on_mouse_down props) e;
+                      (* The focus stays in the search. *)
+                      prevent_mouse e)
+      ?as_=(S.drawn_as props)
+      props=(S.undrawn (S.omit props own))>
+      (Jsx.fragment (S.to_array (S.get resolved)))
+      (match Props.render_empty_state props with
+      | Some draw when S.get p.is_empty_ ->
+          (* A menu holds items, so its empty state is one, as React Aria's
+             is. *)
+          <div role=`menuitem style="display: contents">(S.get draw)</div>
+      | Some _ | None -> Jsx.nothing)
+    </div>
+
+  let component = Jsx.component make
+end
+
+module Item = struct
+  module Context = struct
+    let use () =
+      match Item_context.use () with
+      | Some t -> t
+      | None ->
+          invalid_arg "Command.Item.Context.use is used inside a Command.Item"
+  end
+
+  module Props = struct
+    type t
+
+    external check :
+      ?id:string Solidtype.Check.value ->
+      ?text_value:string Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?on_action:(unit -> unit) ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external id : t -> string option = "id" [@@mel.get]
+    external text_value : t -> string option = "textValue" [@@mel.get]
+    external is_disabled : t -> bool option = "isDisabled" [@@mel.get]
+
+    external on_action : t -> ((unit -> unit)[@u]) option = "onAction"
+    [@@mel.get]
+
+    external children : t -> Jsx.element = "children" [@@mel.get]
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
+    external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
+    [@@mel.get]
+
+    external on_mouse_down : t -> ((Dom.mouseEvent -> unit)[@u]) option
+      = "onMouseDown"
+    [@@mel.get]
+
+    external on_pointer_enter : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerEnter"
+    [@@mel.get]
+  end
+
+  (* The props the item takes for itself; the rest it passes on. *)
+  let own =
+    [|
+      "id";
+      "textValue";
+      "isDisabled";
+      "onAction";
+      "children";
+      "ref";
+      "onClick";
+      "onMouseDown";
+      "onPointerEnter";
+    |]
+
+  let make (props : Props.t) =
+    let p = in_palette "Command.Item" in
+    let group = Group_context.use () in
+    let given_key = S.create_unique_id () in
+    let key =
+      S.create_memo (fun () -> Option.value (Props.id props) ~default:given_key)
+    in
+    let disabled =
+      S.accessor (fun () ->
+          Option.value (Props.is_disabled props) ~default:false
+          || p.disabled_key (S.get key))
+    in
+    let is_focused =
+      S.accessor (fun () ->
+          match S.get p.focused with
+          | Some k -> String.equal k (S.get key)
+          | None -> false)
+    in
+    let t = { key; is_focused; is_disabled = disabled } in
+    (* Its children are made inside it, so a part among them reads the item
+       it is in, and kept while it is hidden, so it is shown again as it
+       was. *)
+    let resolved =
+      S.children (fun () ->
+          <Item_context.Provider value=t>
+            (Props.children props)
+          </Item_context.Provider>)
+    in
+    let text =
+      S.accessor (fun () ->
+          match Props.text_value props with
+          | Some t -> t
+          | None ->
+              String.trim
+                (String.concat ""
+                   (Array.to_list
+                      (Array.map text_of (S.to_array (S.get resolved))))))
+    in
+    let shown = S.create_memo (fun () -> p.keeps (S.get text)) in
+    Option.iter (fun g -> g.count shown) group;
+    let id = S.create_unique_id () in
+    let run () =
+      if not (S.get disabled) then (
+        Jsx.act (Props.on_action props);
+        p.act (S.get key))
+    in
+    <Show when_=(S.get shown)>
+      <div
+        role=`menuitem
+        id
+        tabindex="-1"
+        ref=(fun e ->
+              p.add { entry_key = key; id; element = e; disabled; run };
+              S.on_cleanup (fun () -> p.drop e);
+              Jsx.call (Props.ref props) e)
+        ?aria_disabled=(if S.get disabled then Some true else None)
+        data_key=(Jsx.data (S.get key))
+        data_highlighted=(state (S.get is_focused))
+        data_disabled=(state (S.get disabled))
+        on_pointer_enter=(fun e ->
+                           Jsx.call (Props.on_pointer_enter props) e;
+                           (* The pointer focuses the item it is over, as
+                              React Aria's menu does, though not a touch. *)
+                           if
+                             (not (String.equal (pointer_type e) "touch"))
+                             && not (S.get disabled)
+                           then p.set_focused (Some (S.get key)))
+        on_mouse_down=(fun e ->
+                        Jsx.call (Props.on_mouse_down props) e;
+                        prevent_mouse e)
+        on_click=(fun e ->
+                   Jsx.call (Props.on_click props) e;
+                   run ())
+        ?as_=(S.drawn_as props)
+        props=(S.undrawn (S.omit props own))>
+        (Jsx.fragment (S.to_array (S.get resolved)))
+      </div>
+    </Show>
+
+  let component = Jsx.component make
+end
+
+module Group = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?as_:(Solidtype.Html.Section.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Section.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external children : t -> Jsx.element = "children" [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let (_ : palette) = in_palette "Command.Group" in
+    let counted, set_counted = S.create_signal [] in
+    let heading_id = S.create_unique_id () in
+    let heading_here, labelled = named heading_id in
+    let g =
+      {
+        count =
+          (fun shown ->
+            S.update set_counted (fun l -> shown :: l);
+            S.on_cleanup (fun () ->
+                S.update set_counted (Stdlib.List.filter (fun s -> s != shown))));
+        heading_id;
+        heading_here;
+      }
+    in
+    (* Its items are made while it is hidden too, so they are filtered and
+       show it again. *)
+    let resolved =
+      S.children (fun () ->
+          <Group_context.Provider value=g>
+            (Props.children props)
+          </Group_context.Provider>)
+    in
+    <Show when_=(Stdlib.List.exists S.get (S.get counted))>
+      <section
+        role=`group
+        ?aria_labelledby=(labelled ())
+        ?as_=(S.drawn_as props)
+        props=(S.undrawn (S.omit props [| "children" |]))>
+        (Jsx.fragment (S.to_array (S.get resolved)))
+      </section>
+    </Show>
+
+  let component = Jsx.component make
+end
+
+module Heading = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?as_:(Solidtype.Html.Header.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Header.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external children : t -> Jsx.element = "children" [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let g =
+      match Group_context.use () with
+      | Some g -> g
+      | None -> invalid_arg "Command.Heading is used inside a Command.Group"
+    in
+    g.heading_here ();
+    <header
+      id=g.heading_id
+      role=`presentation
+      ?as_=(S.drawn_as props)
+      props=(S.undrawn (S.omit props [| "children"; "id" |]))>
+      (Props.children props)
+    </header>
+
+  let component = Jsx.component make
+end
+
+module Separator = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (unit -> unit) Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let p = in_palette "Command.Separator" in
+    let element, set_element = S.create_signal None in
+    (* It stays on the page while hidden, where its place among the items
+       says whether it parts any. *)
+    <div
+      role=`separator
+      ref=(fun e ->
+            S.set set_element (Some e);
+            p.add_separator e;
+            S.on_cleanup (fun () -> p.drop_separator e);
+            Jsx.call (Props.ref props) e)
+      hidden=(Jsx.bool
+                (match S.get element with
+                | Some e ->
+                    not (Array.exists (fun s -> s == e) (S.get p.parting))
+                | None -> true))
+      ?as_=(S.drawn_as props)
+      props=(S.undrawn (S.omit props [| "ref" |]))
+    />
+
+  let component = Jsx.component make
+end

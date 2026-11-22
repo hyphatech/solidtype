@@ -20,7 +20,7 @@ let make () =
       aria_label="Trip dates"
       first_day_of_week=`mon
       is_invalid=(too_long ())
-      value=(Js.Nullable.return (S.get value))
+      value=(Js.Null.return (S.get value))
       on_change=(Option.iter (S.set set_value))>
       <Range_calendar.Header>
         <Range_calendar.Heading />

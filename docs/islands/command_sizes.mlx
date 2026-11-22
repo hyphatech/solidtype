@@ -1,0 +1,81 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Chip = Solidtype_heroui.Chip
+module Command = Solidtype_heroui.Command
+module Kbd = Solidtype_heroui.Kbd
+module Gravity = Solidtype_gravity_icons
+
+let sizes = [| (`sm, "sm"); (`md, "md"); (`lg, "lg") |]
+
+let make () =
+  <div class_="flex flex-wrap gap-2">
+    <For each=sizes>
+      (fun (size, name) _ ->
+        <Command>
+          <Button variant=`tertiary>"Size: " (Jsx.string name)</Button>
+          <Command.Backdrop>
+            <Command.Container size>
+              <Command.Dialog>
+                <Command.Header>
+                  <Chip size=`sm variant=`secondary>"Home"</Chip>
+                </Command.Header>
+                <Command.Input_group>
+                  <Command.Input_group.Prefix>
+                    <Gravity.Magnifier class_="size-4" />
+                  </Command.Input_group.Prefix>
+                  <Command.Input_group.Input
+                    placeholder="Type a command or search..."
+                  />
+                  <Command.Input_group.Clear_button />
+                  <Command.Input_group.Suffix>
+                    <Kbd class_="text-xs"><Kbd.Content>"Esc"</Kbd.Content></Kbd>
+                  </Command.Input_group.Suffix>
+                </Command.Input_group>
+                <Command.List>
+                  <Command.Group heading=(Jsx.string "Actions")>
+                    <Command.Item>
+                      <Gravity.File_plus /> <span>"Create new file..."</span>
+                    </Command.Item>
+                    <Command.Item>
+                      <Gravity.Folder_plus />
+                      <span>"Create new folder..."</span>
+                    </Command.Item>
+                    <Command.Item>
+                      <Gravity.Person /> <span>"Assign to me"</span>
+                    </Command.Item>
+                  </Command.Group>
+                  <Command.Group heading=(Jsx.string "Settings")>
+                    <Command.Item>
+                      <Gravity.Gear /> <span>"Preferences"</span>
+                    </Command.Item>
+                    <Command.Item>
+                      <Gravity.Palette /> <span>"Change theme"</span>
+                    </Command.Item>
+                    <Command.Item>
+                      <Gravity.Keyboard /> <span>"Keyboard shortcuts"</span>
+                    </Command.Item>
+                  </Command.Group>
+                </Command.List>
+                <Command.Footer
+                  class_="justify-between [&_kbd]:h-5 [&_kbd]:text-xs">
+                  <div class_="flex items-center gap-3">
+                    <div class_="flex items-center gap-2">
+                      <div class_="flex items-center gap-0.5">
+                        <Kbd><Kbd.Abbr key_value=`up /></Kbd>
+                        <Kbd><Kbd.Abbr key_value=`down /></Kbd>
+                      </div>
+                      <span>"Navigate"</span>
+                    </div>
+                    <div class_="flex items-center gap-2">
+                      <Kbd><Kbd.Abbr key_value=`enter /></Kbd>
+                      <span>"Select"</span>
+                    </div>
+                  </div>
+                </Command.Footer>
+              </Command.Dialog>
+            </Command.Container>
+          </Command.Backdrop>
+        </Command>)
+    </For>
+  </div>

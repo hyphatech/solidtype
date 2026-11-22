@@ -135,7 +135,7 @@ let make () =
     class_="w-80"
     end_name="endDate"
     start_name="startDate"
-    value=(Js.Nullable.return (from_today 4))>
+    value=(Js.Null.return (from_today 4))>
     <Label>"Trip dates"</Label>
     <Date_field.Group full_width=true>
       <Date_field.Input slot="start">
@@ -207,7 +207,7 @@ let make () =
     <Date_range_picker
       end_name="endDate"
       start_name="startDate"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Trip dates"</Label>
       <Date_field.Group full_width=true>
@@ -303,7 +303,7 @@ let make () =
     start_name="startDate"
     is_invalid=(is_invalid ())
     min_value=current
-    value=(Js.Nullable.fromOption (S.get value))
+    value=(Js.Null.fromOption (S.get value))
     on_change=(S.set set_value)>
     <Label>"Booking period"</Label>
     <Date_field.Group full_width=true>
@@ -492,7 +492,7 @@ let make () =
         name
         placeholder_value=(at "2026-02-03T08:45:00")
         should_force_leading_zeros=(S.get leading_zeros)
-        value=(Js.Nullable.fromOption (value ()))
+        value=(Js.Null.fromOption (value ()))
         on_change=(Option.iter set)>
         <Time_field.Group variant=`secondary>
           <Time_field.Input>
@@ -644,7 +644,7 @@ let make () =
       is_invalid=(is_invalid ())
       min_value=current
       start_name="tripStartDate"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Trip dates"</Label>
       <Date_field.Group full_width=true>
@@ -991,7 +991,7 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `CalendarDate.t range Js.Nullable.t` | | Controlled selected range; null controls it empty |
+| `value` | `value` | `CalendarDate.t range Js.Null.t` | | Controlled selected range; null controls it empty |
 | `defaultValue` | `default_value` | `CalendarDate.t range` | | Default selected range in uncontrolled mode |
 | `onChange` | `on_change` | `CalendarDate.t range option -> unit` | | Called when the selected range changes |
 | `isOpen` | `is_open` | `bool` | | Controlled popover open state |

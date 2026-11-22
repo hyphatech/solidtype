@@ -1,5 +1,39 @@
 # Changes
 
+## 0.14.0 (2026-11-22)
+
+- Breaking: a value that may be empty is given as `Js.Null.t`, never
+  `Js.Nullable.t`: a Kobalte prop or argument TypeScript types `T | null`,
+  and the value of `Date_field`, `Time_field`, `Date_picker`,
+  `Date_range_picker`, `Calendar`, `Range_calendar` and `Color_field`, in
+  `solidtype-headless` and `solidtype-heroui`. `Js.Null.fromOption None` is
+  `null`, controlled and empty; `Js.Nullable.fromOption None`, which the
+  documented examples wrote, is the `undefined` a component reads as no
+  value given, and no longer compiles there. What Kobalte tells, an
+  `on_change`'s argument, stays `Js.Nullable.t`.
+- Breaking: `Radio_group`'s `value` is a `string Js.Null.t`, and `null`
+  controls it with none chosen, as React's does.
+- `Command`, a command palette in HeroUI's look with a stylesheet of its own:
+  a search in a dialog that filters a menu of commands, kept or controlled,
+  by its text or a `filter` given. The focus stays in the search while the
+  arrows move through the commands shown, wrapping, and Enter or a press
+  runs one; typing focuses the first command shown, and Escape empties the
+  search before it closes the palette. Groups hide with their commands, a
+  separator with nothing to part, and the list draws `render_empty_state`
+  while it shows none; `sm`, `md` and `lg` sizes, and opaque, blur and
+  transparent backdrops. `Solidtype_headless.Command` is the palette itself,
+  of Kobalte's selection hooks, its words React Aria's in 34 locales.
+- A `Date_picker`, `Date_range_picker`, `Calendar` or `Range_calendar` set
+  to `null` after a date was typed or chosen is empty, where it kept the
+  last date and sent it with a form.
+- `Number_field` set to `nan` is empty, as React's is, where it kept the
+  last number shown; `Solidtype_headless.Number_field` fixes Kobalte's. Its
+  `on_change` tells typed text once Enter or a focus that leaves commits
+  it, as React's does, where it told every key.
+- A `Date_range_picker`'s arrows, Backspace and a segment typed whole move
+  between its start and its end, as React's do; so does
+  `Solidtype_headless.Date_field.Root_range`'s.
+
 ## 0.13.0 (2026-11-22)
 
 - Breaking: the skill, `skills/solidtype`, is no longer installed. The

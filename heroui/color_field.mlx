@@ -227,7 +227,7 @@ type state = {
   is_required : bool Solidtype.Solid.accessor;
 }
 
-let%component make ?(value : Color.t Js.Nullable.t option)
+let%component make ?(value : Color.t Js.Null.t option)
     ?(default_value : Color.t option)
     ?(on_change : (Color.t option -> unit) option) ?(channel : channel option)
     ?(color_space : [ `rgb | `hsl | `hsb ] option) ?(full_width : bool option)

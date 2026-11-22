@@ -17,7 +17,7 @@ let make () =
   <Time_field.Zoned
     class_="w-[256px]"
     name="meeting"
-    value=(Js.Nullable.fromOption (S.get value))
+    value=(Js.Null.fromOption (S.get value))
     placeholder_value=day
     on_change=(S.set set_value)>
     <Label>"Meeting in Kyiv"</Label>

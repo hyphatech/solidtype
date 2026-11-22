@@ -36,6 +36,28 @@ module Wheel = Solidtype.Context.Make_optional (struct
   type t = bool S.accessor
 end)
 
+(* A raw value that is not a number empties the field, as React Aria's does,
+   where Kobalte's leaves the last number shown. *)
+module Emptied = struct
+  let%component make ?(raw_value : float option) () =
+    let field = Kobalte.use_number_field_context () in
+    S.create_effect
+      (S.on ~defer:true
+         (fun () -> S.get raw_value)
+         (fun raw _ ->
+           match raw with
+           | Some r
+             when Float.is_nan r
+                  && not (Float.is_nan (S.get (Field_context.raw_value field)))
+             ->
+               S.batch (fun () ->
+                   Field_context.set_value field
+                     (Solidtype_kobalte.Types.Either.left "");
+                   Field_context.format field ())
+           | Some _ | None -> ()));
+    Jsx.nothing
+end
+
 module Root = struct
   module Props = struct
     include Kobalte.Root.Props
@@ -43,6 +65,8 @@ module Root = struct
     type t
 
     external change_on_wheel : t -> bool option = "changeOnWheel" [@@mel.get]
+    external raw_value : t -> float option = "rawValue" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
   end
 
   let make (props : Props.t) =
@@ -52,8 +76,10 @@ module Root = struct
     in
     <Wheel.Provider value=change_on_wheel>
       <Kobalte.Root
-        change_on_wheel=false props=(S.omit props [| "changeOnWheel" |])
-      />
+        change_on_wheel=false
+        props=(S.omit props [| "changeOnWheel"; "children" |])>
+        <Emptied ?raw_value=(Props.raw_value props) /> (Props.children props)
+      </Kobalte.Root>
     </Wheel.Provider>
 
   let component = Jsx.component make

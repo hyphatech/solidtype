@@ -418,6 +418,42 @@ let stepped_by_buttons ~named =
   Twin.cleanup ();
   Js.Promise.resolve ((solidtype_named, solidtype), (react_named, react))
 
+(* What a field, beginning at 4, tells as a number is typed, then committed by
+   Enter; then stepped by the keys after more is typed; then typed again and
+   left; then stepped after a key the field refuses: each step's changes
+   told, and what it shows last. *)
+let commits ~render ~step =
+  let told = ref [] in
+  let tell v = told := Js.Float.toString v :: !told in
+  let (_ : Dom.element) = render tell in
+  let input () =
+    match Js.Null.toOption (query T.body "input[inputmode]") with
+    | Some i -> i
+    | None -> T.body
+  in
+  let user = T.setup () in
+  let changes () =
+    let c = String.concat "," (List.rev !told) in
+    told := [];
+    c
+  in
+  let* () = step (fun () -> T.click user (input ())) in
+  let* () = step (fun () -> T.keyboard user "{Backspace}42") in
+  let typed = changes () in
+  let* () = step (fun () -> T.keyboard user "{Enter}") in
+  let entered = changes () in
+  let* () =
+    step (fun () -> T.keyboard user "{Backspace}{Backspace}9{ArrowUp}")
+  in
+  let stepped = changes () in
+  let* () = step (fun () -> T.keyboard user "{Backspace}{Backspace}7") in
+  let* () = step (fun () -> T.tab user) in
+  let left = changes () in
+  let* () = step (fun () -> T.click user (input ())) in
+  let* () = step (fun () -> T.keyboard user "x{ArrowUp}") in
+  Js.Promise.resolve
+    (typed, entered, stepped, left, changes (), value_of (input ()))
+
 let () =
   Jest.describe "Number_field" (fun () ->
       Jest.testPromise
@@ -460,6 +496,29 @@ let () =
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.afterEach T.cleanup;
+      Jest.testPromise
+        "tells typed text once committed, by Enter or as the focus leaves, as \
+         React's does" (fun () ->
+          let* react =
+            commits
+              ~render:(fun tell -> Twin.render (props ()) tell)
+              ~step:Twin.step
+          in
+          Twin.cleanup ();
+          let* solidtype =
+            commits
+              ~render:(fun tell ->
+                T.render (fun () ->
+                    <Number_field default_value=4. on_change=tell>
+                      <Label>"Width"</Label>
+                      <Number_field.Group>
+                        <Number_field.Input />
+                      </Number_field.Group>
+                    </Number_field>);
+                T.body)
+              ~step:(fun f -> f ())
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "steps its value, as React's does" (fun () ->
           let* r = both () in
           same r);

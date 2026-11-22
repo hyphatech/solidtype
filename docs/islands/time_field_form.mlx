@@ -47,7 +47,7 @@ let make () =
       name="time"
       min_value=min_time
       max_value=max_time
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Appointment time"</Label>
       <Time_field.Group>

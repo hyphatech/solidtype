@@ -480,11 +480,9 @@ let%component make ?(placeholder : string = "Select an item")
         option_value=(fun o -> Types.Either.left (List_box.key o))
         option_text_value=List_box.text
         option_disabled=(fun o -> disabled_key (List_box.key o))
-        value=(* [null], an empty selection Kobalte keeps: [undefined]
-                   would be no value given. *)
-              (match S.get selected with
-              | o :: _ -> Js.Nullable.return o
-              | [] -> Js.Nullable.null)
+        value=(match S.get selected with
+              | o :: _ -> Js.Null.return o
+              | [] -> Js.Null.empty)
         on_change=(fun o ->
                     change
                       (match Js.Nullable.toOption o with

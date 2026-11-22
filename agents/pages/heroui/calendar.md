@@ -250,7 +250,7 @@ let make () =
     <Calendar
       aria_label="Event date"
       focused_value=(S.get focused)
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(fun d -> S.set set_value (Some d))
       on_focus_change=(S.set set_focused)>
       <Calendar.Header>
@@ -834,7 +834,7 @@ let make () =
       aria_label="Booking date"
       is_date_unavailable
       min_value=(D.today (D.get_local_time_zone ()))
-      value=(Js.Nullable.fromOption (S.get selected))
+      value=(Js.Null.fromOption (S.get selected))
       on_change=(fun d -> S.set set_selected (Some d))>
       <Calendar.Header>
         <Calendar.Heading />
@@ -1034,7 +1034,7 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `CalendarDate.t Js.Nullable.t` | | Controlled selected date; null controls it empty |
+| `value` | `value` | `CalendarDate.t Js.Null.t` | | Controlled selected date; null controls it empty |
 | `defaultValue` | `default_value` | `CalendarDate.t` | | Initial selected date (uncontrolled) |
 | `onChange` | `on_change` | `CalendarDate.t -> unit` | | Called when a date is chosen |
 | `selectionMode` | — | | | `Calendar.Multiple` chooses several dates |

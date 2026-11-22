@@ -108,7 +108,7 @@ type state = {
 }
 
 let%component make ?(variant : [ `primary | `secondary ] = `primary)
-    ?(value : string option) ?(default_value : string option)
+    ?(value : string Js.Null.t option) ?(default_value : string option)
     ?(on_change : (string -> unit) option)
     ?(orientation : [ `horizontal | `vertical ] = `vertical)
     ?(is_disabled : bool option) ?(is_invalid : bool = false)
@@ -140,7 +140,7 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
      none is Kobalte's own empty value, as a form's reset leaves it. *)
   let chosen, choose =
     Field.controlled
-      ~value:(fun () -> Option.map Option.some (S.get value))
+      ~value:(fun () -> Option.map Js.Null.toOption (S.get value))
       ~default:(S.get default_value)
       ~on_change:
         (Option.iter (fun v ->

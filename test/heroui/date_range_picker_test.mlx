@@ -253,6 +253,41 @@ let same_but_invalid_at_once (solidtype, react) =
 let same (solidtype, react) =
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
+external active : Dom.element Js.Nullable.t = "activeElement"
+[@@mel.scope "document"]
+
+external closest : Dom.element -> string -> Dom.element Js.Nullable.t
+  = "closest"
+[@@mel.send]
+
+(* Where the keys move the focus from the start's last segment and the end's
+   first: the focused segment's text, and which end it is in. *)
+let moves step =
+  let where () =
+    match Js.Nullable.toOption active with
+    | Some a -> (
+        T.text_content a ^ " in "
+        ^
+        match Js.Nullable.toOption (closest a "[data-slot=date-input]") with
+        | Some s -> Option.value (T.attribute s "slot") ~default:"?"
+        | None -> "?")
+    | None -> "nothing"
+  in
+  let user = T.setup () in
+  let segment i = (Js.Array.from (T.all_with "[role=spinbutton]")).(i) in
+  let* () = step (fun () -> T.click user (segment 2)) in
+  let* () = step (fun () -> T.keyboard user "{ArrowRight}") in
+  let right = where () in
+  let* () = step (fun () -> T.click user (segment 3)) in
+  let* () = step (fun () -> T.keyboard user "{ArrowLeft}") in
+  let left = where () in
+  let* () = step (fun () -> T.click user (segment 3)) in
+  let* () = step (fun () -> T.keyboard user "{Backspace}") in
+  let erased = where () in
+  let* () = step (fun () -> T.click user (segment 0)) in
+  let* () = step (fun () -> T.keyboard user "11212026") in
+  Js.Promise.resolve (right, left, erased, where ())
+
 let () =
   Jest.describe "Date_range_picker" (fun () ->
       Jest.afterEach T.cleanup;
@@ -294,4 +329,32 @@ let () =
               ~default_value:((2026, 11, 21), (2026, 11, 23))
               ()
           in
-          same r))
+          same r);
+      Jest.testPromise
+        "moves through both ends by the keys and as a segment is typed, as \
+         React's does" (fun () ->
+          let (_ : Dom.element) =
+            Twin.render (props ~locale:"en-US" ()) (fun _ -> ())
+          in
+          let* react = moves Twin.step in
+          Twin.cleanup ();
+          let* () = T.frame () in
+          T.render (fun () ->
+              <I18n.I18nProvider locale="en-US">
+                <Date_range_picker start_name="startDate" end_name="endDate">
+                  <Label>"Trip dates"</Label>
+                  <Date_field.Group full_width=true>
+                    <Date_field.Input slot="start">
+                      (fun segment ->
+                        <Date_field.Segment segment=(S.get segment) />)
+                    </Date_field.Input>
+                    <Date_range_picker.Range_separator />
+                    <Date_field.Input slot="end">
+                      (fun segment ->
+                        <Date_field.Segment segment=(S.get segment) />)
+                    </Date_field.Input>
+                  </Date_field.Group>
+                </Date_range_picker>
+              </I18n.I18nProvider>);
+          let* solidtype = moves (fun f -> f ()) in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react)))

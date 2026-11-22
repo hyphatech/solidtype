@@ -627,7 +627,7 @@ A single-value Select given a list for its value.
   > module Select = Solidtype_kobalte.Select
   > let make () =
   >   <Select.Root options=([| Solidtype_kobalte.Types.Either.left "a" |])
-  >     value=(Js.Nullable.return [| "a" |]) />
+  >     value=(Js.Null.return [| "a" |]) />
   > EOF
   $ build
   File "case.mlx", line 3, characters 27-66:
@@ -930,3 +930,17 @@ compile.
   File "case.mlx", line 1, characters 29-38:
   Error: This pattern matches values of type int
   $ rm case.mlx part.mlx
+
+A value that may be empty is given as [Js.Null.t]: an option made one by
+[Js.Nullable.fromOption], whose [None] is the undefined Kobalte reads as no
+value given, does not compile.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () =
+  >   <Solidtype_kobalte.ToggleGroup.Root value=(Js.Nullable.fromOption None) />
+  > EOF
+  $ build | grep -E '^File|^Error|Js.null$'
+  File "case.mlx", line 2, characters 44-73:
+  Error: This expression has type 'a Js.nullable
+         but an expression was expected of type string Js.null
+  $ rm case.mlx

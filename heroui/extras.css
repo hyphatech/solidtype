@@ -4,3 +4,4 @@
 @import "./number-stepper.css" layer(components);
 @import "./table.css" layer(components);
 @import "./data-grid.css" layer(components);
+@import "./command.css" layer(components);

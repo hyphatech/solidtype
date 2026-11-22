@@ -40,10 +40,11 @@
     {!Date_time}'s, and of ones in a zone {!Zoned}'s. Each end is sent with a
     form by its name, [start_name] and [end_name]. It is invalid while
     [is_invalid], while its end is before its start, and while an end is out of
-    its range or unavailable. The range calendar in its popover takes its range
-    and chooses it, closing the popover unless [should_close_on_select] is
-    [false]; a range with times keeps them. Its locale is the one an
-    [I18nProvider] names, else [en-GB]. *)
+    its range or unavailable. The arrows, Backspace and a segment typed whole
+    move between its ends. The range calendar in its popover takes its range and
+    chooses it, closing the popover unless [should_close_on_select] is [false];
+    a range with times keeps them. Its locale is the one an [I18nProvider]
+    names, else [en-GB]. *)
 
 module S := Solidtype.Solid
 module Jsx := Solidtype.Jsx
@@ -71,7 +72,7 @@ module Props : sig
   type t
 
   val check :
-    ?value:D.Types.CalendarDate.t range Js.Nullable.t Solidtype.Check.value ->
+    ?value:D.Types.CalendarDate.t range Js.Null.t Solidtype.Check.value ->
     ?default_value:D.Types.CalendarDate.t range Solidtype.Check.value ->
     ?on_change:(D.Types.CalendarDate.t range option -> unit) ->
     ?start_name:string Solidtype.Check.value ->
@@ -116,8 +117,7 @@ module Date_time : sig
     type t
 
     val check :
-      ?value:
-        D.Types.CalendarDateTime.t range Js.Nullable.t Solidtype.Check.value ->
+      ?value:D.Types.CalendarDateTime.t range Js.Null.t Solidtype.Check.value ->
       ?default_value:D.Types.CalendarDateTime.t range Solidtype.Check.value ->
       ?on_change:(D.Types.CalendarDateTime.t range option -> unit) ->
       ?start_name:string Solidtype.Check.value ->
@@ -167,7 +167,7 @@ module Zoned : sig
     type t
 
     val check :
-      ?value:D.Types.ZonedDateTime.t range Js.Nullable.t Solidtype.Check.value ->
+      ?value:D.Types.ZonedDateTime.t range Js.Null.t Solidtype.Check.value ->
       ?default_value:D.Types.ZonedDateTime.t range Solidtype.Check.value ->
       ?on_change:(D.Types.ZonedDateTime.t range option -> unit) ->
       ?start_name:string Solidtype.Check.value ->

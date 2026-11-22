@@ -34,7 +34,7 @@ let make () =
   <Color_field
     class_="w-[280px]"
     name="color"
-    value=(Js.Nullable.fromOption (S.get color))
+    value=(Js.Null.fromOption (S.get color))
     on_change=(S.set set_color)>
     <Label>"Color"</Label>
     <Color_field.Group>
@@ -338,7 +338,7 @@ let make () =
       class_="w-[100px]"
       color_space=`hsl
       name
-      value=(Js.Nullable.fromOption (S.get color))
+      value=(Js.Null.fromOption (S.get color))
       on_change=(S.set set_color)>
       <Label>(Jsx.string label)</Label>
       <Color_field.Group>
@@ -404,7 +404,7 @@ let make () =
     <Color_field
       class_="w-[280px]"
       name="color"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Color"</Label>
       <Color_field.Group>
@@ -491,7 +491,7 @@ let make () =
       is_required=true
       class_="w-full"
       name="brand-color"
-      value=(Js.Nullable.fromOption (S.get value))
+      value=(Js.Null.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Brand Color"</Label>
       <Color_field.Group>
@@ -544,7 +544,7 @@ let make () =
   <Color_field
     class_="w-full max-w-xs gap-1.5"
     name="accent-color"
-    value=(Js.Nullable.fromOption (S.get color))
+    value=(Js.Null.fromOption (S.get color))
     on_change=(S.set set_color)>
     <Label class_="font-medium text-foreground">"Accent color"</Label>
     <Description>"Applied to buttons, links, and focus rings."</Description>
@@ -613,7 +613,7 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `Types.Color.t Js.Nullable.t` | | Current value (controlled), null for none |
+| `value` | `value` | `Types.Color.t Js.Null.t` | | Current value (controlled), null for none |
 | `defaultValue` | `default_value` | `Types.Color.t` | | Default value (uncontrolled) |
 | `onChange` | `on_change` | `Types.Color.t option -> unit` | | Handler called when the value changes, `None` for none |
 | `channel` | `channel` | `Color_field.channel` | | The color channel to edit, fixed as it is made. If not provided, edits hex value |

@@ -58,14 +58,14 @@ let item =
    data-[pressed]:bg-accent data-[pressed]:text-accent-foreground"
 
 let make () =
-  let align, set_align = S.create_signal (Js.Nullable.return "left") in
+  let align, set_align = S.create_signal (Some "left") in
   let styles, set_styles = S.create_signal [| "bold" |] in
   <div class_="flex flex-col items-start gap-3">
     <ToggleGroup.Root
       class_="flex gap-1"
       aria_label="Alignment"
-      value=(S.get align)
-      on_change=(S.set set_align)>
+      value=(Js.Null.fromOption (S.get align))
+      on_change=(fun v -> S.set set_align (Js.Nullable.toOption v))>
       <ToggleGroup.Item class_=item value="left">"Left"</ToggleGroup.Item>
       <ToggleGroup.Item class_=item value="center">"Center"</ToggleGroup.Item>
       <ToggleGroup.Item class_=item value="right">"Right"</ToggleGroup.Item>
@@ -80,9 +80,7 @@ let make () =
       <ToggleGroup.Item class_=item value="italic">"Italic"</ToggleGroup.Item>
     </ToggleGroup.Root_multiple>
     <p class_="text-sm text-muted">
-      (let align =
-         Option.value (Js.Nullable.toOption (S.get align)) ~default:"none"
-       in
+      (let align = Option.value (S.get align) ~default:"none" in
        Jsx.string
          (align ^ "; " ^ String.concat ", " (Array.to_list (S.get styles))))
     </p>
@@ -90,8 +88,9 @@ let make () =
 ```
 
 `ToggleGroup.Root` holds one value, or none: its `value` is a
-`string Js.Nullable.t`, since Kobalte reads `undefined` as uncontrolled and
-`null` as a controlled group with nothing pressed. `ToggleGroup.Root_multiple`
+`string Js.Null.t`, since Kobalte reads `undefined` as uncontrolled and
+`null` as a controlled group with nothing pressed. `on_change` tells a
+`string Js.Nullable.t`, as Kobalte gives it. `ToggleGroup.Root_multiple`
 holds several, a `string array`, and takes `multiple=true`. Each has the
 exact type of its value, where TypeScript has one component whose type
 turns on `multiple`.

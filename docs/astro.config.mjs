@@ -105,7 +105,7 @@ export default defineConfig({
             { label: "Forms", items: ["heroui/checkbox", "heroui/checkbox-group", "heroui/description", "heroui/error-message", "heroui/field-error", "heroui/fieldset", "heroui/form", "heroui/input", "heroui/input-group", "heroui/label", "heroui/number-field", "heroui/number-stepper", "heroui/radio-group", "heroui/search-field", "heroui/text-area", "heroui/text-field"] },
             { label: "Layout", items: ["heroui/card", "heroui/separator", "heroui/surface"] },
             { label: "Media", items: ["heroui/avatar", "heroui/avatar-group"] },
-            { label: "Navigation", items: ["heroui/accordion", "heroui/breadcrumbs", "heroui/disclosure", "heroui/disclosure-group", "heroui/link", "heroui/pagination", "heroui/tabs"] },
+            { label: "Navigation", items: ["heroui/accordion", "heroui/breadcrumbs", "heroui/command", "heroui/disclosure", "heroui/disclosure-group", "heroui/link", "heroui/pagination", "heroui/tabs"] },
             { label: "Overlays", items: ["heroui/alert-dialog", "heroui/drawer", "heroui/modal", "heroui/popover", "heroui/toast", "heroui/tooltip"] },
             { label: "Pickers", items: ["heroui/autocomplete", "heroui/combo-box", "heroui/select"] },
             { label: "Typography", items: ["heroui/kbd", "heroui/typography"] },

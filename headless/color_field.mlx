@@ -60,7 +60,7 @@ module Root = struct
     type t
 
     external check :
-      ?value:Color.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:Color.t Js.Null.t Solidtype.Check.value ->
       ?default_value:Color.t Solidtype.Check.value ->
       ?on_change:(Color.t option -> unit) ->
       ?change_on_wheel:bool Solidtype.Check.value ->
@@ -75,7 +75,7 @@ module Root = struct
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external value : t -> Color.t Js.Nullable.t option = "value" [@@mel.get]
+    external value : t -> Color.t Js.Null.t option = "value" [@@mel.get]
     external default_value : t -> Color.t option = "defaultValue" [@@mel.get]
 
     external on_change : t -> ((Color.t option -> unit)[@u]) option = "onChange"
@@ -94,7 +94,7 @@ module Root = struct
     let picker = Color_picker.Context.use () in
     let colour () =
       match (Props.value props, picker) with
-      | Some v, _ -> Js.Nullable.toOption v
+      | Some v, _ -> Js.Null.toOption v
       | None, Some p -> Some (S.get p.color)
       | None, None -> S.get kept
     in

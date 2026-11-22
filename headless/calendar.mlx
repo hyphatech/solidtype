@@ -1906,7 +1906,7 @@ module Root = struct
     type t = Common.t
 
     external check :
-      ?value:C.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:C.t Js.Null.t Solidtype.Check.value ->
       ?default_value:C.t Solidtype.Check.value ->
       ?on_change:(C.t -> unit) ->
       ?focused_value:C.t Solidtype.Check.value ->
@@ -1934,7 +1934,7 @@ module Root = struct
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external value : t -> C.t Js.Nullable.t option = "value" [@@mel.get]
+    external value : t -> C.t Js.Null.t option = "value" [@@mel.get]
     external default_value : t -> C.t option = "defaultValue" [@@mel.get]
 
     external on_change : t -> ((C.t -> unit)[@u]) option = "onChange"
@@ -1953,7 +1953,7 @@ module Root = struct
       in
       let current () =
         match (Props.value props, picker) with
-        | Some v, _ -> Js.Nullable.toOption v
+        | Some v, _ -> Js.Null.toOption v
         | None, Some (v, _) -> S.get v
         | None, None -> S.get kept
       in
@@ -2062,7 +2062,7 @@ module Root_range = struct
     type t = Common.t
 
     external check :
-      ?value:range Js.Nullable.t Solidtype.Check.value ->
+      ?value:range Js.Null.t Solidtype.Check.value ->
       ?default_value:range Solidtype.Check.value ->
       ?on_change:(range option -> unit) ->
       ?allows_non_contiguous_ranges:bool Solidtype.Check.value ->
@@ -2092,7 +2092,7 @@ module Root_range = struct
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external value : t -> range Js.Nullable.t option = "value" [@@mel.get]
+    external value : t -> range Js.Null.t option = "value" [@@mel.get]
     external default_value : t -> range option = "defaultValue" [@@mel.get]
 
     external on_change : t -> ((range option -> unit)[@u]) option = "onChange"
@@ -2118,7 +2118,7 @@ module Root_range = struct
       in
       let current () =
         match (Props.value props, picker) with
-        | Some v, _ -> Js.Nullable.toOption v
+        | Some v, _ -> Js.Null.toOption v
         | None, Some (v, _) -> S.get v
         | None, None -> S.get kept
       in

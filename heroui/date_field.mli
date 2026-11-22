@@ -24,12 +24,12 @@
     by [CalendarDate.make 2026 11 21], [parse_date "2026-11-21"] or
     [today zone]. A date with a time is {!Date_time}'s, and one in a zone
     {!Zoned}'s, each given back as the kind it was given: the three share the
-    parts below. A [value] of [Js.Nullable.null] controls a field empty, as
-    React's [null] does, and [on_change] is told [None] once every segment is
-    erased. It is invalid while [is_invalid], and while its value is before
-    [min_value], after [max_value] or a day [is_date_unavailable] refuses, which
-    a {!Form} refuses to submit. A part is used inside a field: elsewhere it
-    raises [Invalid_argument] as it is made. *)
+    parts below. A [value] of [Js.Null.empty] controls a field empty, as React's
+    [null] does, and [on_change] is told [None] once every segment is erased. It
+    is invalid while [is_invalid], and while its value is before [min_value],
+    after [max_value] or a day [is_date_unavailable] refuses, which a {!Form}
+    refuses to submit. A part is used inside a field: elsewhere it raises
+    [Invalid_argument] as it is made. *)
 
 module S := Solidtype.Solid
 module Jsx := Solidtype.Jsx
@@ -179,7 +179,7 @@ module Props : sig
   type t
 
   val check :
-    ?value:V.t Js.Nullable.t Solidtype.Check.value ->
+    ?value:V.t Js.Null.t Solidtype.Check.value ->
     ?default_value:V.t Solidtype.Check.value ->
     ?on_change:(V.t option -> unit) ->
     ?placeholder_value:V.t Solidtype.Check.value ->
@@ -221,7 +221,7 @@ module Date_time : sig
     type t
 
     val check :
-      ?value:V.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:V.t Js.Null.t Solidtype.Check.value ->
       ?default_value:V.t Solidtype.Check.value ->
       ?on_change:(V.t option -> unit) ->
       ?placeholder_value:V.t Solidtype.Check.value ->
@@ -266,7 +266,7 @@ module Zoned : sig
     type t
 
     val check :
-      ?value:V.t Js.Nullable.t Solidtype.Check.value ->
+      ?value:V.t Js.Null.t Solidtype.Check.value ->
       ?default_value:V.t Solidtype.Check.value ->
       ?on_change:(V.t option -> unit) ->
       placeholder_value:V.t Solidtype.Check.value ->
@@ -320,7 +320,7 @@ type 'v root = {
 
 val root :
   kind:'v kind ->
-  value:'v Js.Nullable.t option S.accessor ->
+  value:'v Js.Null.t option S.accessor ->
   default_value:'v option S.accessor ->
   on_change:('v option -> unit option) ->
   min_value:'v option S.accessor ->

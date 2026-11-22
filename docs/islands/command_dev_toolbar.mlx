@@ -1,0 +1,76 @@
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Command = Solidtype_heroui.Command
+module Kbd = Solidtype_heroui.Kbd
+module Gravity = Solidtype_gravity_icons
+
+let shortcut key =
+  <Kbd class_="ms-auto text-xs">
+    <Kbd.Content>(Jsx.string key)</Kbd.Content>
+  </Kbd>
+
+let make () =
+  <Command>
+    <Button variant=`outline>
+      "Dev Toolbar "
+      <Kbd><Kbd.Abbr key_value=`command /> <Kbd.Content>"K"</Kbd.Content></Kbd>
+    </Button>
+    <Command.Backdrop>
+      <Command.Container>
+        <Command.Dialog>
+          <Command.Input_group>
+            <Command.Input_group.Prefix>
+              <Gravity.Magnifier class_="size-4" />
+            </Command.Input_group.Prefix>
+            <Command.Input_group.Input placeholder="What do you need?" />
+            <Command.Input_group.Clear_button />
+            <Command.Input_group.Suffix>
+              <Kbd class_="text-xs"><Kbd.Content>"Esc"</Kbd.Content></Kbd>
+            </Command.Input_group.Suffix>
+          </Command.Input_group>
+          <Command.List>
+            <Command.Group>
+              <Command.Item
+                class_="bg-default"
+                text_value="View Environment staging/feat-dashboard-redesign">
+                <span class_="size-2 shrink-0 rounded-full bg-success" />
+                <div class_="flex flex-col">
+                  <span class_="font-medium">"View Environment"</span>
+                  <span class_="text-xs text-muted">
+                    "staging/feat-dashboard-redesign"
+                  </span>
+                </div>
+              </Command.Item>
+            </Command.Group>
+            <Command.Group heading=(Jsx.string "Collaboration")>
+              <Command.Item>
+                <Gravity.Comment /> <span>"Feedback"</span> (shortcut "C")
+              </Command.Item>
+              <Command.Item>
+                <Gravity.Bell /> <span>"Notifications"</span> (shortcut "N")
+              </Command.Item>
+              <Command.Item>
+                <Gravity.Flag /> <span>"Feature Flags..."</span> (shortcut "F")
+              </Command.Item>
+              <Command.Item>
+                <Gravity.Eye /> <span>"Share Preview"</span> (shortcut "S")
+              </Command.Item>
+              <Command.Item>
+                <Gravity.Branches_right />
+                <span>"Switch Branch..."</span>
+                (shortcut "B")
+              </Command.Item>
+            </Command.Group>
+            <Command.Group heading=(Jsx.string "Development")>
+              <Command.Item>
+                <Gravity.Terminal /> <span>"View Logs"</span> (shortcut "L")
+              </Command.Item>
+              <Command.Item>
+                <Gravity.Pulse /> <span>"Tracing..."</span> (shortcut "T")
+              </Command.Item>
+            </Command.Group>
+          </Command.List>
+        </Command.Dialog>
+      </Command.Container>
+    </Command.Backdrop>
+  </Command>

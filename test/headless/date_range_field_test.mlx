@@ -123,6 +123,34 @@ let () =
                    ( [],
                      "2026-11-03..2026-11-06",
                      [ "from=2026-11-03"; "to=2026-11-06" ] )));
+      Jest.testPromise
+        "moves the focus between its ends by the keys and as an end is typed"
+        (fun () ->
+          range ();
+          let user = H.setup () in
+          let focused () = H.attribute H.focused "data-type" in
+          let at_start () =
+            Js.Array.includes ~value:H.focused
+              (Js.Array.from (query_all (inputs ()).(0) "[role=spinbutton]"))
+          in
+          let* () = H.click user (segment 0 "year") in
+          let* () = H.keyboard user "{ArrowRight}" in
+          let right = (focused (), at_start ()) in
+          let* () = H.keyboard user "{ArrowLeft}" in
+          let left = (focused (), at_start ()) in
+          let* () = H.click user (segment 1 "month") in
+          let* () = H.keyboard user "{Backspace}" in
+          let erased = (focused (), at_start ()) in
+          let* () = H.click user (segment 0 "month") in
+          let* () = H.keyboard user "11032026" in
+          Js.Promise.resolve
+            E.(
+              expect (right, left, erased, (focused (), at_start ()))
+              |> toEqual
+                   ( (Some "month", false),
+                     (Some "year", true),
+                     (Some "year", true),
+                     (Some "month", false) )));
       Jest.testPromise "tells None as an end is erased whole" (fun () ->
           let told = ref [] in
           range ~told

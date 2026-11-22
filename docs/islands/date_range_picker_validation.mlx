@@ -24,7 +24,7 @@ let make () =
     start_name="startDate"
     is_invalid=(is_invalid ())
     min_value=current
-    value=(Js.Nullable.fromOption (S.get value))
+    value=(Js.Null.fromOption (S.get value))
     on_change=(S.set set_value)>
     <Label>"Booking period"</Label>
     <Date_field.Group full_width=true>
