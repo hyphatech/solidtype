@@ -42,8 +42,8 @@
 module S := Solidtype.Solid
 module Jsx := Solidtype.Jsx
 
-type placement = [ `top | `bottom | `left | `right ]
-(** A side of the trigger. *)
+type placement = Overlay.placement
+(** Where its list sits beside the trigger, as React Aria names it. *)
 
 (** Its button: Kobalte's trigger, which opens the list. *)
 module Trigger : sig

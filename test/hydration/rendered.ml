@@ -20,6 +20,12 @@ let date_field () = Solidtype.Server.render_to_string Date_field_island.make
 let checkbox_group () =
   Solidtype.Server.render_to_string Checkbox_group_island.make
 
+(* A HeroUI Table, virtualized, as the server renders it. *)
+let table () = Solidtype.Server.render_to_string Table_island.make
+
+(* A HeroUI List_view, virtualized, as the server renders it. *)
+let list_view () = Solidtype.Server.render_to_string List_view_island.make
+
 (* A theme's reader, as the server renders it, which knows no visitor. *)
 let theme () = Solidtype.Server.render_to_string Theme_island.make
 

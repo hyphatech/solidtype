@@ -14,11 +14,12 @@ let mounted: { root: Root; host: HTMLElement } | null = null;
 
 type Props = {
   multiple: boolean;
+  placement?: "top end";
   // What the select tells, written into the page as it is told.
   told: (said: string) => void;
 };
 
-export function render({ multiple, told }: Props): HTMLElement {
+export function render({ multiple, placement, told }: Props): HTMLElement {
   const host = document.body.appendChild(document.createElement("div"));
   const root = createRoot(host);
   act(() =>
@@ -40,7 +41,7 @@ export function render({ multiple, told }: Props): HTMLElement {
             <Select.Indicator />
           </Select.Trigger>
           <Description>Where you live</Description>
-          <Select.Popover>
+          <Select.Popover placement={placement}>
             <ListBox>
               <ListBox.Item id="florida" textValue="Florida">
                 Florida

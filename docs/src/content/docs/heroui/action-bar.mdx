@@ -1,0 +1,74 @@
+---
+title: Action Bar
+description: A floating toolbar for what can be done with what is chosen.
+---
+
+import Example from "@components/Example.astro";
+import * as Usage from "@islands/action_bar_usage.jsx";
+import UsageCode from "@islands/action_bar_usage.mlx?raw";
+import * as WithDataGrid from "@islands/data_grid_bulk_actions.jsx";
+import WithDataGridCode from "@islands/data_grid_bulk_actions.mlx?raw";
+
+A [Toolbar](/solidtype/heroui/toolbar/) that floats at the foot of the page
+while `is_open`, sliding in and out. Its look is a stylesheet the library
+ships, imported as [Theming](/solidtype/heroui/theming/#setup) shows.
+
+## Usage
+
+Choose rows to see it.
+
+<Example code={UsageCode} title="action_bar_usage.mlx"><Usage.make client:visible /></Example>
+
+## With Data Grid
+
+<Example code={WithDataGridCode} title="data_grid_bulk_actions.mlx" fill><WithDataGrid.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Action_bar is_open>
+  <Action_bar.Prefix>...</Action_bar.Prefix>
+  <Separator />
+  <Action_bar.Content>...</Action_bar.Content>
+  <Separator />
+  <Action_bar.Suffix>...</Action_bar.Suffix>
+</Action_bar>
+```
+
+Each section is optional; a `Separator` between them runs across the bar.
+
+## Responsive Labels
+
+Text of the class `action-bar__label` is read but not shown below 640 pixels,
+so a button there shows its icon alone.
+
+## Styling Reference
+
+### CSS Classes
+
+- `.action-bar` - Fixed at the foot of the page, centred; `[data-entering]`
+  and `[data-exiting]` while it slides
+- `.action-bar__wrapper` - The bar itself, its toolbar
+- `.action-bar__prefix` - Its leading section
+- `.action-bar__content` - Its actions
+- `.action-bar__suffix` - Its trailing section
+- `.action-bar__label` - Text hidden below 640 pixels
+
+## API Reference
+
+### Action_bar
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `isOpen` | `is_open` | `bool` | | Whether it is shown |
+| `aria-label` | `aria_label` | `string` | `"Actions"` | Its name |
+| `isAttached` | `is_attached` | `bool` | `true` | Whether its toolbar has a surface, fully rounded |
+| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `horizontal `` | Its toolbar's orientation |
+| `className` | `class_` | `string` | | Added after its toolbar's classes |
+
+### Action_bar.Prefix, Content, Suffix
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `className` | `class_` | `string` | Added after its own class |
+| `children` | `children` | elements | What it holds |

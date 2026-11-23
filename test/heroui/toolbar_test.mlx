@@ -1,0 +1,168 @@
+(* HeroUI's Toolbar beside the same toolbar in React: its role, orientation
+   and classes, a separator turned across it and a toggle group along it; and
+   its keys, its own: the arrows of its orientation between its stops, never
+   past either end, Kobalte's toggle group one stop that keeps its own
+   arrows. *)
+
+module Button = Solidtype_heroui.Button
+module Button_group = Solidtype_heroui.Button_group
+module Separator = Solidtype_heroui.Separator
+module Toggle_button = Solidtype_heroui.Toggle_button
+module Toggle_button_group = Solidtype_heroui.Toggle_button_group
+module Toolbar = Solidtype_heroui.Toolbar
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  ?orientation:string ->
+  ?is_attached:(bool[@mel.as "isAttached"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/Toolbar.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Toolbar.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+(* The toolbar, its groups and its separators, as a reader and HeroUI's
+   styles meet them; a button's tabindex, which a toggle group roves, is in
+   the focus walked below instead. *)
+let shown host =
+  Js.Array.from
+    (query_all host
+       "[data-slot=toolbar], [data-slot=toggle-button-group], \
+        [data-slot=button-group], [data-slot=separator]")
+  |> Array.map (fun e ->
+      (* React's toggle group, a group inside the toolbar, keeps an
+         aria-orientation, which ARIA allows a toolbar but not a group. *)
+      let but =
+        match T.attribute e "role" with
+        | Some "group" -> [ "tabindex"; "aria-orientation" ]
+        | Some _ | None -> [ "tabindex" ]
+      in
+      T.attributes_but but e)
+
+let focused () =
+  match T.attribute active "aria-label" with
+  | Some name -> name
+  | None -> String.trim (text active)
+
+let walk () =
+  let user = T.setup () in
+  let seen = ref [] in
+  let after name keys =
+    let* () = T.keyboard user keys in
+    seen := (name, focused ()) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "Tab in" "{Tab}" in
+  let* () = after "Tab into it" "{Tab}" in
+  let* () = after "forward, in the group" "{ArrowRight}" in
+  let* () = after "forward again" "{ArrowRight}" in
+  let* () = after "Tab to the next stop" "{Tab}" in
+  let* () = after "forward" "{ArrowRight}" in
+  let* () = after "past the end" "{ArrowRight}" in
+  let* () = after "down, not its orientation" "{ArrowDown}" in
+  let* () = after "back" "{ArrowLeft}" in
+  let* () = after "back to the group" "{ArrowLeft}" in
+  let* () = after "Tab out" "{Tab}{Tab}{Tab}" in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let orientation_name = function
+  | `horizontal -> "horizontal"
+  | `vertical -> "vertical"
+
+let both ?orientation ?is_attached () =
+  T.render (fun () ->
+      <div>
+        <button type_=`button>"Before"</button>
+        <Toolbar aria_label="Text formatting" ?orientation ?is_attached>
+          <Toggle_button_group aria_label="Text style" selection_mode=`multiple>
+            <Toggle_button is_icon_only=true aria_label="Bold" id="bold">
+              "B"
+            </Toggle_button>
+            <Toggle_button is_icon_only=true aria_label="Italic" id="italic">
+              <Toggle_button_group.Separator /> "I"
+            </Toggle_button>
+          </Toggle_button_group>
+          <Separator />
+          <Button_group variant=`tertiary>
+            <Button is_icon_only=true aria_label="Copy">"C"</Button>
+            <Button is_icon_only=true aria_label="Cut">
+              <Button_group.Separator /> "X"
+            </Button>
+          </Button_group>
+        </Toolbar>
+        <button type_=`button>"After"</button>
+      </div>);
+  let solidtype_shown = shown T.body in
+  let* solidtype_walked = walk () in
+  T.cleanup ();
+  let host =
+    Twin.render
+      (props
+         ?orientation:(Option.map orientation_name orientation)
+         ?is_attached ())
+  in
+  let react_shown = shown host in
+  Twin.cleanup ();
+  Js.Promise.resolve ((solidtype_shown, solidtype_walked), react_shown)
+
+let () =
+  Jest.describe "Toolbar" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "is HeroUI's toolbar, as React's" (fun () ->
+          let* (solidtype, _), react = both () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise
+        "moves between its stops by its arrows, a group's arrows its own"
+        (fun () ->
+          let* (_, walked), _ = both () in
+          Js.Promise.resolve
+            E.(
+              expect walked
+              |> toEqual
+                   [|
+                     ("Tab in", "Before");
+                     ("Tab into it", "Bold");
+                     ("forward, in the group", "Italic");
+                     ("forward again", "Bold");
+                     ("Tab to the next stop", "Copy");
+                     ("forward", "Cut");
+                     ("past the end", "Cut");
+                     ("down, not its orientation", "Cut");
+                     ("back", "Copy");
+                     ("back to the group", "Bold");
+                     ("Tab out", "After");
+                   |]));
+      Jest.testPromise "is vertical, as React's" (fun () ->
+          let* (solidtype, _), react = both ~orientation:`vertical () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is attached, as React's" (fun () ->
+          let* (solidtype, _), react = both ~is_attached:true () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          let* _ = both () in
+          T.cleanup ();
+          T.render (fun () ->
+              <Toolbar aria_label="Text formatting">
+                <Button aria_label="Copy">"C"</Button>
+                <Separator />
+                <Button aria_label="Cut">"X"</Button>
+              </Toolbar>);
+          let* found = T.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))

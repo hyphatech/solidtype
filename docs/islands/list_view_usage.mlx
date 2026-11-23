@@ -1,0 +1,35 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module List_view = Solidtype_heroui.List_view
+module Gravity = Solidtype_gravity_icons
+
+let files =
+  [|
+    ("documents", "Documents", "2 days ago", true);
+    ("photos", "Photos", "1 week ago", true);
+    ("readme", "README.md", "3 hours ago", false);
+    ("package", "package.json", "Yesterday", false);
+    ("src", "src", "Just now", true);
+    ("gitignore", ".gitignore", "2 weeks ago", false);
+  |]
+
+let make () =
+  <div class_="w-full max-w-md">
+    <List_view aria_label="Files" selection_mode=`multiple>
+      <For each=files>
+        (fun (id, name, updated, folder) _ ->
+          <List_view.Item id text_value=name>
+            <List_view.Item_content>
+              (if folder then <Gravity.Folder /> else <Gravity.File />)
+              <div class_="flex min-w-0 flex-col">
+                <List_view.Title>(Jsx.string name)</List_view.Title>
+                <List_view.Description>
+                  (Jsx.string ("Updated " ^ updated))
+                </List_view.Description>
+              </div>
+            </List_view.Item_content>
+          </List_view.Item>)
+      </For>
+    </List_view>
+  </div>

@@ -7,6 +7,7 @@ module Switch = Solidtype_heroui.Switch
 module Label = Solidtype_heroui.Label
 module Form = Solidtype_heroui.Form
 module E = Jest.Expect
+module Description = Solidtype_heroui.Description
 module T = Testing
 open Testing.Syntax
 
@@ -21,6 +22,7 @@ external props :
   is_required:(bool[@mel.as "isRequired"]) ->
   name:string ->
   ?aria_label:(string[@mel.as "aria-label"]) ->
+  ?described:bool ->
   ?on_blur:((Dom.focusEvent -> unit)[@mel.as "onBlur"]) ->
   unit ->
   props = ""
@@ -78,7 +80,7 @@ let shown () =
 (* The port, then the same Switch in React, each alone on the page, shown,
    then walked by its content, the field's state after each step too. *)
 let both ?(read_only = false) ?(required = false) ?(invalid = false) ?aria_label
-    ~size ~selected ~disabled () =
+    ?(described = false) ~size ~selected ~disabled () =
   let walk () =
     let shown_before = shown () in
     let content = part "switch-content" in
@@ -97,16 +99,24 @@ let both ?(read_only = false) ?(required = false) ?(invalid = false) ?aria_label
         name="wifi"
         ?aria_label>
         <Switch.Content>
-          <Switch.Control><Switch.Thumb /></Switch.Control>
+          <Switch.Control>
+            (if described then
+               <Switch.Thumb>
+                 <Switch.Icon><span>"on"</span></Switch.Icon>
+               </Switch.Thumb>
+             else <Switch.Thumb />)
+          </Switch.Control>
           <Label>"Wi-Fi"</Label>
         </Switch.Content>
+        (if described then <Description>"Join networks nearby"</Description>
+         else Solidtype.Jsx.nothing)
       </Switch>);
   let* solidtype = walk () in
   T.cleanup ();
   Twin.render
     (props ~size ~default_selected:selected ~is_disabled:disabled
        ~is_invalid:invalid ~is_read_only:read_only ~is_required:required
-       ~name:"wifi" ?aria_label ());
+       ~name:"wifi" ?aria_label ~described ());
   let* react = walk () in
   Twin.cleanup ();
   Js.Promise.resolve (solidtype, react)
@@ -191,6 +201,12 @@ let () =
         (fun () ->
           let* solidtype, react =
             both ~size:`md ~selected:false ~disabled:false ()
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise
+        "draws an icon in its thumb, and is described, as React's is" (fun () ->
+          let* solidtype, react =
+            both ~described:true ~size:`md ~selected:true ~disabled:false ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "is on, large, as React Aria's is" (fun () ->

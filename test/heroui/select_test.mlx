@@ -14,7 +14,9 @@ open Testing.Syntax
 
 type props
 
-external props : multiple:bool -> told:(string -> unit) -> unit -> props = ""
+external props :
+  multiple:bool -> ?placement:string -> told:(string -> unit) -> unit -> props
+  = ""
 [@@mel.obj]
 
 module Twin = struct
@@ -201,7 +203,7 @@ let walk ~step ~told =
   in
   Js.Promise.resolve (Array.of_list (List.rev !seen))
 
-let both ~multiple =
+let both ?placement ~multiple () =
   let told = ref [] in
   let tell said = told := said :: !told in
   T.render (fun () ->
@@ -224,7 +226,7 @@ let both ~multiple =
             <Select.Value /> <Select.Clear_button /> <Select.Indicator />
           </Select.Trigger>
           <Description>"Where you live"</Description>
-          <Select.Popover>
+          <Select.Popover ?placement=(Option.map fst placement)>
             <List_box>
               <List_box.Item id="florida" text_value="Florida">
                 "Florida" <List_box.Item_indicator />
@@ -242,7 +244,10 @@ let both ~multiple =
   let* solidtype = walk ~step:(fun action -> action ()) ~told in
   T.cleanup ();
   told := [];
-  let (_ : Dom.element) = Twin.render (props ~multiple ~told:tell ()) in
+  let (_ : Dom.element) =
+    Twin.render
+      (props ~multiple ?placement:(Option.map snd placement) ~told:tell ())
+  in
   let* react = walk ~step:Twin.step ~told in
   Twin.cleanup ();
   Js.Promise.resolve (solidtype, react)
@@ -391,10 +396,13 @@ let () =
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.afterEach T.cleanup;
       Jest.testPromise "chooses one, as React's does" (fun () ->
-          let* r = both ~multiple:false in
+          let* r = both ~multiple:false () in
           same r);
       Jest.testPromise "chooses many, as React's does" (fun () ->
-          let* r = both ~multiple:true in
+          let* r = both ~multiple:true () in
+          same r);
+      Jest.testPromise "sits where it is placed, as React's" (fun () ->
+          let* r = both ~placement:(`top_end, "top end") ~multiple:false () in
           same r);
       Jest.testPromise "shows the option it is given, before it opens"
         (fun () ->

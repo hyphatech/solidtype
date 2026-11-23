@@ -1,0 +1,139 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Avatar = Solidtype_heroui.Avatar
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Empty_state = Solidtype_heroui.Empty_state
+module Search_field = Solidtype_heroui.Search_field
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+type user = {
+  avatar_url : string;
+  email : string;
+  fallback : string;
+  id : string;
+  name : string;
+}
+
+let users =
+  [|
+    {
+      avatar_url =
+        "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg";
+      email = "bob@heroui.com";
+      fallback = "B";
+      id = "1";
+      name = "Bob";
+    };
+    {
+      avatar_url =
+        "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/green.jpg";
+      email = "fred@heroui.com";
+      fallback = "F";
+      id = "2";
+      name = "Fred";
+    };
+    {
+      avatar_url =
+        "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/purple.jpg";
+      email = "martha@heroui.com";
+      fallback = "M";
+      id = "3";
+      name = "Martha";
+    };
+    {
+      avatar_url =
+        "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/red.jpg";
+      email = "john@heroui.com";
+      fallback = "J";
+      id = "4";
+      name = "John";
+    };
+    {
+      avatar_url =
+        "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/orange.jpg";
+      email = "jane@heroui.com";
+      fallback = "J";
+      id = "5";
+      name = "Jane";
+    };
+  |]
+
+let make () =
+  let chosen, set_chosen = S.create_signal [||] in
+  let remove keys =
+    S.set set_chosen
+      (Js.Array.filter (S.get chosen) ~f:(fun k ->
+           not (Array.exists (String.equal k) keys)))
+  in
+  let user_of id =
+    Array.find_opt (fun (u : user) -> String.equal u.id id) users
+  in
+  <Autocomplete
+    class_="w-[256px]"
+    placeholder="Select your teammates"
+    selection_mode=`multiple
+    value=(S.get chosen)
+    on_change=(fun keys -> S.set set_chosen keys)>
+    <Label>"Users"</Label>
+    <Autocomplete.Trigger>
+      <Autocomplete.Value>
+        (fun value ->
+          <Tag_group size=`sm on_remove=remove>
+            <Tag_group.List>
+              <Solidtype.For each=(S.get value.selected_keys)>
+                (fun id _ ->
+                  match user_of id with
+                  | Some user ->
+                      <Tag id text_value=user.name>
+                        <Avatar class_="size-4" size=`sm>
+                          <Avatar.Image src=user.avatar_url />
+                          <Avatar.Fallback>
+                            (Jsx.string user.fallback)
+                          </Avatar.Fallback>
+                        </Avatar>
+                        <span>(Jsx.string user.name)</span>
+                      </Tag>
+                  | None -> Jsx.nothing)
+              </Solidtype.For>
+            </Tag_group.List>
+          </Tag_group>)
+      </Autocomplete.Value>
+      <Autocomplete.Clear_button />
+      <Autocomplete.Indicator />
+    </Autocomplete.Trigger>
+    <Autocomplete.Popover>
+      <Autocomplete.Filter>
+        <Search_field
+          aria_label="Search users" name="search" variant=`secondary>
+          <Search_field.Group>
+            <Search_field.Search_icon />
+            <Search_field.Input placeholder="Search users..." />
+            <Search_field.Clear_button />
+          </Search_field.Group>
+        </Search_field>
+        <List_box
+          render_empty_state=(fun _ ->
+                               <Empty_state>"No results found"</Empty_state>)
+          selection_mode=`multiple>
+          <Solidtype.For each=users>
+            (fun (user : user) _ ->
+              <List_box.Item id=user.id text_value=user.name>
+                <Avatar size=`sm>
+                  <Avatar.Image src=user.avatar_url />
+                  <Avatar.Fallback>(Jsx.string user.fallback)</Avatar.Fallback>
+                </Avatar>
+                <div class_="flex flex-col">
+                  <Label>(Jsx.string user.name)</Label>
+                  <Description>(Jsx.string user.email)</Description>
+                </div>
+                <List_box.Item_indicator />
+              </List_box.Item>)
+          </Solidtype.For>
+        </List_box>
+      </Autocomplete.Filter>
+    </Autocomplete.Popover>
+  </Autocomplete>

@@ -2,7 +2,7 @@
 // solidtype port's test renders under the same props and puts through the
 // same steps.
 
-import { Label, Switch } from "@heroui/react";
+import { Description, Label, Switch } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { words } from "./words";
@@ -19,9 +19,11 @@ type Props = {
   isRequired: boolean;
   name: string;
   "aria-label"?: string;
+  // An icon in its thumb, and a description below it.
+  described?: boolean;
 };
 
-export function render(props: Props): void {
+export function render({ described, ...props }: Props): void {
   const host = document.body.appendChild(document.createElement("div"));
   const root = createRoot(host);
   act(() =>
@@ -29,10 +31,19 @@ export function render(props: Props): void {
       <Switch {...props}>
         <Switch.Content>
           <Switch.Control>
-            <Switch.Thumb />
+            {described ? (
+              <Switch.Thumb>
+                <Switch.Icon>
+                  <span>on</span>
+                </Switch.Icon>
+              </Switch.Thumb>
+            ) : (
+              <Switch.Thumb />
+            )}
           </Switch.Control>
           <Label>Wi-Fi</Label>
         </Switch.Content>
+        {described && <Description>Join networks nearby</Description>}
       </Switch>,
     ),
   );

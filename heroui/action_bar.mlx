@@ -1,0 +1,62 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+
+let after own = function Some c -> own ^ " " ^ c | None -> own
+
+module Prefix = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
+    <div
+      class_=(after "action-bar__prefix" (S.get class_))
+      data_slot="action-bar-prefix"
+      props=(Props.others props)>
+      (S.get children)
+    </div>
+  [@@element div]
+end
+
+module Content = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
+    <div
+      class_=(after "action-bar__content" (S.get class_))
+      data_slot="action-bar-content"
+      props=(Props.others props)>
+      (S.get children)
+    </div>
+  [@@element div]
+end
+
+module Suffix = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
+    <div
+      class_=(after "action-bar__suffix" (S.get class_))
+      data_slot="action-bar-suffix"
+      props=(Props.others props)>
+      (S.get children)
+    </div>
+  [@@element div]
+end
+
+let%component make ~(is_open : bool) ?(aria_label : string = "Actions")
+    ?(is_attached : bool = true)
+    ?(orientation : [ `horizontal | `vertical ] = `horizontal)
+    ?(class_ : string option) ~(children : Jsx.element) () =
+  let o = Overlay.create ~is_open:(fun () -> S.get is_open) () in
+  <Show when_=(Overlay.present o)>
+    <div
+      class_="action-bar"
+      data_slot="action-bar"
+      ref=(fun e -> Overlay.watch o e)
+      data_entering=(Jsx.flag (Overlay.entering o))
+      data_exiting=(Jsx.flag (Overlay.exiting o))>
+      <Toolbar
+        aria_label=(S.get aria_label)
+        is_attached=(S.get is_attached)
+        orientation=(S.get orientation)
+        class_=(after "action-bar__wrapper" (S.get class_))
+        props=(Props.others props)>
+        (S.get children)
+      </Toolbar>
+    </div>
+  </Show>
+[@@element div]

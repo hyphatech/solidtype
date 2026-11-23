@@ -1,0 +1,60 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Data_grid = Solidtype_heroui.Data_grid
+module Link = Solidtype_heroui.Link
+
+type user = { name : string; title : string; email : string; role : string }
+
+let user name title email role = { name; title; email; role }
+
+let users =
+  [|
+    user "Lindsay Walton" "Front-end Developer" "lindsay.walton@example.com"
+      "Member";
+    user "Courtney Henry" "Designer" "courtney.henry@example.com" "Admin";
+    user "Tom Cook" "Director of Product" "tom.cook@example.com" "Member";
+    user "Whitney Francis" "Copywriter" "whitney.francis@example.com" "Admin";
+    user "Leonard Krasner" "Senior Designer" "leonard.krasner@example.com"
+      "Owner";
+    user "Floyd Miles" "Principal Designer" "floyd.miles@example.com" "Member";
+  |]
+
+let columns =
+  [|
+    Data_grid.column ~id:"name" ~header:(Text "Name") ~is_row_header:true
+      ~cell_class:"font-medium" (fun u -> Jsx.string (S.get u).name);
+    Data_grid.column ~id:"title" ~header:(Text "Title") (fun u ->
+        Jsx.string (S.get u).title);
+    Data_grid.column ~id:"email" ~header:(Text "Email") (fun u ->
+        Jsx.string (S.get u).email);
+    Data_grid.column ~id:"role" ~header:(Text "Role") (fun u ->
+        Jsx.string (S.get u).role);
+    Data_grid.column ~id:"actions"
+      ~header:(Element (fun () -> <span class_="sr-only">"Actions"</span>))
+      ~align:`end_
+      (fun u ->
+        <Link class_="text-sm" href=("#" ^ (S.get u).email)>"Edit"</Link>);
+  |]
+
+let make () =
+  <div class_="flex w-full flex-col gap-4">
+    <div class_="flex items-center justify-between">
+      <div class_="flex flex-col gap-1">
+        <h2 class_="text-xl font-bold">"Users"</h2>
+        <p class_="text-sm text-muted">
+          "A list of all the users in your account including their name, \
+           title, email and role."
+        </p>
+      </div>
+      <Button size=`sm variant=`secondary>"Add user"</Button>
+    </div>
+    <Data_grid
+      aria_label="Users"
+      variant=`secondary
+      rows=users
+      row_id=(fun u -> u.email)
+      columns
+      content_class="min-w-[640px]"
+    />
+  </div>

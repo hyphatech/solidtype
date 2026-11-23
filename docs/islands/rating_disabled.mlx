@@ -1,0 +1,10 @@
+module Rating = Solidtype_heroui.Rating
+
+let make () =
+  <Rating aria_label="Rating" default_value=3. is_disabled=true>
+    <Rating.Item value=1. />
+    <Rating.Item value=2. />
+    <Rating.Item value=3. />
+    <Rating.Item value=4. />
+    <Rating.Item value=5. />
+  </Rating>

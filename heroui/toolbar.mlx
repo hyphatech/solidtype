@@ -1,0 +1,44 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Headless = Solidtype_headless.Toolbar
+
+type state = Headless.state = {
+  orientation : [ `horizontal | `vertical ] S.accessor;
+}
+
+let%component make ?(is_attached : bool = false)
+    ?(orientation : [ `horizontal | `vertical ] = `horizontal)
+    ?(aria_label : string option) ?(aria_labelledby : string option)
+    ?(class_ : string option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
+  let along = S.accessor (fun () -> S.get orientation) in
+  let across =
+    S.accessor (fun () ->
+        match S.get orientation with
+        | `horizontal -> `vertical
+        | `vertical -> `horizontal)
+  in
+  <Toggle_button_group.Orientation.Provider value=along>
+    <Button_group.Orientation.Provider value=along>
+      <Separator.Orientation.Provider value=across>
+        <Headless
+          orientation=(S.get orientation)
+          ?aria_label=(S.get aria_label)
+          ?aria_labelledby=(S.get aria_labelledby)
+          class_=(Styles.Toolbar.classes
+                    (Styles.Toolbar.options ~is_attached:(S.get is_attached)
+                       ~orientation:(S.get orientation) ?class_:(S.get class_)
+                       ()))
+          data_slot="toolbar"
+          ref=(fun e -> ignore (given_ref e : unit option))
+          ?as_=(S.get as_)
+          props=(Props.others props)>
+          (fun state -> Jsx.draw (S.get children) state)
+        </Headless>
+      </Separator.Orientation.Provider>
+    </Button_group.Orientation.Provider>
+  </Toggle_button_group.Orientation.Provider>
+[@@element div]

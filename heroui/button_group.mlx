@@ -17,6 +17,12 @@ type group = {
   full_width : bool option S.accessor;
 }
 
+(* The orientation a part above gives a group inside it that gives none: a
+   toolbar's own, as React's toolbar turns its button groups. *)
+module Orientation = Solidtype.Context.Make_optional (struct
+  type t = [ `horizontal | `vertical ] S.accessor
+end)
+
 module Context = Solidtype.Context.Make_optional (struct
   type t = group
 end)
@@ -48,9 +54,17 @@ let%component make
        | `danger
        | `danger_soft ]
        option) ?(size : [ `sm | `md | `lg ] option)
-    ?(orientation : [ `horizontal | `vertical ] = `horizontal)
+    ?(orientation : [ `horizontal | `vertical ] option)
     ?(full_width : bool option) ?(is_disabled : bool option)
     ?(class_ : string option) ~(children : Jsx.element) () =
+  let around = Orientation.use () in
+  let orientation =
+    S.accessor (fun () ->
+        match (S.get orientation, around) with
+        | Some o, _ -> o
+        | None, Some o -> S.get o
+        | None, None -> `horizontal)
+  in
   let g = { variant; size; is_disabled; full_width } in
   let disabled () = Option.value (S.get is_disabled) ~default:false in
   <Context.Provider value=g>

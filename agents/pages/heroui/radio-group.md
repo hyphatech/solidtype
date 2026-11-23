@@ -164,6 +164,46 @@ let make () =
   </div>
 ```
 
+### In Surface
+
+On a [Surface](surface.md), `variant=` `` `secondary `` is
+the quieter look meant for its background.
+
+```ocaml title="radio_group_in_surface.mlx"
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Radio = Solidtype_heroui.Radio
+module Radio_group = Solidtype_heroui.Radio_group
+module Surface = Solidtype_heroui.Surface
+
+let make () =
+  <Surface class_="w-full rounded-3xl p-6">
+    <Radio_group
+      default_value="premium" name="plan-on-surface" variant=`secondary>
+      <Label>"Plan selection"</Label>
+      <Description>"Choose the plan that suits you best"</Description>
+      <Radio value="basic">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Basic Plan"
+        </Radio.Content>
+        <Description>"Includes 100 messages per month"</Description>
+      </Radio>
+      <Radio value="premium">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Premium Plan"
+        </Radio.Content>
+        <Description>"Includes 200 messages per month"</Description>
+      </Radio>
+      <Radio value="business">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Business Plan"
+        </Radio.Content>
+        <Description>"Unlimited messages"</Description>
+      </Radio>
+    </Radio_group>
+  </Surface>
+```
+
 ### Disabled
 
 ```ocaml title="radio_group_disabled.mlx"
@@ -285,6 +325,166 @@ let make () =
   </div>
 ```
 
+### Validation
+
+The group is invalid as `is_invalid` says, here once a submit finds no plan
+chosen, and its `Field_error` shows while it is.
+
+```ocaml title="radio_group_validation.mlx"
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Button = Solidtype_heroui.Button
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
+module Label = Solidtype_heroui.Label
+module Radio = Solidtype_heroui.Radio
+module Radio_group = Solidtype_heroui.Radio_group
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+let make () =
+  let plan, set_plan = S.create_signal None in
+  let tried, set_tried = S.create_signal false in
+  let message, set_message = S.create_signal None in
+  <Form
+    class_="flex flex-col gap-4"
+    on_submit=(fun e ->
+                prevent_default e;
+                S.set set_tried true;
+                S.set set_message
+                  (Option.map
+                     (fun p -> "Your chosen plan is: " ^ p)
+                     (S.get plan)))>
+    <Radio_group
+      is_required=true
+      is_invalid=(S.get tried && Option.is_none (S.get plan))
+      name="plan-validation"
+      on_change=(fun p -> S.set set_plan (Some p))>
+      <Label>"Subscription plan"</Label>
+      <Radio value="starter">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Starter"
+        </Radio.Content>
+        <Description>"For side projects and small teams"</Description>
+      </Radio>
+      <Radio value="pro">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Pro"
+        </Radio.Content>
+        <Description>"Advanced reporting and analytics"</Description>
+      </Radio>
+      <Radio value="teams">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Teams"
+        </Radio.Content>
+        <Description>"Share access with up to 10 teammates"</Description>
+      </Radio>
+      <Field_error>"Choose a subscription before continuing."</Field_error>
+    </Radio_group>
+    <Button class_="mt-2 w-fit" type_=`submit>"Submit"</Button>
+    <Show.Some some=(S.get message)>
+      (fun m -> <p class_="text-sm text-muted">(Jsx.string (S.get m))</p>)
+    </Show.Some>
+  </Form>
+```
+
+### Delivery & Payment
+
+Each `Radio.Content` drawn as a card, its state read by `data-selected`.
+
+```ocaml title="radio_group_delivery_and_payment.mlx"
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Radio = Solidtype_heroui.Radio
+module Radio_group = Solidtype_heroui.Radio_group
+module Gravity = Solidtype_gravity_icons
+
+let deliveries =
+  [|
+    ("standard", "Standard", "4-10 business days", "$5.00");
+    ("express", "Express", "2-5 business days", "$16.00");
+    ("super-fast", "Super Fast", "1 business day", "$25.00");
+  |]
+
+let payments =
+  [|
+    ("mastercard", "**** 8304", "Exp. on 01/2026");
+    ("visa", "**** 0123", "Exp. on 01/2026");
+    ("paypal", "PayPal", "Pay with PayPal");
+  |]
+
+let accent =
+  "--accent: #006FEE; --accent-foreground: #fff; --accent-hover: #006FEE; \
+   --border-width: 2px; --border-width-field: 2px; --focus: #006FEE;"
+
+let make () =
+  <div class_="flex w-full flex-col items-center gap-10" style=accent>
+    <section class_="flex w-full max-w-lg flex-col gap-4">
+      <Radio_group default_value="express" name="delivery" variant=`secondary>
+        <Label>"Delivery method"</Label>
+        <div class_="grid gap-x-4 md:grid-cols-3">
+          <For each=deliveries>
+            (fun (value, title, description, price) _ ->
+              <Radio value>
+                <Radio.Content
+                  class_="group relative flex w-full flex-col gap-6 rounded-xl \
+                          border border-transparent bg-surface px-5 py-4 \
+                          transition-all data-[selected=true]:border-accent \
+                          data-[selected=true]:bg-accent/10 \
+                          data-[focus-visible=true]:border-accent \
+                          data-[focus-visible=true]:bg-accent/10">
+                  <Radio.Control class_="absolute end-4 top-3 size-5">
+                    <Radio.Indicator />
+                  </Radio.Control>
+                  <div class_="flex flex-col gap-1">
+                    <span>(Jsx.string title)</span>
+                    <Description>(Jsx.string description)</Description>
+                  </div>
+                  <span class_="text-sm font-semibold">(Jsx.string price)</span>
+                </Radio.Content>
+              </Radio>)
+          </For>
+        </div>
+      </Radio_group>
+    </section>
+    <section class_="flex w-full max-w-lg flex-col gap-4">
+      <Radio_group default_value="visa" name="payment" variant=`secondary>
+        <div class_="flex flex-wrap items-center justify-between gap-4">
+          <Label>"Payment method"</Label>
+        </div>
+        <div class_="grid gap-x-4 md:grid-cols-2">
+          <For each=payments>
+            (fun (value, title, description) _ ->
+              <Radio value>
+                <Radio.Content
+                  class_="group relative flex w-full flex-row items-start \
+                          justify-start gap-4 rounded-xl border \
+                          border-transparent bg-surface px-5 py-4 \
+                          transition-all data-[selected=true]:border-accent \
+                          data-[selected=true]:bg-accent/10">
+                  <Radio.Control class_="absolute end-4 top-3 size-5">
+                    <Radio.Indicator />
+                  </Radio.Control>
+                  (if String.equal value "paypal" then
+                     <Gravity.Wallet class_="size-6" />
+                   else <Gravity.Credit_card class_="size-6" />)
+                  <div class_="flex flex-col gap-1">
+                    <span>(Jsx.string title)</span>
+                    <Description>(Jsx.string description)</Description>
+                  </div>
+                </Radio.Content>
+              </Radio>)
+          </For>
+        </div>
+      </Radio_group>
+    </section>
+  </div>
+```
+
 ### Custom Indicator
 
 ```ocaml title="radio_group_custom_indicator.mlx"
@@ -322,10 +522,9 @@ let make () =
   </Radio_group>
 ```
 
-### Not yet
+### Render Function
 
-HeroUI's In Surface, until Surface is ported; Validation and Delivery &
-Payment, which need a form and `FieldError`. `as_` draws another element in a part's place, as [Composition](composition.md#custom-dom-element) shows.
+`as_` draws another element in a part's place, as [Composition](composition.md#custom-dom-element) shows.
 
 ## Customization
 

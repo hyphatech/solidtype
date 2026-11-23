@@ -1,0 +1,57 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Button = Solidtype_heroui.Button
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
+module Label = Solidtype_heroui.Label
+module Radio = Solidtype_heroui.Radio
+module Radio_group = Solidtype_heroui.Radio_group
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+let make () =
+  let plan, set_plan = S.create_signal None in
+  let tried, set_tried = S.create_signal false in
+  let message, set_message = S.create_signal None in
+  <Form
+    class_="flex flex-col gap-4"
+    on_submit=(fun e ->
+                prevent_default e;
+                S.set set_tried true;
+                S.set set_message
+                  (Option.map
+                     (fun p -> "Your chosen plan is: " ^ p)
+                     (S.get plan)))>
+    <Radio_group
+      is_required=true
+      is_invalid=(S.get tried && Option.is_none (S.get plan))
+      name="plan-validation"
+      on_change=(fun p -> S.set set_plan (Some p))>
+      <Label>"Subscription plan"</Label>
+      <Radio value="starter">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Starter"
+        </Radio.Content>
+        <Description>"For side projects and small teams"</Description>
+      </Radio>
+      <Radio value="pro">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Pro"
+        </Radio.Content>
+        <Description>"Advanced reporting and analytics"</Description>
+      </Radio>
+      <Radio value="teams">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Teams"
+        </Radio.Content>
+        <Description>"Share access with up to 10 teammates"</Description>
+      </Radio>
+      <Field_error>"Choose a subscription before continuing."</Field_error>
+    </Radio_group>
+    <Button class_="mt-2 w-fit" type_=`submit>"Submit"</Button>
+    <Show.Some some=(S.get message)>
+      (fun m -> <p class_="text-sm text-muted">(Jsx.string (S.get m))</p>)
+    </Show.Some>
+  </Form>

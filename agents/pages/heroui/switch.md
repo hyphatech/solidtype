@@ -90,6 +90,67 @@ let make () =
   </div>
 ```
 
+### With Icons
+
+A `Switch.Icon` in the thumb, drawn of the switch's state.
+
+```ocaml title="switch_with_icons.mlx"
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Switch = Solidtype_heroui.Switch
+module Gravity = Solidtype_gravity_icons
+
+type icon = Jsx.element
+
+let switches : (string * (unit -> icon) * (unit -> icon) * string) array =
+  [|
+    ( "check",
+      (fun () -> <Gravity.Check class_="size-3 text-inherit opacity-100" />),
+      (fun () -> <Gravity.Power class_="size-3 text-inherit opacity-70" />),
+      "bg-green-500/80" );
+    ( "darkMode",
+      (fun () -> <Gravity.Sun class_="size-3 text-inherit opacity-100" />),
+      (fun () -> <Gravity.Moon class_="size-3 text-inherit opacity-70" />),
+      "" );
+    ( "microphone",
+      (fun () ->
+        <Gravity.Microphone_slash class_="size-3 text-inherit opacity-100" />),
+      (fun () -> <Gravity.Microphone class_="size-3 text-inherit opacity-70" />),
+      "bg-red-500/80" );
+    ( "notification",
+      (fun () -> <Gravity.Bell_fill class_="size-3 text-inherit opacity-100" />),
+      (fun () -> <Gravity.Bell_slash class_="size-3 text-inherit opacity-70" />),
+      "bg-purple-500/80" );
+    ( "volume",
+      (fun () ->
+        <Gravity.Volume_slash_fill class_="size-3 text-inherit opacity-100" />),
+      (fun () ->
+        <Gravity.Volume_fill class_="size-3 text-inherit opacity-70" />),
+      "bg-blue-500/80" );
+  |]
+
+let make () =
+  <div class_="flex gap-3">
+    <For each=switches>
+      (fun (name, on, off, selected_class) _ ->
+        <Switch default_selected=true aria_label=name size=`lg>
+          (fun s ->
+            <Switch.Content>
+              <Switch.Control
+                class_=(if S.get s.is_selected then selected_class else "")>
+                <Switch.Thumb>
+                  <Switch.Icon>
+                    (if S.get s.is_selected then on () else off ())
+                  </Switch.Icon>
+                </Switch.Thumb>
+              </Switch.Control>
+            </Switch.Content>)
+        </Switch>)
+    </For>
+  </div>
+```
+
 ### Disabled
 
 ```ocaml title="switch_disabled.mlx"
@@ -154,6 +215,23 @@ let make () =
       <Switch.Control><Switch.Thumb /></Switch.Control>
     </Switch.Content>
   </Switch>
+```
+
+### With Description
+
+```ocaml title="switch_with_description.mlx"
+module Description = Solidtype_heroui.Description
+module Switch = Solidtype_heroui.Switch
+
+let make () =
+  <div class_="max-w-sm">
+    <Switch>
+      <Switch.Content>
+        <Switch.Control><Switch.Thumb /></Switch.Control> "Public profile"
+      </Switch.Content>
+      <Description>"Allow others to see your profile information"</Description>
+    </Switch>
+  </div>
 ```
 
 ### Label Position
@@ -233,6 +311,79 @@ let make () =
   </Switch_group>
 ```
 
+### Form Integration
+
+A switch's `name` and `value` are its form's while it is on.
+
+```ocaml title="switch_form_integration.mlx"
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Button = Solidtype_heroui.Button
+module Form = Solidtype_heroui.Form
+module Switch = Solidtype_heroui.Switch
+module Switch_group = Solidtype_heroui.Switch_group
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+external current_target : Dom.event -> Dom.htmlFormElement = "currentTarget"
+[@@mel.get]
+
+type form_data
+
+external form_data : Dom.htmlFormElement -> form_data = "FormData" [@@mel.new]
+
+type entries
+
+external entries : form_data -> entries = "entries" [@@mel.send]
+
+(* Each entry a pair, its name and its value, as JavaScript gives it. *)
+external listed : entries -> (string * string) array = "from"
+[@@mel.scope "Array"]
+
+let make () =
+  let sent, set_sent = S.create_signal None in
+  <Form
+    class_="flex flex-col gap-4"
+    on_submit=(fun e ->
+                prevent_default e;
+                let fields =
+                  listed (entries (form_data (current_target e)))
+                  |> Array.map (fun (key, value) -> key ^ ": " ^ value)
+                in
+                S.set set_sent
+                  (Some
+                     ("Form submitted with: "
+                     ^ String.concat ", " (Array.to_list fields))))>
+    <Switch_group>
+      <Switch name="notifications" value="on">
+        <Switch.Content>
+          <Switch.Control><Switch.Thumb /></Switch.Control>
+          "Enable notifications"
+        </Switch.Content>
+      </Switch>
+      <Switch default_selected=true name="newsletter" value="on">
+        <Switch.Content>
+          <Switch.Control><Switch.Thumb /></Switch.Control>
+          "Subscribe to newsletter"
+        </Switch.Content>
+      </Switch>
+      <Switch name="marketing" value="on">
+        <Switch.Content>
+          <Switch.Control><Switch.Thumb /></Switch.Control>
+          "Receive marketing updates"
+        </Switch.Content>
+      </Switch>
+    </Switch_group>
+    <Button class_="mt-4" size=`sm type_=`submit variant=`primary>
+      "Submit"
+    </Button>
+    <Show.Some some=(S.get sent)>
+      (fun m -> <p class_="text-sm text-muted">(Jsx.string (S.get m))</p>)
+    </Show.Some>
+  </Form>
+```
+
 ### Render Props
 
 A function child is given the switch's state.
@@ -254,10 +405,9 @@ let make () =
   </Switch>
 ```
 
-### Not yet
+### Render Function
 
-HeroUI's With Icons, With Description and Form Integration, until their parts
-are ported. `as_` draws another element in a part's place, as [Composition](composition.md#custom-dom-element) shows.
+`as_` draws another element in a part's place, as [Composition](composition.md#custom-dom-element) shows.
 
 ## Customization
 
@@ -287,6 +437,7 @@ ensure component variants and states are reusable and easy to customize.
 - `.switch__content` - Content container
 - `.switch__control` - Switch control track
 - `.switch__thumb` - Switch thumb that moves
+- `.switch__icon` - An icon in the thumb
 - `.switch--sm` - Small size variant
 - `.switch--md` - Medium size variant (default)
 - `.switch--lg` - Large size variant
@@ -334,12 +485,12 @@ Each prop beside the name HeroUI's React component gives it.
 | `aria-label` | `aria_label` | `string` | | Its name where no label names it |
 | `isInvalid` | `is_invalid` | `bool` | `false` | Whether the switch is invalid |
 
-### Switch.Content, Switch.Control and Switch.Thumb
+### Switch.Content, Switch.Control, Switch.Thumb and Switch.Icon
 
 | React | solidtype | Type | Description |
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's class |
-| `children` | `children` | elements | What it holds; not the thumb's |
+| `children` | `children` | elements | What it holds: the thumb an icon, the icon what it draws |
 
 ### SwitchGroup
 

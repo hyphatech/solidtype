@@ -1,0 +1,42 @@
+/* Action_bar, in HeroUI's look, which ships no stylesheet for it: Tailwind on
+   HeroUI's tokens, written as HeroUI writes its components' CSS, so an
+   application restyles a part by a rule for its class. */
+
+/* At the foot of the page, centred, letting presses through but on its bar. */
+.action-bar {
+  @apply pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center;
+
+  & [data-slot="toolbar"] {
+    @apply rounded-[calc(var(--radius)*3)];
+  }
+
+  &[data-entering] {
+    @apply animate-in duration-300 ease-out fade-in-0 slide-in-from-bottom-2;
+  }
+
+  &[data-exiting] {
+    @apply animate-out duration-300 ease-out fade-out-0 slide-out-to-bottom-2;
+  }
+}
+
+.action-bar__wrapper {
+  @apply pointer-events-auto px-2 py-1 shadow-overlay sm:px-3 sm:py-1.5;
+}
+
+.action-bar__prefix {
+  @apply flex items-center gap-1.5 sm:gap-2.5;
+}
+
+.action-bar__content {
+  @apply flex items-center gap-1;
+}
+
+.action-bar__suffix {
+  @apply flex items-center;
+}
+
+/* Read, and shown from 640 pixels on, where a button has room for its
+   words. */
+.action-bar__label {
+  @apply sr-only text-sm font-medium sm:not-sr-only;
+}

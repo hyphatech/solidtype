@@ -758,3 +758,15 @@ external tag_group_props :
 
 external tag_group : Dom.htmlDivElement -> tag_group_props -> unit = "tagGroup"
 [@@mel.module "./react/heroui.tsx"]
+
+type toolbar_props
+
+external toolbar_props :
+  orientation:string ->
+  is_attached:(bool[@mel.as "isAttached"]) ->
+  unit ->
+  toolbar_props = ""
+[@@mel.obj]
+
+external toolbar : Dom.htmlDivElement -> toolbar_props -> unit = "toolbar"
+[@@mel.module "./react/heroui.tsx"]

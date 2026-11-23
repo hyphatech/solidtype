@@ -1,0 +1,60 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Button = Solidtype_heroui.Button
+module Checkbox = Solidtype_heroui.Checkbox
+module Checkbox_group = Solidtype_heroui.Checkbox_group
+module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
+module Label = Solidtype_heroui.Label
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+let make () =
+  let chosen, set_chosen = S.create_signal [] in
+  let tried, set_tried = S.create_signal false in
+  let sent, set_sent = S.create_signal None in
+  <Form
+    class_="flex flex-col gap-4 px-4"
+    on_submit=(fun e ->
+                prevent_default e;
+                S.set set_tried true;
+                S.set set_sent
+                  (match S.get chosen with
+                  | [] -> None
+                  | values ->
+                      Some ("Selected preferences: " ^ String.concat ", " values)))>
+    <Checkbox_group
+      is_required=true
+      is_invalid=(S.get tried && List.is_empty (S.get chosen))
+      name="preferences"
+      value=(S.get chosen)
+      on_change=(S.set set_chosen)>
+      <Label>"Preferences"</Label>
+      <Checkbox value="email">
+        <Checkbox.Content>
+          <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+          "Email notifications"
+        </Checkbox.Content>
+      </Checkbox>
+      <Checkbox value="sms">
+        <Checkbox.Content>
+          <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+          "SMS notifications"
+        </Checkbox.Content>
+      </Checkbox>
+      <Checkbox value="push">
+        <Checkbox.Content>
+          <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+          "Push notifications"
+        </Checkbox.Content>
+      </Checkbox>
+      <Field_error>
+        "Please select at least one notification method."
+      </Field_error>
+    </Checkbox_group>
+    <Button type_=`submit>"Submit"</Button>
+    <Show.Some some=(S.get sent)>
+      (fun m -> <p class_="text-sm text-muted">(Jsx.string (S.get m))</p>)
+    </Show.Some>
+  </Form>

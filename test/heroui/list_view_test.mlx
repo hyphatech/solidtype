@@ -1,0 +1,181 @@
+(* A list view as a caller meets it, since it has no twin: a grid of rows,
+   each named by its title; its classes pinned; chosen by a checkbox or Space
+   and told, a disabled row passed over and never chosen; moved through by the
+   arrows, Home, End and typing, never past either end; an action run by a
+   press or Enter while nothing is chosen; an empty state; and no violation
+   axe finds. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module List_view = Solidtype_heroui.List_view
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
+
+let all selector = Js.Array.from (query_all T.body selector)
+let rows () = all "[role=row]"
+
+let row named =
+  match
+    Array.to_list (rows ())
+    |> List.find_opt (fun r ->
+        match T.attribute r "aria-label" with
+        | Some name -> String.equal name named
+        | None -> false)
+  with
+  | Some r -> r
+  | None -> Js.Exn.raiseError ("no row " ^ named)
+
+let focused () = Option.value (T.attribute active "aria-label") ~default:""
+
+let files =
+  [| ("readme", "README.md"); ("package", "package.json"); ("src", "src") |]
+
+let list ?(selection_mode = `none) ?(told = ref [||]) ?(acted = ref [||])
+    ?on_action ?disabled_keys ?(items = files) () =
+  T.render (fun () ->
+      <List_view
+        aria_label="Files"
+        selection_mode
+        ?disabled_keys
+        on_selection_change=(fun keys -> told := Array.append !told [| keys |])
+        ?on_action=(Option.map
+                      (fun () key -> acted := Array.append !acted [| key |])
+                      on_action)
+        render_empty_state=(fun () -> <span>"No files"</span>)>
+        <Solidtype.For each=items>
+          (fun (id, name) _ ->
+            <List_view.Item id text_value=name>
+              <List_view.Item_content>
+                <List_view.Title>(Jsx.string name)</List_view.Title>
+              </List_view.Item_content>
+            </List_view.Item>)
+        </Solidtype.For>
+      </List_view>)
+
+let () =
+  Jest.describe "List_view" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is a grid of rows, in its classes" (fun () ->
+          list ~selection_mode:`multiple ();
+          let grid = T.by_role "grid" in
+          E.(
+            expect
+              ( T.class_name grid,
+                T.attribute grid "aria-multiselectable",
+                Array.map (fun r -> T.attribute r "aria-label") (rows ()),
+                Array.map T.class_name (all "[data-slot=list-view-item]"),
+                Array.length (all "[data-slot=list-view-selection-cell]") )
+            |> toEqual
+                 ( "list-view list-view--primary",
+                   Some "true",
+                   [| Some "README.md"; Some "package.json"; Some "src" |],
+                   [| "list-view__item"; "list-view__item"; "list-view__item" |],
+                   3 )));
+      Jest.testPromise "chooses rows by their checkboxes and by Space"
+        (fun () ->
+          let told = ref [||] in
+          list ~selection_mode:`multiple ~told ();
+          let user = T.setup () in
+          let checkbox =
+            (all "[data-slot=list-view-selection-cell] input").(1)
+          in
+          let* () = T.click user checkbox in
+          let* () = T.keyboard user "{ArrowDown} " in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( Array.map (fun k -> Js.Array.sortInPlace (Array.copy k)) !told,
+                  T.attribute (row "package.json") "data-selected",
+                  T.attribute (row "src") "aria-selected" )
+              |> toEqual
+                   ( [| [| "package" |]; [| "package"; "src" |] |],
+                     Some "true",
+                     Some "true" )));
+      Jest.testPromise "chooses a row once by a press on its checkbox's box"
+        (fun () ->
+          let told = ref [||] in
+          list ~selection_mode:`multiple ~told ();
+          let user = T.setup () in
+          let* () =
+            T.click user
+              (all
+                 "[data-slot=list-view-selection-cell] \
+                  [data-slot=checkbox-control]").(0)
+          in
+          Js.Promise.resolve
+            E.(
+              expect (!told, T.attribute (row "README.md") "aria-selected")
+              |> toEqual ([| [| "readme" |] |], Some "true")));
+      Jest.testPromise
+        "moves by the arrows, Home, End and typing, never past either end"
+        (fun () ->
+          list ~selection_mode:`single ~disabled_keys:[| "package" |] ();
+          let user = T.setup () in
+          let* () = T.tab user in
+          let first = focused () in
+          let* () = T.keyboard user "{ArrowDown}" in
+          let skipped = focused () in
+          let* () = T.keyboard user "{ArrowDown}" in
+          let at_end = focused () in
+          let* () = T.keyboard user "{Home}" in
+          let home = focused () in
+          let* () = T.keyboard user "{ArrowUp}" in
+          let at_start = focused () in
+          let* () = T.keyboard user "s" in
+          let typed = focused () in
+          Js.Promise.resolve
+            E.(
+              expect (first, skipped, at_end, home, at_start, typed)
+              |> toEqual
+                   ("README.md", "src", "src", "README.md", "README.md", "src")));
+      Jest.testPromise "runs an item's action by a press or Enter" (fun () ->
+          let acted = ref [||] in
+          list ~acted ~on_action:() ();
+          let user = T.setup () in
+          let* () = T.click user (row "src") in
+          let* () = T.keyboard user "{ArrowUp}{Enter}" in
+          Js.Promise.resolve E.(expect !acted |> toEqual [| "src"; "package" |]));
+      Jest.test "draws its empty state while it holds no row" (fun () ->
+          list ~items:[||] ();
+          E.(
+            expect
+              ( Array.map T.text_content
+                  (all "[data-slot=list-view-empty-state]"),
+                T.attribute (T.by_role "grid") "data-empty" )
+            |> toEqual ([| "No files" |], Some "")));
+      Jest.test "draws only the rows in view while virtualized" (fun () ->
+          T.render (fun () ->
+              <List_view
+                aria_label="Files"
+                virtualized=true
+                row_height=48.
+                style="overflow-y: auto"
+                data_client_height="400">
+                <Solidtype.For each=(Array.init 1000 string_of_int)>
+                  (fun id _ ->
+                    <List_view.Item id text_value=("File " ^ id)>
+                      <List_view.Item_content>
+                        <List_view.Title>
+                          (Jsx.string ("File " ^ id))
+                        </List_view.Title>
+                      </List_view.Item_content>
+                    </List_view.Item>)
+                </Solidtype.For>
+              </List_view>);
+          let drawn = Array.length (rows ()) in
+          E.(
+            expect
+              ( drawn > 0 && drawn < 20,
+                T.attribute (T.by_role "grid") "data-virtualized" )
+            |> toEqual (true, Some "true")));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          list ~selection_mode:`multiple ();
+          let* found = T.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))

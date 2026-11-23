@@ -1,15 +1,58 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
 module Autocomplete = Solidtype_heroui.Autocomplete
 module Empty_state = Solidtype_heroui.Empty_state
 module Label = Solidtype_heroui.Label
 module List_box = Solidtype_heroui.List_box
 module Search_field = Solidtype_heroui.Search_field
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+let states =
+  [|
+    ("florida", "Florida");
+    ("delaware", "Delaware");
+    ("california", "California");
+    ("texas", "Texas");
+    ("new-york", "New York");
+    ("washington", "Washington");
+  |]
+
+let name_of id =
+  match Array.find_opt (fun (k, _) -> String.equal k id) states with
+  | Some (_, name) -> name
+  | None -> id
 
 let make () =
+  let chosen, set_chosen = S.create_signal [||] in
+  let remove keys =
+    S.set set_chosen
+      (Js.Array.filter (S.get chosen) ~f:(fun k ->
+           not (Array.exists (String.equal k) keys)))
+  in
   <Autocomplete
-    class_="w-[256px]" placeholder="Select states" selection_mode=`multiple>
+    class_="w-[256px]"
+    placeholder="Select states"
+    selection_mode=`multiple
+    value=(S.get chosen)
+    on_change=(fun keys -> S.set set_chosen keys)>
     <Label>"States to Visit"</Label>
     <Autocomplete.Trigger>
-      <Autocomplete.Value /> <Autocomplete.Indicator />
+      <Autocomplete.Value>
+        (fun value ->
+          <Tag_group size=`sm on_remove=remove>
+            <Tag_group.List>
+              <For each=(S.get value.selected_keys)>
+                (fun id _ ->
+                  <Tag id text_value=(name_of id)>
+                    (Jsx.string (name_of id))
+                  </Tag>)
+              </For>
+            </Tag_group.List>
+          </Tag_group>)
+      </Autocomplete.Value>
+      <Autocomplete.Indicator />
     </Autocomplete.Trigger>
     <Autocomplete.Popover>
       <Autocomplete.Filter>
@@ -25,24 +68,12 @@ let make () =
           render_empty_state=(fun _ ->
                                <Empty_state>"No results found"</Empty_state>)
           selection_mode=`multiple>
-          <List_box.Item id="florida" text_value="Florida">
-            "Florida" <List_box.Item_indicator />
-          </List_box.Item>
-          <List_box.Item id="delaware" text_value="Delaware">
-            "Delaware" <List_box.Item_indicator />
-          </List_box.Item>
-          <List_box.Item id="california" text_value="California">
-            "California" <List_box.Item_indicator />
-          </List_box.Item>
-          <List_box.Item id="texas" text_value="Texas">
-            "Texas" <List_box.Item_indicator />
-          </List_box.Item>
-          <List_box.Item id="new-york" text_value="New York">
-            "New York" <List_box.Item_indicator />
-          </List_box.Item>
-          <List_box.Item id="washington" text_value="Washington">
-            "Washington" <List_box.Item_indicator />
-          </List_box.Item>
+          <For each=states>
+            (fun (id, name) _ ->
+              <List_box.Item id text_value=name>
+                (Jsx.string name) <List_box.Item_indicator />
+              </List_box.Item>)
+          </For>
         </List_box>
       </Autocomplete.Filter>
     </Autocomplete.Popover>

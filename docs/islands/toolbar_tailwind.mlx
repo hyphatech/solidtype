@@ -1,0 +1,32 @@
+module Toggle_button = Solidtype_heroui.Toggle_button
+module Toggle_button_group = Solidtype_heroui.Toggle_button_group
+module Toolbar = Solidtype_heroui.Toolbar
+module Gravity = Solidtype_gravity_icons
+
+let toggle_class =
+  "rounded-lg data-[selected=true]:bg-accent \
+   data-[selected=true]:text-accent-foreground"
+
+let make () =
+  <Toolbar
+    aria_label="Formatting toolbar"
+    class_="gap-1 rounded-xl border border-border/80 bg-surface-secondary p-1.5">
+    <Toggle_button_group
+      aria_label="Text style" class_="gap-0.5" selection_mode=`multiple>
+      <Toggle_button
+        is_icon_only=true aria_label="Bold" class_=toggle_class id="bold">
+        <Gravity.Bold />
+      </Toggle_button>
+      <Toggle_button
+        is_icon_only=true aria_label="Italic" class_=toggle_class id="italic">
+        <Gravity.Italic />
+      </Toggle_button>
+      <Toggle_button
+        is_icon_only=true
+        aria_label="Underline"
+        class_=toggle_class
+        id="underline">
+        <Gravity.Underline />
+      </Toggle_button>
+    </Toggle_button_group>
+  </Toolbar>

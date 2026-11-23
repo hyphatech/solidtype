@@ -1,0 +1,26 @@
+(* A rating as the server writes it: the items up to its value active in the
+   HTML a page is prerendered with, before Kobalte learns their places. *)
+
+module Server = Solidtype.Server
+module Rating = Solidtype_heroui.Rating
+module E = Jest.Expect
+
+let rating () =
+  <Rating aria_label="Rating" default_value=3.>
+    <Rating.Item value=1. />
+    <Rating.Item value=2. />
+    <Rating.Item value=3. />
+    <Rating.Item value=4. />
+    <Rating.Item value=5. />
+  </Rating>
+
+let count part s = Array.length (Js.String.split ~sep:part s) - 1
+
+let () =
+  Jest.describe "A rating on the server" (fun () ->
+      Jest.test "marks the items up to its value active" (fun () ->
+          E.(
+            expect
+              (count {js|data-active="true"|js}
+                 (Server.render_to_string rating))
+            |> toEqual 3)))

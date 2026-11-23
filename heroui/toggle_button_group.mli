@@ -71,6 +71,24 @@ module Separator : sig
   val component : Props.t Jsx.component
 end
 
+(** The orientation a part above gives a group inside it that gives none, as a
+    {!Toolbar} gives its own. *)
+module Orientation : sig
+  module Provider : sig
+    module Props : sig
+      val check :
+        value:[ `horizontal | `vertical ] S.accessor Solidtype.Check.value ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit
+    end
+
+    val component : unit Jsx.component
+  end
+
+  val use : unit -> [ `horizontal | `vertical ] S.accessor option
+end
+
 (** The group. [selection_mode] is [`single] by default, one button selected at
     most, or [`multiple]. [selected_keys] are the selected buttons' ids while it
     is given, else those kept, [default_selected_keys] at first; a change calls

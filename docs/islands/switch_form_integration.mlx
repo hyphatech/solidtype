@@ -1,0 +1,66 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Button = Solidtype_heroui.Button
+module Form = Solidtype_heroui.Form
+module Switch = Solidtype_heroui.Switch
+module Switch_group = Solidtype_heroui.Switch_group
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+external current_target : Dom.event -> Dom.htmlFormElement = "currentTarget"
+[@@mel.get]
+
+type form_data
+
+external form_data : Dom.htmlFormElement -> form_data = "FormData" [@@mel.new]
+
+type entries
+
+external entries : form_data -> entries = "entries" [@@mel.send]
+
+(* Each entry a pair, its name and its value, as JavaScript gives it. *)
+external listed : entries -> (string * string) array = "from"
+[@@mel.scope "Array"]
+
+let make () =
+  let sent, set_sent = S.create_signal None in
+  <Form
+    class_="flex flex-col gap-4"
+    on_submit=(fun e ->
+                prevent_default e;
+                let fields =
+                  listed (entries (form_data (current_target e)))
+                  |> Array.map (fun (key, value) -> key ^ ": " ^ value)
+                in
+                S.set set_sent
+                  (Some
+                     ("Form submitted with: "
+                     ^ String.concat ", " (Array.to_list fields))))>
+    <Switch_group>
+      <Switch name="notifications" value="on">
+        <Switch.Content>
+          <Switch.Control><Switch.Thumb /></Switch.Control>
+          "Enable notifications"
+        </Switch.Content>
+      </Switch>
+      <Switch default_selected=true name="newsletter" value="on">
+        <Switch.Content>
+          <Switch.Control><Switch.Thumb /></Switch.Control>
+          "Subscribe to newsletter"
+        </Switch.Content>
+      </Switch>
+      <Switch name="marketing" value="on">
+        <Switch.Content>
+          <Switch.Control><Switch.Thumb /></Switch.Control>
+          "Receive marketing updates"
+        </Switch.Content>
+      </Switch>
+    </Switch_group>
+    <Button class_="mt-4" size=`sm type_=`submit variant=`primary>
+      "Submit"
+    </Button>
+    <Show.Some some=(S.get sent)>
+      (fun m -> <p class_="text-sm text-muted">(Jsx.string (S.get m))</p>)
+    </Show.Some>
+  </Form>

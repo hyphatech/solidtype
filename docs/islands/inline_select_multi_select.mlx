@@ -1,0 +1,22 @@
+module Inline_select = Solidtype_heroui.Inline_select
+module List_box = Solidtype_heroui.List_box
+
+let make () =
+  <Inline_select selection_mode=`multiple default_value=[| "email"; "push" |]>
+    <Inline_select.Trigger aria_label="Notification channels">
+      <Inline_select.Value /> <Inline_select.Indicator />
+    </Inline_select.Trigger>
+    <Inline_select.Popover class_="w-48 max-w-48">
+      <List_box>
+        <List_box.Item id="email" text_value="Email">
+          "Email" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="whatsapp" text_value="WhatsApp">
+          "WhatsApp" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="push" text_value="Push Notification">
+          "Push Notification" <List_box.Item_indicator />
+        </List_box.Item>
+      </List_box>
+    </Inline_select.Popover>
+  </Inline_select>

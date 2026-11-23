@@ -521,6 +521,46 @@ let focused () =
 let () =
   Jest.describe "Autocomplete, beyond React's" (fun () ->
       Jest.afterEach T.cleanup;
+      Jest.testPromise
+        "keeps a press on a control in its value, its list left closed"
+        (fun () ->
+          let chosen, set_chosen = S.create_signal [| "texas"; "utah" |] in
+          T.render (fun () ->
+              <Autocomplete
+                selection_mode=`multiple
+                value=(S.get chosen)
+                on_change=(fun keys -> S.set set_chosen keys)>
+                <Label>"States"</Label>
+                <Autocomplete.Trigger>
+                  <Autocomplete.Value>
+                    (fun value ->
+                      <Solidtype.For each=(S.get value.selected_keys)>
+                        (fun key _ ->
+                          <button
+                            type_=`button
+                            aria_label=("Remove " ^ key)
+                            on_click=(fun _ ->
+                                       S.set set_chosen
+                                         (Js.Array.filter (S.get chosen)
+                                            ~f:(fun k ->
+                                              not (String.equal k key))))>
+                            (Solidtype.Jsx.string key)
+                          </button>)
+                      </Solidtype.For>)
+                  </Autocomplete.Value>
+                  <Autocomplete.Indicator />
+                </Autocomplete.Trigger>
+                <Autocomplete.Popover>
+                  (search_and_list ())
+                </Autocomplete.Popover>
+              </Autocomplete>);
+          let user = T.setup () in
+          let* () = T.click user (first "[aria-label=\"Remove texas\"]") in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect (S.get chosen, Array.length (all "[role=listbox]"))
+              |> toEqual ([| "utah" |], 0)));
       Jest.test "describes its button by no description it lacks" (fun () ->
           T.render (fun () -> states (fun () -> <span />));
           let described =

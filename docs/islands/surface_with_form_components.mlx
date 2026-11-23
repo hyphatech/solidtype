@@ -1,0 +1,18 @@
+module Input = Solidtype_heroui.Input
+module Surface = Solidtype_heroui.Surface
+module Text_area = Solidtype_heroui.Text_area
+
+let make () =
+  <Surface
+    class_="flex min-w-[320px] flex-col gap-4 rounded-3xl p-6" variant=`default>
+    <Input
+      aria_label="Input"
+      placeholder="Input with secondary variant"
+      variant=`secondary
+    />
+    <Text_area
+      aria_label="TextArea"
+      placeholder="TextArea with secondary variant"
+      variant=`secondary
+    />
+  </Surface>

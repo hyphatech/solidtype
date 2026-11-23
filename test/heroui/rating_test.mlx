@@ -1,0 +1,76 @@
+(* A rating as a caller meets it, since it has no twin: a radio group of
+   items in its classes; a value chosen by a press and by the arrows, and
+   told; read only, a fractional value's items active up to its whole part
+   and the next filled as far as the fraction; and no violation axe finds. *)
+
+module S = Solidtype.Solid
+module Rating = Solidtype_heroui.Rating
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+let all selector = Js.Array.from (query_all T.body selector)
+
+let rating ?(told = ref [||]) ?default_value ?value ?(is_read_only = false) () =
+  T.render (fun () ->
+      <Rating
+        aria_label="Rating"
+        ?default_value
+        ?value
+        is_read_only
+        on_value_change=(fun v -> told := Array.append !told [| v |])>
+        <Rating.Item value=1. />
+        <Rating.Item value=2. />
+        <Rating.Item value=3. />
+        <Rating.Item value=4. />
+        <Rating.Item value=5. />
+      </Rating>)
+
+let active () =
+  all "[data-slot=rating-icon]"
+  |> Js.Array.filter ~f:(fun e ->
+      match T.attribute e "data-active" with
+      | Some v -> String.equal v "true"
+      | None -> false)
+  |> Array.length
+
+let () =
+  Jest.describe "Rating" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is a radio group of items, in its classes" (fun () ->
+          rating ~default_value:3. ();
+          E.(
+            expect
+              ( T.class_name (T.by_role "radiogroup"),
+                Array.length (all "[role=radio]"),
+                Array.map T.class_name (all "[data-slot=rating-item]")
+                |> Fun.flip Array.get 0,
+                active () )
+            |> toEqual
+                 ("rating rating--md", 5, "rating__item rating__item--md", 3)));
+      Jest.testPromise "chooses by a press and by the arrows, and tells"
+        (fun () ->
+          let told = ref [||] in
+          rating ~told ();
+          let user = T.setup () in
+          let* () = T.click user (all "[role=radio]").(3) in
+          let* () = T.keyboard user "{ArrowLeft}" in
+          Js.Promise.resolve
+            E.(expect (!told, active ()) |> toEqual ([| 4.; 3. |], 3)));
+      Jest.test "fills a fractional value read only" (fun () ->
+          rating ~value:3.7 ~is_read_only:true ();
+          E.(
+            expect
+              ( active (),
+                Array.map
+                  (fun e -> T.attribute e "style")
+                  (all ".rating__icon-partial") )
+            |> toEqual (3, [| Some "--rating-partial: 70%;" |])));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          rating ~default_value:2. ();
+          let* found = T.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))

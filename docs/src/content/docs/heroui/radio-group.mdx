@@ -11,6 +11,12 @@ import * as RadioGroupHorizontal from "@islands/radio_group_horizontal.jsx";
 import RadioGroupHorizontalCode from "@islands/radio_group_horizontal.mlx?raw";
 import * as RadioGroupVariants from "@islands/radio_group_variants.jsx";
 import RadioGroupVariantsCode from "@islands/radio_group_variants.mlx?raw";
+import * as RadioGroupInSurface from "@islands/radio_group_in_surface.jsx";
+import RadioGroupInSurfaceCode from "@islands/radio_group_in_surface.mlx?raw";
+import * as RadioGroupValidation from "@islands/radio_group_validation.jsx";
+import RadioGroupValidationCode from "@islands/radio_group_validation.mlx?raw";
+import * as RadioGroupDeliveryAndPayment from "@islands/radio_group_delivery_and_payment.jsx";
+import RadioGroupDeliveryAndPaymentCode from "@islands/radio_group_delivery_and_payment.mlx?raw";
 import * as RadioGroupDisabled from "@islands/radio_group_disabled.jsx";
 import RadioGroupDisabledCode from "@islands/radio_group_disabled.mlx?raw";
 import * as RadioGroupControlled from "@islands/radio_group_controlled.jsx";
@@ -84,6 +90,13 @@ The RadioGroup component supports two visual variants:
 
 <Example code={RadioGroupVariantsCode} title="radio_group_variants.mlx"><RadioGroupVariants.make client:visible /></Example>
 
+### In Surface
+
+On a [Surface](/solidtype/heroui/surface/), `variant=` `` `secondary `` is
+the quieter look meant for its background.
+
+<Example code={RadioGroupInSurfaceCode} title="radio_group_in_surface.mlx"><RadioGroupInSurface.make client:visible /></Example>
+
 ### Disabled
 
 <Example code={RadioGroupDisabledCode} title="radio_group_disabled.mlx"><RadioGroupDisabled.make client:visible /></Example>
@@ -99,14 +112,26 @@ updates.
 
 <Example code={RadioGroupUncontrolledCode} title="radio_group_uncontrolled.mlx"><RadioGroupUncontrolled.make client:visible /></Example>
 
+### Validation
+
+The group is invalid as `is_invalid` says, here once a submit finds no plan
+chosen, and its `Field_error` shows while it is.
+
+<Example code={RadioGroupValidationCode} title="radio_group_validation.mlx"><RadioGroupValidation.make client:visible /></Example>
+
+### Delivery & Payment
+
+Each `Radio.Content` drawn as a card, its state read by `data-selected`.
+
+<Example code={RadioGroupDeliveryAndPaymentCode} title="radio_group_delivery_and_payment.mlx"><RadioGroupDeliveryAndPayment.make client:visible /></Example>
+
 ### Custom Indicator
 
 <Example code={RadioGroupCustomIndicatorCode} title="radio_group_custom_indicator.mlx"><RadioGroupCustomIndicator.make client:visible /></Example>
 
-### Not yet
+### Render Function
 
-HeroUI's In Surface, until Surface is ported; Validation and Delivery &
-Payment, which need a form and `FieldError`. `as_` draws another element in a part's place, as [Composition](/solidtype/heroui/composition/#custom-dom-element) shows.
+`as_` draws another element in a part's place, as [Composition](/solidtype/heroui/composition/#custom-dom-element) shows.
 
 ## Customization
 

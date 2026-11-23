@@ -12,6 +12,12 @@ type group = {
   join : (unit -> bool) -> unit;
 }
 
+(* The orientation a part above gives a group inside it that gives none, as
+   React Aria's ToggleButtonGroupContext does: a toolbar's own. *)
+module Orientation = Solidtype.Context.Make_optional (struct
+  type t = [ `horizontal | `vertical ] S.accessor
+end)
+
 module Context = Solidtype.Context.Make_optional (struct
   type t = group
 end)
@@ -46,13 +52,21 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
     ?(default_selected_keys : string array option)
     ?(on_selection_change : (string array -> unit) option)
     ?(disallow_empty_selection : bool = false)
-    ?(orientation : [ `horizontal | `vertical ] = `horizontal)
-    ?(size : size option) ?(is_detached : bool = false)
-    ?(full_width : bool = false) ?(is_disabled : bool option)
-    ?(aria_label : string option) ?(aria_labelledby : string option)
-    ?(class_ : string option) ~(children : state Jsx.children)
+    ?(orientation : [ `horizontal | `vertical ] option) ?(size : size option)
+    ?(is_detached : bool = false) ?(full_width : bool = false)
+    ?(is_disabled : bool option) ?(aria_label : string option)
+    ?(aria_labelledby : string option) ?(class_ : string option)
+    ~(children : state Jsx.children)
     ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
     () =
+  let around = Orientation.use () in
+  let orientation =
+    S.accessor (fun () ->
+        match (S.get orientation, around) with
+        | Some o, _ -> o
+        | None, Some o -> S.get o
+        | None, None -> `horizontal)
+  in
   (* The selection is kept here and Kobalte's group controlled by it, so a
      change that would leave none selected is refused, which Kobalte's group
      cannot do. *)

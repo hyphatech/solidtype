@@ -1,0 +1,33 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module List_view = Solidtype_heroui.List_view
+module Gravity = Solidtype_gravity_icons
+
+let files =
+  Array.init 1000 (fun i ->
+      let n = string_of_int (i + 1) in
+      (n, "report-" ^ n ^ ".pdf", string_of_int ((i * 37 mod 900) + 12) ^ " KB"))
+
+let make () =
+  <div class_="w-full max-w-md">
+    <List_view
+      aria_label="Reports"
+      selection_mode=`multiple
+      virtualized=true
+      row_height=64.
+      class_="h-[400px]">
+      <For each=files>
+        (fun (id, name, size) _ ->
+          <List_view.Item id text_value=name>
+            <List_view.Item_content>
+              <Gravity.File />
+              <div class_="flex min-w-0 flex-col">
+                <List_view.Title>(Jsx.string name)</List_view.Title>
+                <List_view.Description>(Jsx.string size)</List_view.Description>
+              </div>
+            </List_view.Item_content>
+          </List_view.Item>)
+      </For>
+    </List_view>
+  </div>

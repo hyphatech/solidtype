@@ -1,13 +1,25 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Show = Solidtype.Show
+module Button = Solidtype_heroui.Button
 module Chip = Solidtype_heroui.Chip
 module Data_grid = Solidtype_heroui.Data_grid
+module Inline_select = Solidtype_heroui.Inline_select
+module Input = Solidtype_heroui.Input
 module List_box = Solidtype_heroui.List_box
 module Number_stepper = Solidtype_heroui.Number_stepper
-module Select = Solidtype_heroui.Select
 module Switch = Solidtype_heroui.Switch
+module Gravity = Solidtype_gravity_icons
 
-type priority = Low | Medium | High
+external target : Dom.inputEvent -> Dom.htmlInputElement = "target" [@@mel.get]
+external value_of : Dom.htmlInputElement -> string = "value" [@@mel.get]
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external focus : Dom.htmlInputElement -> unit = "focus" [@@mel.send]
+external focus_button : Dom.htmlButtonElement -> unit = "focus" [@@mel.send]
+external select_text : Dom.htmlInputElement -> unit = "select" [@@mel.send]
+
+type priority = High | Medium | Low
 
 type flag = {
   id : string;
@@ -17,64 +29,126 @@ type flag = {
   enabled : bool;
 }
 
+let flag id feature priority points enabled =
+  { id; feature; priority; points; enabled }
+
 let flags =
   [|
-    {
-      id = "1";
-      feature = "Dark mode";
-      priority = High;
-      points = 8.;
-      enabled = true;
-    };
-    {
-      id = "2";
-      feature = "CSV export";
-      priority = Medium;
-      points = 6.;
-      enabled = true;
-    };
-    {
-      id = "3";
-      feature = "Keyboard shortcuts";
-      priority = Low;
-      points = 5.;
-      enabled = false;
-    };
-    {
-      id = "4";
-      feature = "Two-factor auth";
-      priority = Medium;
-      points = 16.;
-      enabled = true;
-    };
-    {
-      id = "5";
-      feature = "Bulk import";
-      priority = Medium;
-      points = 8.;
-      enabled = false;
-    };
-    {
-      id = "6";
-      feature = "Audit log";
-      priority = High;
-      points = 5.;
-      enabled = true;
-    };
+    flag "1" "Dark mode" High 8. true;
+    flag "2" "CSV export" Medium 3. true;
+    flag "3" "Keyboard shortcuts" Low 5. false;
+    flag "4" "Two-factor auth" High 13. true;
+    flag "5" "Bulk import" Medium 8. false;
+    flag "6" "Audit log" High 5. true;
+    flag "7" "Webhooks" Low 3. false;
+    flag "8" "Custom branding" Medium 8. true;
   |]
 
-let priority_key = function Low -> "low" | Medium -> "medium" | High -> "high"
-let priority_of = function "high" -> High | "medium" -> Medium | _ -> Low
+let priorities = [| High; Medium; Low |]
+let priority_key = function High -> "high" | Medium -> "medium" | Low -> "low"
 
 let priority_name = function
-  | Low -> "Low"
-  | Medium -> "Medium"
   | High -> "High"
+  | Medium -> "Medium"
+  | Low -> "Low"
 
 let priority_color = function
-  | Low -> `default
-  | Medium -> `warning
   | High -> `danger
+  | Medium -> `warning
+  | Low -> `default
+
+let priority_chip p =
+  <Chip color=(priority_color p) size=`sm variant=`soft>
+    (Jsx.string (priority_name p))
+  </Chip>
+
+(* The title as an input, its text chosen as it opens: Enter or Save keeps
+   it, Escape or Cancel leaves the title as it was. *)
+let title_editor ~title ~save ~cancel =
+  let draft, set_draft = S.create_signal title in
+  let field = ref None in
+  S.on_mount (fun () ->
+      Option.iter
+        (fun e ->
+          focus e;
+          select_text e)
+        !field);
+  let keep () =
+    match String.trim (S.get draft) with "" -> cancel () | t -> save t
+  in
+  <div class_="flex items-center gap-1">
+    <Input
+      aria_label="Edit title"
+      class_="h-7 w-[180px] text-sm"
+      value=(S.get draft)
+      ref=(fun e -> field := Some e)
+      on_input=(fun e -> S.set set_draft (value_of (target e)))
+      on_key_down=(fun e ->
+                    match key e with
+                    | "Enter" -> keep ()
+                    | "Escape" -> cancel ()
+                    | _ -> ())
+    />
+    <Button
+      is_icon_only=true
+      size=`sm
+      variant=`ghost
+      aria_label="Save"
+      on_click=(fun _ -> keep ())>
+      <Gravity.Check class_="size-3" />
+    </Button>
+    <Button
+      is_icon_only=true
+      size=`sm
+      variant=`ghost
+      aria_label="Cancel"
+      on_click=(fun _ -> cancel ())>
+      <Gravity.Xmark class_="size-3" />
+    </Button>
+  </div>
+
+(* Shown while its row is hovered, or reached by the keys. *)
+let edit_button ~ref ~on_click =
+  <Button
+    is_icon_only=true
+    size=`sm
+    variant=`ghost
+    aria_label="Edit title"
+    class_="opacity-0 group-hover/edit:opacity-100 focus-visible:opacity-100"
+    ref
+    on_click=(fun _ -> on_click ())>
+    <Gravity.Pencil class_="size-3" />
+  </Button>
+
+(* The title, and its button, which takes the focus back as editing ends,
+   since the input that had it is gone. *)
+let title_cell ~title ~rename =
+  let editing, set_editing = S.create_signal false in
+  let button = ref None in
+  let finish () =
+    S.set set_editing false;
+    Option.iter focus_button !button
+  in
+  <Show
+    when_=(S.get editing)
+    fallback=(<div class_="group/edit flex items-center gap-1.5">
+                <span class_="text-sm font-medium">
+                  (Jsx.string (S.get title))
+                </span>
+                (edit_button
+                   ~ref:(fun b -> button := Some b)
+                   ~on_click:(fun () -> S.set set_editing true))
+              </div>)>
+    (title_editor ~title:(S.get title)
+       ~save:(fun t ->
+         rename t;
+         finish ())
+       ~cancel:finish)
+  </Show>
+
+let summary =
+  "Edit titles, change priorities, adjust story points, and toggle features \
+   inline."
 
 let make () =
   let rows, set_rows = S.create_signal flags in
@@ -87,50 +161,46 @@ let make () =
   let columns =
     [|
       Data_grid.column ~id:"feature" ~header:(Text "Feature")
-        ~is_row_header:true ~cell_class:"font-medium" (fun row ->
-          Jsx.string (S.get row).feature);
+        ~is_row_header:true ~width:(Pixels 300.) (fun row ->
+          title_cell
+            ~title:(S.accessor (fun () -> (S.get row).feature))
+            ~rename:(fun feature ->
+              change (S.get row).id (fun r -> { r with feature })));
       Data_grid.column ~id:"priority" ~header:(Text "Priority")
-        ~width:(Pixels 200.) (fun row ->
-          <Select
-            aria_label=("Priority of " ^ (S.get row).feature)
-            variant=`secondary
-            class_="w-36"
+        ~width:(Pixels 176.) (fun row ->
+          <Inline_select
             value=[| priority_key (S.get row).priority |]
             on_change=(fun keys ->
-                        match keys with
-                        | [| k |] ->
-                            change (S.get row).id (fun r ->
-                                { r with priority = priority_of k })
-                        | _ -> ())>
-            <Select.Trigger>
-              <Select.Value>
-                <Chip
-                  color=(priority_color (S.get row).priority)
-                  size=`sm
-                  variant=`soft>
-                  (Jsx.string (priority_name (S.get row).priority))
-                </Chip>
-              </Select.Value>
-              <Select.Indicator />
-            </Select.Trigger>
-            <Select.Popover>
+                        match
+                          Array.find_opt
+                            (fun p -> Array.mem (priority_key p) keys)
+                            priorities
+                        with
+                        | Some priority ->
+                            change (S.get row).id (fun r -> { r with priority })
+                        | None -> ())>
+            <Inline_select.Trigger aria_label="Priority">
+              <Inline_select.Value>
+                (priority_chip (S.get row).priority)
+              </Inline_select.Value>
+              <Inline_select.Indicator />
+            </Inline_select.Trigger>
+            <Inline_select.Popover>
               <List_box>
-                <List_box.Item id="high" text_value="High">
-                  "High" <List_box.Item_indicator />
-                </List_box.Item>
-                <List_box.Item id="medium" text_value="Medium">
-                  "Medium" <List_box.Item_indicator />
-                </List_box.Item>
-                <List_box.Item id="low" text_value="Low">
-                  "Low" <List_box.Item_indicator />
-                </List_box.Item>
+                <For each=priorities>
+                  (fun p _ ->
+                    <List_box.Item
+                      id=(priority_key p) text_value=(priority_name p)>
+                      (priority_chip p) <List_box.Item_indicator />
+                    </List_box.Item>)
+                </For>
               </List_box>
-            </Select.Popover>
-          </Select>);
-      Data_grid.column ~id:"points" ~header:(Text "Story points") ~align:`center
-        ~width:(Pixels 160.) (fun row ->
+            </Inline_select.Popover>
+          </Inline_select>);
+      Data_grid.column ~id:"points" ~header:(Text "Story Points") ~align:`center
+        ~width:(Pixels 167.) (fun row ->
           <Number_stepper
-            aria_label=("Story points of " ^ (S.get row).feature)
+            aria_label="Story points"
             size=`sm
             class_="justify-center"
             value=(S.get row).points
@@ -144,9 +214,9 @@ let make () =
             </Number_stepper.Group>
           </Number_stepper>);
       Data_grid.column ~id:"enabled" ~header:(Text "Enabled") ~align:`center
-        ~width:(Pixels 100.) (fun row ->
+        ~width:(Pixels 117.) (fun row ->
           <Switch
-            aria_label=("Enable " ^ (S.get row).feature)
+            aria_label="Enabled"
             is_selected=(S.get row).enabled
             on_change=(fun enabled ->
                         change (S.get row).id (fun r -> { r with enabled }))>
@@ -162,23 +232,28 @@ let make () =
   let effort () =
     Array.fold_left (fun sum r -> sum +. r.points) 0. (S.get rows)
   in
-  <Data_grid
-    aria_label="Feature flags"
-    rows=(S.get rows)
-    row_id=(fun r -> r.id)
-    columns
-    content_class="min-w-[640px]"
-    footer=(<span class_="flex gap-6 text-sm text-muted">
-              <span>
-                (Jsx.string
-                   (string_of_int (enabled ())
-                   ^ " of "
-                   ^ string_of_int (Array.length (S.get rows))
-                   ^ " enabled"))
-              </span>
-              <span>
-                (Jsx.string
-                   ("Total effort: " ^ Js.Float.toString (effort ()) ^ " pts"))
-              </span>
-            </span>)
-  />
+  <div class_="flex w-full max-w-3xl flex-col gap-3">
+    <div class_="flex flex-col gap-1">
+      <h3 class_="text-lg font-semibold">"Feature Flags"</h3>
+      <p class_="text-sm text-muted">(Jsx.string summary)</p>
+    </div>
+    <Data_grid
+      aria_label="Feature flags"
+      rows=(S.get rows)
+      row_id=(fun r -> r.id)
+      columns
+      content_class="min-w-[640px]"
+    />
+    <div class_="flex items-center gap-4 text-sm text-muted">
+      <span>
+        (Jsx.string
+           (string_of_int (enabled ())
+           ^ " of "
+           ^ string_of_int (Array.length (S.get rows))
+           ^ " enabled"))
+      </span>
+      <span>
+        (Jsx.string ("Total effort: " ^ Js.Float.toString (effort ()) ^ " pts"))
+      </span>
+    </div>
+  </div>

@@ -1,0 +1,13 @@
+module For = Solidtype.For
+module Rating = Solidtype_heroui.Rating
+module Gravity = Solidtype_gravity_icons
+
+let make () =
+  <Rating
+    aria_label="Favorites"
+    default_value=3.
+    style="--rating-active-color: var(--danger)">
+    <For each=[| 1.; 2.; 3.; 4.; 5. |]>
+      (fun value _ -> <Rating.Item value><Gravity.Heart_fill /></Rating.Item>)
+    </For>
+  </Rating>

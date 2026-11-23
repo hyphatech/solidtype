@@ -1,0 +1,37 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Rating = Solidtype_heroui.Rating
+
+let scores =
+  [|
+    ("Quality", 4.5);
+    ("Value for money", 3.7);
+    ("Design", 5.);
+    ("Durability", 2.3);
+  |]
+
+let make () =
+  <div class_="flex w-72 flex-col gap-3">
+    <For each=scores>
+      (fun (name, score) _ ->
+        <div class_="flex items-center justify-between gap-4">
+          <span class_="text-sm text-foreground">(Jsx.string name)</span>
+          <div class_="flex items-center gap-2">
+            <Rating
+              aria_label=(name ^ ": " ^ Js.Float.toString score ^ " stars")
+              size=`sm
+              value=score
+              is_read_only=true>
+              <Rating.Item value=1. />
+              <Rating.Item value=2. />
+              <Rating.Item value=3. />
+              <Rating.Item value=4. />
+              <Rating.Item value=5. />
+            </Rating>
+            <span class_="w-7 text-right text-xs text-muted">
+              (Jsx.string (Js.Float.toString score))
+            </span>
+          </div>
+        </div>)
+    </For>
+  </div>

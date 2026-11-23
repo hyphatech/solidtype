@@ -80,6 +80,7 @@
 @import "@heroui/styles/components/accordion.css" layer(components);
 @import "@heroui/styles/components/tabs.css" layer(components);
 @import "@heroui/styles/components/pagination.css" layer(components);
+@import "@heroui/styles/components/toolbar.css" layer(components);
 @import "@heroui/styles/components/tooltip.css" layer(components);
 @import "@heroui/styles/components/popover.css" layer(components);
 @import "@heroui/styles/components/modal.css" layer(components);

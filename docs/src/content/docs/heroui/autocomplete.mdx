@@ -44,14 +44,19 @@ import * as ExUserSelection from "@islands/autocomplete_user_selection.jsx";
 import ExUserSelectionCode from "@islands/autocomplete_user_selection.mlx?raw";
 import * as ExLocationSearch from "@islands/autocomplete_location_search.jsx";
 import ExLocationSearchCode from "@islands/autocomplete_location_search.mlx?raw";
+import * as ExUserSelectionMultiple from "@islands/autocomplete_user_selection_multiple.jsx";
+import ExUserSelectionMultipleCode from "@islands/autocomplete_user_selection_multiple.mlx?raw";
+import * as ExTagGroupSelection from "@islands/autocomplete_tag_group_selection.jsx";
+import ExTagGroupSelectionCode from "@islands/autocomplete_tag_group_selection.mlx?raw";
+import * as ExEmailRecipients from "@islands/autocomplete_email_recipients.jsx";
+import ExEmailRecipientsCode from "@islands/autocomplete_email_recipients.mlx?raw";
+import * as ExCustomStyles from "@islands/autocomplete_custom_styles.jsx";
+import ExCustomStylesCode from "@islands/autocomplete_custom_styles.mlx?raw";
 import * as Demo from "@islands/autocomplete_demo.jsx";
 
 Original HeroUI documentation: [Autocomplete](https://heroui.com/en/docs/react/components/autocomplete).
 
 ## Usage
-
-HeroUI's example draws the states chosen as tags, with a TagGroup, which is
-not ported yet; here they are listed as the value draws them.
 
 <Example code={ExUsageCode} title="autocomplete_usage.mlx"><ExUsage.make client:visible /></Example>
 
@@ -203,22 +208,29 @@ is scrolled into view.
 
 <Example code={ExUserSelectionCode} title="autocomplete_user_selection.mlx"><ExUserSelection.make client:visible /></Example>
 
+### User Selection Multiple
+
+<Example code={ExUserSelectionMultipleCode} title="autocomplete_user_selection_multiple.mlx"><ExUserSelectionMultiple.make client:visible /></Example>
+
 ### Location Search
 
 <Example code={ExLocationSearchCode} title="autocomplete_location_search.mlx"><ExLocationSearch.make client:visible /></Example>
 
-### User Selection Multiple, Tag Group Selection, Email Recipients
+### Tag Group Selection
 
-These draw the options chosen as tags, with HeroUI's TagGroup, which is not
-ported yet.
+<Example code={ExTagGroupSelectionCode} title="autocomplete_tag_group_selection.mlx"><ExTagGroupSelection.make client:visible /></Example>
+
+### Email Recipients
+
+<Example code={ExEmailRecipientsCode} title="autocomplete_email_recipients.mlx"><ExEmailRecipients.make client:visible /></Example>
 
 ## Customization
 
 ### Tailwind CSS
 
-HeroUI's Tailwind example draws the people chosen as tags, with a TagGroup,
-which is not ported yet; `class_` is added after HeroUI's classes on every
-part, as the examples above show.
+`class_` is added after HeroUI's classes on every part.
+
+<Example code={ExCustomStylesCode} title="autocomplete_custom_styles.mlx"><ExCustomStyles.make client:visible /></Example>
 
 ### Global CSS
 

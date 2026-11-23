@@ -1,0 +1,242 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Headless = Solidtype_headless.Grid_list
+
+let after own = function Some c -> own ^ " " ^ c | None -> own
+
+type variant = [ `primary | `secondary ]
+
+(* Whether a list was given [on_action], read of its props as given, which
+   its own parameter, a call that does nothing where none was, cannot tell:
+   only a list given one runs an item's action on a press. *)
+type handler
+
+external action_given : 'props -> handler Js.Undefined.t = "onAction"
+[@@mel.get]
+
+external empty_state_given : 'props -> handler Js.Undefined.t
+  = "renderEmptyState"
+[@@mel.get]
+
+module Variant = Solidtype.Context.Make (struct
+  type t = variant S.accessor
+
+  let default = S.accessor (fun () -> `primary)
+end)
+
+(* A part drawn as a [<div>] or a [<span>] of a class of its own, its
+   children what it holds. *)
+module Item_content = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
+    <div
+      class_=(after "list-view__item-content" (S.get class_))
+      data_slot="list-view-item-content"
+      props=(Props.others props)>
+      (S.get children)
+    </div>
+  [@@element div]
+end
+
+module Title = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
+    <span
+      class_=(after "list-view__title" (S.get class_))
+      data_slot="list-view-title"
+      props=(Props.others props)>
+      (S.get children)
+    </span>
+  [@@element span]
+end
+
+module Description = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
+    <span
+      class_=(after "list-view__description" (S.get class_))
+      data_slot="list-view-description"
+      props=(Props.others props)>
+      (S.get children)
+    </span>
+  [@@element span]
+end
+
+module Item_action = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
+    <div
+      class_=(after "list-view__item-action" (S.get class_))
+      data_slot="list-view-item-action"
+      props=(Props.others props)>
+      (S.get children)
+    </div>
+  [@@element div]
+end
+
+module Item = struct
+  type state = {
+    is_selected : bool S.accessor;
+    is_disabled : bool S.accessor;
+    is_hovered : bool S.accessor;
+    is_pressed : bool S.accessor;
+    is_focused : bool S.accessor;
+    is_focus_visible : bool S.accessor;
+    selection_mode : [ `none | `single | `multiple ] S.accessor;
+  }
+
+  let%component make ?(id : string option) ?(text_value : string option)
+      ?(is_disabled : bool option) ?(href : string option)
+      ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
+    let h = Headless.Context.use () in
+    let variant = Variant.use () in
+    let key =
+      match S.untrack (fun () -> S.get id) with
+      | Some k -> k
+      | None -> S.create_unique_id ()
+    in
+    let disabled () =
+      Option.value (S.get is_disabled) ~default:false || h.is_disabled key
+    in
+    let selected () = h.is_selected key in
+    let i = Interaction.create ~disabled:(fun () -> disabled ()) () in
+    let state () =
+      {
+        is_selected = S.accessor (fun () -> selected ());
+        is_disabled = S.accessor (fun () -> disabled ());
+        is_hovered = S.accessor (fun () -> Interaction.hovered i);
+        is_pressed = S.accessor (fun () -> Interaction.pressed i);
+        is_focused = S.accessor (fun () -> Interaction.focused i);
+        is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
+        selection_mode = h.selection_mode;
+      }
+    in
+    (* A checkbox stands for the item's selection while it can be selected,
+       as React Aria's selection checkbox does. *)
+    let checkbox =
+      {
+        Checkbox.selected = S.accessor (fun () -> selected ());
+        indeterminate = S.accessor (fun () -> false);
+        set =
+          (fun now ->
+            if not (Bool.equal now (selected ())) then h.toggle_selection key);
+        disabled = S.accessor (fun () -> disabled ());
+      }
+    in
+    <Headless.Item
+      id=key
+      ?text_value=(S.get text_value)
+      is_disabled=(disabled ())
+      ?href=(S.get href)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
+      class_=(after "list-view__item" (S.get class_))
+      data_slot="list-view-item"
+      data_selected=(Jsx.flag (selected ()))
+      data_disabled=(Jsx.flag (disabled ()))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_pressed=(Jsx.flag (Interaction.pressed i))
+      data_focused=(Jsx.flag (Interaction.focused i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      data_selection_mode=(match S.get h.selection_mode with
+                          | `none -> Jsx.flag false
+                          | `single -> Jsx.data "single"
+                          | `multiple -> Jsx.data "multiple")
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
+      props=(Props.others props)>
+      (match S.get h.selection_mode with
+      | `none -> Jsx.string ""
+      | `single | `multiple ->
+          <div
+            class_="list-view__selection-cell"
+            data_slot="list-view-selection-cell">
+            <Checkbox.Selection.Provider value=checkbox>
+              <Checkbox
+                aria_label="Select row"
+                slot=`selection
+                variant=(match S.get variant with
+                        | `primary -> `secondary
+                        | `secondary -> `primary)>
+                <Checkbox.Content>
+                  <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+                </Checkbox.Content>
+              </Checkbox>
+            </Checkbox.Selection.Provider>
+          </div>)
+      (Jsx.draw (S.get children) (state ()))
+    </Headless.Item>
+  [@@element div]
+end
+
+let%component make ?(variant : variant = `primary)
+    ?(selection_mode : [ `none | `single | `multiple ] = `none)
+    ?(selection_behavior : [ `toggle | `replace ] option)
+    ?(selected_keys : string array option)
+    ?(default_selected_keys : string array option)
+    ?(on_selection_change : (string array -> unit) option)
+    ?(disabled_keys : string array option)
+    ?(disallow_empty_selection : bool option)
+    ?(on_action : (string -> unit) option)
+    ?(render_empty_state : (unit -> Jsx.element) option)
+    ?(virtualized : bool = false) ?(row_height : float = 48.)
+    ?(class_ : string option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ~(children : Jsx.element) () =
+  let shown_variant = S.accessor (fun () -> S.get variant) in
+  let given_action =
+    Option.is_some (Js.Undefined.toOption (action_given props))
+  in
+  let given_empty_state =
+    Option.is_some (Js.Undefined.toOption (empty_state_given props))
+  in
+  <Variant.Provider value=shown_variant>
+    (let list () =
+       <Headless
+         selection_mode=(S.get selection_mode)
+         ?selection_behavior=(S.get selection_behavior)
+         ?selected_keys=(S.get selected_keys)
+         ?default_selected_keys=(S.get default_selected_keys)
+         on_selection_change=(fun keys ->
+                               ignore (on_selection_change keys : unit option))
+         ?disabled_keys=(S.get disabled_keys)
+         ?disallow_empty_selection=(S.get disallow_empty_selection)
+         ?on_action=(if given_action then
+                       Some (fun k -> ignore (on_action k : unit option))
+                     else None)
+         ?render_empty_state=(if given_empty_state then
+                                Some
+                                  (fun () ->
+                                    <div
+                                      class_="list-view__empty-state"
+                                      data_slot="list-view-empty-state">
+                                      (Option.value (render_empty_state ())
+                                         ~default:Jsx.nothing)
+                                    </div>)
+                              else None)
+         class_=(after
+                   ("list-view list-view--"
+                   ^
+                   match S.get variant with
+                   | `primary -> "primary"
+                   | `secondary -> "secondary")
+                   (S.get class_))
+         data_slot="list-view"
+         data_virtualized=(Jsx.flag (S.get virtualized))
+         data_layout="stack"
+         data_orientation="vertical"
+         ref=(fun e -> ignore (given_ref e : unit option))
+         props=(Props.others props)>
+         (S.get children)
+       </Headless>
+     in
+     (* A long list draws only the rows in view, each [row_height] high. *)
+     if S.untrack (fun () -> S.get virtualized) then
+       <Virtualizer
+         layout=(Virtualizer.list_layout ~row_size:(S.get row_height) ())>
+         (list ())
+       </Virtualizer>
+     else list ())
+  </Variant.Provider>
+[@@element div]

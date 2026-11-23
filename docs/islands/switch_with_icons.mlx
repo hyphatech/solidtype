@@ -1,0 +1,54 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Switch = Solidtype_heroui.Switch
+module Gravity = Solidtype_gravity_icons
+
+type icon = Jsx.element
+
+let switches : (string * (unit -> icon) * (unit -> icon) * string) array =
+  [|
+    ( "check",
+      (fun () -> <Gravity.Check class_="size-3 text-inherit opacity-100" />),
+      (fun () -> <Gravity.Power class_="size-3 text-inherit opacity-70" />),
+      "bg-green-500/80" );
+    ( "darkMode",
+      (fun () -> <Gravity.Sun class_="size-3 text-inherit opacity-100" />),
+      (fun () -> <Gravity.Moon class_="size-3 text-inherit opacity-70" />),
+      "" );
+    ( "microphone",
+      (fun () ->
+        <Gravity.Microphone_slash class_="size-3 text-inherit opacity-100" />),
+      (fun () -> <Gravity.Microphone class_="size-3 text-inherit opacity-70" />),
+      "bg-red-500/80" );
+    ( "notification",
+      (fun () -> <Gravity.Bell_fill class_="size-3 text-inherit opacity-100" />),
+      (fun () -> <Gravity.Bell_slash class_="size-3 text-inherit opacity-70" />),
+      "bg-purple-500/80" );
+    ( "volume",
+      (fun () ->
+        <Gravity.Volume_slash_fill class_="size-3 text-inherit opacity-100" />),
+      (fun () ->
+        <Gravity.Volume_fill class_="size-3 text-inherit opacity-70" />),
+      "bg-blue-500/80" );
+  |]
+
+let make () =
+  <div class_="flex gap-3">
+    <For each=switches>
+      (fun (name, on, off, selected_class) _ ->
+        <Switch default_selected=true aria_label=name size=`lg>
+          (fun s ->
+            <Switch.Content>
+              <Switch.Control
+                class_=(if S.get s.is_selected then selected_class else "")>
+                <Switch.Thumb>
+                  <Switch.Icon>
+                    (if S.get s.is_selected then on () else off ())
+                  </Switch.Icon>
+                </Switch.Thumb>
+              </Switch.Control>
+            </Switch.Content>)
+        </Switch>)
+    </For>
+  </div>

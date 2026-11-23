@@ -1,0 +1,113 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Chip = Solidtype_heroui.Chip
+module Data_grid = Solidtype_heroui.Data_grid
+module Pagination = Solidtype_heroui.Pagination
+
+type status = Paid | Pending | Overdue
+
+type invoice = {
+  id : string;
+  customer : string;
+  date : string;
+  status : status;
+  amount : string;
+}
+
+let invoice id customer date status amount =
+  { id; customer; date; status; amount }
+
+let invoices =
+  [|
+    invoice "INV-001" "Acme Corp" "2024-03-01" Paid "$1,250";
+    invoice "INV-002" "Globex" "2024-03-04" Paid "$890";
+    invoice "INV-003" "Initech" "2024-03-07" Pending "$2,340";
+    invoice "INV-004" "Umbrella Co" "2024-03-09" Overdue "$560";
+    invoice "INV-005" "Stark Industries" "2024-03-12" Paid "$1,780";
+    invoice "INV-006" "Wayne Enterprises" "2024-03-15" Pending "$430";
+    invoice "INV-007" "Cyberdyne" "2024-03-18" Paid "$3,120";
+    invoice "INV-008" "Soylent Corp" "2024-03-21" Overdue "$975";
+    invoice "INV-009" "Massive Dynamic" "2024-03-24" Paid "$1,640";
+    invoice "INV-010" "Hooli" "2024-03-27" Pending "$720";
+    invoice "INV-011" "Vehement Capital" "2024-03-29" Paid "$2,050";
+    invoice "INV-012" "Bluth Company" "2024-03-31" Overdue "$385";
+  |]
+
+let per_page = 4
+let pages = (Array.length invoices + per_page - 1) / per_page
+
+let status_name = function
+  | Paid -> "paid"
+  | Pending -> "pending"
+  | Overdue -> "overdue"
+
+let status_color = function
+  | Paid -> `success
+  | Pending -> `warning
+  | Overdue -> `danger
+
+let columns =
+  [|
+    Data_grid.column ~id:"id" ~header:(Text "Invoice") ~is_row_header:true
+      ~cell_class:"font-medium" (fun i -> Jsx.string (S.get i).id);
+    Data_grid.column ~id:"customer" ~header:(Text "Customer") (fun i ->
+        Jsx.string (S.get i).customer);
+    Data_grid.column ~id:"date" ~header:(Text "Date") (fun i ->
+        Jsx.string (S.get i).date);
+    Data_grid.column ~id:"status" ~header:(Text "Status") (fun i ->
+        <Chip color=(status_color (S.get i).status) size=`sm variant=`soft>
+          (Jsx.string (status_name (S.get i).status))
+        </Chip>);
+    Data_grid.column ~id:"amount" ~header:(Text "Amount") ~align:`end_ (fun i ->
+        <span class_="tabular-nums">(Jsx.string (S.get i).amount)</span>);
+  |]
+
+let make () =
+  let page, set_page = S.create_signal 1 in
+  let shown () = Array.sub invoices ((S.get page - 1) * per_page) per_page in
+  <Data_grid
+    aria_label="Invoices"
+    rows=(shown ())
+    row_id=(fun i -> i.id)
+    columns
+    content_class="min-w-[640px]"
+    footer=(<Pagination size=`sm>
+              <Pagination.Summary>
+                (Jsx.string
+                   (string_of_int (((S.get page - 1) * per_page) + 1)
+                   ^ " to "
+                   ^ string_of_int
+                       (min (S.get page * per_page) (Array.length invoices))
+                   ^ " of "
+                   ^ string_of_int (Array.length invoices)
+                   ^ " invoices"))
+              </Pagination.Summary>
+              <Pagination.Content>
+                <Pagination.Item>
+                  <Pagination.Previous
+                    is_disabled=(S.get page = 1)
+                    on_press=(fun () -> S.update set_page pred)>
+                    <Pagination.Previous_icon />
+                  </Pagination.Previous>
+                </Pagination.Item>
+                <For each=(Array.init pages succ)>
+                  (fun p _ ->
+                    <Pagination.Item>
+                      <Pagination.Link
+                        is_active=(p = S.get page)
+                        on_press=(fun () -> S.set set_page p)>
+                        (Jsx.int p)
+                      </Pagination.Link>
+                    </Pagination.Item>)
+                </For>
+                <Pagination.Item>
+                  <Pagination.Next
+                    is_disabled=(S.get page = pages)
+                    on_press=(fun () -> S.update set_page succ)>
+                    <Pagination.Next_icon />
+                  </Pagination.Next>
+                </Pagination.Item>
+              </Pagination.Content>
+            </Pagination>)
+  />

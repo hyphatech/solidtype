@@ -1,5 +1,53 @@
 # Changes
 
+## 0.15.1 (2026-11-23)
+
+- `List_view`, a list of rows in HeroUI's look, on a headless
+  `Solidtype_headless.Grid_list` made of Kobalte's selection hooks: rows
+  chosen by a checkbox, the keys or a press, toggle or replace, actions and
+  links, disabled rows, an empty state, primary and secondary, and
+  `virtualized`, drawing only the rows in view, each `row_height` high. Its
+  look is `list-view.css`.
+- `Rating`, Kobalte's rating in HeroUI's look: chosen by a press or the
+  keys, previewed under the pointer, three sizes, its colours by CSS
+  variables, an icon for every item or per item, a render function,
+  disabled, and read only with a fractional value filled in part. Its look
+  is `rating.css`.
+- `Action_bar`, a `Toolbar` that floats at the foot of the page while open,
+  for what can be done with what is chosen, sliding in and out. Its look is
+  `action-bar.css`.
+- `Toolbar`, HeroUI's, on a headless `Solidtype_headless.Toolbar`: the
+  arrows of its orientation move between its stops, what Tab reaches in it,
+  so a toggle group is one stop that keeps its own arrows. A `Separator`
+  inside it runs across it, a `Button_group` or `Toggle_button_group` along
+  it, unless either gives its own orientation.
+- `Inline_select`, a select drawn as text with no field around it, for a
+  choice made in a sentence, a toolbar or a cell: its trigger muted until
+  hovered, chevrons up and down or an icon given, its list at the trigger's
+  bottom end. Its look is `inline-select.css`, in the plugin's
+  `heroui-extras.css`.
+- `Select.Popover` takes every placement React Aria names, `` `bottom_end ``,
+  `` `top_start ``, `` `left_top `` and the rest, as `Dropdown.Popover` does,
+  where it took a side alone.
+- A virtualized `Table`'s header, and so a virtualized `Data_grid`'s, hides
+  the rows that scroll beneath it, where they showed through it.
+- A virtualized `Table` prerendered on the server tells a reader its rows
+  and columns, `aria-rowcount` and `aria-colcount`, where it said one row and
+  no column, and kept saying so once hydrated.
+- A `Field_error` inside a `Checkbox_group` or a `Radio_group` shows while
+  the group is invalid and describes the group and each control in it, after
+  its description, where it raised.
+- A press on a control inside an `Autocomplete`'s trigger, a tag's remove
+  button in its value, is the control's: the list no longer opens with it.
+- `Switch.Icon`, an icon in the switch's thumb, which now takes children, as
+  HeroUI's does.
+- A press inside a `Table`'s or `Data_grid`'s cell is the control's
+  wherever it lands: an `Autocomplete`'s value, a date field's segments, a
+  tab, a slider or any group of controls no longer runs the row's action.
+- A virtualized or resizable `Data_grid` draws its checkbox and handle
+  columns 40px and 32px wide, header and cells alike, where its layout gave
+  them 75px and its header kept 40px.
+
 ## 0.15.0 (2026-11-23)
 
 - Breaking: what Kobalte types `any` is no longer a type its reader

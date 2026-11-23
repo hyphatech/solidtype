@@ -82,13 +82,28 @@ module Control = struct
 end
 
 module Thumb = struct
-  let%component make ?(class_ : string option) () =
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
+      () =
     let s = within "Switch.Thumb" in
     <span
       class_=(after (Styles.Switch.thumb (S.get s.slots)) (S.get class_))
       data_slot="switch-thumb"
-      props=(Props.others props)
-    />
+      props=(Props.others props)>
+      (Option.value (S.get children) ~default:Jsx.nothing)
+    </span>
+  [@@element span]
+end
+
+module Icon = struct
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
+      () =
+    let s = within "Switch.Icon" in
+    <span
+      class_=(after (Styles.Switch.icon (S.get s.slots)) (S.get class_))
+      data_slot="switch-icon"
+      props=(Props.others props)>
+      (Option.value (S.get children) ~default:Jsx.nothing)
+    </span>
   [@@element span]
 end
 

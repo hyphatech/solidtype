@@ -10,7 +10,7 @@ shows it beside the same component in React.
 | [Accordion](accordion.md) | ported: one or several expanded, controlled or kept, disabled with an item's own, surface, no separator, its own icon, a button given its slot, panels animated by their height and found by find in page, focus moved by the arrows, a trigger's own `on_press` and `is_disabled` |
 | [Alert](alert.md) | ported: statuses and their icons, indicator, title, description, as a surface |
 | [AlertDialog](alert-dialog.md) | ported: as Modal, its dialog an `alertdialog` that only its buttons close unless its backdrop says otherwise; statuses and their icons, placements, sizes, a custom portal container |
-| [Autocomplete](autocomplete.md) | ported: one or many chosen, controlled or kept, its search a SearchField filtering its ListBox, a filter given, its search's text controlled, an empty state, open controlled or kept, empty collection, clear button, variants, full width, disabled, disabled options, sections, label, description and error, a form's errors; a value drawn as tags not yet |
+| [Autocomplete](autocomplete.md) | ported: one or many chosen, controlled or kept, its search a SearchField filtering its ListBox, a filter given, its search's text controlled, an empty state, open controlled or kept, empty collection, clear button, variants, full width, disabled, disabled options, sections, label, description and error, a form's errors, a value drawn as removable tags |
 | [Avatar](avatar.md) | ported: sizes, colors, variants, image once loaded, fallback |
 | [AvatarGroup](avatar-group.md) | ported: sizes, colors, variants, max and its count, grid, overlaps |
 | [Badge](badge.md) | ported: colors, placements, sizes, variants, anchor, label |
@@ -60,13 +60,13 @@ shows it beside the same component in React.
 | [RangeCalendar](range-calendar.md) | ported: a range begun by a press or Enter and shown to the day hovered or focused, ended by a second; chosen by a drag, an end moved by one; let go by Escape, and ended as `commit_behavior` says; reaching no further than an unavailable day unless non-contiguous, its predicate given the range's anchor; controlled or kept, min and max, disabled, read-only, invalid; weeks or days shown, several months side by side; its year picker; cell indicators |
 | [ScrollShadow](scroll-shadow.md) | ported: orientations, sizes, offset, visibility given or measured, hidden scrollbar |
 | [SearchField](search-field.md) | ported: query controlled or kept, cleared by Escape or its button, submitted by Enter, variants, disabled, invalid |
-| [Select](select.md) | ported: one or many chosen, controlled or kept, its list a ListBox, placeholder, value drawn as the option or by a function, clear button and Backspace, variants, full width, disabled, disabled options, sections, open controlled or kept, label, description and error, a form's errors; required, its error the application's to show, as a text field's |
+| [Select](select.md) | ported: one or many chosen, controlled or kept, its list a ListBox, placeholder, value drawn as the option or by a function, clear button and Backspace, variants, full width, disabled, disabled options, sections, open controlled or kept, its list placed on any side and end, label, description and error, a form's errors; required, its error the application's to show, as a text field's |
 | [Separator](separator.md) | ported: orientations, variants |
 | [Skeleton](skeleton.md) | ported: animation types, and the page's `--skeleton-animation` |
 | [Slider](slider.md) | ported: one value or a range, controlled or kept, step and range, vertical, disabled, output, format options |
 | [Spinner](spinner.md) | ported: colors, sizes, its icon's gradients unique per spinner |
 | [Surface](surface.md) | ported: variants, and the variant it gives what is inside it |
-| [Switch](switch.md) | ported: sizes, selected, disabled, invalid, interaction state, with HeroUI's Label |
+| [Switch](switch.md) | ported: sizes, selected, disabled, invalid, interaction state, with HeroUI's Label, an icon in its thumb, a description, a form's values |
 | [SwitchGroup](switch.md#group) | ported: orientations |
 | [Table](table.md) | ported: variants, static rows or rows of data, columns of data, row headers, an empty state, a footer, rows and cells moved through by the keys, rows selected one or many, by a press, the keys or a checkbox, all by the header's, disabled rows, sorted by a column pressed or keyed, its sortable header's chevron, more rows loaded as its end scrolls into view, columns resized by a drag or the keys, columns pinned to either side, a header kept in view, rows reordered by a drag or the keys, rows that hold rows expanded by a chevron or the keys, virtualized, only the rows in view drawn; a tree virtualized not yet |
 | [Tabs](tabs.md) | ported: selection controlled or kept, horizontal or vertical, primary or secondary, aligned, disabled, manual activation, separators, an indicator that slides between tabs, a list that scrolls by its chevrons, a tab as a link, `href` |
@@ -77,18 +77,19 @@ shows it beside the same component in React.
 | [Toast](toast.md) | ported: provider, placements, the stack collapsed and expanded, its hotkey, variants, indicators, action, loading, custom rendering, queues of its own, update, promise, pause and resume |
 | [ToggleButton](toggle-button.md) | ported: variants, sizes, icon only, selected controlled or kept, disabled, interaction state |
 | [ToggleButtonGroup](toggle-button-group.md) | ported: single or multiple selection controlled or kept, empty selection disallowed, sizes, orientations, detached, full width, disabled with a button's own override, separator |
+| [Toolbar](toolbar.md) | ported: horizontal and vertical, attached, the arrows of its orientation between its controls and Tab out and back, the separators, button groups and toggle groups inside it turned to it |
 | [Tooltip](tooltip.md) | ported: on a button or a trigger of its own, placements, arrow, offset, flip, delays of its own or the page's, hover or focus, disabled, open controlled or kept, enter and exit animations |
 | [Typography](typography.md) | ported: every type and its element, alignments, colors, weights, truncation, primitives, prose |
 
 ## Not yet ported
 
-These 2 components of HeroUI 3.2 are not ported yet; each name links to
+This component of HeroUI 3.2 is not ported yet; its name links to
 HeroUI's own page. What a ported component does not do yet is in its row
 above and on its page.
 
 | Group | Components |
 |---|---|
-| Not yet ported | [InputOTP](https://heroui.com/en/docs/react/components/input-otp), [Toolbar](https://heroui.com/en/docs/react/components/toolbar) |
+| Not yet ported | [InputOTP](https://heroui.com/en/docs/react/components/input-otp) |
 
 ## Beyond HeroUI's set
 
@@ -97,9 +98,13 @@ imported as [Theming](theming.md#setup) shows.
 
 | Component | Status |
 |---|---|
+| [ActionBar](action-bar.md) | made: a toolbar that floats at the foot of the page while open, sliding in and out, a prefix, content and suffix, labels hidden on small screens |
 | [Command](command.md) | made: a search that filters a menu of commands in a dialog, kept or controlled, by its text or a filter given, the focus kept in the search while the keys move through the commands shown, groups, separators, an empty state, a header and a footer, sizes, backdrops |
-| [Data Grid](data-grid.md) | made: rows as data and columns as definitions, sorted in the browser by text in the page's order or a comparison, or by the application, selection checkboxes, columns resized, pinned to either side and aligned, a header kept in view, rows dragged by a handle and the keys, cells of any control, an empty state, loading more, virtualized, a footer |
+| [Data Grid](data-grid.md) | made: rows as data and columns as definitions, sorted in the browser by text in the page's order or a comparison, or by the application, selection checkboxes and an action bar for the rows chosen, columns resized, pinned to either side and aligned, a header kept in view, rows dragged by a handle and the keys, cells of any control, an empty state, loading more, virtualized, a footer |
+| [InlineSelect](inline-select.md) | made: a select drawn as text, one option or many, kept or controlled, a trigger of any content, a custom indicator, its list placed on any side and end |
+| [ListView](list-view.md) | made: rows chosen one or many by a checkbox, the keys or a press, kept or controlled, toggle or replace, primary and secondary, disabled rows, actions and links, an empty state, a title, a description and an action per row |
 | [NumberStepper](number-stepper.md) | made: a number field's value, range, step, format and keys, sizes, a value that rolls, a custom value, custom icons and buttons, reversed, disabled |
+| [Rating](rating.md) | made: Kobalte's rating, chosen by a press or the keys, previewed under the pointer, kept or controlled, sizes, colours, an icon for all or per item, a render function, disabled, read only with fractional values, in a form |
 | [Segment](segment.md) | made: one option always selected, controlled or kept, default and ghost, sizes, disabled whole or by option, separators, icons, options that show their label only while selected, an indicator that slides between options |
 | [TextShimmer](text-shimmer.md) | made: its text's colour, still under reduced motion |
 | [TrendChip](trend-chip.md) | made: trends, sizes, variants, prefix and suffix, a custom indicator, tabular figures |

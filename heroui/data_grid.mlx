@@ -115,6 +115,12 @@ let drag_handle () =
     <Solidtype_gravity_icons.Grip aria_hidden=true />
   </Headless.Drag_handle>
 
+(* The widths of the grid's own columns where a layout places them, as a
+   virtualized or resizable grid's does; where the browser lays the table
+   out, its stylesheet's variables, of the same widths, set them. *)
+let selection_width = 40.
+let drag_handle_width = 32.
+
 let selection_checkbox ~aria_label ~variant =
   <Checkbox aria_label slot=`selection variant>
     <Checkbox.Content>
@@ -267,7 +273,10 @@ let%component make ~(rows : 'row array) ~(row_id : 'row -> string)
       <Table.Header>
         <Show when_=(selects ())>
           <Table.Column
-            class_="data-grid__selection-column" ?pinned=(lead_pinned ())>
+            class_="data-grid__selection-column"
+            width=(Pixels selection_width)
+            min_width=selection_width
+            ?pinned=(lead_pinned ())>
             (match S.get selection_mode with
             | `multiple ->
                 selection_checkbox ~aria_label:"Select all" ~variant:`primary
@@ -276,7 +285,10 @@ let%component make ~(rows : 'row array) ~(row_id : 'row -> string)
         </Show>
         <Show when_=reorders>
           <Table.Column
-            class_="data-grid__drag-handle-column" ?pinned=(lead_pinned ())>
+            class_="data-grid__drag-handle-column"
+            width=(Pixels drag_handle_width)
+            min_width=drag_handle_width
+            ?pinned=(lead_pinned ())>
             (unseen "Reorder")
           </Table.Column>
         </Show>

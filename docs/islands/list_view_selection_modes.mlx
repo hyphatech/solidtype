@@ -1,0 +1,64 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module List_view = Solidtype_heroui.List_view
+module Gravity = Solidtype_gravity_icons
+
+let files =
+  [|
+    ("documents", "Documents", "2 days ago", true);
+    ("photos", "Photos", "1 week ago", true);
+    ("readme", "README.md", "3 hours ago", false);
+    ("package", "package.json", "Yesterday", false);
+    ("src", "src", "Just now", true);
+  |]
+
+let name_of id =
+  match Array.find_opt (fun (k, _, _, _) -> String.equal k id) files with
+  | Some (_, name, _, _) -> name
+  | None -> id
+
+let chosen_text = function
+  | [||] -> "None selected"
+  | [| one |] -> name_of one
+  | many -> string_of_int (Array.length many) ^ " selected"
+
+let column ~title ~mode =
+  let chosen, set_chosen = S.create_signal [||] in
+  <div class_="flex min-w-0 flex-1 flex-col gap-2">
+    <div class_="flex items-baseline justify-between">
+      <span class_="text-sm font-medium">(Jsx.string title)</span>
+      (match mode with
+      | `none -> Jsx.string ""
+      | `single | `multiple ->
+          <span class_="text-xs text-muted">
+            (Jsx.string (chosen_text (S.get chosen)))
+          </span>)
+    </div>
+    <List_view
+      aria_label=title
+      selection_mode=mode
+      on_selection_change=(fun keys -> S.set set_chosen keys)>
+      <For each=files>
+        (fun (id, name, updated, folder) _ ->
+          <List_view.Item id text_value=name>
+            <List_view.Item_content>
+              (if folder then <Gravity.Folder /> else <Gravity.File />)
+              <div class_="flex min-w-0 flex-col">
+                <List_view.Title>(Jsx.string name)</List_view.Title>
+                <List_view.Description>
+                  (Jsx.string ("Updated " ^ updated))
+                </List_view.Description>
+              </div>
+            </List_view.Item_content>
+          </List_view.Item>)
+      </For>
+    </List_view>
+  </div>
+
+let make () =
+  <div class_="flex w-full max-w-3xl flex-col gap-8 sm:flex-row">
+    (column ~title:"None" ~mode:`none)
+    (column ~title:"Single" ~mode:`single)
+    (column ~title:"Multiple" ~mode:`multiple)
+  </div>

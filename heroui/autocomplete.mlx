@@ -93,6 +93,29 @@ external prevent_default_event : Dom.event -> unit = "preventDefault"
 [@@mel.send]
 
 external contains : Dom.element -> Dom.element -> bool = "contains" [@@mel.send]
+external click_target : Dom.mouseEvent -> Dom.element = "target" [@@mel.get]
+
+external closest : Dom.element -> string -> Dom.element Js.null = "closest"
+[@@mel.send]
+
+(* Whether a click inside the trigger landed on a control of its own, a tag's
+   remove button in its value among them, whose press is the control's: never
+   the trigger's indicator, whose press is the trigger's. *)
+let in_own_control (indicator : Dom.element option) trigger e =
+  match
+    Js.Null.toOption
+      (closest (click_target e)
+         "button, a[href], input, select, textarea, [role=button], \
+          [role=checkbox], [role=switch], [role=link]")
+  with
+  | Some c ->
+      (* The click reached the trigger, so the control was inside it as it
+         landed, though its own handler may have taken it off the page since:
+         only one around the trigger is not its own. *)
+      (not (contains c trigger))
+      && not (match indicator with Some i -> i == c | None -> false)
+  | None -> false
+
 external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
 external body : Dom.element = "body" [@@mel.scope "document"]
 
@@ -115,6 +138,7 @@ module Trigger = struct
       =
     let a = within "Autocomplete.Trigger" in
     let i = Interaction.create ~disabled:(fun () -> S.get a.disabled) () in
+    let element = ref None in
     (* A press anywhere on it opens or closes the list, as HeroUI's does. *)
     let state () =
       {
@@ -129,13 +153,17 @@ module Trigger = struct
       role=`group
       ref=(fun e ->
             ignore (given_ref e : unit option);
+            element := Some (as_element e);
             Interaction.watch i e)
       class_=(after
                 (Styles.Autocomplete.trigger (S.get a.slots))
                 (S.get class_))
       on_click=(fun e ->
                  ignore (on_click e : unit option);
-                 if not (S.get a.disabled) then a.toggle ())
+                 match !element with
+                 | Some trigger when in_own_control !(a.indicator) trigger e ->
+                     ()
+                 | Some _ | None -> if not (S.get a.disabled) then a.toggle ())
       data_slot="autocomplete-trigger"
       data_hovered=(Jsx.flag (Interaction.hovered i))
       data_focus_within=(Jsx.flag (Interaction.focused i))

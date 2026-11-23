@@ -1,0 +1,34 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Rating = Solidtype_heroui.Rating
+module Gravity = Solidtype_gravity_icons
+
+let make () =
+  let value, set_value = S.create_signal 0. in
+  <div class_="flex flex-col items-center gap-3">
+    <Rating
+      aria_label="Rating"
+      value=(S.get value)
+      on_value_change=(fun v -> S.set set_value v)>
+      <For each=[| 1.; 2.; 3.; 4.; 5. |]>
+        (fun value _ ->
+          <Rating.Item value>
+            (fun state ->
+              <span
+                class_="flex size-5"
+                style=(if S.get state.is_active then "color: var(--warning)"
+                       else "color: var(--muted)")>
+                <Gravity.Star_fill />
+              </span>)
+          </Rating.Item>)
+      </For>
+    </Rating>
+    <span class_="text-sm text-muted">
+      (Jsx.string
+         (match S.get value with
+         | 0. -> "No rating"
+         | 1. -> "1 star"
+         | v -> Js.Float.toString v ^ " stars"))
+    </span>
+  </div>

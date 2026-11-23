@@ -1,0 +1,114 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Description = Solidtype_heroui.Description
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+let teammates =
+  [|
+    ("sarah", "Sarah Chen", "Product Design");
+    ("marcus", "Marcus Lee", "Engineering");
+    ("priya", "Priya Patel", "Data Science");
+    ("jordan", "Jordan Kim", "Customer Success");
+    ("alex", "Alex Rivera", "Marketing");
+  |]
+
+let name_of id =
+  match Array.find_opt (fun (k, _, _) -> String.equal k id) teammates with
+  | Some (_, name, _) -> name
+  | None -> id
+
+let make () =
+  let chosen, set_chosen = S.create_signal [||] in
+  let remove keys =
+    S.set set_chosen
+      (Js.Array.filter (S.get chosen) ~f:(fun k ->
+           not (Array.exists (String.equal k) keys)))
+  in
+  <div class_="w-full max-w-sm pt-6">
+    <Autocomplete
+      class_="w-full gap-1.5"
+      placeholder="Search teammates..."
+      selection_mode=`multiple
+      value=(S.get chosen)
+      on_change=(fun keys -> S.set set_chosen keys)>
+      <Label class_="font-medium text-foreground">"Assignees"</Label>
+      <Description>
+        "People who will be notified when this task updates."
+      </Description>
+      <Autocomplete.Trigger
+        class_="rounded-xl border border-border/80 bg-surface shadow-sm ring-1 \
+                ring-accent/5 transition-[box-shadow,border-color] \
+                focus-within:border-accent/25 focus-within:ring-2 \
+                focus-within:ring-accent/15 dark:border-border/90 \
+                dark:bg-surface dark:ring-accent/10 \
+                dark:focus-within:border-accent/35">
+        <Autocomplete.Value>
+          (fun value ->
+            <Tag_group size=`sm on_remove=remove>
+              <Tag_group.List>
+                <For each=(S.get value.selected_keys)>
+                  (fun id _ ->
+                    <Tag
+                      id
+                      text_value=(name_of id)
+                      class_="border border-accent/15 bg-accent/8 \
+                              text-foreground dark:border-accent/25 \
+                              dark:bg-accent/12">
+                      (Jsx.string (name_of id))
+                    </Tag>)
+                </For>
+              </Tag_group.List>
+            </Tag_group>)
+        </Autocomplete.Value>
+        <Autocomplete.Clear_button />
+        <Autocomplete.Indicator />
+      </Autocomplete.Trigger>
+      <Autocomplete.Popover
+        class_="overflow-hidden rounded-xl border border-border/80 bg-surface \
+                shadow-xl ring-1 ring-black/3 dark:border-border/90 \
+                dark:bg-surface dark:ring-white/5">
+        <Autocomplete.Filter>
+          <Search_field
+            aria_label="Search by name or role" name="search" variant=`secondary>
+            <Search_field.Group
+              class_="border-b border-separator bg-surface-secondary/50">
+              <Search_field.Search_icon class_="text-muted" />
+              <Search_field.Input placeholder="Search by name or role..." />
+              <Search_field.Clear_button />
+            </Search_field.Group>
+          </Search_field>
+          <List_box
+            class_="p-1.5"
+            render_empty_state=(fun _ ->
+                                 <Empty_state>"No teammates found"</Empty_state>)
+            selection_mode=`multiple>
+            <For each=teammates>
+              (fun (id, name, role) _ ->
+                <List_box.Item
+                  id
+                  text_value=(name ^ " " ^ role)
+                  class_="rounded-lg data-[focused=true]:bg-accent/10 \
+                          data-[selected=true]:bg-accent/5 \
+                          dark:data-[focused=true]:bg-accent/15 \
+                          dark:data-[selected=true]:bg-accent/8">
+                  <div class_="flex flex-col gap-0.5">
+                    <span class_="text-sm font-medium text-foreground">
+                      (Jsx.string name)
+                    </span>
+                    <span class_="text-xs text-muted">(Jsx.string role)</span>
+                  </div>
+                  <List_box.Item_indicator />
+                </List_box.Item>)
+            </For>
+          </List_box>
+        </Autocomplete.Filter>
+      </Autocomplete.Popover>
+    </Autocomplete>
+  </div>

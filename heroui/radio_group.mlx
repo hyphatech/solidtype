@@ -97,6 +97,24 @@ let description : Description.slot =
     (children ())
   </Kobalte.Description>
 
+module Kobalte_error = Field.As_span (struct
+  let component = Kobalte.ErrorMessage.component
+end)
+
+(* An error in a group is the group's: Kobalte's, shown while it is invalid
+   and describing it. *)
+let error : Field_error.slot =
+ fun classes others children ->
+  <Kobalte_error
+    as_="span"
+    class_=(classes ())
+    slot="errorMessage"
+    data_slot="field-error"
+    data_visible="true"
+    props=others>
+    (children ())
+  </Kobalte_error>
+
 (* What its children are drawn of: React Aria's render props for a radio
    group. *)
 type state = {
@@ -207,7 +225,9 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
       props=(Props.others props)>
       <Label.Slot.Provider value=label>
         <Description.Slot.Provider value=description>
-          (Jsx.draw (S.get children) (state ()))
+          <Field_error.Slot.Provider value=error>
+            (Jsx.draw (S.get children) (state ()))
+          </Field_error.Slot.Provider>
         </Description.Slot.Provider>
       </Label.Slot.Provider>
     </Kobalte.Root>
