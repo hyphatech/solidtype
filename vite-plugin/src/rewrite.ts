@@ -345,6 +345,7 @@ export async function rewrite(code: string, filename: string): Promise<{ code: s
     babelrc: false,
     configFile: false,
     sourceMaps: true,
+    highlightCode: false,
     plugins: [markersPlugin],
   });
   if (!result?.code) return null;

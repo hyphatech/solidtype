@@ -29,7 +29,8 @@ make setup          # once: the switch solidtype, all dependencies, and Bun's
 make test           # the ppx's lowering, the plugin's rewrite, the
                     # libraries' tests and the example's
 make lint           # formatting, the plugin's and the generators' types,
-                    # litany, the release build and the generated bindings
+                    # litany, the release build, the generators' rules and
+                    # the generated bindings
 make fmt            # format in place
 make generate       # write the generated bindings
 make example        # the board, built by Vite into _build/example-dist, and

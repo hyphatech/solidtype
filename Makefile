@@ -38,6 +38,7 @@ lint: node_modules ## check formatting, types, litany, the release build and bin
 	$(OPAM) litany check
 	bun run tsc -p vite-plugin
 	bun run tsc -p generate
+	$(OPAM) bun test generate/test
 	@for g in $(GENERATORS); do echo "generate/$$g.ts --check"; $(OPAM) bun generate/$$g.ts --check || exit 1; done
 
 fmt: ## format the code
