@@ -211,3 +211,22 @@ function make() {
 }`);
   expect(code).toContain("ref={function (e)");
 });
+
+test("a bound function stays where a name it reads means something else at its use", async () => {
+  const code = await written(`
+function make(x) {
+  const f = function () { return x; };
+  return function (x) { return Markers.el("div", [Markers.s("title", f)], []); };
+}`);
+  expect(code).toContain("const f = function ()");
+  expect(code).toContain("title={f}");
+});
+
+test("a marker left outside an element is refused, never left to fail in the browser", async () => {
+  await expect(written(`export const mark = Markers.s;`)).rejects.toThrow(/Markers\.s is no marker's call/);
+});
+
+test("a marker the plugin cannot read is refused where it is written", async () => {
+  await expect(written(`
+export const a = Markers.el("div", [Markers.s("id")], []);`)).rejects.toThrow(/a marker takes 2 arguments[\s\S]*Markers\.s\("id"\)/);
+});

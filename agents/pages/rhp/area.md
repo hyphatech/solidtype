@@ -16,7 +16,7 @@ from the middle of the band.
 ```ocaml title="rhp_area_violin.mlx"
 module Area = Solidtype_rhp.Area
 module Chart = Solidtype_rhp.Chart
-module Density = Solidtype_rhp.Types.Density
+module Density = Solidtype_rhp.Types.Density_Options
 module Jsx = Solidtype.Jsx
 module Label = Solidtype_rhp.Label
 module Plot = Solidtype_rhp.Plot

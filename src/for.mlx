@@ -1,0 +1,23 @@
+module Raw = struct
+  module Props = struct
+    let check ~each:(_ : 'a array Check.value)
+        ?fallback:(_ : Jsx.element Check.value option)
+        ~children:
+          (_ :
+            ( 'a -> int Solid.accessor -> Jsx.element,
+              [ `render ] )
+            Check.children) () =
+      ()
+  end
+
+  external component : unit Jsx.component = "For" [@@mel.module "solid-js"]
+end
+
+(* Solid calls the function with an item and its index at once, and its type
+   does not say whether it takes them so: it is called here, as OCaml calls a
+   function it did not make. *)
+let%component make ~(each : 'a array) ?(fallback : Jsx.element option)
+    ~(children : 'a -> int Solid.accessor -> Jsx.element) () =
+  <Raw each=(Solid.get each) ?fallback=(Solid.get fallback)>
+    (fun item index -> children item index)
+  </Raw>

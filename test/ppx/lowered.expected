@@ -780,3 +780,48 @@ let accessor_of_function =
   Solidtype.Solid.of_function
     ((fun () -> let solidtype__given s = s ^ "!" in solidtype__given)
     [@u ])
+module Joins =
+  struct
+    include
+      struct
+        module Props =
+          struct
+            [@@@ocaml.warning "-32-37"]
+            type t
+            external get_join :
+              t -> (string -> string -> string) Solidtype.Check.value =
+                "join"[@@mel.get ]
+            external get_shout : t -> ((string -> string)[@u ]) = "shout"
+            [@@mel.get ]
+            external make :
+              join:(string -> string -> string) ->
+                shout:(string -> string) -> unit -> t = ""[@@mel.obj ]
+            let check ~join:(_ : string -> string -> string)
+              ~shout:(_ : string -> string)
+              ?props:(_ : t Solidtype.Solid.rest option) () = ()
+            let others (props : t) : _ Solidtype.Solid.rest=
+              Solidtype.Solid.others props [|"join";"shout"|]
+            type name =
+              | Join 
+              | Shout 
+            let omit (props : t) (names : name array) :
+              t Solidtype.Solid.rest=
+              Solidtype.Solid.omit props
+                (Array.map (function | Join -> "join" | Shout -> "shout")
+                   names)
+          end
+        let make (props : Props.t) =
+          let join solidtype__0 solidtype__1 =
+            let f = Props.get_join props in f solidtype__0 solidtype__1
+          [@@inline ][@@ocaml.warning "-26-27"]
+          and shout solidtype__0 =
+            let f = Props.get_shout props in ((f solidtype__0)[@u ])[@@inline
+                                                                    ]
+          [@@ocaml.warning "-26-27"] in
+          Solidtype.Jsx.el "p" [||]
+            [|(Solidtype.Jsx.dynamic
+                 (((fun () -> Jsx.string (join "a" (shout "b")))
+                 [@u ]) : ((unit -> Solidtype.Jsx.element)[@u ])))|]
+        let component = Solidtype.Jsx.component make
+      end
+  end

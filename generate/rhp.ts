@@ -12,30 +12,20 @@
 // `--check` fails when one differs from what rhp's types give.
 
 import ts from "typescript";
-import { existsSync, readFileSync, realpathSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { bind, doc, functionBinding, names, part, real, typesFiles, unmapped, valueBinding } from "./binding.ts";
-import { label, table } from "./names.ts";
-import { apply, name as tname, type Type } from "./ocaml.ts";
-import { writeOrCheck } from "./output.ts";
-import { Source } from "./source.ts";
-import { browser } from "./program.ts";
+import { existsSync, readFileSync } from "node:fs";
+import { reading } from "./generator.ts";
+import { label } from "./names.ts";
+import { apply, name as tname, type Item, type Type } from "./ocaml.ts";
+import { refuse } from "./output.ts";
+import { byName, root } from "./package.ts";
 
-const root = fileURLToPath(new URL("../", import.meta.url));
-const dist = realpathSync(`${root}node_modules/@bezda/rhp/dist`);
-const entry = `${dist}/index.d.ts`;
-const out = `${root}rhp/solidtype_rhp.ml`;
-const typesOut = `${root}rhp/types.ml`;
-const namesOut = `${root}ppx/rhp_names.ml`;
-const rhp = JSON.parse(readFileSync(`${root}node_modules/@bezda/rhp/package.json`, "utf8")).version as string;
-
-const program = ts.createProgram([entry], {
-  ...browser,
-  jsx: ts.JsxEmit.Preserve,
-  module: ts.ModuleKind.ESNext,
-  moduleResolution: ts.ModuleResolutionKind.Bundler,
+const by = "generate/rhp.ts";
+const { dir, version: rhp, checker, exportsOf, bind } = reading({
+  package: "@bezda/rhp",
+  entries: (dir) => [`${dir}/dist/index.d.ts`],
+  jsx: true,
 });
-const checker = program.getTypeChecker();
+const exports = exportsOf(`${dir}/dist/index.d.ts`);
 
 const declaredIn = (symbol: ts.Symbol, pattern: RegExp) =>
   (symbol.declarations ?? []).some((d) => pattern.test(d.getSourceFile().fileName));
@@ -73,7 +63,7 @@ const portedExports = new Set([
 const handModules = ["Animate", "Color", "Ease", "Many_dots", "Order", "Plot", "Row", "Scale", "Shape", "Slat", "Ticks"];
 const included = "Helpers";
 
-bind(root, checker, {
+const { doc, functionBinding, part, real, valueBinding, write } = bind({
   name: "rhp",
   throwsUndocumented: () => false,
   // Solid's CSSProperties alone is a style rhp spreads into its own, an
@@ -125,25 +115,19 @@ function elementOf(node: ts.Node): string | null {
   return null;
 }
 
-const source = program.getSourceFile(entry);
-const mod = source && checker.getSymbolAtLocation(source);
-if (!mod) throw new Error(`no ${entry}`);
-
 // A component with a page of its own names it in its comment, the page's
 // path as the solidtype package installs it, so an agent reading the
 // signature is sent to how the component is used. Indented as a module's
 // comment is, which top() takes back to the file's margin.
-function pageDoc(comment: string[], name: string): string[] {
+function pageDoc(comment: string | undefined, name: string): string | undefined {
   const page = `rhp/${name.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase()}`;
   if (!existsSync(`${root}docs/src/content/docs/${page}.mdx`)) return comment;
-  const line = `Its page, with its examples:\n      [$(opam var solidtype:doc)/pages/${page}.md].`;
-  const last = comment.at(-1);
-  if (last === undefined) return [`  (** ${line} *)`];
-  return [...comment.slice(0, -1), last.replace(/ \*\)$/, `\n\n      ${line} *)`)];
+  const line = `Its page, with its examples: [$(opam var solidtype:doc)/pages/${page}.md].`;
+  return comment === undefined ? line : `${comment}\n\n${line}`;
 }
 
-const src = new Source();
-for (const sym of [...checker.getExportsOfModule(mod)].sort((a, b) => (a.name < b.name ? -1 : 1))) {
+const items: Item[] = [];
+for (const sym of byName(exports)) {
   if (portedExports.has(sym.name)) continue;
   const r = real(sym);
   const type = checker.getTypeOfSymbol(r);
@@ -155,19 +139,13 @@ for (const sym of [...checker.getExportsOfModule(mod)].sort((a, b) => (a.name < 
     const props = checker.getTypeOfSymbol(signature.getParameters()[0]!);
     const element = renders[sym.name] ?? (param?.type ? elementOf(param.type) : null);
     const own = checker.getPropertiesOfType(props).filter(ofRhp);
-    src.both(...pageDoc(doc(r, "  "), sym.name));
-    src.module("  ", sym.name, () => part(src, "@bezda/rhp", sym.name, decl, null, [], sym.name, { element, own }));
-    src.both(``);
+    items.push({ kind: "module", name: sym.name, doc: pageDoc(doc(r), sym.name), items: part("@bezda/rhp", sym.name, decl, null, [], sym.name, { element, own }) });
   } else if (r.flags & ts.SymbolFlags.Function) {
-    functionBinding(src, r, sym.name, "@bezda/rhp", sym.name);
+    items.push(...functionBinding(r, sym.name, "@bezda/rhp", sym.name));
   } else if (r.flags & ts.SymbolFlags.Variable && signature === undefined) {
-    valueBinding(src, r, sym.name, "@bezda/rhp", sym.name);
+    items.push(...valueBinding(r, sym.name, "@bezda/rhp", sym.name));
   }
 }
-
-const { ml: typesText, mli: typesMli } = typesFiles(`(* The types rhp's components and functions name, each a module.
-   Generated from the declarations of @bezda/rhp ${rhp} by generate/rhp.ts;
-   never edited by hand. *)`);
 
 // What a hand port is held to: each prop, setting, field or key rhp declares
 // for it is bound in its .mli, or named here as left out, with the reason,
@@ -197,7 +175,7 @@ function boundIn(mli: string): Set<string> {
 // What rhp declares for a port: an object type's own members, or a union's
 // keys, a template's head the key of its family, series-${number}'s series.
 function declaredNames(name: string): string[] {
-  const symbol = checker.getExportsOfModule(mod!).find((s) => s.name === name);
+  const symbol = exports.find((s) => s.name === name);
   if (!symbol) throw new Error(`rhp declares no ${name}`);
   const type = checker.getDeclaredTypeOfSymbol(real(symbol));
   if (type.isUnion()) {
@@ -209,7 +187,7 @@ function declaredNames(name: string): string[] {
 }
 
 const drift: string[] = [];
-const exported = new Set(checker.getExportsOfModule(mod).map((s) => s.name));
+const exported = new Set(exports.map((s) => s.name));
 for (const name of portedExports) if (!exported.has(name)) drift.push(`${name}: ported by hand, but rhp no longer exports it`);
 for (const { port, declared, leftOut = {} } of held) {
   const mli = `${root}rhp/${port}.mli`;
@@ -218,53 +196,40 @@ for (const { port, declared, leftOut = {} } of held) {
     continue;
   }
   const bound = boundIn(mli);
-  for (const name of declaredNames(declared)) {
+  const declaredHere = declaredNames(declared);
+  for (const name of Object.keys(leftOut)) {
+    if (!declaredHere.includes(name)) drift.push(`${declared}.${name}: named as left out, but rhp no longer declares it`);
+  }
+  for (const name of declaredHere) {
     if (!(name in leftOut) && !bound.has(label(name))) drift.push(`${declared}.${name}: rhp declares it, and rhp/${port}.mli neither binds it nor is said to leave it out`);
   }
 }
 
 // Whole or failing: a declaration no rule maps and nothing ports by hand,
 // and a hand port behind what rhp declares.
-if (drift.length > 0) {
-  for (const d of drift) console.error(d);
-  console.error("rhp's hand ports above are behind its declarations: bind each, or name it as left out in generate/rhp.ts");
-  process.exit(1);
-}
-if (unmapped.size > 0) {
-  for (const [k, v] of unmapped) console.error(`${k}: ${v}`);
-  console.error("rhp's declarations above map by no rule: port each by hand, in generate/rhp.ts and rhp/");
-  process.exit(1);
-}
+refuse(drift, "rhp's hand ports above are not what its declarations give: bind each, or name it as left out in generate/rhp.ts");
 
-// Each module is at the top of the file, where the core writes it one deep.
-const top = (lines: string[]) => lines.map((l) => l.replace(/^  /gm, ""));
-
-// The included module, as the file or its interface writes it: the
-// interface strengthened, so its types are the module's own.
-const include = (mli: boolean) => (mli ? `include module type of struct include ${included} end` : `include ${included}`);
-
-const file = (modules: string[], mli: boolean) => `(* rhp's components and functions, and the types they name, in Types.
-   Generated from the declarations of @bezda/rhp ${rhp} by generate/rhp.ts;
+write({
+  module: "rhp/solidtype_rhp",
+  names: "ppx/rhp_names.ml",
+  by,
+  whose: "rhp's",
+  otherwise: "port it by hand, in rhp/",
+  header: `(* rhp's components and functions, and the types they name, in Types.
+   Generated from the declarations of @bezda/rhp ${rhp} by ${by};
    never edited by hand.
 
    A component's props check takes its own props, then its children, then
    the attributes of the element it passes them on to. Each check is
    external, since the compiler checks it and Melange writes none of it.
-   What no rule maps is ported by hand, a module each, re-exported here. *)
-
-module Types = Types
-${handModules.map((m) => `module ${m} = ${m}`).join("\n")}
-${include(mli)}
-
-${modules.join("\n")}`;
-
-writeOrCheck(
-  [
-    [out, file(top(src.ml), false)],
-    [`${out}i`, file(top(src.mli), true)],
-    [typesOut, typesText],
-    [`${typesOut}i`, typesMli],
-    [namesOut, table(names, "generate/rhp.ts")],
+   What no rule maps is ported by hand, a module each, re-exported here. *)`,
+  typesHeader: `(* The types rhp's components and functions name, each a module.
+   Generated from the declarations of @bezda/rhp ${rhp} by ${by};
+   never edited by hand. *)`,
+  items: [
+    ...handModules.map((m): Item => ({ kind: "alias", name: m, of: m })),
+    // The interface strengthened, so the included module's types are its own.
+    { kind: "include", ml: `include ${included}`, mli: `include module type of struct include ${included} end` },
+    ...items,
   ],
-  "rhp's types",
-);
+});

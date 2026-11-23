@@ -8,48 +8,65 @@
 // a file differs from what Kobalte's types give.
 
 import ts from "typescript";
-import { readdirSync, existsSync, readFileSync, realpathSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { bind, doc, functionBinding, names, part, real, typesFiles, unmapped, valueBinding } from "./binding.ts";
-import { table } from "./names.ts";
-import { writeOrCheck } from "./output.ts";
-import { Source } from "./source.ts";
-import { browser } from "./program.ts";
+import { readdirSync, existsSync } from "node:fs";
+import { reading } from "./generator.ts";
+import type { Item } from "./ocaml.ts";
+import { byName } from "./package.ts";
 
-const root = fileURLToPath(new URL("../", import.meta.url));
-// Kobalte's real path: a package manager that links each package's
-// dependencies beside it, as Bun does, is resolved from there.
-const dist = realpathSync(`${root}node_modules/@kobalte/core/dist`);
-const out = `${root}kobalte/solidtype_kobalte.ml`;
-// The types, a file of their own: Melange keeps a function's arity, and so
-// calls it directly from another library, one module deep in a file, not two.
-const typesOut = `${root}kobalte/types.ml`;
-const namesOut = `${root}ppx/kobalte_names.ml`;
-const kobalte = JSON.parse(readFileSync(`${root}node_modules/@kobalte/core/package.json`, "utf8")).version as string;
-
+const by = "generate/kobalte.ts";
 // The building blocks Kobalte's components are made of, which its
 // documentation does not offer as components.
 const blocks = new Set(["menu", "popper", "dismissable-layer", "polymorphic"]);
+const components = (dist: string) =>
+  readdirSync(dist)
+    .filter((d) => existsSync(`${dist}/${d}/index.d.ts`) && !blocks.has(d))
+    .sort();
 
-const entries = readdirSync(dist)
-  .filter((d) => existsSync(`${dist}/${d}/index.d.ts`) && !blocks.has(d))
-  .sort();
-const program = ts.createProgram([...entries.map((d) => `${dist}/${d}/index.d.ts`), `${dist}/index.d.ts`], {
-  ...browser,
-  jsx: ts.JsxEmit.Preserve,
-  module: ts.ModuleKind.ESNext,
-  moduleResolution: ts.ModuleResolutionKind.Bundler,
+const { dir, version: kobalte, checker, exportsOf, bind } = reading({
+  package: "@kobalte/core",
+  entries: (dir) => [...components(`${dir}/dist`).map((d) => `${dir}/dist/${d}/index.d.ts`), `${dir}/dist/index.d.ts`],
+  jsx: true,
 });
-const checker = program.getTypeChecker();
+const dist = `${dir}/dist`;
+const entries = components(dist);
 
-bind(root, checker, {
+const anyOption = "an option, the caller's data, which the context types any";
+const threeKinds = "takes a number, a bigint or a third kind, and Either holds two";
+const readersChoice = "a context's value, of a type its reader would choose";
+
+const { doc, functionBinding, part, real, valueBinding, write } = bind({
   name: "Kobalte",
   // toFormat throws converting HSL or HSB to hex without saying so.
   throwsUndocumented: (where) => where === "Color.toFormat",
   // The props a create function is given, whose any is the caller's data:
   // createListState's dataSource, and the getKey it is read by.
   data: (symbol) => /^Create[A-Za-z]*Props$/.test(symbol.name),
+  // Meter and Slider each declare a GetValueLabelParams, of its own fields.
+  named: (symbol) => {
+    if (symbol.name !== "GetValueLabelParams") return undefined;
+    const file = symbol.declarations?.[0]?.getSourceFile().fileName ?? "";
+    const component = ["Meter", "Slider"].find((c) => file.includes(`/${c.toLowerCase()}-`));
+    if (!component) throw new Error(`GetValueLabelParams of ${file} is neither Meter's nor Slider's`);
+    return `${component}_GetValueLabelParams`;
+  },
+  leftOut: {
+    "ComboboxContextValue.selectedOptions": anyOption,
+    "ComboboxContextValue.removeOptionFromSelection": anyOption,
+    "SelectContextValue.selectedOptions": anyOption,
+    "SelectContextValue.removeOptionFromSelection": anyOption,
+    "DateTimeFormat.formatRange()": threeKinds,
+    "DateTimeFormat.formatRangeToParts()": threeKinds,
+    "NumberFormat.formatRange()": threeKinds,
+    "NumberFormat.formatRangeToParts()": threeKinds,
+    "FlowProps.value": readersChoice,
+    "Context_Provider_Props.value": readersChoice,
+    "Toast_Toaster.make": "the toaster is Kobalte's to make: one made here would be handed Kobalte's functions, which OCaml calls by their length",
+  },
 });
+
+// A type as TypeScript writes it, whole: it cuts a long one short unless
+// told not to, and what is read of it here may be past the cut.
+const whole = (t: ts.Type) => checker.typeToString(t, undefined, ts.TypeFormatFlags.NoTruncation);
 
 const pascal = (s: string) => s.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join("");
 
@@ -64,9 +81,9 @@ function commonProps(decl: ts.SignatureDeclaration): ts.Symbol[] {
   const visit = (t: ts.Type) => {
     for (const part of t.isIntersection() ? t.types : [t]) {
       const name = part.aliasSymbol?.name ?? part.getSymbol()?.name ?? "";
-      if (/CommonProps$/.test(name) || (part.aliasSymbol?.name === "Partial" && /CommonProps/.test(checker.typeToString(part)))) {
+      if (/CommonProps$/.test(name) || (part.aliasSymbol?.name === "Partial" && /CommonProps/.test(whole(part)))) {
         for (const p of checker.getPropertiesOfType(part)) {
-          if (!/ElementOf|\bT\b/.test(checker.typeToString(checker.getTypeOfSymbol(p)))) found.push(p);
+          if (!/ElementOf|\bT\b/.test(whole(checker.getTypeOfSymbol(p)))) found.push(p);
         }
       }
     }
@@ -75,18 +92,13 @@ function commonProps(decl: ts.SignatureDeclaration): ts.Symbol[] {
   return found;
 }
 
-// Each entry's module, its lines ending in an empty one, then end.
-let body = "";
-let bodyMli = "";
+const modules: Item[] = [];
 for (const entry of entries) {
-  const source = program.getSourceFile(`${dist}/${entry}/index.d.ts`);
-  const mod = source && checker.getSymbolAtLocation(source);
-  if (!mod) continue;
-  const exports = checker.getExportsOfModule(mod);
-  const byName = new Map(exports.map((s) => [s.name, s]));
+  const exports = exportsOf(`${dist}/${entry}/index.d.ts`);
+  const exported = new Map(exports.map((s) => [s.name, s]));
   const component = pascal(entry);
-  const src = new Source();
-  for (const sym of [...exports].sort((a, b) => (a.name < b.name ? -1 : 1))) {
+  const items: Item[] = [];
+  for (const sym of byName(exports)) {
     const r = real(sym);
     const declared = r.declarations?.[0];
     if (!declared) continue;
@@ -102,7 +114,7 @@ for (const entry of entries) {
     if (signature && /^[A-Z]/.test(sym.name)) {
       if (sym.name === component) continue;
       const optionsName = `${component}${sym.name}Options`;
-      const opt = byName.get(optionsName) ?? byName.get(`${sym.name}Options`) ?? byName.get(`${sym.name}Props`);
+      const opt = exported.get(optionsName) ?? exported.get(`${sym.name}Options`) ?? exported.get(`${sym.name}Props`);
       // Without an Options interface, the props its signature gives:
       // PolymorphicProps<T, Props>, SegmentedControl's an alias of
       // RadioGroup's.
@@ -112,73 +124,64 @@ for (const entry of entries) {
         : null;
       const optType = opt ? checker.getDeclaredTypeOfSymbol(real(opt)) : given;
       // A root whose value type turns on [multiple] is two modules.
-      if (optType?.isUnion() && optType.types.some((t) => /Multiple/.test(checker.typeToString(t)))) {
+      if (optType?.isUnion() && optType.types.some((t) => /Multiple/.test(whole(t)))) {
         for (const variant of optType.types) {
-          const multiple = /Multiple/.test(checker.typeToString(variant));
-          src.both(...doc(r, "  "));
-          src.module("  ", `${sym.name}${multiple ? "_multiple" : ""}`, () => part(src, `@kobalte/core/${entry}`, `${entry}.${sym.name}`, signature, variant, commonProps(signature), sym.name));
-          src.both(``);
+          const multiple = /Multiple/.test(whole(variant));
+          items.push({
+            kind: "module",
+            name: `${sym.name}${multiple ? "_multiple" : ""}`,
+            doc: doc(r),
+            items: part(`@kobalte/core/${entry}`, `${entry}.${sym.name}`, signature, variant, commonProps(signature), sym.name),
+          });
         }
         continue;
       }
-      src.both(...doc(r, "  "));
-      src.module("  ", sym.name, () => part(src, `@kobalte/core/${entry}`, `${entry}.${sym.name}`, signature, optType, commonProps(signature), sym.name));
-      src.both(``);
+      items.push({
+        kind: "module",
+        name: sym.name,
+        doc: doc(r),
+        items: part(`@kobalte/core/${entry}`, `${entry}.${sym.name}`, signature, optType, commonProps(signature), sym.name),
+      });
     } else if ((r.flags & ts.SymbolFlags.Function) && ts.isFunctionDeclaration(decl)) {
-      functionBinding(src, r, sym.name, `@kobalte/core/${entry}`, `${entry}.${sym.name}`);
-    } else if (r.flags & ts.SymbolFlags.Variable && sym.name !== component && !byName.get(sym.name)?.getDeclarations()?.some(ts.isFunctionDeclaration)) {
-      valueBinding(src, r, sym.name, `@kobalte/core/${entry}`, `${entry}.${sym.name}`);
+      items.push(...functionBinding(r, sym.name, `@kobalte/core/${entry}`, `${entry}.${sym.name}`));
+    } else if (r.flags & ts.SymbolFlags.Variable && sym.name !== component && !exported.get(sym.name)?.getDeclarations()?.some(ts.isFunctionDeclaration)) {
+      items.push(...valueBinding(r, sym.name, `@kobalte/core/${entry}`, `${entry}.${sym.name}`));
     }
   }
-  if (src.ml.length === 0) continue;
-  body += `\nmodule ${component} = struct\n${src.ml.join("\n")}end\n`;
-  bodyMli += `\nmodule ${component} : sig\n${src.mli.join("\n")}end\n`;
+  if (items.length > 0) modules.push({ kind: "module", name: component, items });
 }
 
 // The building blocks of Kobalte's lists, from its root, which a component
 // Kobalte lacks is made of: a list's state and selection, and the handlers
 // that make an element a list of selectable items.
 const selectionNames = ["createListState", "createSelectableCollection", "createSelectableItem", "createSelectableList", "createTypeSelect"];
-const rootSource = program.getSourceFile(`${dist}/index.d.ts`);
-const rootModule = rootSource && checker.getSymbolAtLocation(rootSource);
-if (rootModule) {
-  const exports = new Map(checker.getExportsOfModule(rootModule).map((s) => [s.name, s]));
-  const src = new Source();
-  for (const name of selectionNames) {
+{
+  const exports = new Map(exportsOf(`${dist}/index.d.ts`).map((s) => [s.name, s]));
+  const items = selectionNames.flatMap((name) => {
     const sym = exports.get(name);
-    if (sym) functionBinding(src, real(sym), name, "@kobalte/core", `Selection.${name}`);
-  }
-  body += `\nmodule Selection = struct\n${src.ml.join("\n")}end\n`;
-  bodyMli += `\nmodule Selection : sig\n${src.mli.join("\n")}end\n`;
+    if (!sym) throw new Error(`@kobalte/core exports no ${name}`);
+    return functionBinding(real(sym), name, "@kobalte/core", `Selection.${name}`);
+  });
+  modules.push({ kind: "module", name: "Selection", items });
 }
 
-const { ml: typesText, mli: typesMli } = typesFiles(`(* The types Kobalte's components and functions name, each a module.
-   Generated from the declarations of @kobalte/core ${kobalte} by
-   generate/kobalte.ts; never edited by hand. *)`);
-
-
-const componentsFile = (modules: string) => `(* Every Kobalte component, part by part, its hooks and utilities, and the
+// The types are a file of their own: Melange keeps a function's arity, and
+// so calls it directly from another library, one module deep in a file, not
+// two.
+write({
+  module: "kobalte/solidtype_kobalte",
+  names: "ppx/kobalte_names.ml",
+  by,
+  whose: "Kobalte's",
+  header: `(* Every Kobalte component, part by part, its hooks and utilities, and the
    types they name, in Types. Generated from the declarations of
-   @kobalte/core ${kobalte} by generate/kobalte.ts; never edited by hand.
+   @kobalte/core ${kobalte} by ${by}; never edited by hand.
 
    A part's props check takes its own props, then its children, then the
    attributes of the element it renders, which it passes on. Each check is
-   external, since the compiler checks it and Melange writes none of it. *)
-
-module Types = Types
-${modules}`;
-const text = componentsFile(body);
-const textMli = componentsFile(bodyMli);
-
-if (process.argv.includes("--unmapped")) for (const [k, v] of unmapped) console.error(`${k}: ${v}`);
-
-writeOrCheck(
-  [
-    [out, text],
-    [`${out}i`, textMli],
-    [typesOut, typesText],
-    [`${typesOut}i`, typesMli],
-    [namesOut, table(names, "generate/kobalte.ts")],
-  ],
-  "Kobalte's types",
-);
+   external, since the compiler checks it and Melange writes none of it. *)`,
+  typesHeader: `(* The types Kobalte's components and functions name, each a module.
+   Generated from the declarations of @kobalte/core ${kobalte} by
+   ${by}; never edited by hand. *)`,
+  items: modules,
+});

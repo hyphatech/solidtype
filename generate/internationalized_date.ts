@@ -7,33 +7,17 @@
 // lint`'s `--check` fails when a file differs from what its types give.
 
 import ts from "typescript";
-import { readFileSync, realpathSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { bind, functionBinding, reach, typesFiles, unmapped } from "./binding.ts";
-import { writeOrCheck } from "./output.ts";
-import { Source } from "./source.ts";
-import { browser } from "./program.ts";
+import { reading } from "./generator.ts";
 
-const root = fileURLToPath(new URL("../", import.meta.url));
-const pkg = realpathSync(`${root}node_modules/@internationalized/date`);
-const entry = `${pkg}/dist/types/src/index.d.ts`;
-const out = `${root}internationalized_date/solidtype_internationalized_date.ml`;
-const typesOut = `${root}internationalized_date/types.ml`;
-const version = JSON.parse(readFileSync(`${pkg}/package.json`, "utf8")).version as string;
-
-const program = ts.createProgram([entry], {
-  ...browser,
-  module: ts.ModuleKind.ESNext,
-  moduleResolution: ts.ModuleResolutionKind.Bundler,
+const by = "generate/internationalized_date.ts";
+const { dir, version, checker, exportsOf, real, bind } = reading({
+  package: "@internationalized/date",
+  entries: (dir) => [`${dir}/dist/types/src/index.d.ts`],
 });
-const checker = program.getTypeChecker();
-
-const source = program.getSourceFile(entry);
-const mod = source && checker.getSymbolAtLocation(source);
-if (!mod) throw new Error(`no ${entry}`);
-const real = (s: ts.Symbol) => (s.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(s) : s);
+const entry = `${dir}/dist/types/src/index.d.ts`;
+const exports = exportsOf(entry);
 const exported = (name: string) => {
-  const s = checker.getExportsOfModule(mod).find((e) => e.name === name);
+  const s = exports.find((e) => e.name === name);
   if (!s) throw new Error(`@internationalized/date exports no ${name}`);
   return real(s);
 };
@@ -46,7 +30,7 @@ const exported = (name: string) => {
 const throwing = new Set<string>();
 const takesZone = (sig: ts.Signature) =>
   sig.getParameters().some((q) => q.name === "timeZone" || q.name === "disambiguation");
-for (const sym of checker.getExportsOfModule(mod)) {
+for (const sym of exports) {
   const r = real(sym);
   if (r.flags & ts.SymbolFlags.Function) {
     const sigs = checker.getTypeOfSymbol(r).getCallSignatures();
@@ -59,7 +43,7 @@ for (const sym of checker.getExportsOfModule(mod)) {
   }
 }
 
-bind(root, checker, {
+const { functions, reach, write } = bind({
   name: "@internationalized/date",
   throwsUndocumented: (where) => throwing.has(where),
   // A date's every number is a small whole one, but the milliseconds since
@@ -70,57 +54,35 @@ bind(root, checker, {
     classes: ["CalendarDate", "CalendarDateTime", "Time", "ZonedDateTime"].map(exported),
     structural: ["AnyCalendarDate", "AnyDateTime", "AnyTime"].map(exported),
   },
+  // A calendar's optional methods are ones it may not have, which the
+  // library calls through its own functions where a user needs them --
+  // getMinimumMonthInYear, getMinimumDayInMonth, isEqualCalendar -- or
+  // that mutate a date in place inside it.
+  leftOut: Object.fromEntries([
+    "getMinimumMonthInYear", "getMinimumDayInMonth", "getFormattableMonth", "isEqual",
+    "balanceDate", "balanceYearMonth", "constrainDate", "isInverseEra",
+  ].map((m) => [`Calendar.${m}()`, "a calendar's optional method, reached through the library's own functions"])),
 });
 // The one class nothing else names: a date's formatter, made by its
 // constructor.
 reach(exported("DateFormatter"));
 
-// What is left out, each with why. A calendar's optional methods are ones it
-// may not have, which the library calls through its own functions where a
-// user needs them -- getMinimumMonthInYear, getMinimumDayInMonth,
-// isEqualCalendar -- or mutate a date in place inside it.
-const leftOut = new Set([
-  "getMinimumMonthInYear", "getMinimumDayInMonth", "getFormattableMonth", "isEqual",
-  "balanceDate", "balanceYearMonth", "constrainDate", "isInverseEra",
-].map((m) => `Calendar.${m}()`));
+// A class is a module of Types, which the functions name; a type alone is
+// bound where it is named.
+const items = functions(entry, "@internationalized/date");
 
-const src = new Source();
-for (const sym of [...checker.getExportsOfModule(mod)].sort((a, b) => (a.name < b.name ? -1 : 1))) {
-  const r = real(sym);
-  // A class is a module of Types, which the functions name; a type alone is
-  // bound where it is named.
-  if (r.flags & ts.SymbolFlags.Function) functionBinding(src, r, sym.name, "@internationalized/date", sym.name);
-}
-
-const { ml: typesText, mli: typesMli } = typesFiles(`(* The values @internationalized/date makes and takes, each a module: a
+write({
+  module: "internationalized_date/solidtype_internationalized_date",
+  by,
+  whose: "@internationalized/date's",
+  header: `(* @internationalized/date's functions: its conversions, queries and
+   parsers, and the values they make and take, in Types. Generated from the
+   declarations of @internationalized/date ${version} by
+   ${by}; never edited by hand. *)`,
+  typesHeader: `(* The values @internationalized/date makes and takes, each a module: a
    CalendarDate, a CalendarDateTime, a Time and a ZonedDateTime are each a
    kind of Value, so a function that takes several takes any of them as it
    is. Generated from the declarations of @internationalized/date ${version}
-   by generate/internationalized_date.ts; never edited by hand. *)`);
-
-const missing = [...unmapped].filter(([k]) => !leftOut.has(k));
-if (missing.length > 0) {
-  for (const [k, v] of missing) console.error(`${k}: ${v}`);
-  console.error("@internationalized/date's declarations above map by no rule: map each, or name it as left out in generate/internationalized_date.ts");
-  process.exit(1);
-}
-
-const top = (lines: string[]) => lines.map((l) => l.replace(/^  /gm, ""));
-const file = (modules: string[]) => `(* @internationalized/date's functions: its conversions, queries and
-   parsers, and the values they make and take, in Types. Generated from the
-   declarations of @internationalized/date ${version} by
-   generate/internationalized_date.ts; never edited by hand. *)
-
-module Types = Types
-
-${modules.join("\n")}`;
-
-writeOrCheck(
-  [
-    [out, file(top(src.ml))],
-    [`${out}i`, file(top(src.mli))],
-    [typesOut, typesText],
-    [`${typesOut}i`, typesMli],
-  ],
-  "@internationalized/date's types",
-);
+   by ${by}; never edited by hand. *)`,
+  items,
+});

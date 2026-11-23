@@ -1,6 +1,7 @@
 SWITCH ?= solidtype
 OPAM = opam exec --switch=$(SWITCH) --
 DOCS_PORT ?= 4321
+GENERATORS = html kobalte heroui rhp internationalized_date gravity_icons
 REFERENCE = solidtype solidtype-kobalte solidtype-headless solidtype-heroui solidtype-rhp solidtype-internationalized-date solidtype-gravity-icons ppx_solidtype odoc.support
 
 .DEFAULT_GOAL := help
@@ -37,12 +38,7 @@ lint: node_modules ## check formatting, types, litany, the release build and bin
 	$(OPAM) litany check
 	bun run tsc -p vite-plugin
 	bun run tsc -p generate
-	$(OPAM) bun generate/html.ts --check
-	$(OPAM) bun generate/kobalte.ts --check
-	$(OPAM) bun generate/heroui.ts --check
-	$(OPAM) bun generate/rhp.ts --check
-	$(OPAM) bun generate/internationalized_date.ts --check
-	$(OPAM) bun generate/gravity_icons.ts --check
+	@for g in $(GENERATORS); do echo "generate/$$g.ts --check"; $(OPAM) bun generate/$$g.ts --check || exit 1; done
 
 fmt: ## format the code
 	$(OPAM) dune fmt
@@ -75,12 +71,7 @@ docs-serve: docs ## serve the built documentation site
 	cd docs && bun --bun astro preview --open --port $(DOCS_PORT)
 
 generate: node_modules ## write the generated bindings
-	$(OPAM) bun generate/html.ts
-	$(OPAM) bun generate/kobalte.ts
-	$(OPAM) bun generate/heroui.ts
-	$(OPAM) bun generate/rhp.ts
-	$(OPAM) bun generate/internationalized_date.ts
-	$(OPAM) bun generate/gravity_icons.ts
+	@for g in $(GENERATORS); do echo "generate/$$g.ts"; $(OPAM) bun generate/$$g.ts || exit 1; done
 
 release: node_modules ## tag VERSION and make its release
 	rm -rf _build/plugin && bun vite-plugin/pack.ts $(VERSION) _build/plugin

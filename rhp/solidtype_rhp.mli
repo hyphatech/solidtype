@@ -19,10 +19,13 @@ module Scale = Scale
 module Shape = Shape
 module Slat = Slat
 module Ticks = Ticks
-include module type of struct include Helpers end
 
-(** Its page, with its examples:
-    [$(opam var solidtype:doc)/pages/rhp/area.md]. *)
+include module type of struct
+  include Helpers
+end
+
+(** Its page, with its examples: [$(opam var solidtype:doc)/pages/rhp/area.md].
+*)
 module Area : sig
   module Props : sig
     external check :
@@ -33,7 +36,8 @@ module Area : sig
       ?color:Color.t Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Svg.check = "check"
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Svg.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
 
@@ -49,7 +53,9 @@ module Axis : sig
       ?grid:bool Solidtype.Check.value ->
       ?cross:bool Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+      ?children:('f, [ `elements ]) Solidtype.Check.children ->
+      unit ->
+      unit = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
 
@@ -57,8 +63,8 @@ module Axis : sig
   [@@mel.module "@bezda/rhp"]
 end
 
-(** Its page, with its examples:
-    [$(opam var solidtype:doc)/pages/rhp/bar.md]. *)
+(** Its page, with its examples: [$(opam var solidtype:doc)/pages/rhp/bar.md].
+*)
 module Bar : sig
   module Props : sig
     external check :
@@ -69,7 +75,8 @@ module Bar : sig
       ?color:Color.t Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
 
@@ -77,8 +84,8 @@ module Bar : sig
   [@@mel.module "@bezda/rhp"]
 end
 
-(** Its page, with its examples:
-    [$(opam var solidtype:doc)/pages/rhp/cell.md]. *)
+(** Its page, with its examples: [$(opam var solidtype:doc)/pages/rhp/cell.md].
+*)
 module Cell : sig
   module Props : sig
     external check :
@@ -87,7 +94,8 @@ module Cell : sig
       ?color:Color.t Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
 
@@ -95,8 +103,8 @@ module Cell : sig
   [@@mel.module "@bezda/rhp"]
 end
 
-(** Its page, with its examples:
-    [$(opam var solidtype:doc)/pages/rhp/chart.md]. *)
+(** Its page, with its examples: [$(opam var solidtype:doc)/pages/rhp/chart.md].
+*)
 module Chart : sig
   module Props : sig
     external check :
@@ -122,7 +130,9 @@ module Chart : sig
       ?style:string Js.Dict.t Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       ?props:'spread Solidtype.Solid.rest ->
-      ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+      ?children:('f, [ `elements ]) Solidtype.Check.children ->
+      unit ->
+      unit = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
 
@@ -130,8 +140,8 @@ module Chart : sig
   [@@mel.module "@bezda/rhp"]
 end
 
-(** Its page, with its examples:
-    [$(opam var solidtype:doc)/pages/rhp/dot.md]. *)
+(** Its page, with its examples: [$(opam var solidtype:doc)/pages/rhp/dot.md].
+*)
 module Dot : sig
   module Props : sig
     external check :
@@ -143,7 +153,8 @@ module Dot : sig
       ?color:Color.t Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
 
@@ -151,8 +162,8 @@ module Dot : sig
   [@@mel.module "@bezda/rhp"]
 end
 
-(** Its page, with its examples:
-    [$(opam var solidtype:doc)/pages/rhp/label.md]. *)
+(** Its page, with its examples: [$(opam var solidtype:doc)/pages/rhp/label.md].
+*)
 module Label : sig
   module Props : sig
     external check :
@@ -163,7 +174,8 @@ module Label : sig
       ?cross:float Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
 
@@ -171,10 +183,11 @@ module Label : sig
   [@@mel.module "@bezda/rhp"]
 end
 
-(** A line through points: a sparkline in a slat, or on a Chart's cross scale a line chart.
+(** A line through points: a sparkline in a slat, or on a Chart's cross scale a
+    line chart.
 
-    Its page, with its examples:
-    [$(opam var solidtype:doc)/pages/rhp/line.md]. *)
+    Its page, with its examples: [$(opam var solidtype:doc)/pages/rhp/line.md].
+*)
 module Line : sig
   module Props : sig
     external check :
@@ -186,7 +199,8 @@ module Line : sig
       ?color:Color.t Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Svg.check = "check"
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Svg.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
 
@@ -194,10 +208,11 @@ module Line : sig
   [@@mel.module "@bezda/rhp"]
 end
 
-(** A place on the chart and nothing else: no size and nothing drawn, so whatever you put inside it sits at its value.
+(** A place on the chart and nothing else: no size and nothing drawn, so
+    whatever you put inside it sits at its value.
 
-    Its page, with its examples:
-    [$(opam var solidtype:doc)/pages/rhp/place.md]. *)
+    Its page, with its examples: [$(opam var solidtype:doc)/pages/rhp/place.md].
+*)
 module Place : sig
   module Props : sig
     external check :
@@ -206,7 +221,8 @@ module Place : sig
       ?cross:float Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
 
@@ -214,8 +230,9 @@ module Place : sig
   [@@mel.module "@bezda/rhp"]
 end
 
-(** A magazine-style panel around a chart: kicker, headline, dek, the chart, a note. Markup only; its look is the page's
-    CSS, and \@bezda/rhp/posters.css has the gallery's looks to start from.
+(** A magazine-style panel around a chart: kicker, headline, dek, the chart, a
+    note. Markup only; its look is the page's CSS, and \@bezda/rhp/posters.css
+    has the gallery's looks to start from.
 
     Its page, with its examples:
     [$(opam var solidtype:doc)/pages/rhp/poster.md]. *)
@@ -228,7 +245,8 @@ module Poster : sig
       ?dek:Solidtype.Jsx.element Solidtype.Check.value ->
       ?note:Solidtype.Jsx.element Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Figure.check = "check"
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Figure.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
 
@@ -239,14 +257,16 @@ end
 external theme : Types.RequiredThemeValues.t = "THEME"
 [@@mel.module "@bezda/rhp"]
 
-(** Its page, with its examples:
-    [$(opam var solidtype:doc)/pages/rhp/theme.md]. *)
+(** Its page, with its examples: [$(opam var solidtype:doc)/pages/rhp/theme.md].
+*)
 module Theme : sig
   module Props : sig
     external check :
       value:Types.ThemeValues.t Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+      ?children:('f, [ `elements ]) Solidtype.Check.children ->
+      unit ->
+      unit = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
 
@@ -254,8 +274,8 @@ module Theme : sig
   [@@mel.module "@bezda/rhp"]
 end
 
-(** Its page, with its examples:
-    [$(opam var solidtype:doc)/pages/rhp/tick.md]. *)
+(** Its page, with its examples: [$(opam var solidtype:doc)/pages/rhp/tick.md].
+*)
 module Tick : sig
   module Props : sig
     external check :
@@ -265,7 +285,8 @@ module Tick : sig
       ?color:Color.t Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
 
@@ -273,62 +294,94 @@ module Tick : sig
   [@@mel.module "@bezda/rhp"]
 end
 
-(** A value that moves to each new value over time: the reader gives the value to draw now, or ms ahead. *)
-val animated : (unit -> 't) -> ?settings:(unit -> Types.Animated.t) -> unit -> (float option -> 't)
+val animated :
+  (unit -> 't) ->
+  ?settings:(unit -> Types.Animated_Settings.t) ->
+  unit ->
+  float option ->
+  't
+(** A value that moves to each new value over time: the reader gives the value
+    to draw now, or ms ahead. *)
 
-(** Item i of a data group (a list wraps around; one value is every row's). *)
 external at : ('t, 't array) Types.Either.t -> float -> 't option = "at"
 [@@mel.module "@bezda/rhp"]
+(** Item i of a data group (a list wraps around; one value is every row's). *)
 
-(** Histogram bins: bin k covers x0\[k\]..x1\[k\] and holds tally\[k\] samples. Samples all alike get a scale one wide around
-    them, and no samples a scale from 0 to 1. *)
-external bins : float option array -> ?options:Types.Bins.t -> unit -> Types.Bins2.t = "bins"
+external bins :
+  float option array -> ?options:Types.Bins_Options.t -> unit -> Types.Bins.t
+  = "bins"
 [@@mel.module "@bezda/rhp"]
+(** Histogram bins: bin k covers x0\[k\]..x1\[k\] and holds tally\[k\] samples.
+    Samples all alike get a scale one wide around them, and no samples a scale
+    from 0 to 1. *)
 
+val curve : ?ease:Ease.t -> unit -> float -> float
 (** A timing curve as a function of 0..1. *)
-val curve : ?ease:Ease.t -> unit -> (float -> float)
 
-(** A Gaussian kernel density estimate: points pairs of \[x, density\] (for Area). *)
-external density : float option array -> ?options:Types.Density.t -> unit -> (float * float) array = "density"
+external density :
+  float option array ->
+  ?options:Types.Density_Options.t ->
+  unit ->
+  (float * float) array = "density"
 [@@mel.module "@bezda/rhp"]
+(** A Gaussian kernel density estimate: points pairs of \[x, density\] (for
+    Area). *)
 
-(** Runs f with rhp's style writes going to the page at once instead of in the next frame: for an app that changes
-    chart data inside its own requestAnimationFrame callback, so the change shows in that frame. *)
 external drawing : (unit -> 't) -> 't = "drawing"
 [@@mel.module "@bezda/rhp"]
+(** Runs f with rhp's style writes going to the page at once instead of in the
+    next frame: for an app that changes chart data inside its own
+    requestAnimationFrame callback, so the change shows in that frame. *)
 
-(** Ticks at every multiple of step in the scale; with ends, its min and max too. A step that is not above 0 throws.
-    
+val every :
+  float ->
+  ?options:Types.Every_Options.t ->
+  unit ->
+  float * float ->
+  float array
+(** Ticks at every multiple of step in the scale; with ends, its min and max
+    too. A step that is not above 0 throws.
+
     Raises [Invalid_argument] with rhp's message, where it throws. *)
-val every : float -> ?options:Types.Every.t -> unit -> ((float * float) -> float array)
-val every_opt : float -> ?options:Types.Every.t -> unit -> ((float * float) -> float array) option
 
-(** \[smallest, largest\], leaving out missing values (\[Infinity, -Infinity\] when there are none, which nice() makes 0 to 1). *)
-external extent : float option array -> (float * float) = "extent"
+val every_opt :
+  float ->
+  ?options:Types.Every_Options.t ->
+  unit ->
+  (float * float -> float array) option
+
+external extent : float option array -> float * float = "extent"
 [@@mel.module "@bezda/rhp"]
+(** \[smallest, largest\], leaving out missing values (\[Infinity, -Infinity\]
+    when there are none, which nice() makes 0 to 1). *)
 
-(** Call where the app starts, before the first chart: --rhp-position is passed down from each slat root again, so
-    anything inside a slat can read it, as in rhp 2.0. Charts take longer to draw (no style is shared between rows). *)
 external inherit_position : unit -> unit = "inheritPosition"
 [@@mel.module "@bezda/rhp"]
+(** Call where the app starts, before the first chart: --rhp-position is passed
+    down from each slat root again, so anything inside a slat can read it, as in
+    rhp 2.0. Charts take longer to draw (no style is shared between rows). *)
 
-(** Call where the app starts, on the server and in the browser, when the page links \@bezda/rhp/rhp.css itself. *)
 external linked_css : unit -> unit = "linkedCss"
 [@@mel.module "@bezda/rhp"]
+(** Call where the app starts, on the server and in the browser, when the page
+    links \@bezda/rhp/rhp.css itself. *)
 
-(** A round scale covering lo..hi with about count ticks. *)
 external nice : float -> float -> ?count:float -> unit -> Types.Nice.t = "nice"
 [@@mel.module "@bezda/rhp"]
+(** A round scale covering lo..hi with about count ticks. *)
 
-(** Call where the app starts, before the first chart, on the server and in the browser: no chart on the page gets the
-    guard (the CSS that keeps a page's own rules from reaching a chart). Charts draw faster, and the page's CSS must leave
-    their elements alone. A page that links rhp's stylesheet itself links \@bezda/rhp/rhp-no-css-guard.css instead. *)
 external no_css_guard : unit -> unit = "noCssGuard"
 [@@mel.module "@bezda/rhp"]
+(** Call where the app starts, before the first chart, on the server and in the
+    browser: no chart on the page gets the guard (the CSS that keeps a page's
+    own rules from reaching a chart). Charts draw faster, and the page's CSS
+    must leave their elements alone. A page that links rhp's stylesheet itself
+    links \@bezda/rhp/rhp-no-css-guard.css instead. *)
 
-(** Box and whisker numbers, leaving out missing samples; low and high are the whisker ends (1.5 x IQR). *)
 external summary : float option array -> Types.Summary.t = "summary"
 [@@mel.module "@bezda/rhp"]
+(** Box and whisker numbers, leaving out missing samples; low and high are the
+    whisker ends (1.5 x IQR). *)
 
+val use_orientation : unit -> unit -> [ `horizontal | `vertical ]
 (** The orientation of the Plot around, as a signal. *)
-val use_orientation : unit -> (unit -> [ `horizontal | `vertical ])

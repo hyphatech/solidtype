@@ -7,7 +7,7 @@
     "docs"
   ],
   "scripts": {
-    "test": "bun test vite-plugin/test && bun --bun vite build --config example/vite.config.ts && bun --bun vitest run",
+    "test": "bun test vite-plugin/test generate/test && bun --bun vite build --config example/vite.config.ts && bun --bun vitest run",
     "dev": "bun --bun vite --config example/vite.config.ts"
   },
   "devDependencies": {

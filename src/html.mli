@@ -1,18 +1,17 @@
-(** Each element's attributes, as their types: [Html.Div.class_] is
-    [string]. Generated from the JSX types of solid-js 1.9.17 by
-    [generate/html.ts]; never edited by hand.
+(** Each element's attributes, as their types: [Html.Div.class_] is [string].
+    Generated from the JSX types of solid-js 1.9.17 by [generate/html.ts]; never
+    edited by hand.
 
-    An attribute is named as Solid's JSX names it, by one rule: a capital is
-    an underscore and the lower case, [read_only], a hyphen an underscore,
-    [aria_label], and an OCaml keyword takes a trailing underscore,
-    [class_]. *)
+    An attribute is named as Solid's JSX names it, by one rule: a capital is an
+    underscore and the lower case, [read_only], a hyphen an underscore,
+    [aria_label], and an OCaml keyword takes a trailing underscore, [class_]. *)
 
 module type Dom_attributes = sig
   type element
   type props = element Solid.rest
   type aria_activedescendant = string
   type aria_atomic = bool
-  type aria_autocomplete = [ `none | `inline | `list | `both ]
+  type aria_autocomplete = [ `both | `inline | `list | `none ]
   type aria_braillelabel = string
   type aria_brailleroledescription = string
   type aria_busy = bool
@@ -27,7 +26,7 @@ module type Dom_attributes = sig
   type aria_description = string
   type aria_details = string
   type aria_disabled = bool
-  type aria_dropeffect = [ `none | `copy | `execute | `link | `move | `popup ]
+  type aria_dropeffect = [ `copy | `execute | `link | `move | `none | `popup ]
   type aria_errormessage = string
   type aria_expanded = bool
   type aria_flowto = string
@@ -39,7 +38,7 @@ module type Dom_attributes = sig
   type aria_label = string
   type aria_labelledby = string
   type aria_level = string
-  type aria_live = [ `off | `assertive | `polite ]
+  type aria_live = [ `assertive | `off | `polite ]
   type aria_modal = bool
   type aria_multiline = bool
   type aria_multiselectable = bool
@@ -58,7 +57,7 @@ module type Dom_attributes = sig
   type aria_rowspan = string
   type aria_selected = bool
   type aria_setsize = string
-  type aria_sort = [ `none | `ascending | `descending | `other ]
+  type aria_sort = [ `ascending | `descending | `none | `other ]
   type aria_valuemax = string
   type aria_valuemin = string
   type aria_valuenow = string
@@ -183,12 +182,85 @@ module type Dom_attributes = sig
   type on_waiting = Dom.event -> unit
   type on_wheel = Dom.wheelEvent -> unit
   type ref = element -> unit
-  type role = [ `none | `list | `link | `menu | `listbox | `tree | `grid | `dialog | `alert | `alertdialog | `application | `article | `banner | `button | `cell | `checkbox | `columnheader | `combobox | `complementary | `contentinfo | `definition | `directory | `document | `feed | `figure | `form | `gridcell | `group | `heading | `img | `listitem | `log | `main | `marquee | `math | `menubar | `menuitem | `menuitemcheckbox | `menuitemradio | `meter | `navigation | `note | `option | `presentation | `progressbar | `radio | `radiogroup | `region | `row | `rowgroup | `rowheader | `scrollbar | `search | `searchbox | `separator | `slider | `spinbutton | `status | `switch | `tab | `table | `tablist | `tabpanel | `term | `textbox | `timer | `toolbar | `tooltip | `treegrid | `treeitem ]
+
+  type role =
+    [ `alert
+    | `alertdialog
+    | `application
+    | `article
+    | `banner
+    | `button
+    | `cell
+    | `checkbox
+    | `columnheader
+    | `combobox
+    | `complementary
+    | `contentinfo
+    | `definition
+    | `dialog
+    | `directory
+    | `document
+    | `feed
+    | `figure
+    | `form
+    | `grid
+    | `gridcell
+    | `group
+    | `heading
+    | `img
+    | `link
+    | `list
+    | `listbox
+    | `listitem
+    | `log
+    | `main
+    | `marquee
+    | `math
+    | `menu
+    | `menubar
+    | `menuitem
+    | `menuitemcheckbox
+    | `menuitemradio
+    | `meter
+    | `navigation
+    | `none
+    | `note
+    | `option
+    | `presentation
+    | `progressbar
+    | `radio
+    | `radiogroup
+    | `region
+    | `row
+    | `rowgroup
+    | `rowheader
+    | `scrollbar
+    | `search
+    | `searchbox
+    | `separator
+    | `slider
+    | `spinbutton
+    | `status
+    | `switch
+    | `tab
+    | `table
+    | `tablist
+    | `tabpanel
+    | `term
+    | `textbox
+    | `timer
+    | `toolbar
+    | `tooltip
+    | `tree
+    | `treegrid
+    | `treeitem ]
+
   type slot = string
   type style = string
   type tab_index = string
   type tabindex = string
   type text_content = string
+
   type 'r dom_check =
     ?aria_activedescendant:aria_activedescendant Check.value ->
     ?aria_atomic:aria_atomic Check.value ->
@@ -274,7 +346,8 @@ module type Dom_attributes = sig
     ?on_composition_end:on_composition_end ->
     ?on_composition_start:on_composition_start ->
     ?on_composition_update:on_composition_update ->
-    ?on_content_visibility_auto_state_change:on_content_visibility_auto_state_change ->
+    ?on_content_visibility_auto_state_change:
+      on_content_visibility_auto_state_change ->
     ?on_context_lost:on_context_lost ->
     ?on_context_menu:on_context_menu ->
     ?on_context_restored:on_context_restored ->
@@ -374,12 +447,18 @@ end
 
 module type AnchorHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
   type attributionsrc = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type charset = string
   type content_editable = string
@@ -388,7 +467,7 @@ module type AnchorHTMLAttributes = sig
   type contextmenu = string
   type coords = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type download = string
   type draggable = bool
   type enterkeyhint = string
@@ -399,8 +478,13 @@ module type AnchorHTMLAttributes = sig
   type hreflang = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -424,14 +508,15 @@ module type AnchorHTMLAttributes = sig
   type rel = string
   type resource = string
   type rev = string
-  type shape = [ `rect | `circle | `poly | `default ]
+  type shape = [ `circle | `default | `poly | `rect ]
   type spellcheck = bool
   type target = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type type_ = string
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -496,8 +581,9 @@ end
 
 module type AnimateMotionSVGAttributes = sig
   include Dom_attributes
+
   type accumulate = [ `none | `sum ]
-  type additive = [ `sum | `replace ]
+  type additive = [ `replace | `sum ]
   type attribute_name = string
   type begin_ = string
   type by = string
@@ -522,12 +608,13 @@ module type AnimateMotionSVGAttributes = sig
   type repeat_dur = string
   type required_extensions = string
   type required_features = string
-  type restart = [ `always | `whenNotActive | `never ]
+  type restart = [ `always | `never | `whenNotActive ]
   type rotate = string
   type system_language = string
   type to_ = string
   type values = string
   type xmlns = string
+
   type 'r check =
     ?accumulate:accumulate Check.value ->
     ?additive:additive Check.value ->
@@ -566,10 +653,11 @@ end
 
 module type AnimateSVGAttributes = sig
   include Dom_attributes
+
   type accumulate = [ `none | `sum ]
-  type additive = [ `sum | `replace ]
+  type additive = [ `replace | `sum ]
   type attribute_name = string
-  type attribute_type = [ `auto | `CSS | `XML ]
+  type attribute_type = [ `CSS | `XML | `auto ]
   type begin_ = string
   type by = string
   type calc_mode = [ `discrete | `linear | `paced | `spline ]
@@ -592,11 +680,12 @@ module type AnimateSVGAttributes = sig
   type repeat_dur = string
   type required_extensions = string
   type required_features = string
-  type restart = [ `always | `whenNotActive | `never ]
+  type restart = [ `always | `never | `whenNotActive ]
   type system_language = string
   type to_ = string
   type values = string
   type xmlns = string
+
   type 'r check =
     ?accumulate:accumulate Check.value ->
     ?additive:additive Check.value ->
@@ -634,10 +723,11 @@ end
 
 module type AnimateTransformSVGAttributes = sig
   include Dom_attributes
+
   type accumulate = [ `none | `sum ]
-  type additive = [ `sum | `replace ]
+  type additive = [ `replace | `sum ]
   type attribute_name = string
-  type attribute_type = [ `auto | `CSS | `XML ]
+  type attribute_type = [ `CSS | `XML | `auto ]
   type begin_ = string
   type by = string
   type calc_mode = [ `discrete | `linear | `paced | `spline ]
@@ -658,12 +748,13 @@ module type AnimateTransformSVGAttributes = sig
   type repeat_dur = string
   type required_extensions = string
   type required_features = string
-  type restart = [ `always | `whenNotActive | `never ]
+  type restart = [ `always | `never | `whenNotActive ]
   type system_language = string
   type to_ = string
-  type type_ = [ `translate | `scale | `rotate | `skewX | `skewY ]
+  type type_ = [ `rotate | `scale | `skewX | `skewY | `translate ]
   type values = string
   type xmlns = string
+
   type 'r check =
     ?accumulate:accumulate Check.value ->
     ?additive:additive Check.value ->
@@ -700,13 +791,19 @@ end
 
 module type AreaHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
   type alt = string
   type attributionsrc = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
@@ -714,7 +811,7 @@ module type AreaHTMLAttributes = sig
   type contextmenu = string
   type coords = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type download = string
   type draggable = bool
   type enterkeyhint = string
@@ -724,8 +821,13 @@ module type AreaHTMLAttributes = sig
   type href = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -748,13 +850,14 @@ module type AreaHTMLAttributes = sig
   type referrerpolicy = string
   type rel = string
   type resource = string
-  type shape = [ `rect | `circle | `poly | `default ]
+  type shape = [ `circle | `default | `poly | `rect ]
   type spellcheck = bool
   type target = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -816,11 +919,17 @@ end
 
 module type AudioHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type autoplay = bool
   type content_editable = string
@@ -832,7 +941,7 @@ module type AudioHTMLAttributes = sig
   type cross_origin = string
   type crossorigin = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type disableremoteplayback = bool
   type draggable = bool
   type enterkeyhint = string
@@ -841,8 +950,13 @@ module type AudioHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -870,9 +984,10 @@ module type AudioHTMLAttributes = sig
   type spellcheck = bool
   type src = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -936,18 +1051,24 @@ end
 
 module type BaseHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -956,8 +1077,13 @@ module type BaseHTMLAttributes = sig
   type href = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -978,9 +1104,10 @@ module type BaseHTMLAttributes = sig
   type spellcheck = bool
   type target = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -1032,11 +1159,17 @@ end
 
 module type BdoHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
@@ -1051,8 +1184,13 @@ module type BdoHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -1072,9 +1210,10 @@ module type BdoHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -1124,11 +1263,17 @@ end
 
 module type BlockquoteHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type cite = string
   type content_editable = string
@@ -1136,7 +1281,7 @@ module type BlockquoteHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -1144,8 +1289,13 @@ module type BlockquoteHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -1165,9 +1315,10 @@ module type BlockquoteHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -1218,18 +1369,24 @@ end
 
 module type BodyHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -1237,8 +1394,13 @@ module type BodyHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -1278,9 +1440,10 @@ module type BodyHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -1350,11 +1513,17 @@ end
 
 module type ButtonHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type command = string
   type commandfor = string
@@ -1363,7 +1532,7 @@ module type ButtonHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type disabled = bool
   type draggable = bool
   type enterkeyhint = string
@@ -1372,19 +1541,24 @@ module type ButtonHTMLAttributes = sig
   type form = string
   type form_action = string
   type form_enctype = string
-  type form_method = [ `dialog | `post | `get ]
+  type form_method = [ `dialog | `get | `post ]
   type form_no_validate = bool
   type form_target = string
   type formaction = string
   type formenctype = string
-  type formmethod = [ `dialog | `post | `get ]
+  type formmethod = [ `dialog | `get | `post ]
   type formnovalidate = bool
   type formtarget = string
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -1409,11 +1583,12 @@ module type ButtonHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
-  type type_ = [ `menu | `button | `submit | `reset ]
+  type translate = [ `no | `yes ]
+  type type_ = [ `button | `menu | `reset | `submit ]
   type typeof = string
   type value = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -1484,18 +1659,24 @@ end
 
 module type CanvasHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -1504,8 +1685,13 @@ module type CanvasHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -1526,10 +1712,11 @@ module type CanvasHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
   type width = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -1582,19 +1769,25 @@ end
 
 module type CaptionHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type align = [ `left | `center | `right ]
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type align = [ `center | `left | `right ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -1602,8 +1795,13 @@ module type CaptionHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -1623,9 +1821,10 @@ module type CaptionHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -1676,6 +1875,7 @@ end
 
 module type CircleSVGAttributes = sig
   include Dom_attributes
+
   type clip_path = string
   type clip_rule = string
   type color = string
@@ -1710,6 +1910,7 @@ module type CircleSVGAttributes = sig
   type transform = string
   type visibility = string
   type xmlns = string
+
   type 'r check =
     ?clip_path:clip_path Check.value ->
     ?clip_rule:clip_rule Check.value ->
@@ -1750,8 +1951,9 @@ end
 
 module type ClipPathSVGAttributes = sig
   include Dom_attributes
+
   type clip_path = string
-  type clip_path_units = [ `userSpaceOnUse | `objectBoundingBox ]
+  type clip_path_units = [ `objectBoundingBox | `userSpaceOnUse ]
   type external_resources_required = bool
   type lang = string
   type required_extensions = string
@@ -1759,6 +1961,7 @@ module type ClipPathSVGAttributes = sig
   type system_language = string
   type transform = string
   type xmlns = string
+
   type 'r check =
     ?clip_path:clip_path Check.value ->
     ?clip_path_units:clip_path_units Check.value ->
@@ -1774,12 +1977,18 @@ end
 
 module type ColHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type align = [ `left | `center | `right | `justify | `char ]
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type align = [ `center | `char | `justify | `left | `right ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type bgcolor = string
   type char = string
@@ -1789,7 +1998,7 @@ module type ColHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -1797,8 +2006,13 @@ module type ColHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -1819,11 +2033,12 @@ module type ColHTMLAttributes = sig
   type span = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
-  type valign = [ `baseline | `middle | `bottom | `top ]
+  type valign = [ `baseline | `bottom | `middle | `top ]
   type vocab = string
   type width = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -1880,12 +2095,18 @@ end
 
 module type ColgroupHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type align = [ `left | `center | `right | `justify | `char ]
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type align = [ `center | `char | `justify | `left | `right ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type bgcolor = string
   type char = string
@@ -1895,7 +2116,7 @@ module type ColgroupHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -1903,8 +2124,13 @@ module type ColgroupHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -1925,11 +2151,12 @@ module type ColgroupHTMLAttributes = sig
   type span = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
-  type valign = [ `baseline | `middle | `bottom | `top ]
+  type valign = [ `baseline | `bottom | `middle | `top ]
   type vocab = string
   type width = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -1986,18 +2213,24 @@ end
 
 module type DataHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -2005,8 +2238,13 @@ module type DataHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -2026,10 +2264,11 @@ module type DataHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type value = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -2080,6 +2319,7 @@ end
 
 module type DefsSVGAttributes = sig
   include Dom_attributes
+
   type clip_path = string
   type color = string
   type color_interpolation = string
@@ -2109,6 +2349,7 @@ module type DefsSVGAttributes = sig
   type system_language = string
   type transform = string
   type xmlns = string
+
   type 'r check =
     ?clip_path:clip_path Check.value ->
     ?color:color Check.value ->
@@ -2144,28 +2385,34 @@ end
 
 module type DescSVGAttributes = sig
   include Dom_attributes
+
   type lang = string
   type xmlns = string
+
   type 'r check =
-    ?lang:lang Check.value ->
-    ?xmlns:xmlns Check.value ->
-    'r dom_check
+    ?lang:lang Check.value -> ?xmlns:xmlns Check.value -> 'r dom_check
 end
 
 module type DetailsHtmlAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -2173,8 +2420,13 @@ module type DetailsHtmlAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -2196,9 +2448,10 @@ module type DetailsHtmlAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -2250,19 +2503,25 @@ end
 
 module type DialogHtmlAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
-  type closedby = [ `none | `any | `closerequest ]
+  type closedby = [ `any | `closerequest | `none ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -2270,8 +2529,13 @@ module type DialogHtmlAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -2292,9 +2556,10 @@ module type DialogHtmlAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -2346,6 +2611,7 @@ end
 
 module type EllipseSVGAttributes = sig
   include Dom_attributes
+
   type clip_path = string
   type clip_rule = string
   type color = string
@@ -2382,6 +2648,7 @@ module type EllipseSVGAttributes = sig
   type transform = string
   type visibility = string
   type xmlns = string
+
   type 'r check =
     ?clip_path:clip_path Check.value ->
     ?clip_rule:clip_rule Check.value ->
@@ -2424,19 +2691,25 @@ end
 
 module type EmbedHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type align = [ `left | `center | `right | `justify ]
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type align = [ `center | `justify | `left | `right ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -2445,8 +2718,13 @@ module type EmbedHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -2468,11 +2746,12 @@ module type EmbedHTMLAttributes = sig
   type spellcheck = bool
   type src = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type type_ = string
   type typeof = string
   type vocab = string
   type width = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -2528,17 +2807,19 @@ end
 
 module type FeBlendSVGAttributes = sig
   include Dom_attributes
+
   type color_interpolation_filters = string
   type height = string
   type in2 = string
   type in_ = string
   type lang = string
-  type mode = [ `normal | `multiply | `screen | `darken | `lighten ]
+  type mode = [ `darken | `lighten | `multiply | `normal | `screen ]
   type result = string
   type width = string
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
@@ -2556,17 +2837,19 @@ end
 
 module type FeColorMatrixSVGAttributes = sig
   include Dom_attributes
+
   type color_interpolation_filters = string
   type height = string
   type in_ = string
   type lang = string
   type result = string
-  type type_ = [ `matrix | `saturate | `hueRotate | `luminanceToAlpha ]
+  type type_ = [ `hueRotate | `luminanceToAlpha | `matrix | `saturate ]
   type values = string
   type width = string
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
@@ -2584,6 +2867,7 @@ end
 
 module type FeComponentTransferSVGAttributes = sig
   include Dom_attributes
+
   type color_interpolation_filters = string
   type height = string
   type in_ = string
@@ -2593,6 +2877,7 @@ module type FeComponentTransferSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
@@ -2608,6 +2893,7 @@ end
 
 module type FeCompositeSVGAttributes = sig
   include Dom_attributes
+
   type color_interpolation_filters = string
   type height = string
   type in2 = string
@@ -2623,6 +2909,7 @@ module type FeCompositeSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
@@ -2644,10 +2931,11 @@ end
 
 module type FeConvolveMatrixSVGAttributes = sig
   include Dom_attributes
+
   type bias = string
   type color_interpolation_filters = string
   type divisor = string
-  type edge_mode = [ `none | `duplicate | `wrap ]
+  type edge_mode = [ `duplicate | `none | `wrap ]
   type height = string
   type in_ = string
   type kernel_matrix = string
@@ -2662,6 +2950,7 @@ module type FeConvolveMatrixSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?bias:bias Check.value ->
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
@@ -2686,6 +2975,7 @@ end
 
 module type FeDiffuseLightingSVGAttributes = sig
   include Dom_attributes
+
   type color = string
   type color_interpolation_filters = string
   type diffuse_constant = string
@@ -2700,6 +2990,7 @@ module type FeDiffuseLightingSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?color:color Check.value ->
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
@@ -2720,6 +3011,7 @@ end
 
 module type FeDisplacementMapSVGAttributes = sig
   include Dom_attributes
+
   type color_interpolation_filters = string
   type height = string
   type in2 = string
@@ -2729,10 +3021,11 @@ module type FeDisplacementMapSVGAttributes = sig
   type scale = string
   type width = string
   type x = string
-  type x_channel_selector = [ `R | `G | `B | `A ]
+  type x_channel_selector = [ `A | `B | `G | `R ]
   type xmlns = string
   type y = string
-  type y_channel_selector = [ `R | `G | `B | `A ]
+  type y_channel_selector = [ `A | `B | `G | `R ]
+
   type 'r check =
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
@@ -2752,10 +3045,12 @@ end
 
 module type FeDistantLightSVGAttributes = sig
   include Dom_attributes
+
   type azimuth = string
   type elevation = string
   type lang = string
   type xmlns = string
+
   type 'r check =
     ?azimuth:azimuth Check.value ->
     ?elevation:elevation Check.value ->
@@ -2766,6 +3061,7 @@ end
 
 module type FeDropShadowSVGAttributes = sig
   include Dom_attributes
+
   type color = string
   type color_interpolation_filters = string
   type dx = string
@@ -2780,6 +3076,7 @@ module type FeDropShadowSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?color:color Check.value ->
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
@@ -2800,6 +3097,7 @@ end
 
 module type FeFloodSVGAttributes = sig
   include Dom_attributes
+
   type color = string
   type color_interpolation_filters = string
   type flood_color = string
@@ -2811,6 +3109,7 @@ module type FeFloodSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?color:color Check.value ->
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
@@ -2828,6 +3127,7 @@ end
 
 module type FeFuncSVGAttributes = sig
   include Dom_attributes
+
   type amplitude = string
   type exponent = string
   type intercept = string
@@ -2835,8 +3135,9 @@ module type FeFuncSVGAttributes = sig
   type offset = string
   type slope = string
   type table_values = string
-  type type_ = [ `table | `discrete | `linear | `identity | `gamma ]
+  type type_ = [ `discrete | `gamma | `identity | `linear | `table ]
   type xmlns = string
+
   type 'r check =
     ?amplitude:amplitude Check.value ->
     ?exponent:exponent Check.value ->
@@ -2852,6 +3153,7 @@ end
 
 module type FeGaussianBlurSVGAttributes = sig
   include Dom_attributes
+
   type color_interpolation_filters = string
   type height = string
   type in_ = string
@@ -2862,6 +3164,7 @@ module type FeGaussianBlurSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
@@ -2878,6 +3181,7 @@ end
 
 module type FeImageSVGAttributes = sig
   include Dom_attributes
+
   type color_interpolation_filters = string
   type external_resources_required = bool
   type height = string
@@ -2889,6 +3193,7 @@ module type FeImageSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
@@ -2906,9 +3211,11 @@ end
 
 module type FeMergeNodeSVGAttributes = sig
   include Dom_attributes
+
   type in_ = string
   type lang = string
   type xmlns = string
+
   type 'r check =
     ?in_:in_ Check.value ->
     ?lang:lang Check.value ->
@@ -2918,6 +3225,7 @@ end
 
 module type FeMergeSVGAttributes = sig
   include Dom_attributes
+
   type color_interpolation_filters = string
   type height = string
   type lang = string
@@ -2926,6 +3234,7 @@ module type FeMergeSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
@@ -2940,17 +3249,19 @@ end
 
 module type FeMorphologySVGAttributes = sig
   include Dom_attributes
+
   type color_interpolation_filters = string
   type height = string
   type in_ = string
   type lang = string
-  type operator = [ `erode | `dilate ]
+  type operator = [ `dilate | `erode ]
   type radius = string
   type result = string
   type width = string
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
@@ -2968,6 +3279,7 @@ end
 
 module type FeOffsetSVGAttributes = sig
   include Dom_attributes
+
   type color_interpolation_filters = string
   type dx = string
   type dy = string
@@ -2979,6 +3291,7 @@ module type FeOffsetSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?dx:dx Check.value ->
@@ -2996,11 +3309,13 @@ end
 
 module type FePointLightSVGAttributes = sig
   include Dom_attributes
+
   type lang = string
   type x = string
   type xmlns = string
   type y = string
   type z = string
+
   type 'r check =
     ?lang:lang Check.value ->
     ?x:x Check.value ->
@@ -3012,6 +3327,7 @@ end
 
 module type FeSpecularLightingSVGAttributes = sig
   include Dom_attributes
+
   type color = string
   type color_interpolation_filters = string
   type height = string
@@ -3027,6 +3343,7 @@ module type FeSpecularLightingSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?color:color Check.value ->
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
@@ -3048,6 +3365,7 @@ end
 
 module type FeSpotLightSVGAttributes = sig
   include Dom_attributes
+
   type lang = string
   type limiting_cone_angle = string
   type points_at_x = string
@@ -3058,6 +3376,7 @@ module type FeSpotLightSVGAttributes = sig
   type xmlns = string
   type y = string
   type z = string
+
   type 'r check =
     ?lang:lang Check.value ->
     ?limiting_cone_angle:limiting_cone_angle Check.value ->
@@ -3074,6 +3393,7 @@ end
 
 module type FeTileSVGAttributes = sig
   include Dom_attributes
+
   type color_interpolation_filters = string
   type height = string
   type in_ = string
@@ -3083,6 +3403,7 @@ module type FeTileSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
@@ -3098,6 +3419,7 @@ end
 
 module type FeTurbulanceSVGAttributes = sig
   include Dom_attributes
+
   type base_frequency = string
   type color_interpolation_filters = string
   type height = string
@@ -3105,12 +3427,13 @@ module type FeTurbulanceSVGAttributes = sig
   type num_octaves = string
   type result = string
   type seed = string
-  type stitch_tiles = [ `stitch | `noStitch ]
+  type stitch_tiles = [ `noStitch | `stitch ]
   type type_ = [ `fractalNoise | `turbulence ]
   type width = string
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?base_frequency:base_frequency Check.value ->
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
@@ -3130,18 +3453,24 @@ end
 
 module type FieldsetHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type disabled = bool
   type draggable = bool
   type enterkeyhint = string
@@ -3151,8 +3480,13 @@ module type FieldsetHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -3173,9 +3507,10 @@ module type FieldsetHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -3228,16 +3563,18 @@ end
 
 module type FilterSVGAttributes = sig
   include Dom_attributes
+
   type external_resources_required = bool
   type filter_res = string
-  type filter_units = [ `userSpaceOnUse | `objectBoundingBox ]
+  type filter_units = [ `objectBoundingBox | `userSpaceOnUse ]
   type height = string
   type lang = string
-  type primitive_units = [ `userSpaceOnUse | `objectBoundingBox ]
+  type primitive_units = [ `objectBoundingBox | `userSpaceOnUse ]
   type width = string
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?external_resources_required:external_resources_required Check.value ->
     ?filter_res:filter_res Check.value ->
@@ -3254,6 +3591,7 @@ end
 
 module type ForeignObjectSVGAttributes = sig
   include Dom_attributes
+
   type clip = string
   type display = string
   type external_resources_required = bool
@@ -3270,6 +3608,7 @@ module type ForeignObjectSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?clip:clip Check.value ->
     ?display:display Check.value ->
@@ -3292,14 +3631,20 @@ end
 
 module type FormHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type accept = string
   type accept_charset = string
   type access_key = string
   type accesskey = string
   type action = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocomplete = [ `off | `on ]
   type autocorrect = [ `off | `on ]
   type content_editable = string
@@ -3307,7 +3652,7 @@ module type FormHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type encoding = string
   type enctype = string
@@ -3317,8 +3662,13 @@ module type FormHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -3331,7 +3681,7 @@ module type FormHTMLAttributes = sig
   type itemscope = bool
   type itemtype = string
   type lang = string
-  type method_ = [ `dialog | `post | `get ]
+  type method_ = [ `dialog | `get | `post ]
   type name = string
   type no_validate = bool
   type novalidate = bool
@@ -3344,9 +3694,10 @@ module type FormHTMLAttributes = sig
   type spellcheck = bool
   type target = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?accept:accept Check.value ->
@@ -3408,6 +3759,7 @@ end
 
 module type GSVGAttributes = sig
   include Dom_attributes
+
   type clip_path = string
   type color = string
   type color_interpolation = string
@@ -3439,6 +3791,7 @@ module type GSVGAttributes = sig
   type transform = string
   type visibility = string
   type xmlns = string
+
   type 'r check =
     ?clip_path:clip_path Check.value ->
     ?color:color Check.value ->
@@ -3476,18 +3829,24 @@ end
 
 module type HTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -3495,8 +3854,13 @@ module type HTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -3516,9 +3880,10 @@ module type HTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -3568,18 +3933,24 @@ end
 
 module type HTMLSlotElementAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -3587,8 +3958,13 @@ module type HTMLSlotElementAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -3609,9 +3985,10 @@ module type HTMLSlotElementAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -3662,6 +4039,7 @@ end
 
 module type IframeHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
@@ -3671,8 +4049,13 @@ module type IframeHTMLAttributes = sig
   type allowfullscreen = bool
   type allowpaymentrequest = bool
   type allowtransparency = bool
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type browsingtopics = bool
   type content_editable = string
@@ -3682,7 +4065,7 @@ module type IframeHTMLAttributes = sig
   type credentialless = bool
   type csp = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -3692,8 +4075,13 @@ module type IframeHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -3720,17 +4108,18 @@ module type IframeHTMLAttributes = sig
   type referrerpolicy = string
   type resource = string
   type sandbox = string
-  type scrolling = [ `auto | `yes | `no ]
+  type scrolling = [ `auto | `no | `yes ]
   type seamless = bool
   type sharedstoragewritable = bool
   type spellcheck = bool
   type src = string
   type srcdoc = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
   type width = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -3806,6 +4195,7 @@ end
 
 module type ImageSVGAttributes = sig
   include Dom_attributes
+
   type clip = string
   type clip_path = string
   type clip_rule = string
@@ -3834,6 +4224,7 @@ module type ImageSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?clip:clip Check.value ->
     ?clip_path:clip_path Check.value ->
@@ -3868,14 +4259,20 @@ end
 
 module type ImgHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type align = [ `middle | `left | `right | `bottom | `top ]
+  type align = [ `bottom | `left | `middle | `right | `top ]
   type alt = string
   type attributionsrc = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type border = string
   type content_editable = string
@@ -3885,8 +4282,8 @@ module type ImgHTMLAttributes = sig
   type cross_origin = string
   type crossorigin = string
   type datatype = string
-  type decoding = [ `auto | `sync | `async ]
-  type dir = [ `ltr | `rtl | `auto ]
+  type decoding = [ `async | `auto | `sync ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -3897,8 +4294,13 @@ module type ImgHTMLAttributes = sig
   type hspace = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type intrinsicsize = string
   type is = string
   type is_map = bool
@@ -3932,13 +4334,14 @@ module type ImgHTMLAttributes = sig
   type src_set = string
   type srcset = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type use_map = string
   type usemap = string
   type vocab = string
   type vspace = string
   type width = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -4016,6 +4419,7 @@ end
 
 module type InputHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type accept = string
   type access_key = string
@@ -4023,11 +4427,16 @@ module type InputHTMLAttributes = sig
   type align = string
   type alpha = bool
   type alt = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocomplete = string
   type autocorrect = [ `off | `on ]
-  type capture = [ `user | `environment ]
+  type capture = [ `environment | `user ]
   type checked = bool
   type colorspace = string
   type content_editable = string
@@ -4035,7 +4444,7 @@ module type InputHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type dirname = string
   type disabled = bool
   type draggable = bool
@@ -4045,12 +4454,12 @@ module type InputHTMLAttributes = sig
   type form = string
   type form_action = string
   type form_enctype = string
-  type form_method = [ `dialog | `post | `get ]
+  type form_method = [ `dialog | `get | `post ]
   type form_no_validate = bool
   type form_target = string
   type formaction = string
   type formenctype = string
-  type formmethod = [ `dialog | `post | `get ]
+  type formmethod = [ `dialog | `get | `post ]
   type formnovalidate = bool
   type formtarget = string
   type height = string
@@ -4058,8 +4467,13 @@ module type InputHTMLAttributes = sig
   type incremental = bool
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -4099,13 +4513,14 @@ module type InputHTMLAttributes = sig
   type src = string
   type step = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type type_ = string
   type typeof = string
   type usemap = string
   type value = string
   type vocab = string
   type width = string
+
   type 'r check =
     ?about:about Check.value ->
     ?accept:accept Check.value ->
@@ -4202,11 +4617,17 @@ end
 
 module type KeygenHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type challenge = string
   type content_editable = string
@@ -4214,7 +4635,7 @@ module type KeygenHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type disabled = bool
   type draggable = bool
   type enterkeyhint = string
@@ -4224,8 +4645,13 @@ module type KeygenHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -4248,9 +4674,10 @@ module type KeygenHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -4306,18 +4733,24 @@ end
 
 module type LabelHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -4326,8 +4759,13 @@ module type LabelHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -4347,9 +4785,10 @@ module type LabelHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -4400,18 +4839,24 @@ end
 
 module type LiHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -4419,8 +4864,13 @@ module type LiHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -4440,11 +4890,12 @@ module type LiHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type type_ = string
   type typeof = string
   type value = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -4496,6 +4947,7 @@ end
 
 module type LineSVGAttributes = sig
   include Dom_attributes
+
   type clip_path = string
   type clip_rule = string
   type color = string
@@ -4535,6 +4987,7 @@ module type LineSVGAttributes = sig
   type xmlns = string
   type y1 = string
   type y2 = string
+
   type 'r check =
     ?clip_path:clip_path Check.value ->
     ?clip_rule:clip_rule Check.value ->
@@ -4580,9 +5033,10 @@ end
 
 module type LinearGradientSVGAttributes = sig
   include Dom_attributes
+
   type external_resources_required = bool
   type gradient_transform = string
-  type gradient_units = [ `userSpaceOnUse | `objectBoundingBox ]
+  type gradient_units = [ `objectBoundingBox | `userSpaceOnUse ]
   type href = string
   type lang = string
   type spread_method = [ `pad | `reflect | `repeat ]
@@ -4591,6 +5045,7 @@ module type LinearGradientSVGAttributes = sig
   type xmlns = string
   type y1 = string
   type y2 = string
+
   type 'r check =
     ?external_resources_required:external_resources_required Check.value ->
     ?gradient_transform:gradient_transform Check.value ->
@@ -4608,12 +5063,18 @@ end
 
 module type LinkHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
   type as_ = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type blocking = [ `render ]
   type charset = string
@@ -4625,7 +5086,7 @@ module type LinkHTMLAttributes = sig
   type cross_origin = string
   type crossorigin = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type disabled = bool
   type draggable = bool
   type enterkeyhint = string
@@ -4639,8 +5100,13 @@ module type LinkHTMLAttributes = sig
   type imagesrcset = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type integrity = string
   type is = string
   type item_id = string
@@ -4668,10 +5134,11 @@ module type LinkHTMLAttributes = sig
   type spellcheck = bool
   type target = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type type_ = string
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -4742,28 +5209,34 @@ end
 
 module type MPathSVGAttributes = sig
   include Dom_attributes
+
   type lang = string
   type xmlns = string
+
   type 'r check =
-    ?lang:lang Check.value ->
-    ?xmlns:xmlns Check.value ->
-    'r dom_check
+    ?lang:lang Check.value -> ?xmlns:xmlns Check.value -> 'r dom_check
 end
 
 module type MapHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -4771,8 +5244,13 @@ module type MapHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -4793,9 +5271,10 @@ module type MapHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -4846,6 +5325,7 @@ end
 
 module type MarkerSVGAttributes = sig
   include Dom_attributes
+
   type clip = string
   type clip_path = string
   type color = string
@@ -4860,7 +5340,7 @@ module type MarkerSVGAttributes = sig
   type filter = string
   type lang = string
   type marker_height = string
-  type marker_units = [ `userSpaceOnUse | `strokeWidth ]
+  type marker_units = [ `strokeWidth | `userSpaceOnUse ]
   type marker_width = string
   type mask = string
   type opacity = string
@@ -4881,6 +5361,7 @@ module type MarkerSVGAttributes = sig
   type stroke_width = string
   type view_box = string
   type xmlns = string
+
   type 'r check =
     ?clip:clip Check.value ->
     ?clip_path:clip_path Check.value ->
@@ -4922,6 +5403,7 @@ end
 
 module type MaskSVGAttributes = sig
   include Dom_attributes
+
   type clip_path = string
   type color = string
   type color_interpolation = string
@@ -4935,8 +5417,8 @@ module type MaskSVGAttributes = sig
   type height = string
   type lang = string
   type mask = string
-  type mask_content_units = [ `userSpaceOnUse | `objectBoundingBox ]
-  type mask_units = [ `userSpaceOnUse | `objectBoundingBox ]
+  type mask_content_units = [ `objectBoundingBox | `userSpaceOnUse ]
+  type mask_units = [ `objectBoundingBox | `userSpaceOnUse ]
   type path_length = string
   type required_extensions = string
   type required_features = string
@@ -4954,6 +5436,7 @@ module type MaskSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?clip_path:clip_path Check.value ->
     ?color:color Check.value ->
@@ -4992,11 +5475,17 @@ end
 
 module type MenuHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type compact = bool
   type content_editable = string
@@ -5004,7 +5493,7 @@ module type MenuHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -5012,8 +5501,13 @@ module type MenuHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -5034,10 +5528,11 @@ module type MenuHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
-  type type_ = [ `toolbar | `context ]
+  type translate = [ `no | `yes ]
+  type type_ = [ `context | `toolbar ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -5090,11 +5585,17 @@ end
 
 module type MetaHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type charset = string
   type content = string
@@ -5103,7 +5604,7 @@ module type MetaHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -5112,8 +5613,13 @@ module type MetaHTMLAttributes = sig
   type http_equiv = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -5136,9 +5642,10 @@ module type MetaHTMLAttributes = sig
   type scheme = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -5194,28 +5701,34 @@ end
 
 module type MetadataSVGAttributes = sig
   include Dom_attributes
+
   type lang = string
   type xmlns = string
+
   type 'r check =
-    ?lang:lang Check.value ->
-    ?xmlns:xmlns Check.value ->
-    'r dom_check
+    ?lang:lang Check.value -> ?xmlns:xmlns Check.value -> 'r dom_check
 end
 
 module type MeterHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -5225,8 +5738,13 @@ module type MeterHTMLAttributes = sig
   type high = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -5250,10 +5768,11 @@ module type MeterHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type value = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -5310,11 +5829,17 @@ end
 
 module type ModHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type cite = string
   type content_editable = string
@@ -5324,7 +5849,7 @@ module type ModHTMLAttributes = sig
   type datatype = string
   type date_time = string
   type datetime = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -5332,8 +5857,13 @@ module type ModHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -5353,9 +5883,10 @@ module type ModHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -5408,13 +5939,19 @@ end
 
 module type ObjectHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
   type align = string
   type archive = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type border = string
   type classid = string
@@ -5428,7 +5965,7 @@ module type ObjectHTMLAttributes = sig
   type data = string
   type datatype = string
   type declare = bool
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -5439,8 +5976,13 @@ module type ObjectHTMLAttributes = sig
   type hspace = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -5462,7 +6004,7 @@ module type ObjectHTMLAttributes = sig
   type spellcheck = bool
   type standby = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type type_ = string
   type typemustmatch = bool
   type typeof = string
@@ -5471,6 +6013,7 @@ module type ObjectHTMLAttributes = sig
   type vocab = string
   type vspace = string
   type width = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -5540,11 +6083,17 @@ end
 
 module type OlHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type compact = bool
   type content_editable = string
@@ -5552,7 +6101,7 @@ module type OlHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -5560,8 +6109,13 @@ module type OlHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -5583,10 +6137,11 @@ module type OlHTMLAttributes = sig
   type spellcheck = bool
   type start = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type type_ = string
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -5640,18 +6195,24 @@ end
 
 module type OptgroupHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type disabled = bool
   type draggable = bool
   type enterkeyhint = string
@@ -5660,8 +6221,13 @@ module type OptgroupHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -5682,9 +6248,10 @@ module type OptgroupHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -5736,18 +6303,24 @@ end
 
 module type OptionHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type disabled = bool
   type draggable = bool
   type enterkeyhint = string
@@ -5756,8 +6329,13 @@ module type OptionHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -5779,10 +6357,11 @@ module type OptionHTMLAttributes = sig
   type selected = bool
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type value = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -5836,18 +6415,24 @@ end
 
 module type OutputHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -5857,8 +6442,13 @@ module type OutputHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -5879,9 +6469,10 @@ module type OutputHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -5934,18 +6525,24 @@ end
 
 module type ParamHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -5953,8 +6550,13 @@ module type ParamHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -5975,12 +6577,13 @@ module type ParamHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type type_ = string
   type typeof = string
   type value = string
   type valuetype = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -6034,6 +6637,7 @@ end
 
 module type PathSVGAttributes = sig
   include Dom_attributes
+
   type clip_path = string
   type clip_rule = string
   type color = string
@@ -6070,6 +6674,7 @@ module type PathSVGAttributes = sig
   type transform = string
   type visibility = string
   type xmlns = string
+
   type 'r check =
     ?clip_path:clip_path Check.value ->
     ?clip_rule:clip_rule Check.value ->
@@ -6112,6 +6717,7 @@ end
 
 module type PatternSVGAttributes = sig
   include Dom_attributes
+
   type clip = string
   type clip_path = string
   type color = string
@@ -6131,9 +6737,9 @@ module type PatternSVGAttributes = sig
   type opacity = string
   type overflow = string
   type path_length = string
-  type pattern_content_units = [ `userSpaceOnUse | `objectBoundingBox ]
+  type pattern_content_units = [ `objectBoundingBox | `userSpaceOnUse ]
   type pattern_transform = string
-  type pattern_units = [ `userSpaceOnUse | `objectBoundingBox ]
+  type pattern_units = [ `objectBoundingBox | `userSpaceOnUse ]
   type preserve_aspect_ratio = string
   type required_extensions = string
   type required_features = string
@@ -6152,6 +6758,7 @@ module type PatternSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?clip:clip Check.value ->
     ?clip_path:clip_path Check.value ->
@@ -6198,6 +6805,7 @@ end
 
 module type PolygonSVGAttributes = sig
   include Dom_attributes
+
   type clip_path = string
   type clip_rule = string
   type color = string
@@ -6234,6 +6842,7 @@ module type PolygonSVGAttributes = sig
   type transform = string
   type visibility = string
   type xmlns = string
+
   type 'r check =
     ?clip_path:clip_path Check.value ->
     ?clip_rule:clip_rule Check.value ->
@@ -6276,6 +6885,7 @@ end
 
 module type PolylineSVGAttributes = sig
   include Dom_attributes
+
   type clip_path = string
   type clip_rule = string
   type color = string
@@ -6312,6 +6922,7 @@ module type PolylineSVGAttributes = sig
   type transform = string
   type visibility = string
   type xmlns = string
+
   type 'r check =
     ?clip_path:clip_path Check.value ->
     ?clip_rule:clip_rule Check.value ->
@@ -6354,18 +6965,24 @@ end
 
 module type ProgressHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -6373,8 +6990,13 @@ module type ProgressHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -6395,10 +7017,11 @@ module type ProgressHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type value = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -6450,11 +7073,17 @@ end
 
 module type QuoteHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type cite = string
   type content_editable = string
@@ -6462,7 +7091,7 @@ module type QuoteHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -6470,8 +7099,13 @@ module type QuoteHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -6491,9 +7125,10 @@ module type QuoteHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -6544,18 +7179,20 @@ end
 
 module type RadialGradientSVGAttributes = sig
   include Dom_attributes
+
   type cx = string
   type cy = string
   type external_resources_required = bool
   type fx = string
   type fy = string
   type gradient_transform = string
-  type gradient_units = [ `userSpaceOnUse | `objectBoundingBox ]
+  type gradient_units = [ `objectBoundingBox | `userSpaceOnUse ]
   type href = string
   type lang = string
   type r = string
   type spread_method = [ `pad | `reflect | `repeat ]
   type xmlns = string
+
   type 'r check =
     ?cx:cx Check.value ->
     ?cy:cy Check.value ->
@@ -6574,6 +7211,7 @@ end
 
 module type RectSVGAttributes = sig
   include Dom_attributes
+
   type clip_path = string
   type clip_rule = string
   type color = string
@@ -6612,6 +7250,7 @@ module type RectSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?clip_path:clip_path Check.value ->
     ?clip_rule:clip_rule Check.value ->
@@ -6656,13 +7295,19 @@ end
 
 module type ScriptHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
   type async = bool
   type attributionsrc = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type blocking = [ `render ]
   type charset = string
@@ -6674,7 +7319,7 @@ module type ScriptHTMLAttributes = sig
   type crossorigin = string
   type datatype = string
   type defer = bool
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type event = string
@@ -6684,8 +7329,13 @@ module type ScriptHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type integrity = string
   type is = string
   type item_id = string
@@ -6712,10 +7362,11 @@ module type ScriptHTMLAttributes = sig
   type spellcheck = bool
   type src = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type type_ = string
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -6782,11 +7433,17 @@ end
 
 module type SelectHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocomplete = string
   type autocorrect = [ `off | `on ]
   type content_editable = string
@@ -6794,7 +7451,7 @@ module type SelectHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type disabled = bool
   type draggable = bool
   type enterkeyhint = string
@@ -6804,8 +7461,13 @@ module type SelectHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -6829,10 +7491,11 @@ module type SelectHTMLAttributes = sig
   type size = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type value = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -6890,6 +7553,7 @@ end
 
 module type SetSVGAttributes = sig
   include Dom_attributes
+
   type begin_ = string
   type dur = string
   type end_ = string
@@ -6905,9 +7569,10 @@ module type SetSVGAttributes = sig
   type repeat_dur = string
   type required_extensions = string
   type required_features = string
-  type restart = [ `always | `whenNotActive | `never ]
+  type restart = [ `always | `never | `whenNotActive ]
   type system_language = string
   type xmlns = string
+
   type 'r check =
     ?begin_:begin_ Check.value ->
     ?dur:dur Check.value ->
@@ -6932,18 +7597,24 @@ end
 
 module type SourceHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -6952,8 +7623,13 @@ module type SourceHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -6977,11 +7653,12 @@ module type SourceHTMLAttributes = sig
   type src = string
   type srcset = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type type_ = string
   type typeof = string
   type vocab = string
   type width = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -7038,12 +7715,14 @@ end
 
 module type StopSVGAttributes = sig
   include Dom_attributes
+
   type color = string
   type lang = string
   type offset = string
   type stop_color = string
   type stop_opacity = string
   type xmlns = string
+
   type 'r check =
     ?color:color Check.value ->
     ?lang:lang Check.value ->
@@ -7056,11 +7735,17 @@ end
 
 module type StyleHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type blocking = [ `render ]
   type content_editable = string
@@ -7068,7 +7753,7 @@ module type StyleHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -7076,8 +7761,13 @@ module type StyleHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -7099,10 +7789,11 @@ module type StyleHTMLAttributes = sig
   type scoped = bool
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type type_ = string
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -7156,6 +7847,7 @@ end
 
 module type SvgSVGAttributes = sig
   include Dom_attributes
+
   type alignment_baseline = string
   type base_profile = string
   type baseline_shift = string
@@ -7253,6 +7945,7 @@ module type SvgSVGAttributes = sig
   type xmlns = string
   type y = string
   type zoom_and_pan = [ `disable | `magnify ]
+
   type 'r check =
     ?alignment_baseline:alignment_baseline Check.value ->
     ?base_profile:base_profile Check.value ->
@@ -7356,6 +8049,7 @@ end
 
 module type SwitchSVGAttributes = sig
   include Dom_attributes
+
   type clip_path = string
   type color = string
   type color_interpolation = string
@@ -7387,6 +8081,7 @@ module type SwitchSVGAttributes = sig
   type transform = string
   type visibility = string
   type xmlns = string
+
   type 'r check =
     ?clip_path:clip_path Check.value ->
     ?color:color Check.value ->
@@ -7424,6 +8119,7 @@ end
 
 module type SymbolSVGAttributes = sig
   include Dom_attributes
+
   type clip = string
   type clip_path = string
   type color = string
@@ -7459,6 +8155,7 @@ module type SymbolSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?clip:clip Check.value ->
     ?clip_path:clip_path Check.value ->
@@ -7500,6 +8197,7 @@ end
 
 module type TSpanSVGAttributes = sig
   include Dom_attributes
+
   type alignment_baseline = string
   type baseline_shift = string
   type color = string
@@ -7546,6 +8244,7 @@ module type TSpanSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?alignment_baseline:alignment_baseline Check.value ->
     ?baseline_shift:baseline_shift Check.value ->
@@ -7598,13 +8297,19 @@ end
 
 module type TdHTMLAttributes = sig
   include Dom_attributes
+
   type abbr = string
   type about = string
   type access_key = string
   type accesskey = string
-  type align = [ `left | `center | `right | `justify | `char ]
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type align = [ `center | `char | `justify | `left | `right ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type axis = string
   type bgcolor = string
@@ -7617,7 +8322,7 @@ module type TdHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -7627,8 +8332,13 @@ module type TdHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -7649,14 +8359,15 @@ module type TdHTMLAttributes = sig
   type resource = string
   type row_span = string
   type rowspan = string
-  type scope = [ `row | `rowgroup | `col | `colgroup ]
+  type scope = [ `col | `colgroup | `row | `rowgroup ]
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
-  type valign = [ `baseline | `middle | `bottom | `top ]
+  type valign = [ `baseline | `bottom | `middle | `top ]
   type vocab = string
   type width = string
+
   type 'r check =
     ?abbr:abbr Check.value ->
     ?about:about Check.value ->
@@ -7722,18 +8433,24 @@ end
 
 module type TemplateHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -7741,8 +8458,13 @@ module type TemplateHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -7767,9 +8489,10 @@ module type TemplateHTMLAttributes = sig
   type shadowrootserializable = bool
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -7824,6 +8547,7 @@ end
 
 module type TextPathSVGAttributes = sig
   include Dom_attributes
+
   type alignment_baseline = string
   type baseline_shift = string
   type color = string
@@ -7867,6 +8591,7 @@ module type TextPathSVGAttributes = sig
   type visibility = string
   type word_spacing = string
   type xmlns = string
+
   type 'r check =
     ?alignment_baseline:alignment_baseline Check.value ->
     ?baseline_shift:baseline_shift Check.value ->
@@ -7916,6 +8641,7 @@ end
 
 module type TextSVGAttributes = sig
   include Dom_attributes
+
   type clip_path = string
   type clip_rule = string
   type color = string
@@ -7972,6 +8698,7 @@ module type TextSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?clip_path:clip_path Check.value ->
     ?clip_rule:clip_rule Check.value ->
@@ -8034,11 +8761,17 @@ end
 
 module type TextareaHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocomplete = string
   type autocorrect = [ `off | `on ]
   type cols = string
@@ -8047,7 +8780,7 @@ module type TextareaHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type dirname = string
   type disabled = bool
   type draggable = bool
@@ -8058,8 +8791,13 @@ module type TextareaHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -8089,11 +8827,12 @@ module type TextareaHTMLAttributes = sig
   type rows = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type value = string
   type vocab = string
-  type wrap = [ `off | `hard | `soft ]
+  type wrap = [ `hard | `off | `soft ]
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -8160,13 +8899,19 @@ end
 
 module type ThHTMLAttributes = sig
   include Dom_attributes
+
   type abbr = string
   type about = string
   type access_key = string
   type accesskey = string
-  type align = [ `left | `center | `right | `justify | `char ]
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type align = [ `center | `char | `justify | `left | `right ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type axis = string
   type bgcolor = string
@@ -8179,7 +8924,7 @@ module type ThHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -8189,8 +8934,13 @@ module type ThHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -8211,14 +8961,15 @@ module type ThHTMLAttributes = sig
   type resource = string
   type row_span = string
   type rowspan = string
-  type scope = [ `row | `rowgroup | `col | `colgroup ]
+  type scope = [ `col | `colgroup | `row | `rowgroup ]
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
-  type valign = [ `baseline | `middle | `bottom | `top ]
+  type valign = [ `baseline | `bottom | `middle | `top ]
   type vocab = string
   type width = string
+
   type 'r check =
     ?abbr:abbr Check.value ->
     ?about:about Check.value ->
@@ -8284,11 +9035,17 @@ end
 
 module type TimeHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
@@ -8297,7 +9054,7 @@ module type TimeHTMLAttributes = sig
   type datatype = string
   type date_time = string
   type datetime = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -8305,8 +9062,13 @@ module type TimeHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -8326,9 +9088,10 @@ module type TimeHTMLAttributes = sig
   type resource = string
   type spellcheck = bool
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -8380,11 +9143,17 @@ end
 
 module type TrackHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type content_editable = string
   type contenteditable = string
@@ -8392,7 +9161,7 @@ module type TrackHTMLAttributes = sig
   type contextmenu = string
   type datatype = string
   type default = bool
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
   type export_parts = string
@@ -8400,8 +9169,13 @@ module type TrackHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -8427,9 +9201,10 @@ module type TrackHTMLAttributes = sig
   type src = string
   type srclang = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -8486,6 +9261,7 @@ end
 
 module type UseSVGAttributes = sig
   include Dom_attributes
+
   type alignment_baseline = string
   type baseline_shift = string
   type clip = string
@@ -8558,6 +9334,7 @@ module type UseSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
+
   type 'r check =
     ?alignment_baseline:alignment_baseline Check.value ->
     ?baseline_shift:baseline_shift Check.value ->
@@ -8636,11 +9413,17 @@ end
 
 module type VideoHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type autoplay = bool
   type content_editable = string
@@ -8652,7 +9435,7 @@ module type VideoHTMLAttributes = sig
   type cross_origin = string
   type crossorigin = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type disablepictureinpicture = bool
   type disableremoteplayback = bool
   type draggable = bool
@@ -8663,8 +9446,13 @@ module type VideoHTMLAttributes = sig
   type hidden = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -8696,10 +9484,11 @@ module type VideoHTMLAttributes = sig
   type spellcheck = bool
   type src = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type vocab = string
   type width = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -8770,6 +9559,7 @@ end
 
 module type ViewSVGAttributes = sig
   include Dom_attributes
+
   type external_resources_required = bool
   type lang = string
   type preserve_aspect_ratio = string
@@ -8777,6 +9567,7 @@ module type ViewSVGAttributes = sig
   type view_target = string
   type xmlns = string
   type zoom_and_pan = [ `disable | `magnify ]
+
   type 'r check =
     ?external_resources_required:external_resources_required Check.value ->
     ?lang:lang Check.value ->
@@ -8790,13 +9581,19 @@ end
 
 module type WebViewHTMLAttributes = sig
   include Dom_attributes
+
   type about = string
   type access_key = string
   type accesskey = string
   type allowfullscreen = bool
   type allowpopups = bool
-  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
-  type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+
+  type auto_capitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
+  type autocapitalize =
+    [ `characters | `none | `off | `on | `sentences | `words ]
+
   type autocorrect = [ `off | `on ]
   type autosize = bool
   type blinkfeatures = string
@@ -8805,7 +9602,7 @@ module type WebViewHTMLAttributes = sig
   type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dir = [ `ltr | `rtl | `auto ]
+  type dir = [ `auto | `ltr | `rtl ]
   type disableblinkfeatures = string
   type disableguestresize = bool
   type disablewebsecurity = bool
@@ -8819,8 +9616,13 @@ module type WebViewHTMLAttributes = sig
   type httpreferrer = string
   type inert = bool
   type inner_text = string
-  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
-  type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+
+  type input_mode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
+  type inputmode =
+    [ `decimal | `email | `none | `numeric | `search | `tel | `text | `url ]
+
   type is = string
   type item_id = string
   type item_prop = string
@@ -8846,11 +9648,12 @@ module type WebViewHTMLAttributes = sig
   type spellcheck = bool
   type src = string
   type title = string
-  type translate = [ `yes | `no ]
+  type translate = [ `no | `yes ]
   type typeof = string
   type useragent = string
   type vocab = string
   type webpreferences = string
+
   type 'r check =
     ?about:about Check.value ->
     ?access_key:access_key Check.value ->
@@ -8917,357 +9720,237 @@ module type WebViewHTMLAttributes = sig
 end
 
 module A : AnchorHTMLAttributes with type element = Dom.htmlAnchorElement
-
 module Abbr : HTMLAttributes with type element = Dom.htmlElement
-
 module Address : HTMLAttributes with type element = Dom.htmlElement
-
 module Area : AreaHTMLAttributes with type element = Dom.htmlAreaElement
-
 module Article : HTMLAttributes with type element = Dom.htmlElement
-
 module Aside : HTMLAttributes with type element = Dom.htmlElement
-
 module Audio : AudioHTMLAttributes with type element = Dom.htmlAudioElement
-
 module B : HTMLAttributes with type element = Dom.htmlElement
-
 module Base : BaseHTMLAttributes with type element = Dom.htmlBaseElement
-
 module Bdi : HTMLAttributes with type element = Dom.htmlElement
-
 module Bdo : BdoHTMLAttributes with type element = Dom.htmlElement
 
-module Blockquote : BlockquoteHTMLAttributes with type element = Dom.htmlQuoteElement
+module Blockquote :
+  BlockquoteHTMLAttributes with type element = Dom.htmlQuoteElement
 
 module Body : BodyHTMLAttributes with type element = Dom.htmlBodyElement
-
 module Br : HTMLAttributes with type element = Dom.element
-
 module Button : ButtonHTMLAttributes with type element = Dom.htmlButtonElement
-
 module Canvas : CanvasHTMLAttributes with type element = Dom.htmlCanvasElement
 
-module Caption : CaptionHTMLAttributes with type element = Dom.htmlTableCaptionElement
+module Caption :
+  CaptionHTMLAttributes with type element = Dom.htmlTableCaptionElement
 
 module Cite : HTMLAttributes with type element = Dom.htmlElement
-
 module Code : HTMLAttributes with type element = Dom.htmlElement
-
 module Col : ColHTMLAttributes with type element = Dom.htmlTableColElement
 
-module Colgroup : ColgroupHTMLAttributes with type element = Dom.htmlTableColElement
+module Colgroup :
+  ColgroupHTMLAttributes with type element = Dom.htmlTableColElement
 
 module Data : DataHTMLAttributes with type element = Dom.htmlDataElement
-
 module Datalist : HTMLAttributes with type element = Dom.htmlDataListElement
-
 module Dd : HTMLAttributes with type element = Dom.htmlElement
-
 module Del : ModHTMLAttributes with type element = Dom.htmlModElement
-
 module Details : DetailsHtmlAttributes with type element = Dom.element
-
 module Dfn : HTMLAttributes with type element = Dom.htmlElement
-
 module Dialog : DialogHtmlAttributes with type element = Dom.htmlDialogElement
-
 module Div : HTMLAttributes with type element = Dom.htmlDivElement
-
 module Dl : HTMLAttributes with type element = Dom.element
-
 module Dt : HTMLAttributes with type element = Dom.htmlElement
-
 module Em : HTMLAttributes with type element = Dom.htmlElement
-
 module Embed : EmbedHTMLAttributes with type element = Dom.htmlEmbedElement
 
-module Fieldset : FieldsetHTMLAttributes with type element = Dom.htmlFieldSetElement
+module Fieldset :
+  FieldsetHTMLAttributes with type element = Dom.htmlFieldSetElement
 
 module Figcaption : HTMLAttributes with type element = Dom.htmlElement
-
 module Figure : HTMLAttributes with type element = Dom.htmlElement
-
 module Footer : HTMLAttributes with type element = Dom.htmlElement
-
 module Form : FormHTMLAttributes with type element = Dom.htmlFormElement
-
 module H1 : HTMLAttributes with type element = Dom.htmlHeadingElement
-
 module H2 : HTMLAttributes with type element = Dom.htmlHeadingElement
-
 module H3 : HTMLAttributes with type element = Dom.htmlHeadingElement
-
 module H4 : HTMLAttributes with type element = Dom.htmlHeadingElement
-
 module H5 : HTMLAttributes with type element = Dom.htmlHeadingElement
-
 module H6 : HTMLAttributes with type element = Dom.htmlHeadingElement
-
 module Head : HTMLAttributes with type element = Dom.htmlHeadElement
-
 module Header : HTMLAttributes with type element = Dom.htmlElement
-
 module Hgroup : HTMLAttributes with type element = Dom.htmlElement
-
 module Hr : HTMLAttributes with type element = Dom.element
-
 module Html : HTMLAttributes with type element = Dom.htmlHtmlElement
-
 module I : HTMLAttributes with type element = Dom.htmlElement
-
 module Iframe : IframeHTMLAttributes with type element = Dom.element
-
 module Img : ImgHTMLAttributes with type element = Dom.htmlImageElement
-
 module Input : InputHTMLAttributes with type element = Dom.htmlInputElement
-
 module Ins : ModHTMLAttributes with type element = Dom.htmlModElement
-
 module Kbd : HTMLAttributes with type element = Dom.htmlElement
-
 module Label : LabelHTMLAttributes with type element = Dom.htmlLabelElement
-
 module Legend : HTMLAttributes with type element = Dom.htmlLegendElement
-
 module Li : LiHTMLAttributes with type element = Dom.element
-
 module Link : LinkHTMLAttributes with type element = Dom.htmlLinkElement
-
 module Main : HTMLAttributes with type element = Dom.htmlElement
-
 module Map : MapHTMLAttributes with type element = Dom.htmlMapElement
-
 module Mark : HTMLAttributes with type element = Dom.htmlElement
-
 module Menu : MenuHTMLAttributes with type element = Dom.htmlMenuElement
-
 module Meta : MetaHTMLAttributes with type element = Dom.htmlMetaElement
-
 module Meter : MeterHTMLAttributes with type element = Dom.htmlMeterElement
-
 module Nav : HTMLAttributes with type element = Dom.htmlElement
-
 module Noscript : HTMLAttributes with type element = Dom.htmlElement
-
 module Object : ObjectHTMLAttributes with type element = Dom.htmlObjectElement
-
 module Ol : OlHTMLAttributes with type element = Dom.htmlOListElement
 
-module Optgroup : OptgroupHTMLAttributes with type element = Dom.htmlOptGroupElement
+module Optgroup :
+  OptgroupHTMLAttributes with type element = Dom.htmlOptGroupElement
 
 module Option : OptionHTMLAttributes with type element = Dom.htmlOptionElement
-
 module Output : OutputHTMLAttributes with type element = Dom.htmlOutputElement
-
 module P : HTMLAttributes with type element = Dom.htmlParagraphElement
-
 module Picture : HTMLAttributes with type element = Dom.element
-
 module Pre : HTMLAttributes with type element = Dom.htmlPreElement
 
-module Progress : ProgressHTMLAttributes with type element = Dom.htmlProgressElement
+module Progress :
+  ProgressHTMLAttributes with type element = Dom.htmlProgressElement
 
 module Q : QuoteHTMLAttributes with type element = Dom.htmlQuoteElement
-
 module Rp : HTMLAttributes with type element = Dom.htmlElement
-
 module Rt : HTMLAttributes with type element = Dom.htmlElement
-
 module Ruby : HTMLAttributes with type element = Dom.htmlElement
-
 module S : HTMLAttributes with type element = Dom.htmlElement
-
 module Samp : HTMLAttributes with type element = Dom.htmlElement
-
 module Script : ScriptHTMLAttributes with type element = Dom.htmlScriptElement
-
 module Search : HTMLAttributes with type element = Dom.htmlElement
-
 module Section : HTMLAttributes with type element = Dom.htmlElement
-
 module Select : SelectHTMLAttributes with type element = Dom.htmlSelectElement
-
 module Slot : HTMLSlotElementAttributes with type element = Dom.htmlSlotElement
-
 module Small : HTMLAttributes with type element = Dom.htmlElement
-
 module Source : SourceHTMLAttributes with type element = Dom.htmlSourceElement
-
 module Span : HTMLAttributes with type element = Dom.htmlSpanElement
-
 module Strong : HTMLAttributes with type element = Dom.htmlElement
-
 module Style : StyleHTMLAttributes with type element = Dom.htmlStyleElement
-
 module Sub : HTMLAttributes with type element = Dom.htmlElement
-
 module Summary : HTMLAttributes with type element = Dom.htmlElement
-
 module Sup : HTMLAttributes with type element = Dom.htmlElement
-
 module Table : HTMLAttributes with type element = Dom.htmlTableElement
-
 module Tbody : HTMLAttributes with type element = Dom.htmlTableSectionElement
-
 module Td : TdHTMLAttributes with type element = Dom.htmlTableCellElement
-
 module Template : TemplateHTMLAttributes with type element = Dom.element
 
-module Textarea : TextareaHTMLAttributes with type element = Dom.htmlTextAreaElement
+module Textarea :
+  TextareaHTMLAttributes with type element = Dom.htmlTextAreaElement
 
 module Tfoot : HTMLAttributes with type element = Dom.htmlTableSectionElement
-
 module Th : ThHTMLAttributes with type element = Dom.htmlTableCellElement
-
 module Thead : HTMLAttributes with type element = Dom.htmlTableSectionElement
-
 module Time : TimeHTMLAttributes with type element = Dom.htmlTimeElement
-
 module Title : HTMLAttributes with type element = Dom.htmlTitleElement
-
 module Tr : HTMLAttributes with type element = Dom.htmlTableRowElement
-
 module Track : TrackHTMLAttributes with type element = Dom.htmlTrackElement
-
 module U : HTMLAttributes with type element = Dom.htmlElement
-
 module Ul : HTMLAttributes with type element = Dom.element
-
 module Var : HTMLAttributes with type element = Dom.htmlElement
-
 module Video : VideoHTMLAttributes with type element = Dom.htmlVideoElement
-
 module Wbr : HTMLAttributes with type element = Dom.htmlElement
-
 module Webview : WebViewHTMLAttributes with type element = Dom.htmlElement
-
 module Big : HTMLAttributes with type element = Dom.htmlElement
-
 module Keygen : KeygenHTMLAttributes with type element = Dom.htmlUnknownElement
-
 module Menuitem : HTMLAttributes with type element = Dom.htmlUnknownElement
-
 module Param : ParamHTMLAttributes with type element = Dom.htmlParamElement
-
 module Animate : AnimateSVGAttributes with type element = Dom.element
 
-module AnimateMotion : AnimateMotionSVGAttributes with type element = Dom.element
+module AnimateMotion :
+  AnimateMotionSVGAttributes with type element = Dom.element
 
-module AnimateTransform : AnimateTransformSVGAttributes with type element = Dom.element
+module AnimateTransform :
+  AnimateTransformSVGAttributes with type element = Dom.element
 
 module Circle : CircleSVGAttributes with type element = Dom.element
-
 module ClipPath : ClipPathSVGAttributes with type element = Dom.element
-
 module Defs : DefsSVGAttributes with type element = Dom.element
-
 module Desc : DescSVGAttributes with type element = Dom.element
-
 module Ellipse : EllipseSVGAttributes with type element = Dom.element
-
 module FeBlend : FeBlendSVGAttributes with type element = Dom.element
 
-module FeColorMatrix : FeColorMatrixSVGAttributes with type element = Dom.element
+module FeColorMatrix :
+  FeColorMatrixSVGAttributes with type element = Dom.element
 
-module FeComponentTransfer : FeComponentTransferSVGAttributes with type element = Dom.element
+module FeComponentTransfer :
+  FeComponentTransferSVGAttributes with type element = Dom.element
 
 module FeComposite : FeCompositeSVGAttributes with type element = Dom.element
 
-module FeConvolveMatrix : FeConvolveMatrixSVGAttributes with type element = Dom.element
+module FeConvolveMatrix :
+  FeConvolveMatrixSVGAttributes with type element = Dom.element
 
-module FeDiffuseLighting : FeDiffuseLightingSVGAttributes with type element = Dom.element
+module FeDiffuseLighting :
+  FeDiffuseLightingSVGAttributes with type element = Dom.element
 
-module FeDisplacementMap : FeDisplacementMapSVGAttributes with type element = Dom.element
+module FeDisplacementMap :
+  FeDisplacementMapSVGAttributes with type element = Dom.element
 
-module FeDistantLight : FeDistantLightSVGAttributes with type element = Dom.element
+module FeDistantLight :
+  FeDistantLightSVGAttributes with type element = Dom.element
 
 module FeDropShadow : FeDropShadowSVGAttributes with type element = Dom.element
-
 module FeFlood : FeFloodSVGAttributes with type element = Dom.element
-
 module FeFuncA : FeFuncSVGAttributes with type element = Dom.element
-
 module FeFuncB : FeFuncSVGAttributes with type element = Dom.element
-
 module FeFuncG : FeFuncSVGAttributes with type element = Dom.element
-
 module FeFuncR : FeFuncSVGAttributes with type element = Dom.element
 
-module FeGaussianBlur : FeGaussianBlurSVGAttributes with type element = Dom.element
+module FeGaussianBlur :
+  FeGaussianBlurSVGAttributes with type element = Dom.element
 
 module FeImage : FeImageSVGAttributes with type element = Dom.element
-
 module FeMerge : FeMergeSVGAttributes with type element = Dom.element
-
 module FeMergeNode : FeMergeNodeSVGAttributes with type element = Dom.element
-
 module FeMorphology : FeMorphologySVGAttributes with type element = Dom.element
-
 module FeOffset : FeOffsetSVGAttributes with type element = Dom.element
-
 module FePointLight : FePointLightSVGAttributes with type element = Dom.element
 
-module FeSpecularLighting : FeSpecularLightingSVGAttributes with type element = Dom.element
+module FeSpecularLighting :
+  FeSpecularLightingSVGAttributes with type element = Dom.element
 
 module FeSpotLight : FeSpotLightSVGAttributes with type element = Dom.element
-
 module FeTile : FeTileSVGAttributes with type element = Dom.element
-
 module FeTurbulence : FeTurbulanceSVGAttributes with type element = Dom.element
-
 module Filter : FilterSVGAttributes with type element = Dom.element
 
-module ForeignObject : ForeignObjectSVGAttributes with type element = Dom.element
+module ForeignObject :
+  ForeignObjectSVGAttributes with type element = Dom.element
 
 module G : GSVGAttributes with type element = Dom.element
-
 module Image : ImageSVGAttributes with type element = Dom.element
-
 module Line : LineSVGAttributes with type element = Dom.element
 
-module LinearGradient : LinearGradientSVGAttributes with type element = Dom.element
+module LinearGradient :
+  LinearGradientSVGAttributes with type element = Dom.element
 
 module Marker : MarkerSVGAttributes with type element = Dom.element
-
 module Mask : MaskSVGAttributes with type element = Dom.element
-
 module Metadata : MetadataSVGAttributes with type element = Dom.element
-
 module Mpath : MPathSVGAttributes with type element = Dom.element
-
 module Path : PathSVGAttributes with type element = Dom.element
-
 module Pattern : PatternSVGAttributes with type element = Dom.element
-
 module Polygon : PolygonSVGAttributes with type element = Dom.element
-
 module Polyline : PolylineSVGAttributes with type element = Dom.element
 
-module RadialGradient : RadialGradientSVGAttributes with type element = Dom.element
+module RadialGradient :
+  RadialGradientSVGAttributes with type element = Dom.element
 
 module Rect : RectSVGAttributes with type element = Dom.element
-
 module Set : SetSVGAttributes with type element = Dom.element
-
 module Stop : StopSVGAttributes with type element = Dom.element
-
 module Svg : SvgSVGAttributes with type element = Dom.element
-
 module Switch : SwitchSVGAttributes with type element = Dom.element
-
 module Symbol : SymbolSVGAttributes with type element = Dom.element
-
 module Text : TextSVGAttributes with type element = Dom.element
-
 module TextPath : TextPathSVGAttributes with type element = Dom.element
-
 module Tspan : TSpanSVGAttributes with type element = Dom.element
-
 module Use : UseSVGAttributes with type element = Dom.element
-
 module View : ViewSVGAttributes with type element = Dom.element
 
-(** An element whose tag is known only as the page runs: the attributes
-    every HTML element takes. *)
 module Element : HTMLAttributes with type element = Dom.htmlElement
+(** An element whose tag is known only as the page runs: the attributes every
+    HTML element takes. *)

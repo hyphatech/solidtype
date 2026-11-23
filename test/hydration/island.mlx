@@ -15,6 +15,22 @@ module Tag = struct
     <span>(Jsx.draw (S.get children) { label })</span>
 end
 
+(* A component given a function of two arguments, and the same under
+   [Arity], as a binding makes a JavaScript component that takes one. *)
+module Joined = struct
+  let%component make ~(join : string -> string -> string) () =
+    <i>(Jsx.string (join "a" "b"))</i>
+end
+
+module Adapted = struct
+  module Props = Joined.Props
+
+  let component =
+    Solidtype.Arity.adapted "join"
+      (fun (f : string -> string -> string) -> fun[@u] a b -> f a b)
+      Joined.component
+end
+
 let make () =
   let count, set_count = S.create_signal 0 in
   <div>
@@ -27,4 +43,10 @@ let make () =
     </button>
     <p>(Jsx.int (S.get count))</p>
     <Tag>(fun s -> <b>(Jsx.string (S.get s.label))</b>)</Tag>
+    <ul>
+      <Solidtype.For each=[| "x"; "y" |]>
+        (fun item _ -> <li>(Jsx.string item)</li>)
+      </Solidtype.For>
+    </ul>
+    <Adapted join=(fun a b -> a ^ b) />
   </div>

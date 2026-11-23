@@ -124,9 +124,9 @@ let%component make ~(value : float) ?(min_value : float = 0.)
   in
   let value_label params =
     text
-      ~value:(Types.GetValueLabelParams.value params)
-      ~min:(Types.GetValueLabelParams.min params)
-      ~max:(Types.GetValueLabelParams.max params)
+      ~value:(Types.Meter_GetValueLabelParams.value params)
+      ~min:(Types.Meter_GetValueLabelParams.min params)
+      ~max:(Types.Meter_GetValueLabelParams.max params)
   in
   let m =
     {

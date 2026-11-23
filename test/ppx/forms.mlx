@@ -153,3 +153,12 @@ end
 
 let drawn_as = <button ?as_=None class_="x" />
 let accessor_of_function = S.accessor (fun () -> fun s -> s ^ "!")
+
+(* A function prop of several arguments is read as OCaml gave it and applied
+   as OCaml applies a function it did not make; one of one argument is read
+   uncurried. *)
+module Joins = struct
+  let%component make ~(join : string -> string -> string)
+      ~(shout : string -> string) () =
+    <p>(Jsx.string (join "a" (shout "b")))</p>
+end

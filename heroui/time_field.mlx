@@ -302,8 +302,8 @@ let of_clock c =
     ~second:(part Clock.second) ()
 
 let fields t =
-  D.Types.ZonedDateTime_Set.make ~hour:(Time.hour t) ~minute:(Time.minute t)
-    ~second:(Time.second t) ()
+  D.Types.ZonedDateTime_Set_Fields.make ~hour:(Time.hour t)
+    ~minute:(Time.minute t) ~second:(Time.second t) ()
 
 (* What a kind of value is to a field, which edits its time of day alone: that
    time, the same value at another, its zone, and what a form is sent. *)

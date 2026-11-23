@@ -55,11 +55,11 @@ after.
 | `running` | `float option array -> Solidtype_rhp.stack` | Running totals, for a waterfall |
 | `shares` | `?total:float -> float option array -> float option array` | Each value's share of the sum, scaled to `total`, 100 by default |
 | `summary` | `float option array -> Types.Summary.t` | Quartiles, median, whiskers, mean and outliers |
-| `bins` | `float option array -> ?options:Types.Bins.t -> unit -> Types.Bins2.t` | Histogram bins, `x0`, `x1` and `tally` |
-| `density` | `float option array -> ?options:Types.Density.t -> unit -> (float * float) array` | A kernel density estimate, for an `Area` |
+| `bins` | `float option array -> ?options:Types.Bins_Options.t -> unit -> Types.Bins.t` | Histogram bins, `x0`, `x1` and `tally` |
+| `density` | `float option array -> ?options:Types.Density_Options.t -> unit -> (float * float) array` | A kernel density estimate, for an `Area` |
 | `extent` | `float option array -> float * float` | The smallest and the largest |
 | `nice` | `float -> float -> ?count:float -> unit -> Types.Nice.t` | A round scale over a range |
-| `every` | `float -> ?options:Types.Every.t -> unit -> (float * float -> float array)` | Ticks at every multiple of a step |
+| `every` | `float -> ?options:Types.Every_Options.t -> unit -> (float * float -> float array)` | Ticks at every multiple of a step |
 | `series` | `?n:int -> unit -> 'row Row.t -> Color.t` | The theme's series colours through the rows |
 | `cycle` | `'a array -> 'row Row.t -> 'a` | A list repeated over the rows |
 

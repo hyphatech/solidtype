@@ -6,8 +6,9 @@ module Node = K.Types.CollectionNode
 module Item_props = K.Types.ComboboxBaseItemComponentProps
 module Jsx = Solidtype.Jsx
 
-let island () =
+let island ?on_open_change () =
   <Combobox.Root
+    ?on_open_change
     options=(Array.map K.Types.Either.left
                [| "Apple"; "Banana"; "Blueberry"; "Cherry" |])
     placeholder=(<span>"Pick a fruit"</span>)
@@ -50,7 +51,10 @@ let active input =
       | Some option -> H.text option)
 
 let () =
-  H.alike "Combobox" ~island ~twin (fun user ->
+  H.alike "Combobox"
+    ~island:(fun () -> island ())
+    ~twin
+    (fun user ->
       let input = H.by_role_named "combobox" (H.query ~name:"Fruit" ()) in
       H.expect_equal ~what:"the input, closed" "false" (expanded input);
       H.expect_equal ~what:"the input's completion" "list"
@@ -102,3 +106,29 @@ let () =
       H.eventually (fun () ->
           H.expect_equal ~what:"the input, an option clicked" "false"
             (expanded input)))
+
+(* A handler of two arguments that takes the first, works, and gives a
+   function of the second: OCaml types it as it types [fun a b -> ...], and
+   Kobalte calls it with both at once. *)
+let heard = ref ""
+
+let staged_opened is_open =
+  let said = if is_open then "open" else "closed" in
+  fun (_ : [ `focus | `input | `manual ] option) -> heard := said
+
+let () =
+  Jest.describe "Combobox's handler of two arguments" (fun () ->
+      Jest.afterEachPromise H.released;
+      Jest.afterEach H.cleanup;
+      Jest.testPromise "is called, though it takes them one at a time"
+        (fun () ->
+          H.render (fun () -> island ~on_open_change:staged_opened ());
+          let user = H.setup () in
+          let input = H.by_role_named "combobox" (H.query ~name:"Fruit" ()) in
+          let* () = H.click user input in
+          let* () = H.keyboard user "b" in
+          let* () =
+            H.eventually (fun () ->
+                H.expect_equal ~what:"what the handler heard" "open" !heard)
+          in
+          Js.Promise.resolve Jest.Expect.(expect !heard |> toBe "open")))

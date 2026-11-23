@@ -9,8 +9,10 @@ module Accordion = struct
   type options
 
   external options :
-    ?variant:([ `default [@mel.as "default"] | `surface [@mel.as "surface"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?variant:
+      ([ `default [@mel.as "default"] | `surface [@mel.as "surface"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -35,8 +37,14 @@ module Alert = struct
   type options
 
   external options :
-    ?status:([ `accent [@mel.as "accent"] | `danger [@mel.as "danger"] | `default [@mel.as "default"] | `success [@mel.as "success"] | `warning [@mel.as "warning"] ] [@mel.as "status"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?status:
+      ([ `accent [@mel.as "accent"]
+       | `danger [@mel.as "danger"]
+       | `default [@mel.as "default"]
+       | `success [@mel.as "success"]
+       | `warning [@mel.as "warning"] ]
+      [@mel.as "status"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -58,10 +66,26 @@ module AlertDialog = struct
   type options
 
   external options :
-    ?size:([ `cover [@mel.as "cover"] | `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] | `xs [@mel.as "xs"] ] [@mel.as "size"]) ->
-    ?status:([ `accent [@mel.as "accent"] | `danger [@mel.as "danger"] | `default [@mel.as "default"] | `success [@mel.as "success"] | `warning [@mel.as "warning"] ] [@mel.as "status"]) ->
-    ?variant:([ `blur [@mel.as "blur"] | `opaque [@mel.as "opaque"] | `transparent [@mel.as "transparent"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?size:
+      ([ `cover [@mel.as "cover"]
+       | `lg [@mel.as "lg"]
+       | `md [@mel.as "md"]
+       | `sm [@mel.as "sm"]
+       | `xs [@mel.as "xs"] ]
+      [@mel.as "size"]) ->
+    ?status:
+      ([ `accent [@mel.as "accent"]
+       | `danger [@mel.as "danger"]
+       | `default [@mel.as "default"]
+       | `success [@mel.as "success"]
+       | `warning [@mel.as "warning"] ]
+      [@mel.as "status"]) ->
+    ?variant:
+      ([ `blur [@mel.as "blur"]
+       | `opaque [@mel.as "opaque"]
+       | `transparent [@mel.as "transparent"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -88,9 +112,11 @@ module Autocomplete = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -114,10 +140,20 @@ module Avatar = struct
   type options
 
   external options :
-    ?color:([ `accent [@mel.as "accent"] | `danger [@mel.as "danger"] | `default [@mel.as "default"] | `success [@mel.as "success"] | `warning [@mel.as "warning"] ] [@mel.as "color"]) ->
-    ?size:([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ] [@mel.as "size"]) ->
-    ?variant:([ `default [@mel.as "default"] | `soft [@mel.as "soft"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?color:
+      ([ `accent [@mel.as "accent"]
+       | `danger [@mel.as "danger"]
+       | `default [@mel.as "default"]
+       | `success [@mel.as "success"]
+       | `warning [@mel.as "warning"] ]
+      [@mel.as "color"]) ->
+    ?size:
+      ([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ]
+      [@mel.as "size"]) ->
+    ?variant:
+      ([ `default [@mel.as "default"] | `soft [@mel.as "soft"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -137,9 +173,10 @@ module AvatarGroup = struct
   type options
 
   external options :
-    ?is_grid:(bool [@mel.as "isGrid"]) ->
-    ?overlap:([ `clip [@mel.as "clip"] | `ring [@mel.as "ring"] ] [@mel.as "overlap"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?is_grid:(bool[@mel.as "isGrid"]) ->
+    ?overlap:
+      ([ `clip [@mel.as "clip"] | `ring [@mel.as "ring"] ][@mel.as "overlap"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -158,11 +195,28 @@ module Badge = struct
   type options
 
   external options :
-    ?color:([ `accent [@mel.as "accent"] | `danger [@mel.as "danger"] | `default [@mel.as "default"] | `success [@mel.as "success"] | `warning [@mel.as "warning"] ] [@mel.as "color"]) ->
-    ?placement:([ `bottom_left [@mel.as "bottom-left"] | `bottom_right [@mel.as "bottom-right"] | `top_left [@mel.as "top-left"] | `top_right [@mel.as "top-right"] ] [@mel.as "placement"]) ->
-    ?size:([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ] [@mel.as "size"]) ->
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] | `soft [@mel.as "soft"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?color:
+      ([ `accent [@mel.as "accent"]
+       | `danger [@mel.as "danger"]
+       | `default [@mel.as "default"]
+       | `success [@mel.as "success"]
+       | `warning [@mel.as "warning"] ]
+      [@mel.as "color"]) ->
+    ?placement:
+      ([ `bottom_left [@mel.as "bottom-left"]
+       | `bottom_right [@mel.as "bottom-right"]
+       | `top_left [@mel.as "top-left"]
+       | `top_right [@mel.as "top-right"] ]
+      [@mel.as "placement"]) ->
+    ?size:
+      ([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ]
+      [@mel.as "size"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"]
+       | `secondary [@mel.as "secondary"]
+       | `soft [@mel.as "soft"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -181,10 +235,7 @@ end
 module Breadcrumbs = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -203,11 +254,21 @@ module Button = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?is_icon_only:(bool [@mel.as "isIconOnly"]) ->
-    ?size:([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ] [@mel.as "size"]) ->
-    ?variant:([ `danger [@mel.as "danger"] | `danger_soft [@mel.as "danger-soft"] | `ghost [@mel.as "ghost"] | `outline [@mel.as "outline"] | `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] | `tertiary [@mel.as "tertiary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?is_icon_only:(bool[@mel.as "isIconOnly"]) ->
+    ?size:
+      ([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ]
+      [@mel.as "size"]) ->
+    ?variant:
+      ([ `danger [@mel.as "danger"]
+       | `danger_soft [@mel.as "danger-soft"]
+       | `ghost [@mel.as "ghost"]
+       | `outline [@mel.as "outline"]
+       | `primary [@mel.as "primary"]
+       | `secondary [@mel.as "secondary"]
+       | `tertiary [@mel.as "tertiary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -221,9 +282,11 @@ module ButtonGroup = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?orientation:([ `horizontal [@mel.as "horizontal"] | `vertical [@mel.as "vertical"] ] [@mel.as "orientation"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?orientation:
+      ([ `horizontal [@mel.as "horizontal"] | `vertical [@mel.as "vertical"] ]
+      [@mel.as "orientation"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -241,10 +304,7 @@ end
 module Calendar = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -270,10 +330,7 @@ end
 module CalendarYearPicker = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -292,10 +349,7 @@ end
 module RangeCalendar = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -322,8 +376,13 @@ module Card = struct
   type options
 
   external options :
-    ?variant:([ `default [@mel.as "default"] | `secondary [@mel.as "secondary"] | `tertiary [@mel.as "tertiary"] | `transparent [@mel.as "transparent"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?variant:
+      ([ `default [@mel.as "default"]
+       | `secondary [@mel.as "secondary"]
+       | `tertiary [@mel.as "tertiary"]
+       | `transparent [@mel.as "transparent"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -346,8 +405,10 @@ module Checkbox = struct
   type options
 
   external options :
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -368,8 +429,10 @@ module CheckboxGroup = struct
   type options
 
   external options :
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -383,10 +446,23 @@ module Chip = struct
   type options
 
   external options :
-    ?color:([ `accent [@mel.as "accent"] | `danger [@mel.as "danger"] | `default [@mel.as "default"] | `success [@mel.as "success"] | `warning [@mel.as "warning"] ] [@mel.as "color"]) ->
-    ?size:([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ] [@mel.as "size"]) ->
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] | `soft [@mel.as "soft"] | `tertiary [@mel.as "tertiary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?color:
+      ([ `accent [@mel.as "accent"]
+       | `danger [@mel.as "danger"]
+       | `default [@mel.as "default"]
+       | `success [@mel.as "success"]
+       | `warning [@mel.as "warning"] ]
+      [@mel.as "color"]) ->
+    ?size:
+      ([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ]
+      [@mel.as "size"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"]
+       | `secondary [@mel.as "secondary"]
+       | `soft [@mel.as "soft"]
+       | `tertiary [@mel.as "tertiary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -405,8 +481,8 @@ module ColorArea = struct
   type options
 
   external options :
-    ?show_dots:(bool [@mel.as "showDots"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?show_dots:(bool[@mel.as "showDots"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -425,8 +501,8 @@ module ColorField = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -440,9 +516,11 @@ module ColorInputGroup = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -462,10 +540,7 @@ end
 module ColorPicker = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -482,10 +557,7 @@ end
 module ColorSlider = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -504,9 +576,17 @@ module ColorSwatch = struct
   type options
 
   external options :
-    ?shape:([ `circle [@mel.as "circle"] | `square [@mel.as "square"] ] [@mel.as "shape"]) ->
-    ?size:([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] | `xl [@mel.as "xl"] | `xs [@mel.as "xs"] ] [@mel.as "size"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?shape:
+      ([ `circle [@mel.as "circle"] | `square [@mel.as "square"] ]
+      [@mel.as "shape"]) ->
+    ?size:
+      ([ `lg [@mel.as "lg"]
+       | `md [@mel.as "md"]
+       | `sm [@mel.as "sm"]
+       | `xl [@mel.as "xl"]
+       | `xs [@mel.as "xs"] ]
+      [@mel.as "size"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -520,8 +600,8 @@ module CloseButton = struct
   type options
 
   external options :
-    ?variant:([ `default [@mel.as "default"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?variant:([ `default [@mel.as "default"] ][@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -535,10 +615,19 @@ module ColorSwatchPicker = struct
   type options
 
   external options :
-    ?layout:([ `grid [@mel.as "grid"] | `stack [@mel.as "stack"] ] [@mel.as "layout"]) ->
-    ?size:([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] | `xl [@mel.as "xl"] | `xs [@mel.as "xs"] ] [@mel.as "size"]) ->
-    ?variant:([ `circle [@mel.as "circle"] | `square [@mel.as "square"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?layout:
+      ([ `grid [@mel.as "grid"] | `stack [@mel.as "stack"] ][@mel.as "layout"]) ->
+    ?size:
+      ([ `lg [@mel.as "lg"]
+       | `md [@mel.as "md"]
+       | `sm [@mel.as "sm"]
+       | `xl [@mel.as "xl"]
+       | `xs [@mel.as "xs"] ]
+      [@mel.as "size"]) ->
+    ?variant:
+      ([ `circle [@mel.as "circle"] | `square [@mel.as "square"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -559,8 +648,8 @@ module ComboBox = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -582,8 +671,8 @@ module DateField = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -596,10 +685,7 @@ end
 module DatePicker = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -617,10 +703,7 @@ end
 module DateRangePicker = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -640,9 +723,11 @@ module DateInputGroup = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -664,10 +749,7 @@ end
 module Description = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   external classes : options -> string = "descriptionVariants"
@@ -679,9 +761,18 @@ module Drawer = struct
   type options
 
   external options :
-    ?placement:([ `bottom [@mel.as "bottom"] | `left [@mel.as "left"] | `right [@mel.as "right"] | `top [@mel.as "top"] ] [@mel.as "placement"]) ->
-    ?variant:([ `blur [@mel.as "blur"] | `opaque [@mel.as "opaque"] | `transparent [@mel.as "transparent"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?placement:
+      ([ `bottom [@mel.as "bottom"]
+       | `left [@mel.as "left"]
+       | `right [@mel.as "right"]
+       | `top [@mel.as "top"] ]
+      [@mel.as "placement"]) ->
+    ?variant:
+      ([ `blur [@mel.as "blur"]
+       | `opaque [@mel.as "opaque"]
+       | `transparent [@mel.as "transparent"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -707,10 +798,7 @@ end
 module Disclosure = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -731,10 +819,7 @@ end
 module DisclosureGroup = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -749,10 +834,7 @@ end
 module Dropdown = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -770,10 +852,7 @@ end
 module EmptyState = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   external classes : options -> string = "emptyStateVariants"
@@ -784,10 +863,7 @@ end
 module ErrorMessage = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   external classes : options -> string = "errorMessageVariants"
@@ -798,10 +874,7 @@ end
 module FieldError = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   external classes : options -> string = "fieldErrorVariants"
@@ -812,10 +885,7 @@ end
 module Fieldset = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -834,10 +904,7 @@ end
 module Header = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   external classes : options -> string = "headerVariants"
@@ -849,9 +916,11 @@ module Input = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -865,9 +934,11 @@ module InputGroup = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -888,8 +959,10 @@ module InputOTP = struct
   type options
 
   external options :
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -913,8 +986,10 @@ module Kbd = struct
   type options
 
   external options :
-    ?variant:([ `default [@mel.as "default"] | `light [@mel.as "light"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?variant:
+      ([ `default [@mel.as "default"] | `light [@mel.as "light"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -934,10 +1009,10 @@ module Label = struct
   type options
 
   external options :
-    ?is_disabled:(bool [@mel.as "isDisabled"]) ->
-    ?is_invalid:(bool [@mel.as "isInvalid"]) ->
-    ?is_required:(bool [@mel.as "isRequired"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+    ?is_invalid:(bool[@mel.as "isInvalid"]) ->
+    ?is_required:(bool[@mel.as "isRequired"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -950,10 +1025,7 @@ end
 module Link = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -970,8 +1042,10 @@ module Listbox = struct
   type options
 
   external options :
-    ?variant:([ `danger [@mel.as "danger"] | `default [@mel.as "default"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?variant:
+      ([ `danger [@mel.as "danger"] | `default [@mel.as "default"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -985,8 +1059,10 @@ module ListboxItem = struct
   type options
 
   external options :
-    ?variant:([ `danger [@mel.as "danger"] | `default [@mel.as "default"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?variant:
+      ([ `danger [@mel.as "danger"] | `default [@mel.as "default"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1004,10 +1080,7 @@ end
 module ListboxSection = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   external classes : options -> string = "listboxSectionVariants"
@@ -1018,10 +1091,7 @@ end
 module Menu = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   external classes : options -> string = "menuVariants"
@@ -1033,9 +1103,17 @@ module Meter = struct
   type options
 
   external options :
-    ?color:([ `accent [@mel.as "accent"] | `danger [@mel.as "danger"] | `default [@mel.as "default"] | `success [@mel.as "success"] | `warning [@mel.as "warning"] ] [@mel.as "color"]) ->
-    ?size:([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ] [@mel.as "size"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?color:
+      ([ `accent [@mel.as "accent"]
+       | `danger [@mel.as "danger"]
+       | `default [@mel.as "default"]
+       | `success [@mel.as "success"]
+       | `warning [@mel.as "warning"] ]
+      [@mel.as "color"]) ->
+    ?size:
+      ([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ]
+      [@mel.as "size"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1056,9 +1134,17 @@ module ProgressBar = struct
   type options
 
   external options :
-    ?color:([ `accent [@mel.as "accent"] | `danger [@mel.as "danger"] | `default [@mel.as "default"] | `success [@mel.as "success"] | `warning [@mel.as "warning"] ] [@mel.as "color"]) ->
-    ?size:([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ] [@mel.as "size"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?color:
+      ([ `accent [@mel.as "accent"]
+       | `danger [@mel.as "danger"]
+       | `default [@mel.as "default"]
+       | `success [@mel.as "success"]
+       | `warning [@mel.as "warning"] ]
+      [@mel.as "color"]) ->
+    ?size:
+      ([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ]
+      [@mel.as "size"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1079,9 +1165,17 @@ module ProgressCircle = struct
   type options
 
   external options :
-    ?color:([ `accent [@mel.as "accent"] | `danger [@mel.as "danger"] | `default [@mel.as "default"] | `success [@mel.as "success"] | `warning [@mel.as "warning"] ] [@mel.as "color"]) ->
-    ?size:([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ] [@mel.as "size"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?color:
+      ([ `accent [@mel.as "accent"]
+       | `danger [@mel.as "danger"]
+       | `default [@mel.as "default"]
+       | `success [@mel.as "success"]
+       | `warning [@mel.as "warning"] ]
+      [@mel.as "color"]) ->
+    ?size:
+      ([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ]
+      [@mel.as "size"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1102,8 +1196,10 @@ module MenuItem = struct
   type options
 
   external options :
-    ?variant:([ `danger [@mel.as "danger"] | `default [@mel.as "default"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?variant:
+      ([ `danger [@mel.as "danger"] | `default [@mel.as "default"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1122,10 +1218,7 @@ end
 module MenuSection = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   external classes : options -> string = "menuSectionVariants"
@@ -1137,10 +1230,23 @@ module Modal = struct
   type options
 
   external options :
-    ?scroll:([ `inside [@mel.as "inside"] | `outside [@mel.as "outside"] ] [@mel.as "scroll"]) ->
-    ?size:([ `cover [@mel.as "cover"] | `full [@mel.as "full"] | `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] | `xs [@mel.as "xs"] ] [@mel.as "size"]) ->
-    ?variant:([ `blur [@mel.as "blur"] | `opaque [@mel.as "opaque"] | `transparent [@mel.as "transparent"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?scroll:
+      ([ `inside [@mel.as "inside"] | `outside [@mel.as "outside"] ]
+      [@mel.as "scroll"]) ->
+    ?size:
+      ([ `cover [@mel.as "cover"]
+       | `full [@mel.as "full"]
+       | `lg [@mel.as "lg"]
+       | `md [@mel.as "md"]
+       | `sm [@mel.as "sm"]
+       | `xs [@mel.as "xs"] ]
+      [@mel.as "size"]) ->
+    ?variant:
+      ([ `blur [@mel.as "blur"]
+       | `opaque [@mel.as "opaque"]
+       | `transparent [@mel.as "transparent"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1167,9 +1273,11 @@ module NumberField = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1191,8 +1299,10 @@ module Pagination = struct
   type options
 
   external options :
-    ?size:([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ] [@mel.as "size"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?size:
+      ([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ]
+      [@mel.as "size"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1214,10 +1324,7 @@ end
 module Popover = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -1235,10 +1342,7 @@ end
 module Radio = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -1257,8 +1361,10 @@ module RadioGroup = struct
   type options
 
   external options :
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1272,10 +1378,12 @@ module ScrollShadow = struct
   type options
 
   external options :
-    ?hide_scroll_bar:(bool [@mel.as "hideScrollBar"]) ->
-    ?orientation:([ `horizontal [@mel.as "horizontal"] | `vertical [@mel.as "vertical"] ] [@mel.as "orientation"]) ->
-    ?variant:([ `fade [@mel.as "fade"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?hide_scroll_bar:(bool[@mel.as "hideScrollBar"]) ->
+    ?orientation:
+      ([ `horizontal [@mel.as "horizontal"] | `vertical [@mel.as "vertical"] ]
+      [@mel.as "orientation"]) ->
+    ?variant:([ `fade [@mel.as "fade"] ][@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1293,9 +1401,11 @@ module SearchField = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1317,9 +1427,11 @@ module Select = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1342,9 +1454,15 @@ module Separator = struct
   type options
 
   external options :
-    ?orientation:([ `horizontal [@mel.as "horizontal"] | `vertical [@mel.as "vertical"] ] [@mel.as "orientation"]) ->
-    ?variant:([ `default [@mel.as "default"] | `secondary [@mel.as "secondary"] | `tertiary [@mel.as "tertiary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?orientation:
+      ([ `horizontal [@mel.as "horizontal"] | `vertical [@mel.as "vertical"] ]
+      [@mel.as "orientation"]) ->
+    ?variant:
+      ([ `default [@mel.as "default"]
+       | `secondary [@mel.as "secondary"]
+       | `tertiary [@mel.as "tertiary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1358,8 +1476,12 @@ module Skeleton = struct
   type options
 
   external options :
-    ?animation_type:([ `none [@mel.as "none"] | `pulse [@mel.as "pulse"] | `shimmer [@mel.as "shimmer"] ] [@mel.as "animationType"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?animation_type:
+      ([ `none [@mel.as "none"]
+       | `pulse [@mel.as "pulse"]
+       | `shimmer [@mel.as "shimmer"] ]
+      [@mel.as "animationType"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1376,10 +1498,7 @@ end
 module Slider = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -1400,9 +1519,20 @@ module Spinner = struct
   type options
 
   external options :
-    ?color:([ `accent [@mel.as "accent"] | `current [@mel.as "current"] | `danger [@mel.as "danger"] | `success [@mel.as "success"] | `warning [@mel.as "warning"] ] [@mel.as "color"]) ->
-    ?size:([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] | `xl [@mel.as "xl"] ] [@mel.as "size"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?color:
+      ([ `accent [@mel.as "accent"]
+       | `current [@mel.as "current"]
+       | `danger [@mel.as "danger"]
+       | `success [@mel.as "success"]
+       | `warning [@mel.as "warning"] ]
+      [@mel.as "color"]) ->
+    ?size:
+      ([ `lg [@mel.as "lg"]
+       | `md [@mel.as "md"]
+       | `sm [@mel.as "sm"]
+       | `xl [@mel.as "xl"] ]
+      [@mel.as "size"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1416,8 +1546,13 @@ module Surface = struct
   type options
 
   external options :
-    ?variant:([ `default [@mel.as "default"] | `secondary [@mel.as "secondary"] | `tertiary [@mel.as "tertiary"] | `transparent [@mel.as "transparent"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?variant:
+      ([ `default [@mel.as "default"]
+       | `secondary [@mel.as "secondary"]
+       | `tertiary [@mel.as "tertiary"]
+       | `transparent [@mel.as "transparent"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1431,8 +1566,10 @@ module Switch = struct
   type options
 
   external options :
-    ?size:([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ] [@mel.as "size"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?size:
+      ([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ]
+      [@mel.as "size"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1454,8 +1591,10 @@ module SwitchGroup = struct
   type options
 
   external options :
-    ?orientation:([ `horizontal [@mel.as "horizontal"] | `vertical [@mel.as "vertical"] ] [@mel.as "orientation"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?orientation:
+      ([ `horizontal [@mel.as "horizontal"] | `vertical [@mel.as "vertical"] ]
+      [@mel.as "orientation"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1474,8 +1613,10 @@ module Table = struct
   type options
 
   external options :
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1495,11 +1636,19 @@ module Table = struct
   external header : slots -> string = "header" [@@mel.send]
   external load_more : slots -> string = "loadMore" [@@mel.send]
   external load_more_content : slots -> string = "loadMoreContent" [@@mel.send]
-  external resizable_container : slots -> string = "resizableContainer" [@@mel.send]
+
+  external resizable_container : slots -> string = "resizableContainer"
+  [@@mel.send]
+
   external row : slots -> string = "row" [@@mel.send]
   external scroll_container : slots -> string = "scrollContainer" [@@mel.send]
-  external sortable_column_header : slots -> string = "sortableColumnHeader" [@@mel.send]
-  external sortable_column_indicator : slots -> string = "sortableColumnIndicator" [@@mel.send]
+
+  external sortable_column_header : slots -> string = "sortableColumnHeader"
+  [@@mel.send]
+
+  external sortable_column_indicator : slots -> string
+    = "sortableColumnIndicator"
+  [@@mel.send]
 end
 
 (** HeroUI's [tabsVariants]. *)
@@ -1507,9 +1656,15 @@ module Tabs = struct
   type options
 
   external options :
-    ?align:([ `center [@mel.as "center"] | `end_ [@mel.as "end"] | `start [@mel.as "start"] ] [@mel.as "align"]) ->
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?align:
+      ([ `center [@mel.as "center"]
+       | `end_ [@mel.as "end"]
+       | `start [@mel.as "start"] ]
+      [@mel.as "align"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1527,7 +1682,10 @@ module Tabs = struct
   external tab : slots -> string = "tab" [@@mel.send]
   external tab_indicator : slots -> string = "tabIndicator" [@@mel.send]
   external tab_list : slots -> string = "tabList" [@@mel.send]
-  external tab_list_container : slots -> string = "tabListContainer" [@@mel.send]
+
+  external tab_list_container : slots -> string = "tabListContainer"
+  [@@mel.send]
+
   external tab_panel : slots -> string = "tabPanel" [@@mel.send]
 end
 
@@ -1536,9 +1694,13 @@ module Tag = struct
   type options
 
   external options :
-    ?size:([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ] [@mel.as "size"]) ->
-    ?variant:([ `default [@mel.as "default"] | `surface [@mel.as "surface"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?size:
+      ([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ]
+      [@mel.as "size"]) ->
+    ?variant:
+      ([ `default [@mel.as "default"] | `surface [@mel.as "surface"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1556,10 +1718,7 @@ end
 module TagGroup = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -1576,12 +1735,35 @@ module Typography = struct
   type options
 
   external options :
-    ?align:([ `center [@mel.as "center"] | `end_ [@mel.as "end"] | `justify [@mel.as "justify"] | `start [@mel.as "start"] ] [@mel.as "align"]) ->
-    ?color:([ `default [@mel.as "default"] | `muted [@mel.as "muted"] ] [@mel.as "color"]) ->
-    ?truncate:(bool [@mel.as "truncate"]) ->
-    ?type_:([ `body [@mel.as "body"] | `body_sm [@mel.as "body-sm"] | `body_xs [@mel.as "body-xs"] | `code [@mel.as "code"] | `h1 [@mel.as "h1"] | `h2 [@mel.as "h2"] | `h3 [@mel.as "h3"] | `h4 [@mel.as "h4"] | `h5 [@mel.as "h5"] | `h6 [@mel.as "h6"] ] [@mel.as "type"]) ->
-    ?weight:([ `bold [@mel.as "bold"] | `medium [@mel.as "medium"] | `normal [@mel.as "normal"] | `semibold [@mel.as "semibold"] ] [@mel.as "weight"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?align:
+      ([ `center [@mel.as "center"]
+       | `end_ [@mel.as "end"]
+       | `justify [@mel.as "justify"]
+       | `start [@mel.as "start"] ]
+      [@mel.as "align"]) ->
+    ?color:
+      ([ `default [@mel.as "default"] | `muted [@mel.as "muted"] ]
+      [@mel.as "color"]) ->
+    ?truncate:(bool[@mel.as "truncate"]) ->
+    ?type_:
+      ([ `body [@mel.as "body"]
+       | `body_sm [@mel.as "body-sm"]
+       | `body_xs [@mel.as "body-xs"]
+       | `code [@mel.as "code"]
+       | `h1 [@mel.as "h1"]
+       | `h2 [@mel.as "h2"]
+       | `h3 [@mel.as "h3"]
+       | `h4 [@mel.as "h4"]
+       | `h5 [@mel.as "h5"]
+       | `h6 [@mel.as "h6"] ]
+      [@mel.as "type"]) ->
+    ?weight:
+      ([ `bold [@mel.as "bold"]
+       | `medium [@mel.as "medium"]
+       | `normal [@mel.as "normal"]
+       | `semibold [@mel.as "semibold"] ]
+      [@mel.as "weight"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1600,8 +1782,8 @@ module TextField = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1615,9 +1797,11 @@ module TextArea = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?variant:([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?variant:
+      ([ `primary [@mel.as "primary"] | `secondary [@mel.as "secondary"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1631,8 +1815,8 @@ module TimeField = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1646,9 +1830,22 @@ module Toast = struct
   type options
 
   external options :
-    ?placement:([ `bottom [@mel.as "bottom"] | `bottom_end [@mel.as "bottom end"] | `bottom_start [@mel.as "bottom start"] | `top [@mel.as "top"] | `top_end [@mel.as "top end"] | `top_start [@mel.as "top start"] ] [@mel.as "placement"]) ->
-    ?variant:([ `accent [@mel.as "accent"] | `danger [@mel.as "danger"] | `default [@mel.as "default"] | `success [@mel.as "success"] | `warning [@mel.as "warning"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?placement:
+      ([ `bottom [@mel.as "bottom"]
+       | `bottom_end [@mel.as "bottom end"]
+       | `bottom_start [@mel.as "bottom start"]
+       | `top [@mel.as "top"]
+       | `top_end [@mel.as "top end"]
+       | `top_start [@mel.as "top start"] ]
+      [@mel.as "placement"]) ->
+    ?variant:
+      ([ `accent [@mel.as "accent"]
+       | `danger [@mel.as "danger"]
+       | `default [@mel.as "default"]
+       | `success [@mel.as "success"]
+       | `warning [@mel.as "warning"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1673,10 +1870,14 @@ module ToggleButton = struct
   type options
 
   external options :
-    ?is_icon_only:(bool [@mel.as "isIconOnly"]) ->
-    ?size:([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ] [@mel.as "size"]) ->
-    ?variant:([ `default [@mel.as "default"] | `ghost [@mel.as "ghost"] ] [@mel.as "variant"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?is_icon_only:(bool[@mel.as "isIconOnly"]) ->
+    ?size:
+      ([ `lg [@mel.as "lg"] | `md [@mel.as "md"] | `sm [@mel.as "sm"] ]
+      [@mel.as "size"]) ->
+    ?variant:
+      ([ `default [@mel.as "default"] | `ghost [@mel.as "ghost"] ]
+      [@mel.as "variant"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1690,10 +1891,12 @@ module ToggleButtonGroup = struct
   type options
 
   external options :
-    ?full_width:(bool [@mel.as "fullWidth"]) ->
-    ?is_detached:(bool [@mel.as "isDetached"]) ->
-    ?orientation:([ `horizontal [@mel.as "horizontal"] | `vertical [@mel.as "vertical"] ] [@mel.as "orientation"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?full_width:(bool[@mel.as "fullWidth"]) ->
+    ?is_detached:(bool[@mel.as "isDetached"]) ->
+    ?orientation:
+      ([ `horizontal [@mel.as "horizontal"] | `vertical [@mel.as "vertical"] ]
+      [@mel.as "orientation"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1712,9 +1915,11 @@ module Toolbar = struct
   type options
 
   external options :
-    ?is_attached:(bool [@mel.as "isAttached"]) ->
-    ?orientation:([ `horizontal [@mel.as "horizontal"] | `vertical [@mel.as "vertical"] ] [@mel.as "orientation"]) ->
-    ?class_:(string [@mel.as "class"]) ->
+    ?is_attached:(bool[@mel.as "isAttached"]) ->
+    ?orientation:
+      ([ `horizontal [@mel.as "horizontal"] | `vertical [@mel.as "vertical"] ]
+      [@mel.as "orientation"]) ->
+    ?class_:(string[@mel.as "class"]) ->
     unit ->
     options = ""
   [@@mel.obj]
@@ -1727,10 +1932,7 @@ end
 module Tooltip = struct
   type options
 
-  external options :
-    ?class_:(string [@mel.as "class"]) ->
-    unit ->
-    options = ""
+  external options : ?class_:(string[@mel.as "class"]) -> unit -> options = ""
   [@@mel.obj]
 
   type slots
@@ -1742,8 +1944,8 @@ module Tooltip = struct
   external trigger : slots -> string = "trigger" [@@mel.send]
 end
 
+external cn : string -> string -> string Js.undefined = "cn"
+[@@mel.module "@heroui/styles"]
 (** HeroUI's [cn]: [cn a b] is [a]'s classes and [b]'s, a Tailwind utility of
     [b] winning over one of [a] that sets the same property, as a variant
     function merges its [class]; none where both are empty. *)
-external cn : string -> string -> string Js.undefined = "cn"
-[@@mel.module "@heroui/styles"]

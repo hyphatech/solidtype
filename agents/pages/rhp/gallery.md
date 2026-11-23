@@ -233,7 +233,7 @@ frame, since a path's points moved by CSS would flatten its rim.
 Original rhp documentation: [Pie](https://rhp.vercel.app/examples/pie-chart/).
 
 ```ocaml title="rhp_pie.mlx"
-module Animated = Solidtype_rhp.Types.Animated
+module Animated = Solidtype_rhp.Types.Animated_Settings
 module Bar = Solidtype_rhp.Bar
 module Chart = Solidtype_rhp.Chart
 module Color = Solidtype_rhp.Color
