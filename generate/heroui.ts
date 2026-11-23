@@ -6,31 +6,18 @@
 // HeroUI's types give.
 
 import ts from "typescript";
-import { readFileSync, realpathSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { isTag } from "./melange.ts";
 import { label } from "./names.ts";
-import { name as tname, print, type Type } from "./ocaml.ts";
-import { writeOrCheck } from "./output.ts";
-import { browser } from "./program.ts";
-import { Source } from "./source.ts";
+import { name as tname, print, printItems, type Item, type Type } from "./ocaml.ts";
+import { formatted, writeOrCheck } from "./output.ts";
+import { declarations, installed, root } from "./package.ts";
 
-const root = fileURLToPath(new URL("../", import.meta.url));
-// HeroUI's real path: tailwind-variants, whose types its declarations name,
-// is installed beside it, not here.
-const entry = realpathSync(`${root}node_modules/@heroui/styles/dist/index.d.ts`);
+const { dir, version: heroui } = installed("@heroui/styles");
+const entry = `${dir}/dist/index.d.ts`;
 const out = `${root}heroui/styles.ml`;
-const heroui = JSON.parse(readFileSync(`${root}node_modules/@heroui/styles/package.json`, "utf8")).version as string;
 
-const program = ts.createProgram([entry], {
-  ...browser,
-  module: ts.ModuleKind.ESNext,
-  moduleResolution: ts.ModuleResolutionKind.Bundler,
-});
-const checker = program.getTypeChecker();
-const source = program.getSourceFile(entry);
-const exported = source && checker.getSymbolAtLocation(source);
-if (!exported) throw new Error(`no ${entry}`);
+const { checker, exportsOf, real } = declarations([entry]);
+const exported = exportsOf(entry);
 
 const properties = (t: ts.Type | undefined) => (t && !(t.flags & ts.TypeFlags.Undefined) ? checker.getPropertiesOfType(t) : []);
 
@@ -54,69 +41,65 @@ const show = (t: Type) =>
 
 // Each variant function, a module by its component: buttonVariants is
 // Button. The capitalised exports, ButtonVariants, are types.
-const src = new Source();
-for (const symbol of checker.getExportsOfModule(exported)) {
+const items: Item[] = [];
+for (const symbol of exported) {
   if (!/^[a-z]\w*Variants$/.test(symbol.name)) continue;
-  const real = symbol.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(symbol) : symbol;
-  const type = checker.getTypeOfSymbol(real);
+  const type = checker.getTypeOfSymbol(real(symbol));
   if (type.getSymbol()?.name !== "TVReturnType") throw new Error(`${symbol.name} is no variant function`);
   const [variants, slots] = checker.getTypeArguments(type as ts.TypeReference);
   const component = symbol.name.charAt(0).toUpperCase() + symbol.name.slice(1, -"Variants".length);
   const options = properties(variants).map((v) => {
     const keys = properties(checker.getTypeOfSymbol(v)).map((k) => k.name);
-    return `    ?${label(v.name)}:(${show(variant(`${symbol.name}.${v.name}`, keys))} [@mel.as ${JSON.stringify(v.name)}]) ->`;
+    return `?${label(v.name)}:(${show(variant(`${symbol.name}.${v.name}`, keys))} [@mel.as ${JSON.stringify(v.name)}]) ->`;
   });
   const parts = properties(slots).map((s) => s.name);
-  src.both(`(** HeroUI's [${symbol.name}]. *)`);
-  src.module("", component, () => {
-    src.both(
-      `  type options`,
-      ``,
-      `  external options :`,
-      ...options,
-      `    ?class_:(string [@mel.as "class"]) ->`,
-      `    unit ->`,
-      `    options = ""`,
-      `  [@@mel.obj]`,
-      ``,
-    );
-    if (parts.length === 0) {
-      src.both(`  external classes : options -> string = ${JSON.stringify(symbol.name)}`, `  [@@mel.module "@heroui/styles"]`);
-    } else {
-      src.both(`  type slots`, ``, `  external slots : options -> slots = ${JSON.stringify(symbol.name)}`, `  [@@mel.module "@heroui/styles"]`, ``);
-      for (const part of parts) src.both(`  external ${label(part)} : slots -> string = ${JSON.stringify(part)} [@@mel.send]`);
-    }
+  const from = [`mel.module "@heroui/styles"`];
+  items.push({
+    kind: "module",
+    name: component,
+    doc: `HeroUI's [${symbol.name}].`,
+    items: [
+      { kind: "type", name: "options" },
+      { kind: "external", name: "options", type: `${options.join(" ")} ?class_:(string [@mel.as "class"]) -> unit -> options`, js: "", attributes: ["mel.obj"] },
+      ...(parts.length === 0
+        ? [{ kind: "external", name: "classes", type: "options -> string", js: symbol.name, attributes: from } as Item]
+        : [
+            { kind: "type", name: "slots" } as Item,
+            { kind: "external", name: "slots", type: "options -> slots", js: symbol.name, attributes: from } as Item,
+            ...parts.map((part): Item => ({ kind: "external", name: label(part), type: "slots -> string", js: part, attributes: ["mel.send"] })),
+          ]),
+    ],
   });
-  src.both(``);
 }
 
 // cn, which the variant functions merge a class by: a component styled here
 // rather than by a variant function merges a caller's class by it too, so the
 // caller's utility wins as it does over HeroUI's own.
-const cn = checker.getExportsOfModule(exported).find((s) => s.name === "cn");
-const cnType = cn && checker.getTypeOfSymbol(cn.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(cn) : cn);
+const cn = exported.find((s) => s.name === "cn");
+const cnType = cn && checker.getTypeOfSymbol(real(cn));
 if (!cnType || cnType.getCallSignatures().length === 0) throw new Error("@heroui/styles exports no cn function");
-src.both(
-  `(** HeroUI's [cn]: [cn a b] is [a]'s classes and [b]'s, a Tailwind utility of`,
-  `    [b] winning over one of [a] that sets the same property, as a variant`,
-  `    function merges its [class]; none where both are empty. *)`,
-  `external cn : string -> string -> string Js.undefined = "cn"`,
-  `[@@mel.module "@heroui/styles"]`,
-  ``,
-);
+items.push({
+  kind: "external",
+  name: "cn",
+  type: "string -> string -> string Js.undefined",
+  js: "cn",
+  attributes: [`mel.module "@heroui/styles"`],
+  doc: "HeroUI's [cn]: [cn a b] is [a]'s classes and [b]'s, a Tailwind utility of [b] winning over one of [a] that sets the same property, as a variant function merges its [class]; none where both are empty.",
+});
 
-const file = (lines: string[]) => `(* Each of HeroUI's variant functions, by its component: [options] built
+const file = (which: "ml" | "mli") => `(* Each of HeroUI's variant functions, by its component: [options] built
    from its variants, then [classes], its class string, or for a component of
    several parts [slots], a class string per part; and [cn], the merge they
    give a class by. Generated from the declarations of @heroui/styles
    ${heroui} by generate/heroui.ts; never edited by hand. *)
 
-${lines.join("\n")}`;
+${printItems(items, which)}
+`;
 
 writeOrCheck(
   [
-    [out, file(src.ml)],
-    [`${out}i`, file(src.mli)],
+    [out, formatted(out, file("ml"))],
+    [`${out}i`, formatted(`${out}i`, file("mli"))],
   ],
   "HeroUI's types",
 );

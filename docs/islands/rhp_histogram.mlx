@@ -1,10 +1,10 @@
 module Bar = Solidtype_rhp.Bar
-module Bins = Solidtype_rhp.Types.Bins
+module Bins = Solidtype_rhp.Types.Bins_Options
 module Chart = Solidtype_rhp.Chart
 module Jsx = Solidtype.Jsx
 module Label = Solidtype_rhp.Label
 module Plot = Solidtype_rhp.Plot
-module Range = Solidtype_rhp.Types.Bins2
+module Range = Solidtype_rhp.Types.Bins
 module Row = Solidtype_rhp.Row
 module Slat = Solidtype_rhp.Slat
 

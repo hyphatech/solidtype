@@ -500,14 +500,14 @@ A value taken for one JavaScript threw, which only a handler is given.
 A Kobalte value read as whatever type its caller names.
 
   $ cat > case.mlx <<'EOF'
-  > let n (p : Solidtype_kobalte.Types.Context_Provider.t) : int =
-  >   Solidtype_kobalte.Types.Context_Provider.value p
+  > let n (p : Solidtype_kobalte.Types.Context_Provider_Props.t) : int =
+  >   Solidtype_kobalte.Types.Context_Provider_Props.value p
   > EOF
   $ build
-  File "case.mlx", line 2, characters 2-48:
-  2 |   Solidtype_kobalte.Types.Context_Provider.value p
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Error: Unbound value Solidtype_kobalte.Types.Context_Provider.value
+  File "case.mlx", line 2, characters 2-54:
+  2 |   Solidtype_kobalte.Types.Context_Provider_Props.value p
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Error: Unbound value Solidtype_kobalte.Types.Context_Provider_Props.value
   [1]
 
 A raw external under a Kobalte wrapper, which skips what the wrapper adds.

@@ -9,13 +9,15 @@
 module Types = Types
 
 module Accordion : sig
-  (** Contains the content to be rendered when the `Accordion.Item` is expanded. *)
+  (** Contains the content to be rendered when the `Accordion.Item` is expanded.
+  *)
   module Content : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -23,14 +25,15 @@ module Accordion : sig
     [@@mel.module "@kobalte/core/accordion"]
   end
 
-  (** Wraps an `Accordion.Trigger`.
-      Use the `as` prop to update it to the appropriate heading level for your page. *)
+  (** Wraps an `Accordion.Trigger`. Use the `as` prop to update it to the
+      appropriate heading level for your page. *)
   module Header : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.H3.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.H3.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.H3.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -38,7 +41,8 @@ module Accordion : sig
     [@@mel.module "@kobalte/core/accordion"]
   end
 
-  (** An item of the accordion, contains all the parts of a collapsible section. *)
+  (** An item of the accordion, contains all the parts of a collapsible section.
+  *)
   module Item : sig
     module Props : sig
       external check :
@@ -47,7 +51,8 @@ module Accordion : sig
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -55,7 +60,8 @@ module Accordion : sig
     [@@mel.module "@kobalte/core/accordion"]
   end
 
-  (** A vertically stacked set of interactive headings that each reveal an associated section of content. *)
+  (** A vertically stacked set of interactive headings that each reveal an
+      associated section of content. *)
   module Root : sig
     module Props : sig
       external check :
@@ -67,7 +73,8 @@ module Accordion : sig
         ?should_focus_wrap:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -75,13 +82,15 @@ module Accordion : sig
     [@@mel.module "@kobalte/core/accordion"]
   end
 
-  (** Toggles the collapsed state of its associated item. It should be nested inside an `Accordion.Header`. *)
+  (** Toggles the collapsed state of its associated item. It should be nested
+      inside an `Accordion.Header`. *)
   module Trigger : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -89,19 +98,21 @@ module Accordion : sig
     [@@mel.module "@kobalte/core/accordion"]
   end
 
-  external use_accordion_context : unit -> Types.AccordionContextValue.t = "useAccordionContext"
+  external use_accordion_context : unit -> Types.AccordionContextValue.t
+    = "useAccordionContext"
   [@@mel.module "@kobalte/core/accordion"]
 end
 
 module Alert : sig
-  (** Alert displays a brief, important message
-      in a way that attracts the user's attention without interrupting the user's task. *)
+  (** Alert displays a brief, important message in a way that attracts the
+      user's attention without interrupting the user's task. *)
   module Root : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -117,7 +128,8 @@ module AlertDialog : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -125,7 +137,8 @@ module AlertDialog : sig
     [@@mel.module "@kobalte/core/alert-dialog"]
   end
 
-  (** Overrides the regular `Dialog.Content` with role="alertdialog" to interrupt the user. *)
+  (** Overrides the regular `Dialog.Content` with role="alertdialog" to
+      interrupt the user. *)
   module Content : sig
     module Props : sig
       external check :
@@ -137,7 +150,8 @@ module AlertDialog : sig
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -145,13 +159,15 @@ module AlertDialog : sig
     [@@mel.module "@kobalte/core/alert-dialog"]
   end
 
-  (** An optional accessible description to be announced when the dialog is open. *)
+  (** An optional accessible description to be announced when the dialog is
+      open. *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.P.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.P.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.P.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -159,13 +175,15 @@ module AlertDialog : sig
     [@@mel.module "@kobalte/core/alert-dialog"]
   end
 
-  (** A layer that covers the inert portion of the view when the dialog is open. *)
+  (** A layer that covers the inert portion of the view when the dialog is open.
+  *)
   module Overlay : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -182,7 +200,9 @@ module AlertDialog : sig
         ?is_svg:bool Solidtype.Check.value ->
         ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -190,11 +210,13 @@ module AlertDialog : sig
     [@@mel.module "@kobalte/core/alert-dialog"]
   end
 
-  (** A dialog is a window overlaid on either the primary window or another dialog window. *)
+  (** A dialog is a window overlaid on either the primary window or another
+      dialog window. *)
   module Root : sig
     module Props : sig
       external check :
-        ?translations:Types.AlertDialog_Root_Translations.t Solidtype.Check.value ->
+        ?translations:
+          Types.AlertDialog_Root_Translations.t Solidtype.Check.value ->
         ?open_:bool Solidtype.Check.value ->
         ?default_open:bool Solidtype.Check.value ->
         ?on_open_change:(bool -> unit) ->
@@ -203,7 +225,9 @@ module AlertDialog : sig
         ?prevent_scroll:bool Solidtype.Check.value ->
         ?force_mount:bool Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -217,7 +241,8 @@ module AlertDialog : sig
       external check :
         ?as_:(Solidtype.Html.H2.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.H2.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.H2.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -231,7 +256,8 @@ module AlertDialog : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -247,7 +273,8 @@ module Badge : sig
         ?text_value:string Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -264,7 +291,8 @@ module Breadcrumbs : sig
         ?current:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.A.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.A.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.A.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -272,15 +300,18 @@ module Breadcrumbs : sig
     [@@mel.module "@kobalte/core/breadcrumbs"]
   end
 
-  (** Breadcrumbs show hierarchy and navigational context for a user’s location within an application. *)
+  (** Breadcrumbs show hierarchy and navigational context for a user’s location
+      within an application. *)
   module Root : sig
     module Props : sig
       external check :
         ?separator:Solidtype.Jsx.element Solidtype.Check.value ->
-        ?translations:Types.Breadcrumbs_Root_Translations.t Solidtype.Check.value ->
+        ?translations:
+          Types.Breadcrumbs_Root_Translations.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Nav.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Nav.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Nav.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -288,14 +319,15 @@ module Breadcrumbs : sig
     [@@mel.module "@kobalte/core/breadcrumbs"]
   end
 
-  (** The visual separator between each breadcrumb items.
-      It will not be visible by screen readers. *)
+  (** The visual separator between each breadcrumb items. It will not be visible
+      by screen readers. *)
   module Separator : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -303,20 +335,23 @@ module Breadcrumbs : sig
     [@@mel.module "@kobalte/core/breadcrumbs"]
   end
 
-  external use_breadcrumbs_context : unit -> Types.BreadcrumbsContextValue.t = "useBreadcrumbsContext"
+  external use_breadcrumbs_context : unit -> Types.BreadcrumbsContextValue.t
+    = "useBreadcrumbsContext"
   [@@mel.module "@kobalte/core/breadcrumbs"]
 end
 
 module Button : sig
-  (** Button enables users to trigger an action or event, such as submitting a form,
-      opening a dialog, canceling an action, or performing a delete operation.
-      This component is based on the \[WAI-ARIA Button Pattern\](https://www.w3.org/WAI/ARIA/apg/patterns/button/) *)
+  (** Button enables users to trigger an action or event, such as submitting a
+      form, opening a dialog, canceling an action, or performing a delete
+      operation. This component is based on the \[WAI-ARIA Button
+      Pattern\](https://www.w3.org/WAI/ARIA/apg/patterns/button/) *)
   module Root : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -332,7 +367,8 @@ module Checkbox : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -347,7 +383,8 @@ module Checkbox : sig
         ?id:string Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -355,7 +392,8 @@ module Checkbox : sig
     [@@mel.module "@kobalte/core/checkbox"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the checkbox. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the checkbox. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
@@ -363,7 +401,8 @@ module Checkbox : sig
         ?id:string Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -371,15 +410,17 @@ module Checkbox : sig
     [@@mel.module "@kobalte/core/checkbox"]
   end
 
-  (** The visual indicator rendered when the checkbox is in a checked or indeterminate state.
-      You can style this element directly, or you can use it as a wrapper to put an icon into, or both. *)
+  (** The visual indicator rendered when the checkbox is in a checked or
+      indeterminate state. You can style this element directly, or you can use
+      it as a wrapper to put an icon into, or both. *)
   module Indicator : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -393,7 +434,8 @@ module Checkbox : sig
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -407,7 +449,8 @@ module Checkbox : sig
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -415,7 +458,8 @@ module Checkbox : sig
     [@@mel.module "@kobalte/core/checkbox"]
   end
 
-  (** A control that allows the user to toggle between checked and not checked. *)
+  (** A control that allows the user to toggle between checked and not checked.
+  *)
   module Root : sig
     module Props : sig
       external check :
@@ -425,13 +469,19 @@ module Checkbox : sig
         ?indeterminate:bool Solidtype.Check.value ->
         ?value:string Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:(Types.CheckboxRootState.t -> Solidtype.Jsx.element, [ `elements | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:
+           ( Types.CheckboxRootState.t -> Solidtype.Jsx.element,
+             [ `elements | `render ] )
+           Solidtype.Check.children ->
+        unit ->
+        unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -439,7 +489,8 @@ module Checkbox : sig
     [@@mel.module "@kobalte/core/checkbox"]
   end
 
-  external use_checkbox_context : unit -> Types.CheckboxContextValue.t = "useCheckboxContext"
+  external use_checkbox_context : unit -> Types.CheckboxContextValue.t
+    = "useCheckboxContext"
   [@@mel.module "@kobalte/core/checkbox"]
 end
 
@@ -450,7 +501,8 @@ module Collapsible : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -469,7 +521,8 @@ module Collapsible : sig
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -483,7 +536,8 @@ module Collapsible : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -491,7 +545,8 @@ module Collapsible : sig
     [@@mel.module "@kobalte/core/collapsible"]
   end
 
-  external use_collapsible_context : unit -> Types.CollapsibleContextValue.t = "useCollapsibleContext"
+  external use_collapsible_context : unit -> Types.CollapsibleContextValue.t
+    = "useCollapsibleContext"
   [@@mel.module "@kobalte/core/collapsible"]
 end
 
@@ -501,7 +556,8 @@ module ColorArea : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -509,13 +565,15 @@ module ColorArea : sig
     [@@mel.module "@kobalte/core/color-area"]
   end
 
-  (** The description that gives the user more information on the form control. *)
+  (** The description that gives the user more information on the form control.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -523,14 +581,16 @@ module ColorArea : sig
     [@@mel.module "@kobalte/core/color-area"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the form control. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the form control. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -542,7 +602,8 @@ module ColorArea : sig
     module Props : sig
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -554,7 +615,8 @@ module ColorArea : sig
     module Props : sig
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -568,7 +630,8 @@ module ColorArea : sig
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -584,20 +647,39 @@ module ColorArea : sig
         ?default_value:Types.Color.t Solidtype.Check.value ->
         ?on_change:(Types.Color.t -> unit) ->
         ?on_change_end:(Types.Color.t -> unit) ->
-        ?x_channel:[ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] Solidtype.Check.value ->
-        ?y_channel:[ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] Solidtype.Check.value ->
-        ?color_space:[ `rgb | `hsl | `hsb ] Solidtype.Check.value ->
+        ?x_channel:
+          [ `alpha
+          | `blue
+          | `brightness
+          | `green
+          | `hue
+          | `lightness
+          | `red
+          | `saturation ]
+          Solidtype.Check.value ->
+        ?y_channel:
+          [ `alpha
+          | `blue
+          | `brightness
+          | `green
+          | `hue
+          | `lightness
+          | `red
+          | `saturation ]
+          Solidtype.Check.value ->
+        ?color_space:[ `hsb | `hsl | `rgb ] Solidtype.Check.value ->
         ?id:string Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
         ?x_name:string Solidtype.Check.value ->
         ?y_name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -610,7 +692,8 @@ module ColorArea : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -618,7 +701,8 @@ module ColorArea : sig
     [@@mel.module "@kobalte/core/color-area"]
   end
 
-  external use_color_area_context : unit -> Types.ColorAreaContextValue.t = "useColorAreaContext"
+  external use_color_area_context : unit -> Types.ColorAreaContextValue.t
+    = "useColorAreaContext"
   [@@mel.module "@kobalte/core/color-area"]
 end
 
@@ -628,7 +712,8 @@ module ColorChannelField : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -636,13 +721,15 @@ module ColorChannelField : sig
     [@@mel.module "@kobalte/core/color-channel-field"]
   end
 
-  (** The description that gives the user more information on the form control. *)
+  (** The description that gives the user more information on the form control.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -650,14 +737,16 @@ module ColorChannelField : sig
     [@@mel.module "@kobalte/core/color-channel-field"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the form control. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the form control. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -669,7 +758,8 @@ module ColorChannelField : sig
     module Props : sig
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -682,7 +772,8 @@ module ColorChannelField : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -695,7 +786,8 @@ module ColorChannelField : sig
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -709,7 +801,8 @@ module ColorChannelField : sig
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -723,12 +816,22 @@ module ColorChannelField : sig
         ?value:Types.Color.t Solidtype.Check.value ->
         ?default_value:Types.Color.t Solidtype.Check.value ->
         ?on_change:(Types.Color.t -> unit) ->
-        channel:[ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] Solidtype.Check.value ->
-        ?color_space:[ `rgb | `hsl | `hsb ] Solidtype.Check.value ->
+        channel:
+          [ `alpha
+          | `blue
+          | `brightness
+          | `green
+          | `hue
+          | `lightness
+          | `red
+          | `saturation ]
+          Solidtype.Check.value ->
+        ?color_space:[ `hsb | `hsl | `rgb ] Solidtype.Check.value ->
         ?id:string Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?text_value:string Solidtype.Check.value ->
-        ?translations:Types.ColorChannelField_Root_Translations.t Solidtype.Check.value ->
+        ?translations:
+          Types.ColorChannelField_Root_Translations.t Solidtype.Check.value ->
         ?min_value:float Solidtype.Check.value ->
         ?max_value:float Solidtype.Check.value ->
         ?step:float Solidtype.Check.value ->
@@ -736,12 +839,13 @@ module ColorChannelField : sig
         ?change_on_wheel:bool Solidtype.Check.value ->
         ?format:bool Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -751,13 +855,15 @@ module ColorChannelField : sig
 end
 
 module ColorField : sig
-  (** The description that gives the user more information on the form control. *)
+  (** The description that gives the user more information on the form control.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -765,14 +871,16 @@ module ColorField : sig
     [@@mel.module "@kobalte/core/color-field"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the form control. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the form control. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -785,7 +893,8 @@ module ColorField : sig
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -799,7 +908,8 @@ module ColorField : sig
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -815,13 +925,14 @@ module ColorField : sig
         ?on_change:(string -> unit) ->
         ?id:string Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -829,7 +940,8 @@ module ColorField : sig
     [@@mel.module "@kobalte/core/color-field"]
   end
 
-  external use_color_field_context : unit -> Types.ColorFieldContextValue.t = "useColorFieldContext"
+  external use_color_field_context : unit -> Types.ColorFieldContextValue.t
+    = "useColorFieldContext"
   [@@mel.module "@kobalte/core/color-field"]
 end
 
@@ -837,19 +949,22 @@ module ColorMode : sig
   external color_mode_storage_key : string = "COLOR_MODE_STORAGE_KEY"
   [@@mel.module "@kobalte/core/color-mode"]
 
-  external color_mode_context : Types.ColorModeContextType.t option Types.Context.t = "ColorModeContext"
+  external color_mode_context :
+    Types.ColorModeContextType.t option Types.Context.t = "ColorModeContext"
   [@@mel.module "@kobalte/core/color-mode"]
 
-  (** Provides context for the color mode based on config in `theme`
-      Returns the color mode and function to toggle the color mode *)
+  (** Provides context for the color mode based on config in `theme` Returns the
+      color mode and function to toggle the color mode *)
   module ColorModeProvider : sig
     module Props : sig
       external check :
-        ?initial_color_mode:[ `light | `dark | `system ] Solidtype.Check.value ->
+        ?initial_color_mode:[ `dark | `light | `system ] Solidtype.Check.value ->
         ?disable_transition_on_change:bool Solidtype.Check.value ->
         ?storage_manager:Types.ColorModeStorageManager.t Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -860,12 +975,14 @@ module ColorMode : sig
   module ColorModeScript : sig
     module Props : sig
       external check :
-        ?initial_color_mode:[ `light | `dark | `system ] Solidtype.Check.value ->
-        ?storage_type:[ `localStorage | `cookie ] Solidtype.Check.value ->
+        ?initial_color_mode:[ `dark | `light | `system ] Solidtype.Check.value ->
+        ?storage_type:[ `cookie | `localStorage ] Solidtype.Check.value ->
         ?storage_key:string Solidtype.Check.value ->
         ?nonce:string Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -873,39 +990,52 @@ module ColorMode : sig
     [@@mel.module "@kobalte/core/color-mode"]
   end
 
-  external cookie_storage_manager : Types.ColorModeStorageManager.t = "cookieStorageManager"
+  external cookie_storage_manager : Types.ColorModeStorageManager.t
+    = "cookieStorageManager"
   [@@mel.module "@kobalte/core/color-mode"]
 
-  external cookie_storage_manager_ssr : string -> Types.ColorModeStorageManager.t = "cookieStorageManagerSSR"
+  external cookie_storage_manager_ssr :
+    string -> Types.ColorModeStorageManager.t = "cookieStorageManagerSSR"
   [@@mel.module "@kobalte/core/color-mode"]
 
-  external create_cookie_storage_manager : string -> ?cookie:string -> unit -> Types.ColorModeStorageManager.t = "createCookieStorageManager"
+  external create_cookie_storage_manager :
+    string -> ?cookie:string -> unit -> Types.ColorModeStorageManager.t
+    = "createCookieStorageManager"
   [@@mel.module "@kobalte/core/color-mode"]
 
-  external create_local_storage_manager : string -> Types.ColorModeStorageManager.t = "createLocalStorageManager"
+  external create_local_storage_manager :
+    string -> Types.ColorModeStorageManager.t = "createLocalStorageManager"
   [@@mel.module "@kobalte/core/color-mode"]
 
-  external local_storage_manager : Types.ColorModeStorageManager.t = "localStorageManager"
+  external local_storage_manager : Types.ColorModeStorageManager.t
+    = "localStorageManager"
   [@@mel.module "@kobalte/core/color-mode"]
 
-  (** Primitive that reads from `ColorModeProvider` context,
-      Returns the color mode and function to toggle it. *)
-  external use_color_mode : unit -> Types.ColorModeContextType.t = "useColorMode"
+  external use_color_mode : unit -> Types.ColorModeContextType.t
+    = "useColorMode"
   [@@mel.module "@kobalte/core/color-mode"]
+  (** Primitive that reads from `ColorModeProvider` context, Returns the color
+      mode and function to toggle it. *)
 
+  external use_color_mode_value :
+    't_light ->
+    't_dark ->
+    ('t_light, 't_dark) Types.Either.t Solidtype.Solid.accessor
+    = "useColorModeValue"
+  [@@mel.module "@kobalte/core/color-mode"]
   (** Change value based on color mode. *)
-  external use_color_mode_value : 't_light -> 't_dark -> ('t_light, 't_dark) Types.Either.t Solidtype.Solid.accessor = "useColorModeValue"
-  [@@mel.module "@kobalte/core/color-mode"]
 end
 
 module ColorSlider : sig
-  (** The description that gives the user more information on the form control. *)
+  (** The description that gives the user more information on the form control.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -913,14 +1043,16 @@ module ColorSlider : sig
     [@@mel.module "@kobalte/core/color-slider"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the form control. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the form control. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -934,7 +1066,8 @@ module ColorSlider : sig
       external check :
         ?style:string Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -948,7 +1081,8 @@ module ColorSlider : sig
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -963,20 +1097,31 @@ module ColorSlider : sig
         ?default_value:Types.Color.t Solidtype.Check.value ->
         ?on_change:(Types.Color.t -> unit) ->
         ?on_change_end:(Types.Color.t -> unit) ->
-        channel:[ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] Solidtype.Check.value ->
-        ?color_space:[ `rgb | `hsl | `hsb ] Solidtype.Check.value ->
+        channel:
+          [ `alpha
+          | `blue
+          | `brightness
+          | `green
+          | `hue
+          | `lightness
+          | `red
+          | `saturation ]
+          Solidtype.Check.value ->
+        ?color_space:[ `hsb | `hsl | `rgb ] Solidtype.Check.value ->
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?get_value_label:(Types.Color.t -> string) ->
         ?id:string Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
-        ?translations:Types.ColorSlider_Root_Translations.t Solidtype.Check.value ->
+        ?translations:
+          Types.ColorSlider_Root_Translations.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -989,7 +1134,8 @@ module ColorSlider : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1002,7 +1148,8 @@ module ColorSlider : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1010,13 +1157,15 @@ module ColorSlider : sig
     [@@mel.module "@kobalte/core/color-slider"]
   end
 
-  (** The accessible label text representing the current value in a human-readable format. *)
+  (** The accessible label text representing the current value in a
+      human-readable format. *)
   module ValueLabel : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1024,7 +1173,8 @@ module ColorSlider : sig
     [@@mel.module "@kobalte/core/color-slider"]
   end
 
-  external use_color_slider_context : unit -> Types.ColorSliderContextValue.t = "useColorSliderContext"
+  external use_color_slider_context : unit -> Types.ColorSliderContextValue.t
+    = "useColorSliderContext"
   [@@mel.module "@kobalte/core/color-slider"]
 end
 
@@ -1034,10 +1184,12 @@ module ColorSwatch : sig
       external check :
         value:Types.Color.t Solidtype.Check.value ->
         ?color_name:string Solidtype.Check.value ->
-        ?translations:Types.ColorSwatch_Root_Translations.t Solidtype.Check.value ->
+        ?translations:
+          Types.ColorSwatch_Root_Translations.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1047,13 +1199,15 @@ module ColorSwatch : sig
 end
 
 module ColorWheel : sig
-  (** The description that gives the user more information on the form control. *)
+  (** The description that gives the user more information on the form control.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1061,14 +1215,16 @@ module ColorWheel : sig
     [@@mel.module "@kobalte/core/color-wheel"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the form control. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the form control. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1081,7 +1237,8 @@ module ColorWheel : sig
       external check :
         ?style:string Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1095,7 +1252,8 @@ module ColorWheel : sig
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1106,7 +1264,8 @@ module ColorWheel : sig
   module Root : sig
     module Props : sig
       external check :
-        ?translations:Types.ColorSlider_Root_Translations.t Solidtype.Check.value ->
+        ?translations:
+          Types.ColorSlider_Root_Translations.t Solidtype.Check.value ->
         ?value:Types.Color.t Solidtype.Check.value ->
         ?default_value:Types.Color.t Solidtype.Check.value ->
         ?thickness:float Solidtype.Check.value ->
@@ -1115,13 +1274,14 @@ module ColorWheel : sig
         ?get_value_label:(Types.Color.t -> string) ->
         ?id:string Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1134,7 +1294,8 @@ module ColorWheel : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1147,7 +1308,8 @@ module ColorWheel : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1160,7 +1322,8 @@ module ColorWheel : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1168,42 +1331,73 @@ module ColorWheel : sig
     [@@mel.module "@kobalte/core/color-wheel"]
   end
 
-  external use_color_wheel_context : unit -> Types.ColorWheelContextValue.t = "useColorWheelContext"
+  external use_color_wheel_context : unit -> Types.ColorWheelContextValue.t
+    = "useColorWheelContext"
   [@@mel.module "@kobalte/core/color-wheel"]
 end
 
 module Colors : sig
-  external color_intl_translations : Types.ColorSlider_Root_Translations.t = "COLOR_INTL_TRANSLATIONS"
+  external color_intl_translations : Types.ColorSlider_Root_Translations.t
+    = "COLOR_INTL_TRANSLATIONS"
   [@@mel.module "@kobalte/core/colors"]
 
+  external get_color_channels :
+    [ `hsb | `hsl | `rgb ] ->
+    [ `alpha
+    | `blue
+    | `brightness
+    | `green
+    | `hue
+    | `lightness
+    | `red
+    | `saturation ]
+    * [ `alpha
+      | `blue
+      | `brightness
+      | `green
+      | `hue
+      | `lightness
+      | `red
+      | `saturation ]
+    * [ `alpha
+      | `blue
+      | `brightness
+      | `green
+      | `hue
+      | `lightness
+      | `red
+      | `saturation ] = "getColorChannels"
+  [@@mel.module "@kobalte/core/colors"]
   (** Returns a list of color channels for a given color space. *)
-  external get_color_channels : [ `rgb | `hsl | `hsb ] -> ([ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] * [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] * [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ]) = "getColorChannels"
+
+  external normalize_color :
+    (string, Types.Color.t) Types.Either.t -> Types.Color.t = "normalizeColor"
   [@@mel.module "@kobalte/core/colors"]
 
-  external normalize_color : (string, Types.Color.t) Types.Either.t -> Types.Color.t = "normalizeColor"
-  [@@mel.module "@kobalte/core/colors"]
-
-  (** Returns the hue value normalized to the range of 0 to 360. *)
   external normalize_hue : float -> float = "normalizeHue"
   [@@mel.module "@kobalte/core/colors"]
+  (** Returns the hue value normalized to the range of 0 to 360. *)
 
-  (** Parses a color from a string value. Throws an error if the string could not be parsed.
-      
-      Raises [Invalid_argument] with Kobalte's message, where it throws. *)
   val parse_color : string -> Types.Color.t
+  (** Parses a color from a string value. Throws an error if the string could
+      not be parsed.
+
+      Raises [Invalid_argument] with Kobalte's message, where it throws. *)
+
   val parse_color_opt : string -> Types.Color.t option
 end
 
 module Combobox : sig
-  (** An optional arrow element to render alongside the popper content.
-      Must be rendered in the popper content. *)
+  (** An optional arrow element to render alongside the popper content. Must be
+      rendered in the popper content. *)
   module Arrow : sig
     module Props : sig
       external check :
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1221,7 +1415,8 @@ module Combobox : sig
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1235,7 +1430,13 @@ module Combobox : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('option Types.ComboboxControlState.t -> Solidtype.Jsx.element, [ `elements | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:
+           ( 'option Types.ComboboxControlState.t -> Solidtype.Jsx.element,
+             [ `elements | `render ] )
+           Solidtype.Check.children ->
+        unit ->
+        unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1243,13 +1444,15 @@ module Combobox : sig
     [@@mel.module "@kobalte/core/combobox"]
   end
 
-  (** The description that gives the user more information on the form control. *)
+  (** The description that gives the user more information on the form control.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1257,14 +1460,16 @@ module Combobox : sig
     [@@mel.module "@kobalte/core/combobox"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the form control. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the form control. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1276,7 +1481,8 @@ module Combobox : sig
     module Props : sig
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Select.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Select.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1284,14 +1490,16 @@ module Combobox : sig
     [@@mel.module "@kobalte/core/combobox"]
   end
 
-  (** A small icon often displayed next to the value as a visual affordance for the fact it can be open.
-      It renders a `▼` by default, but you can use your own icon `children`. *)
+  (** A small icon often displayed next to the value as a visual affordance for
+      the fact it can be open. It renders a `▼` by default, but you can use your
+      own icon `children`. *)
   module Icon : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1304,7 +1512,8 @@ module Combobox : sig
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1319,7 +1528,8 @@ module Combobox : sig
         item:_ Types.CollectionNode.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1327,14 +1537,16 @@ module Combobox : sig
     [@@mel.module "@kobalte/core/combobox"]
   end
 
-  (** An optional accessible description to be announced for the item.
-      Useful for items that have more complex content (e.g. icons, multiple lines of text, etc.) *)
+  (** An optional accessible description to be announced for the item. Useful
+      for items that have more complex content (e.g. icons, multiple lines of
+      text, etc.) *)
   module ItemDescription : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1342,15 +1554,17 @@ module Combobox : sig
     [@@mel.module "@kobalte/core/combobox"]
   end
 
-  (** The visual indicator rendered when the item is selected.
-      You can style this element directly, or you can use it as a wrapper to put an icon into, or both. *)
+  (** The visual indicator rendered when the item is selected. You can style
+      this element directly, or you can use it as a wrapper to put an icon into,
+      or both. *)
   module ItemIndicator : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1358,14 +1572,15 @@ module Combobox : sig
     [@@mel.module "@kobalte/core/combobox"]
   end
 
-  (** An accessible label to be announced for the item.
-      Useful for items that have more complex content (e.g. icons, multiple lines of text, etc.) *)
+  (** An accessible label to be announced for the item. Useful for items that
+      have more complex content (e.g. icons, multiple lines of text, etc.) *)
   module ItemLabel : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1379,7 +1594,8 @@ module Combobox : sig
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1391,11 +1607,21 @@ module Combobox : sig
   module Listbox : sig
     module Props : sig
       external check :
-        ?scroll_ref:Dom.htmlElement option Solidtype.Solid.accessor Solidtype.Check.value ->
+        ?scroll_ref:
+          Dom.htmlElement option Solidtype.Solid.accessor Solidtype.Check.value ->
         ?scroll_to_item:(string -> unit) ->
         ?as_:(Solidtype.Html.Ul.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:(('option, 'opt_group) Types.Either.t Types.CollectionNode.t Types.Collection.t Solidtype.Solid.accessor -> Solidtype.Jsx.element, [ `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
+        (?children:
+           ( ('option, 'opt_group) Types.Either.t Types.CollectionNode.t
+             Types.Collection.t
+             Solidtype.Solid.accessor ->
+             Solidtype.Jsx.element,
+             [ `render ] )
+           Solidtype.Check.children ->
+        unit ->
+        unit)
+        Solidtype.Html.Ul.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1412,7 +1638,9 @@ module Combobox : sig
         ?is_svg:bool Solidtype.Check.value ->
         ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1420,7 +1648,8 @@ module Combobox : sig
     [@@mel.module "@kobalte/core/combobox"]
   end
 
-  (** A combo box combines a text input with a listbox, allowing users to filter a list of options to items matching a query. *)
+  (** A combo box combines a text input with a listbox, allowing users to filter
+      a list of options to items matching a query. *)
   module Root : sig
     module Props : sig
       external check :
@@ -1431,7 +1660,7 @@ module Combobox : sig
         ?disabled:bool Solidtype.Check.value ->
         ?translations:Types.Combobox_Root_Translations.t Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
@@ -1461,31 +1690,40 @@ module Combobox : sig
         ?option_disabled:('option -> bool) ->
         ?option_group_children:string Solidtype.Check.value ->
         ?keyboard_delegate:Types.KeyboardDelegate.t Solidtype.Check.value ->
-        ?default_filter:([ `contains | `startsWith | `endsWith ], 'option -> string -> bool) Types.Either.t Solidtype.Check.value ->
+        ?default_filter:
+          ( [ `contains | `endsWith | `startsWith ],
+            'option -> string -> bool )
+          Types.Either.t
+          Solidtype.Check.value ->
         ?should_focus_wrap:bool Solidtype.Check.value ->
         ?allows_empty_collection:bool Solidtype.Check.value ->
-        ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+        ?selection_behavior:[ `replace | `toggle ] Solidtype.Check.value ->
         ?allow_duplicate_selection_events:bool Solidtype.Check.value ->
         ?disallow_empty_selection:bool Solidtype.Check.value ->
         ?close_on_selection:bool Solidtype.Check.value ->
         ?remove_on_backspace:bool Solidtype.Check.value ->
         ?virtualized:bool Solidtype.Check.value ->
-        ?item_component:('option Types.ComboboxBaseItemComponentProps.t -> Solidtype.Jsx.element) ->
-        ?section_component:('opt_group Types.ComboboxBaseSectionComponentProps.t -> Solidtype.Jsx.element) ->
+        ?item_component:
+          ('option Types.ComboboxBaseItemComponentProps.t ->
+          Solidtype.Jsx.element) ->
+        ?section_component:
+          ('opt_group Types.ComboboxBaseSectionComponentProps.t ->
+          Solidtype.Jsx.element) ->
         ?modal:bool Solidtype.Check.value ->
         ?prevent_scroll:bool Solidtype.Check.value ->
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Solidtype.Jsx.component = "Root"
-    [@@mel.module "@kobalte/core/combobox"]
+    val component : unit Solidtype.Jsx.component
   end
 
-  (** A combo box combines a text input with a listbox, allowing users to filter a list of options to items matching a query. *)
+  (** A combo box combines a text input with a listbox, allowing users to filter
+      a list of options to items matching a query. *)
   module Root_multiple : sig
     module Props : sig
       external check :
@@ -1497,7 +1735,7 @@ module Combobox : sig
         ?disabled:bool Solidtype.Check.value ->
         ?translations:Types.Combobox_Root_Translations.t Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
@@ -1527,38 +1765,47 @@ module Combobox : sig
         ?option_disabled:('option -> bool) ->
         ?option_group_children:string Solidtype.Check.value ->
         ?keyboard_delegate:Types.KeyboardDelegate.t Solidtype.Check.value ->
-        ?default_filter:([ `contains | `startsWith | `endsWith ], 'option -> string -> bool) Types.Either.t Solidtype.Check.value ->
+        ?default_filter:
+          ( [ `contains | `endsWith | `startsWith ],
+            'option -> string -> bool )
+          Types.Either.t
+          Solidtype.Check.value ->
         ?should_focus_wrap:bool Solidtype.Check.value ->
         ?allows_empty_collection:bool Solidtype.Check.value ->
-        ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+        ?selection_behavior:[ `replace | `toggle ] Solidtype.Check.value ->
         ?allow_duplicate_selection_events:bool Solidtype.Check.value ->
         ?disallow_empty_selection:bool Solidtype.Check.value ->
         ?close_on_selection:bool Solidtype.Check.value ->
         ?remove_on_backspace:bool Solidtype.Check.value ->
         ?virtualized:bool Solidtype.Check.value ->
-        ?item_component:('option Types.ComboboxBaseItemComponentProps.t -> Solidtype.Jsx.element) ->
-        ?section_component:('opt_group Types.ComboboxBaseSectionComponentProps.t -> Solidtype.Jsx.element) ->
+        ?item_component:
+          ('option Types.ComboboxBaseItemComponentProps.t ->
+          Solidtype.Jsx.element) ->
+        ?section_component:
+          ('opt_group Types.ComboboxBaseSectionComponentProps.t ->
+          Solidtype.Jsx.element) ->
         ?modal:bool Solidtype.Check.value ->
         ?prevent_scroll:bool Solidtype.Check.value ->
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Solidtype.Jsx.component = "Root"
-    [@@mel.module "@kobalte/core/combobox"]
+    val component : unit Solidtype.Jsx.component
   end
 
-  (** A component used to render the label of a listbox option group.
-      It won't be focusable using arrow keys. *)
+  (** A component used to render the label of a listbox option group. It won't
+      be focusable using arrow keys. *)
   module Section : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1571,7 +1818,8 @@ module Combobox : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1579,20 +1827,22 @@ module Combobox : sig
     [@@mel.module "@kobalte/core/combobox"]
   end
 
-  external use_combobox_context : unit -> Types.ComboboxContextValue.t = "useComboboxContext"
+  external use_combobox_context : unit -> Types.ComboboxContextValue.t
+    = "useComboboxContext"
   [@@mel.module "@kobalte/core/combobox"]
 end
 
 module ContextMenu : sig
-  (** An optional arrow element to render alongside the popper content.
-      Must be rendered in the popper content. *)
+  (** An optional arrow element to render alongside the popper content. Must be
+      rendered in the popper content. *)
   module Arrow : sig
     module Props : sig
       external check :
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1614,7 +1864,8 @@ module ContextMenu : sig
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1633,7 +1884,8 @@ module ContextMenu : sig
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1647,7 +1899,8 @@ module ContextMenu : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1655,14 +1908,15 @@ module ContextMenu : sig
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
-  (** A component used to render the label of a `Menu.Group`.
-      It won't be focusable using arrow keys. *)
+  (** A component used to render the label of a `Menu.Group`. It won't be
+      focusable using arrow keys. *)
   module GroupLabel : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1670,14 +1924,16 @@ module ContextMenu : sig
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
-  (** A small icon often displayed inside the menu trigger as a visual affordance for the fact it can be open.
-      It renders a `▼` by default, but you can use your own icon by providing a `children`. *)
+  (** A small icon often displayed inside the menu trigger as a visual
+      affordance for the fact it can be open. It renders a `▼` by default, but
+      you can use your own icon by providing a `children`. *)
   module Icon : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1695,7 +1951,8 @@ module ContextMenu : sig
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1704,13 +1961,15 @@ module ContextMenu : sig
   end
 
   (** An optional accessible description to be announced for the menu item.
-      Useful for menu items that have more complex content (e.g. icons, multiple lines of text, etc.) *)
+      Useful for menu items that have more complex content (e.g. icons, multiple
+      lines of text, etc.) *)
   module ItemDescription : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1718,15 +1977,17 @@ module ContextMenu : sig
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
-  (** The visual indicator rendered when the parent menu `CheckboxItem` or `RadioItem` is checked.
-      You can style this element directly, or you can use it as a wrapper to put an icon into, or both. *)
+  (** The visual indicator rendered when the parent menu `CheckboxItem` or
+      `RadioItem` is checked. You can style this element directly, or you can
+      use it as a wrapper to put an icon into, or both. *)
   module ItemIndicator : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1734,14 +1995,16 @@ module ContextMenu : sig
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
-  (** An accessible label to be announced for the menu item.
-      Useful for menu items that have more complex content (e.g. icons, multiple lines of text, etc.) *)
+  (** An accessible label to be announced for the menu item. Useful for menu
+      items that have more complex content (e.g. icons, multiple lines of text,
+      etc.) *)
   module ItemLabel : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1758,7 +2021,9 @@ module ContextMenu : sig
         ?is_svg:bool Solidtype.Check.value ->
         ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1766,7 +2031,8 @@ module ContextMenu : sig
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
-  (** A container used to group multiple `Menu.RadioItem`s and manage the selection. *)
+  (** A container used to group multiple `Menu.RadioItem`s and manage the
+      selection. *)
   module RadioGroup : sig
     module Props : sig
       external check :
@@ -1776,7 +2042,8 @@ module ContextMenu : sig
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1795,7 +2062,8 @@ module ContextMenu : sig
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1803,7 +2071,8 @@ module ContextMenu : sig
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
-  (** Displays a menu located at the pointer, triggered by a right-click or a long-press. *)
+  (** Displays a menu located at the pointer, triggered by a right-click or a
+      long-press. *)
   module Root : sig
     module Props : sig
       external check :
@@ -1827,7 +2096,9 @@ module ContextMenu : sig
         ?force_mount:bool Solidtype.Check.value ->
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1842,7 +2113,8 @@ module ContextMenu : sig
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Hr.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Hr.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1868,7 +2140,9 @@ module ContextMenu : sig
         ?default_open:bool Solidtype.Check.value ->
         ?on_open_change:(bool -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1886,7 +2160,8 @@ module ContextMenu : sig
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1902,7 +2177,8 @@ module ContextMenu : sig
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1916,7 +2192,8 @@ module ContextMenu : sig
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1924,7 +2201,8 @@ module ContextMenu : sig
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
-  external use_context_menu_context : unit -> Types.ContextMenuContextValue.t = "useContextMenuContext"
+  external use_context_menu_context : unit -> Types.ContextMenuContextValue.t
+    = "useContextMenuContext"
   [@@mel.module "@kobalte/core/context-menu"]
 end
 
@@ -1935,7 +2213,8 @@ module Dialog : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1955,7 +2234,8 @@ module Dialog : sig
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1963,13 +2243,15 @@ module Dialog : sig
     [@@mel.module "@kobalte/core/dialog"]
   end
 
-  (** An optional accessible description to be announced when the dialog is open. *)
+  (** An optional accessible description to be announced when the dialog is
+      open. *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.P.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.P.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.P.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1977,13 +2259,15 @@ module Dialog : sig
     [@@mel.module "@kobalte/core/dialog"]
   end
 
-  (** A layer that covers the inert portion of the view when the dialog is open. *)
+  (** A layer that covers the inert portion of the view when the dialog is open.
+  *)
   module Overlay : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2000,7 +2284,9 @@ module Dialog : sig
         ?is_svg:bool Solidtype.Check.value ->
         ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2008,11 +2294,13 @@ module Dialog : sig
     [@@mel.module "@kobalte/core/dialog"]
   end
 
-  (** A dialog is a window overlaid on either the primary window or another dialog window. *)
+  (** A dialog is a window overlaid on either the primary window or another
+      dialog window. *)
   module Root : sig
     module Props : sig
       external check :
-        ?translations:Types.AlertDialog_Root_Translations.t Solidtype.Check.value ->
+        ?translations:
+          Types.AlertDialog_Root_Translations.t Solidtype.Check.value ->
         ?open_:bool Solidtype.Check.value ->
         ?default_open:bool Solidtype.Check.value ->
         ?on_open_change:(bool -> unit) ->
@@ -2021,7 +2309,9 @@ module Dialog : sig
         ?prevent_scroll:bool Solidtype.Check.value ->
         ?force_mount:bool Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2035,7 +2325,8 @@ module Dialog : sig
       external check :
         ?as_:(Solidtype.Html.H2.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.H2.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.H2.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2049,7 +2340,8 @@ module Dialog : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2057,20 +2349,22 @@ module Dialog : sig
     [@@mel.module "@kobalte/core/dialog"]
   end
 
-  external use_dialog_context : unit -> Types.DialogContextValue.t = "useDialogContext"
+  external use_dialog_context : unit -> Types.DialogContextValue.t
+    = "useDialogContext"
   [@@mel.module "@kobalte/core/dialog"]
 end
 
 module DropdownMenu : sig
-  (** An optional arrow element to render alongside the popper content.
-      Must be rendered in the popper content. *)
+  (** An optional arrow element to render alongside the popper content. Must be
+      rendered in the popper content. *)
   module Arrow : sig
     module Props : sig
       external check :
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2092,7 +2386,8 @@ module DropdownMenu : sig
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2112,7 +2407,8 @@ module DropdownMenu : sig
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2126,7 +2422,8 @@ module DropdownMenu : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2134,14 +2431,15 @@ module DropdownMenu : sig
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
-  (** A component used to render the label of a `Menu.Group`.
-      It won't be focusable using arrow keys. *)
+  (** A component used to render the label of a `Menu.Group`. It won't be
+      focusable using arrow keys. *)
   module GroupLabel : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2149,14 +2447,16 @@ module DropdownMenu : sig
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
-  (** A small icon often displayed inside the menu trigger as a visual affordance for the fact it can be open.
-      It renders a `▼` by default, but you can use your own icon by providing a `children`. *)
+  (** A small icon often displayed inside the menu trigger as a visual
+      affordance for the fact it can be open. It renders a `▼` by default, but
+      you can use your own icon by providing a `children`. *)
   module Icon : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2174,7 +2474,8 @@ module DropdownMenu : sig
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2183,13 +2484,15 @@ module DropdownMenu : sig
   end
 
   (** An optional accessible description to be announced for the menu item.
-      Useful for menu items that have more complex content (e.g. icons, multiple lines of text, etc.) *)
+      Useful for menu items that have more complex content (e.g. icons, multiple
+      lines of text, etc.) *)
   module ItemDescription : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2197,15 +2500,17 @@ module DropdownMenu : sig
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
-  (** The visual indicator rendered when the parent menu `CheckboxItem` or `RadioItem` is checked.
-      You can style this element directly, or you can use it as a wrapper to put an icon into, or both. *)
+  (** The visual indicator rendered when the parent menu `CheckboxItem` or
+      `RadioItem` is checked. You can style this element directly, or you can
+      use it as a wrapper to put an icon into, or both. *)
   module ItemIndicator : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2213,14 +2518,16 @@ module DropdownMenu : sig
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
-  (** An accessible label to be announced for the menu item.
-      Useful for menu items that have more complex content (e.g. icons, multiple lines of text, etc.) *)
+  (** An accessible label to be announced for the menu item. Useful for menu
+      items that have more complex content (e.g. icons, multiple lines of text,
+      etc.) *)
   module ItemLabel : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2237,7 +2544,9 @@ module DropdownMenu : sig
         ?is_svg:bool Solidtype.Check.value ->
         ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2245,7 +2554,8 @@ module DropdownMenu : sig
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
-  (** A container used to group multiple `Menu.RadioItem`s and manage the selection. *)
+  (** A container used to group multiple `Menu.RadioItem`s and manage the
+      selection. *)
   module RadioGroup : sig
     module Props : sig
       external check :
@@ -2255,7 +2565,8 @@ module DropdownMenu : sig
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2274,7 +2585,8 @@ module DropdownMenu : sig
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2282,7 +2594,8 @@ module DropdownMenu : sig
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
-  (** Displays a menu to the user —such as a set of actions or functions— triggered by a button. *)
+  (** Displays a menu to the user —such as a set of actions or functions—
+      triggered by a button. *)
   module Root : sig
     module Props : sig
       external check :
@@ -2309,7 +2622,9 @@ module DropdownMenu : sig
         ?arrow_padding:float Solidtype.Check.value ->
         ?overflow_padding:float Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2324,7 +2639,8 @@ module DropdownMenu : sig
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Hr.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Hr.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2350,7 +2666,9 @@ module DropdownMenu : sig
         ?default_open:bool Solidtype.Check.value ->
         ?on_open_change:(bool -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2368,7 +2686,8 @@ module DropdownMenu : sig
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2384,7 +2703,8 @@ module DropdownMenu : sig
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2398,7 +2718,8 @@ module DropdownMenu : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2408,16 +2729,19 @@ module DropdownMenu : sig
 end
 
 module FileField : sig
-  external context : Types.FileFieldContextValue.t option Types.Context.t = "Context"
+  external context : Types.FileFieldContextValue.t option Types.Context.t
+    = "Context"
   [@@mel.module "@kobalte/core/file-field"]
 
-  (** The description that gives the user more information on the form control. *)
+  (** The description that gives the user more information on the form control.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2430,7 +2754,8 @@ module FileField : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2438,14 +2763,16 @@ module FileField : sig
     [@@mel.module "@kobalte/core/file-field"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the form control. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the form control. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2458,7 +2785,8 @@ module FileField : sig
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2471,7 +2799,8 @@ module FileField : sig
       external check :
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2484,7 +2813,8 @@ module FileField : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2497,7 +2827,13 @@ module FileField : sig
       external check :
         ?as_:(Solidtype.Html.Ul.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (children:(Types.File.t -> Solidtype.Jsx.element, [ `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
+        (children:
+           ( Types.File.t -> Solidtype.Jsx.element,
+             [ `render ] )
+           Solidtype.Check.children ->
+        unit ->
+        unit)
+        Solidtype.Html.Ul.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2510,7 +2846,8 @@ module FileField : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2524,7 +2861,8 @@ module FileField : sig
         type_:string Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2537,7 +2875,8 @@ module FileField : sig
       external check :
         ?as_:(Solidtype.Html.Img.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Img.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Img.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2551,7 +2890,8 @@ module FileField : sig
         ?precision:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2564,7 +2904,8 @@ module FileField : sig
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2585,16 +2926,24 @@ module FileField : sig
         ?on_file_accept:(Types.File.t array -> unit) ->
         ?on_file_reject:(Types.FileRejection.t array -> unit) ->
         ?on_file_change:(Types.Details.t -> unit) ->
-        ?validate:(Types.File.t -> [ `TOO_MANY_FILES | `FILE_INVALID_TYPE | `FILE_TOO_LARGE | `FILE_TOO_SMALL ] array Js.Null.t) ->
+        ?validate:
+          (Types.File.t ->
+          [ `FILE_INVALID_TYPE
+          | `FILE_TOO_LARGE
+          | `FILE_TOO_SMALL
+          | `TOO_MANY_FILES ]
+          array
+          Js.Null.t) ->
         ?id:string Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2607,7 +2956,8 @@ module FileField : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2615,20 +2965,22 @@ module FileField : sig
     [@@mel.module "@kobalte/core/file-field"]
   end
 
-  external use_file_field_context : unit -> Types.FileFieldContextValue.t = "useFileFieldContext"
+  external use_file_field_context : unit -> Types.FileFieldContextValue.t
+    = "useFileFieldContext"
   [@@mel.module "@kobalte/core/file-field"]
 end
 
 module HoverCard : sig
-  (** An optional arrow element to render alongside the popper content.
-      Must be rendered in the popper content. *)
+  (** An optional arrow element to render alongside the popper content. Must be
+      rendered in the popper content. *)
   module Arrow : sig
     module Props : sig
       external check :
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2642,7 +2994,8 @@ module HoverCard : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2659,7 +3012,9 @@ module HoverCard : sig
         ?is_svg:bool Solidtype.Check.value ->
         ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2667,7 +3022,8 @@ module HoverCard : sig
     [@@mel.module "@kobalte/core/hover-card"]
   end
 
-  (** A popover that allows sighted users to preview content available behind a link. *)
+  (** A popover that allows sighted users to preview content available behind a
+      link. *)
   module Root : sig
     module Props : sig
       external check :
@@ -2693,7 +3049,9 @@ module HoverCard : sig
         ?arrow_padding:float Solidtype.Check.value ->
         ?overflow_padding:float Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2707,7 +3065,8 @@ module HoverCard : sig
       external check :
         ?as_:(Solidtype.Html.A.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.A.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.A.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2715,7 +3074,8 @@ module HoverCard : sig
     [@@mel.module "@kobalte/core/hover-card"]
   end
 
-  external use_hover_card_context : unit -> Types.HoverCardContextValue.t = "useHoverCardContext"
+  external use_hover_card_context : unit -> Types.HoverCardContextValue.t
+    = "useHoverCardContext"
   [@@mel.module "@kobalte/core/hover-card"]
 end
 
@@ -2726,7 +3086,9 @@ module I18n : sig
       external check :
         ?locale:string Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2737,56 +3099,77 @@ module I18n : sig
   external rtl_langs : string Js.Set.t = "RTL_LANGS"
   [@@mel.module "@kobalte/core/i18n"]
 
-  (** Provides localized string collation for the current locale. Automatically updates when the locale changes,
-      and handles caching of the collator for performance. *)
-  external create_collator : ?options:Types.CollatorOptions.t -> unit -> Types.Collator.t Solidtype.Solid.accessor = "createCollator"
+  external create_collator :
+    ?options:Types.CollatorOptions.t ->
+    unit ->
+    Types.Collator.t Solidtype.Solid.accessor = "createCollator"
   [@@mel.module "@kobalte/core/i18n"]
+  (** Provides localized string collation for the current locale. Automatically
+      updates when the locale changes, and handles caching of the collator for
+      performance. *)
 
-  (** Provides localized date formatting for the current locale. Automatically updates when the locale changes,
-      and handles caching of the date formatter for performance. *)
-  external create_date_formatter : (Types.DateTimeFormatOptions.t, Types.DateTimeFormatOptions.t Solidtype.Solid.accessor) Types.Either.t -> Types.DateTimeFormat.t Solidtype.Solid.accessor = "createDateFormatter"
+  external create_date_formatter :
+    ( Types.DateTimeFormatOptions.t,
+      Types.DateTimeFormatOptions.t Solidtype.Solid.accessor )
+    Types.Either.t ->
+    Types.DateTimeFormat.t Solidtype.Solid.accessor = "createDateFormatter"
   [@@mel.module "@kobalte/core/i18n"]
+  (** Provides localized date formatting for the current locale. Automatically
+      updates when the locale changes, and handles caching of the date formatter
+      for performance. *)
 
-  (** Returns an accessor for the current browser/system language, and updates when it changes. *)
-  external create_default_locale : unit -> Types.I18n_CreateDefaultLocale.t = "createDefaultLocale"
+  external create_default_locale : unit -> Types.I18n_CreateDefaultLocale.t
+    = "createDefaultLocale"
   [@@mel.module "@kobalte/core/i18n"]
+  (** Returns an accessor for the current browser/system language, and updates
+      when it changes. *)
 
-  (** Provides localized string search functionality that is useful for filtering or matching items
-      in a list. Options can be provided to adjust the sensitivity to case, diacritics, and other parameters. *)
-  external create_filter : ?options:Types.CollatorOptions.t -> unit -> Types.Filter.t = "createFilter"
+  external create_filter :
+    ?options:Types.CollatorOptions.t -> unit -> Types.Filter.t = "createFilter"
   [@@mel.module "@kobalte/core/i18n"]
+  (** Provides localized string search functionality that is useful for
+      filtering or matching items in a list. Options can be provided to adjust
+      the sensitivity to case, diacritics, and other parameters. *)
 
-  (** Provides localized number formatting for the current locale. Automatically updates when the locale changes,
-      and handles caching of the number formatter for performance. *)
-  external create_number_formatter : (Types.NumberFormatOptions.t, Types.NumberFormatOptions.t Solidtype.Solid.accessor) Types.Either.t -> Types.NumberFormat.t Solidtype.Solid.accessor = "createNumberFormatter"
+  external create_number_formatter :
+    ( Types.NumberFormatOptions.t,
+      Types.NumberFormatOptions.t Solidtype.Solid.accessor )
+    Types.Either.t ->
+    Types.NumberFormat.t Solidtype.Solid.accessor = "createNumberFormatter"
   [@@mel.module "@kobalte/core/i18n"]
+  (** Provides localized number formatting for the current locale. Automatically
+      updates when the locale changes, and handles caching of the number
+      formatter for performance. *)
 
-  (** Gets the locale setting of the browser. *)
   external get_default_locale : unit -> Types.Locale.t = "getDefaultLocale"
   [@@mel.module "@kobalte/core/i18n"]
+  (** Gets the locale setting of the browser. *)
 
-  external get_reading_direction : string -> [ `rtl | `ltr ] = "getReadingDirection"
+  external get_reading_direction : string -> [ `ltr | `rtl ]
+    = "getReadingDirection"
   [@@mel.module "@kobalte/core/i18n"]
 
-  (** Determines if a locale is read right to left using \[Intl.Locale\]
-      \{\@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale\}. *)
   external is_rtl : string -> bool = "isRTL"
   [@@mel.module "@kobalte/core/i18n"]
+  (** Determines if a locale is read right to left using \[Intl.Locale\] \{@link
+      https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale\}.
+  *)
 
-  (** Returns an accessor for the current locale and layout direction. *)
   external use_locale : unit -> Types.I18n_UseLocale.t = "useLocale"
   [@@mel.module "@kobalte/core/i18n"]
+  (** Returns an accessor for the current locale and layout direction. *)
 end
 
 module Image : sig
-  (** An element that renders when the image hasn't loaded.
-      This means whilst it's loading, or if there was an error. *)
+  (** An element that renders when the image hasn't loaded. This means whilst
+      it's loading, or if there was an error. *)
   module Fallback : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2794,13 +3177,15 @@ module Image : sig
     [@@mel.module "@kobalte/core/image"]
   end
 
-  (** The image to render. By default, it will only render when it has loaded. *)
+  (** The image to render. By default, it will only render when it has loaded.
+  *)
   module Img : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Img.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Img.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Img.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2808,15 +3193,18 @@ module Image : sig
     [@@mel.module "@kobalte/core/image"]
   end
 
-  (** An image element with an optional fallback for loading and error status. *)
+  (** An image element with an optional fallback for loading and error status.
+  *)
   module Root : sig
     module Props : sig
       external check :
         ?fallback_delay:float Solidtype.Check.value ->
-        ?on_loading_status_change:([ `idle | `loading | `loaded | `error ] -> unit) ->
+        ?on_loading_status_change:
+          ([ `error | `idle | `loaded | `loading ] -> unit) ->
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2824,19 +3212,22 @@ module Image : sig
     [@@mel.module "@kobalte/core/image"]
   end
 
-  external use_image_context : unit -> Types.ImageContextValue.t = "useImageContext"
+  external use_image_context : unit -> Types.ImageContextValue.t
+    = "useImageContext"
   [@@mel.module "@kobalte/core/image"]
 end
 
 module Link : sig
-  (** Link allows a user to navigate to another page or resource within a web page or application. *)
+  (** Link allows a user to navigate to another page or resource within a web
+      page or application. *)
   module Root : sig
     module Props : sig
       external check :
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.A.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.A.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.A.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2853,7 +3244,8 @@ module Listbox : sig
         item:_ Types.CollectionNode.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2861,14 +3253,16 @@ module Listbox : sig
     [@@mel.module "@kobalte/core/listbox"]
   end
 
-  (** An optional accessible description to be announced for the item.
-      Useful for items that have more complex content (e.g. icons, multiple lines of text, etc.) *)
+  (** An optional accessible description to be announced for the item. Useful
+      for items that have more complex content (e.g. icons, multiple lines of
+      text, etc.) *)
   module ItemDescription : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2876,15 +3270,17 @@ module Listbox : sig
     [@@mel.module "@kobalte/core/listbox"]
   end
 
-  (** The visual indicator rendered when the item is selected.
-      You can style this element directly, or you can use it as a wrapper to put an icon into, or both. *)
+  (** The visual indicator rendered when the item is selected. You can style
+      this element directly, or you can use it as a wrapper to put an icon into,
+      or both. *)
   module ItemIndicator : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2892,14 +3288,15 @@ module Listbox : sig
     [@@mel.module "@kobalte/core/listbox"]
   end
 
-  (** An accessible label to be announced for the item.
-      Useful for items that have more complex content (e.g. icons, multiple lines of text, etc.) *)
+  (** An accessible label to be announced for the item. Useful for items that
+      have more complex content (e.g. icons, multiple lines of text, etc.) *)
   module ItemLabel : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2907,40 +3304,54 @@ module Listbox : sig
     [@@mel.module "@kobalte/core/listbox"]
   end
 
-  (** Listbox presents a list of options and allows a user to select one or more of them. *)
+  (** Listbox presents a list of options and allows a user to select one or more
+      of them. *)
   module Root : sig
     module Props : sig
       external check :
         ?value:string array Solidtype.Check.value ->
         ?default_value:string array Solidtype.Check.value ->
         ?on_change:(string Js.Set.t -> unit) ->
-        ?options:('option, 'opt_group) Types.Either.t array Solidtype.Check.value ->
+        ?options:
+          ('option, 'opt_group) Types.Either.t array Solidtype.Check.value ->
         ?option_value:('option -> string) ->
         ?option_text_value:('option -> string) ->
         ?option_disabled:('option -> bool) ->
         ?option_group_children:('opt_group -> 'option array) ->
         ?state:Types.ListState.t Solidtype.Check.value ->
         ?keyboard_delegate:Types.KeyboardDelegate.t Solidtype.Check.value ->
-        ?auto_focus:([ `first | `last ], bool) Types.Either.t Solidtype.Check.value ->
+        ?auto_focus:
+          ([ `first | `last ], bool) Types.Either.t Solidtype.Check.value ->
         ?should_focus_wrap:bool Solidtype.Check.value ->
         ?should_use_virtual_focus:bool Solidtype.Check.value ->
         ?should_select_on_press_up:bool Solidtype.Check.value ->
         ?should_focus_on_hover:bool Solidtype.Check.value ->
-        ?scroll_ref:Dom.htmlElement option Solidtype.Solid.accessor Solidtype.Check.value ->
-        ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+        ?scroll_ref:
+          Dom.htmlElement option Solidtype.Solid.accessor Solidtype.Check.value ->
+        ?selection_behavior:[ `replace | `toggle ] Solidtype.Check.value ->
         ?allow_duplicate_selection_events:bool Solidtype.Check.value ->
-        ?selection_mode:[ `none | `single | `multiple ] Solidtype.Check.value ->
+        ?selection_mode:[ `multiple | `none | `single ] Solidtype.Check.value ->
         ?disallow_empty_selection:bool Solidtype.Check.value ->
         ?select_on_focus:bool Solidtype.Check.value ->
         ?disallow_type_ahead:bool Solidtype.Check.value ->
         ?allows_tab_navigation:bool Solidtype.Check.value ->
         ?virtualized:bool Solidtype.Check.value ->
         ?render_item:('option Types.CollectionNode.t -> Solidtype.Jsx.element) ->
-        ?render_section:('opt_group Types.CollectionNode.t -> Solidtype.Jsx.element) ->
+        ?render_section:
+          ('opt_group Types.CollectionNode.t -> Solidtype.Jsx.element) ->
         ?scroll_to_item:(string -> unit) ->
         ?as_:(Solidtype.Html.Ul.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:(('option, 'opt_group) Types.Either.t Types.CollectionNode.t Types.Collection.t Solidtype.Solid.accessor -> Solidtype.Jsx.element, [ `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
+        (?children:
+           ( ('option, 'opt_group) Types.Either.t Types.CollectionNode.t
+             Types.Collection.t
+             Solidtype.Solid.accessor ->
+             Solidtype.Jsx.element,
+             [ `render ] )
+           Solidtype.Check.children ->
+        unit ->
+        unit)
+        Solidtype.Html.Ul.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2948,14 +3359,15 @@ module Listbox : sig
     [@@mel.module "@kobalte/core/listbox"]
   end
 
-  (** A component used to render the label of a listbox option group.
-      It won't be focusable using arrow keys. *)
+  (** A component used to render the label of a listbox option group. It won't
+      be focusable using arrow keys. *)
   module Section : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2963,20 +3375,22 @@ module Listbox : sig
     [@@mel.module "@kobalte/core/listbox"]
   end
 
-  external use_listbox_context : unit -> Types.ListboxContextValue.t = "useListboxContext"
+  external use_listbox_context : unit -> Types.ListboxContextValue.t
+    = "useListboxContext"
   [@@mel.module "@kobalte/core/listbox"]
 end
 
 module Menubar : sig
-  (** An optional arrow element to render alongside the popper content.
-      Must be rendered in the popper content. *)
+  (** An optional arrow element to render alongside the popper content. Must be
+      rendered in the popper content. *)
   module Arrow : sig
     module Props : sig
       external check :
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2998,7 +3412,8 @@ module Menubar : sig
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3017,7 +3432,8 @@ module Menubar : sig
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3031,7 +3447,8 @@ module Menubar : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3039,14 +3456,15 @@ module Menubar : sig
     [@@mel.module "@kobalte/core/menubar"]
   end
 
-  (** A component used to render the label of a `Menu.Group`.
-      It won't be focusable using arrow keys. *)
+  (** A component used to render the label of a `Menu.Group`. It won't be
+      focusable using arrow keys. *)
   module GroupLabel : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3054,14 +3472,16 @@ module Menubar : sig
     [@@mel.module "@kobalte/core/menubar"]
   end
 
-  (** A small icon often displayed inside the menu trigger as a visual affordance for the fact it can be open.
-      It renders a `▼` by default, but you can use your own icon by providing a `children`. *)
+  (** A small icon often displayed inside the menu trigger as a visual
+      affordance for the fact it can be open. It renders a `▼` by default, but
+      you can use your own icon by providing a `children`. *)
   module Icon : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3079,7 +3499,8 @@ module Menubar : sig
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3088,13 +3509,15 @@ module Menubar : sig
   end
 
   (** An optional accessible description to be announced for the menu item.
-      Useful for menu items that have more complex content (e.g. icons, multiple lines of text, etc.) *)
+      Useful for menu items that have more complex content (e.g. icons, multiple
+      lines of text, etc.) *)
   module ItemDescription : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3102,15 +3525,17 @@ module Menubar : sig
     [@@mel.module "@kobalte/core/menubar"]
   end
 
-  (** The visual indicator rendered when the parent menu `CheckboxItem` or `RadioItem` is checked.
-      You can style this element directly, or you can use it as a wrapper to put an icon into, or both. *)
+  (** The visual indicator rendered when the parent menu `CheckboxItem` or
+      `RadioItem` is checked. You can style this element directly, or you can
+      use it as a wrapper to put an icon into, or both. *)
   module ItemIndicator : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3118,14 +3543,16 @@ module Menubar : sig
     [@@mel.module "@kobalte/core/menubar"]
   end
 
-  (** An accessible label to be announced for the menu item.
-      Useful for menu items that have more complex content (e.g. icons, multiple lines of text, etc.) *)
+  (** An accessible label to be announced for the menu item. Useful for menu
+      items that have more complex content (e.g. icons, multiple lines of text,
+      etc.) *)
   module ItemLabel : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3133,7 +3560,8 @@ module Menubar : sig
     [@@mel.module "@kobalte/core/menubar"]
   end
 
-  (** Displays a menu to the user —such as a set of actions or functions— triggered by a button. *)
+  (** Displays a menu to the user —such as a set of actions or functions—
+      triggered by a button. *)
   module Menu : sig
     module Props : sig
       external check :
@@ -3160,7 +3588,9 @@ module Menubar : sig
         ?arrow_padding:float Solidtype.Check.value ->
         ?overflow_padding:float Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3177,7 +3607,9 @@ module Menubar : sig
         ?is_svg:bool Solidtype.Check.value ->
         ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3185,7 +3617,8 @@ module Menubar : sig
     [@@mel.module "@kobalte/core/menubar"]
   end
 
-  (** A container used to group multiple `Menu.RadioItem`s and manage the selection. *)
+  (** A container used to group multiple `Menu.RadioItem`s and manage the
+      selection. *)
   module RadioGroup : sig
     module Props : sig
       external check :
@@ -3195,7 +3628,8 @@ module Menubar : sig
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3214,7 +3648,8 @@ module Menubar : sig
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3222,7 +3657,8 @@ module Menubar : sig
     [@@mel.module "@kobalte/core/menubar"]
   end
 
-  (** A visually persistent menu common in desktop applications that provides quick access to a consistent set of commands. *)
+  (** A visually persistent menu common in desktop applications that provides
+      quick access to a consistent set of commands. *)
   module Root : sig
     module Props : sig
       external check :
@@ -3233,10 +3669,12 @@ module Menubar : sig
         ?focus_on_alt:bool Solidtype.Check.value ->
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?auto_focus_menu:bool Solidtype.Check.value ->
-        ?on_auto_focus_menu_change:bool Solidtype.Solid.setter Solidtype.Check.value ->
+        ?on_auto_focus_menu_change:
+          bool Solidtype.Solid.setter Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3251,7 +3689,8 @@ module Menubar : sig
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Hr.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Hr.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3277,7 +3716,9 @@ module Menubar : sig
         ?default_open:bool Solidtype.Check.value ->
         ?on_open_change:(bool -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3295,7 +3736,8 @@ module Menubar : sig
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3311,7 +3753,8 @@ module Menubar : sig
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3325,7 +3768,8 @@ module Menubar : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3333,19 +3777,21 @@ module Menubar : sig
     [@@mel.module "@kobalte/core/menubar"]
   end
 
-  external use_menubar_context : unit -> Types.MenubarContextValue.t = "useMenubarContext"
+  external use_menubar_context : unit -> Types.MenubarContextValue.t
+    = "useMenubarContext"
   [@@mel.module "@kobalte/core/menubar"]
 end
 
 module Meter : sig
-  (** The component that visually represents the meter value.
-      Used to visually show the fill of `Meter.Track`. *)
+  (** The component that visually represents the meter value. Used to visually
+      show the fill of `Meter.Track`. *)
   module Fill : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3359,7 +3805,8 @@ module Meter : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3374,10 +3821,11 @@ module Meter : sig
         ?value:float Solidtype.Check.value ->
         ?min_value:float Solidtype.Check.value ->
         ?max_value:float Solidtype.Check.value ->
-        ?get_value_label:(Types.GetValueLabelParams.t -> string) ->
+        ?get_value_label:(Types.Meter_GetValueLabelParams.t -> string) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3385,14 +3833,15 @@ module Meter : sig
     [@@mel.module "@kobalte/core/meter"]
   end
 
-  (** The component that visually represents the meter track.
-      Act as a container for `Meter.Fill`. *)
+  (** The component that visually represents the meter track. Act as a container
+      for `Meter.Fill`. *)
   module Track : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3400,13 +3849,15 @@ module Meter : sig
     [@@mel.module "@kobalte/core/meter"]
   end
 
-  (** The accessible label text representing the current value in a human-readable format. *)
+  (** The accessible label text representing the current value in a
+      human-readable format. *)
   module ValueLabel : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3414,20 +3865,22 @@ module Meter : sig
     [@@mel.module "@kobalte/core/meter"]
   end
 
-  external use_meter_context : unit -> Types.MeterContextValue.t = "useMeterContext"
+  external use_meter_context : unit -> Types.MeterContextValue.t
+    = "useMeterContext"
   [@@mel.module "@kobalte/core/meter"]
 end
 
 module NavigationMenu : sig
-  (** An optional arrow element to render alongside the viewport content.
-      Must be rendered in the viewport. *)
+  (** An optional arrow element to render alongside the viewport content. Must
+      be rendered in the viewport. *)
   module Arrow : sig
     module Props : sig
       external check :
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3449,7 +3902,8 @@ module NavigationMenu : sig
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3468,7 +3922,8 @@ module NavigationMenu : sig
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Ul.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Ul.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3482,7 +3937,8 @@ module NavigationMenu : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3490,14 +3946,15 @@ module NavigationMenu : sig
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
-  (** A component used to render the label of a `Menu.Group`.
-      It won't be focusable using arrow keys. *)
+  (** A component used to render the label of a `Menu.Group`. It won't be
+      focusable using arrow keys. *)
   module GroupLabel : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3505,14 +3962,16 @@ module NavigationMenu : sig
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
-  (** A small icon often displayed inside the menu trigger as a visual affordance for the fact it can be open.
-      It renders a `▼` by default, but you can use your own icon by providing a `children`. *)
+  (** A small icon often displayed inside the menu trigger as a visual
+      affordance for the fact it can be open. It renders a `▼` by default, but
+      you can use your own icon by providing a `children`. *)
   module Icon : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3530,7 +3989,8 @@ module NavigationMenu : sig
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.A.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.A.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.A.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3539,13 +3999,15 @@ module NavigationMenu : sig
   end
 
   (** An optional accessible description to be announced for the menu item.
-      Useful for menu items that have more complex content (e.g. icons, multiple lines of text, etc.) *)
+      Useful for menu items that have more complex content (e.g. icons, multiple
+      lines of text, etc.) *)
   module ItemDescription : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3553,15 +4015,17 @@ module NavigationMenu : sig
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
-  (** The visual indicator rendered when the parent menu `CheckboxItem` or `RadioItem` is checked.
-      You can style this element directly, or you can use it as a wrapper to put an icon into, or both. *)
+  (** The visual indicator rendered when the parent menu `CheckboxItem` or
+      `RadioItem` is checked. You can style this element directly, or you can
+      use it as a wrapper to put an icon into, or both. *)
   module ItemIndicator : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3569,14 +4033,16 @@ module NavigationMenu : sig
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
-  (** An accessible label to be announced for the menu item.
-      Useful for menu items that have more complex content (e.g. icons, multiple lines of text, etc.) *)
+  (** An accessible label to be announced for the menu item. Useful for menu
+      items that have more complex content (e.g. icons, multiple lines of text,
+      etc.) *)
   module ItemLabel : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3584,7 +4050,8 @@ module NavigationMenu : sig
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
-  (** Displays a menu to the user —such as a set of actions or functions— triggered by a button. *)
+  (** Displays a menu to the user —such as a set of actions or functions—
+      triggered by a button. *)
   module Menu : sig
     module Props : sig
       external check :
@@ -3611,7 +4078,9 @@ module NavigationMenu : sig
         ?arrow_padding:float Solidtype.Check.value ->
         ?overflow_padding:float Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3619,7 +4088,8 @@ module NavigationMenu : sig
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
-  (** Portals its children into the NavigationMenu.Viewport when the menu is open. *)
+  (** Portals its children into the NavigationMenu.Viewport when the menu is
+      open. *)
   module Portal : sig
     module Props : sig
       external check :
@@ -3628,7 +4098,9 @@ module NavigationMenu : sig
         ?is_svg:bool Solidtype.Check.value ->
         ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3636,7 +4108,8 @@ module NavigationMenu : sig
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
-  (** A container used to group multiple `Menu.RadioItem`s and manage the selection. *)
+  (** A container used to group multiple `Menu.RadioItem`s and manage the
+      selection. *)
   module RadioGroup : sig
     module Props : sig
       external check :
@@ -3646,7 +4119,8 @@ module NavigationMenu : sig
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3665,7 +4139,8 @@ module NavigationMenu : sig
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3673,7 +4148,8 @@ module NavigationMenu : sig
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
-  (** A visually persistent menu common in desktop applications that provides quick access to a consistent set of commands. *)
+  (** A visually persistent menu common in desktop applications that provides
+      quick access to a consistent set of commands. *)
   module Root : sig
     module Props : sig
       external check :
@@ -3681,7 +4157,8 @@ module NavigationMenu : sig
         ?skip_delay_duration:float Solidtype.Check.value ->
         ?force_mount:bool Solidtype.Check.value ->
         ?auto_focus_menu:bool Solidtype.Check.value ->
-        ?on_auto_focus_menu_change:bool Solidtype.Solid.setter Solidtype.Check.value ->
+        ?on_auto_focus_menu_change:
+          bool Solidtype.Solid.setter Solidtype.Check.value ->
         ?default_value:string Solidtype.Check.value ->
         ?value:string Js.Null.t Solidtype.Check.value ->
         ?on_value_change:(string Js.Nullable.t -> unit) ->
@@ -3703,7 +4180,8 @@ module NavigationMenu : sig
         ?overflow_padding:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Ul.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Ul.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3718,7 +4196,8 @@ module NavigationMenu : sig
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Hr.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Hr.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3744,7 +4223,9 @@ module NavigationMenu : sig
         ?default_open:bool Solidtype.Check.value ->
         ?on_open_change:(bool -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3762,7 +4243,8 @@ module NavigationMenu : sig
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3778,7 +4260,8 @@ module NavigationMenu : sig
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3792,7 +4275,8 @@ module NavigationMenu : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3809,7 +4293,8 @@ module NavigationMenu : sig
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3817,7 +4302,8 @@ module NavigationMenu : sig
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
-  external use_navigation_menu_context : unit -> Types.NavigationMenuContextValue.t = "useNavigationMenuContext"
+  external use_navigation_menu_context :
+    unit -> Types.NavigationMenuContextValue.t = "useNavigationMenuContext"
   [@@mel.module "@kobalte/core/navigation-menu"]
 end
 
@@ -3827,7 +4313,8 @@ module NumberField : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3835,13 +4322,15 @@ module NumberField : sig
     [@@mel.module "@kobalte/core/number-field"]
   end
 
-  (** The description that gives the user more information on the form control. *)
+  (** The description that gives the user more information on the form control.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3849,14 +4338,16 @@ module NumberField : sig
     [@@mel.module "@kobalte/core/number-field"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the form control. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the form control. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3868,7 +4359,8 @@ module NumberField : sig
     module Props : sig
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3881,7 +4373,8 @@ module NumberField : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3894,7 +4387,8 @@ module NumberField : sig
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3908,7 +4402,8 @@ module NumberField : sig
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3916,7 +4411,8 @@ module NumberField : sig
     [@@mel.module "@kobalte/core/number-field"]
   end
 
-  (** A text input that allow users to input custom text entries with a keyboard. *)
+  (** A text input that allow users to input custom text entries with a
+      keyboard. *)
   module Root : sig
     module Props : sig
       external check :
@@ -3935,15 +4431,17 @@ module NumberField : sig
         ?allowed_input:Js.Re.t Solidtype.Check.value ->
         ?id:string Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?text_value:string Solidtype.Check.value ->
-        ?translations:Types.ColorChannelField_Root_Translations.t Solidtype.Check.value ->
+        ?translations:
+          Types.ColorChannelField_Root_Translations.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3951,7 +4449,8 @@ module NumberField : sig
     [@@mel.module "@kobalte/core/number-field"]
   end
 
-  external use_number_field_context : unit -> Types.NumberFieldContextValue.t = "useNumberFieldContext"
+  external use_number_field_context : unit -> Types.NumberFieldContextValue.t
+    = "useNumberFieldContext"
   [@@mel.module "@kobalte/core/number-field"]
 end
 
@@ -3961,7 +4460,8 @@ module Pagination : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3975,7 +4475,8 @@ module Pagination : sig
         page:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3987,7 +4488,9 @@ module Pagination : sig
     module Props : sig
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4000,7 +4503,8 @@ module Pagination : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4013,7 +4517,8 @@ module Pagination : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4033,12 +4538,14 @@ module Pagination : sig
         ?show_first:bool Solidtype.Check.value ->
         ?show_last:bool Solidtype.Check.value ->
         ?fixed_items:(string, bool) Types.Either.t Solidtype.Check.value ->
-        item_component:(Types.Pagination_Root_ItemComponent.t -> Solidtype.Jsx.element) ->
+        item_component:
+          (Types.Pagination_Root_ItemComponent_Props.t -> Solidtype.Jsx.element) ->
         ellipsis_component:(unit -> Solidtype.Jsx.element) ->
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Nav.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Nav.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Nav.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4046,19 +4553,22 @@ module Pagination : sig
     [@@mel.module "@kobalte/core/pagination"]
   end
 
-  external use_pagination_context : unit -> Types.PaginationContextValue.t = "usePaginationContext"
+  external use_pagination_context : unit -> Types.PaginationContextValue.t
+    = "usePaginationContext"
   [@@mel.module "@kobalte/core/pagination"]
 end
 
 module Popover : sig
-  (** An optional element to position the `Popover.Content` against.
-      If this part is not used, the content will position alongside the `Popover.Trigger`. *)
+  (** An optional element to position the `Popover.Content` against. If this
+      part is not used, the content will position alongside the
+      `Popover.Trigger`. *)
   module Anchor : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4066,15 +4576,16 @@ module Popover : sig
     [@@mel.module "@kobalte/core/popover"]
   end
 
-  (** An optional arrow element to render alongside the popper content.
-      Must be rendered in the popper content. *)
+  (** An optional arrow element to render alongside the popper content. Must be
+      rendered in the popper content. *)
   module Arrow : sig
     module Props : sig
       external check :
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4088,7 +4599,8 @@ module Popover : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4108,7 +4620,8 @@ module Popover : sig
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4116,13 +4629,15 @@ module Popover : sig
     [@@mel.module "@kobalte/core/popover"]
   end
 
-  (** An optional accessible description to be announced when the popover is open. *)
+  (** An optional accessible description to be announced when the popover is
+      open. *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.P.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.P.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.P.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4139,7 +4654,9 @@ module Popover : sig
         ?is_svg:bool Solidtype.Check.value ->
         ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4151,7 +4668,8 @@ module Popover : sig
   module Root : sig
     module Props : sig
       external check :
-        ?anchor_ref:Dom.htmlElement option Solidtype.Solid.accessor Solidtype.Check.value ->
+        ?anchor_ref:
+          Dom.htmlElement option Solidtype.Solid.accessor Solidtype.Check.value ->
         ?open_:bool Solidtype.Check.value ->
         ?default_open:bool Solidtype.Check.value ->
         ?on_open_change:(bool -> unit) ->
@@ -4174,7 +4692,9 @@ module Popover : sig
         ?arrow_padding:float Solidtype.Check.value ->
         ?overflow_padding:float Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4188,7 +4708,8 @@ module Popover : sig
       external check :
         ?as_:(Solidtype.Html.H2.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.H2.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.H2.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4202,7 +4723,8 @@ module Popover : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4210,19 +4732,21 @@ module Popover : sig
     [@@mel.module "@kobalte/core/popover"]
   end
 
-  external use_popover_context : unit -> Types.PopoverContextValue.t = "usePopoverContext"
+  external use_popover_context : unit -> Types.PopoverContextValue.t
+    = "usePopoverContext"
   [@@mel.module "@kobalte/core/popover"]
 end
 
 module Progress : sig
-  (** The component that visually represents the progress value.
-      Used to visually show the fill of `Progress.Track`. *)
+  (** The component that visually represents the progress value. Used to
+      visually show the fill of `Progress.Track`. *)
   module Fill : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4236,7 +4760,8 @@ module Progress : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4244,7 +4769,8 @@ module Progress : sig
     [@@mel.module "@kobalte/core/progress"]
   end
 
-  (** Progress show either determinate or indeterminate progress of an operation over time. *)
+  (** Progress show either determinate or indeterminate progress of an operation
+      over time. *)
   module Root : sig
     module Props : sig
       external check :
@@ -4252,10 +4778,11 @@ module Progress : sig
         ?value:float Solidtype.Check.value ->
         ?min_value:float Solidtype.Check.value ->
         ?max_value:float Solidtype.Check.value ->
-        ?get_value_label:(Types.GetValueLabelParams.t -> string) ->
+        ?get_value_label:(Types.Meter_GetValueLabelParams.t -> string) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4263,14 +4790,15 @@ module Progress : sig
     [@@mel.module "@kobalte/core/progress"]
   end
 
-  (** The component that visually represents the progress track.
-      Act as a container for `Progress.Fill`. *)
+  (** The component that visually represents the progress track. Act as a
+      container for `Progress.Fill`. *)
   module Track : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4278,13 +4806,15 @@ module Progress : sig
     [@@mel.module "@kobalte/core/progress"]
   end
 
-  (** The accessible label text representing the current value in a human-readable format. *)
+  (** The accessible label text representing the current value in a
+      human-readable format. *)
   module ValueLabel : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4292,18 +4822,21 @@ module Progress : sig
     [@@mel.module "@kobalte/core/progress"]
   end
 
-  external use_progress_context : unit -> Types.ProgressContextValue.t = "useProgressContext"
+  external use_progress_context : unit -> Types.ProgressContextValue.t
+    = "useProgressContext"
   [@@mel.module "@kobalte/core/progress"]
 end
 
 module RadioGroup : sig
-  (** The description that gives the user more information on the form control. *)
+  (** The description that gives the user more information on the form control.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4311,14 +4844,16 @@ module RadioGroup : sig
     [@@mel.module "@kobalte/core/radio-group"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the form control. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the form control. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4334,7 +4869,8 @@ module RadioGroup : sig
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4348,7 +4884,8 @@ module RadioGroup : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4356,13 +4893,15 @@ module RadioGroup : sig
     [@@mel.module "@kobalte/core/radio-group"]
   end
 
-  (** The description that gives the user more information on the radio button. *)
+  (** The description that gives the user more information on the radio button.
+  *)
   module ItemDescription : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4371,14 +4910,16 @@ module RadioGroup : sig
   end
 
   (** The visual indicator rendered when the radio item is in a checked state.
-      You can style this element directly, or you can use it as a wrapper to put an icon into, or both. *)
+      You can style this element directly, or you can use it as a wrapper to put
+      an icon into, or both. *)
   module ItemIndicator : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4392,7 +4933,8 @@ module RadioGroup : sig
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4406,7 +4948,8 @@ module RadioGroup : sig
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4420,7 +4963,8 @@ module RadioGroup : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4428,8 +4972,10 @@ module RadioGroup : sig
     [@@mel.module "@kobalte/core/radio-group"]
   end
 
-  (** A set of checkable buttons, known as radio buttons, where no more than one of the buttons can be checked at a time.
-      This component is based on the \[WAI-ARIA Radio Group Pattern\](https://www.w3.org/WAI/ARIA/apg/patterns/radiobutton/) *)
+  (** A set of checkable buttons, known as radio buttons, where no more than one
+      of the buttons can be checked at a time. This component is based on the
+      \[WAI-ARIA Radio Group
+      Pattern\](https://www.w3.org/WAI/ARIA/apg/patterns/radiobutton/) *)
   module Root : sig
     module Props : sig
       external check :
@@ -4439,13 +4985,14 @@ module RadioGroup : sig
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?id:string Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4453,7 +5000,8 @@ module RadioGroup : sig
     [@@mel.module "@kobalte/core/radio-group"]
   end
 
-  external use_radio_group_context : unit -> Types.RadioGroupContextValue.t = "useRadioGroupContext"
+  external use_radio_group_context : unit -> Types.RadioGroupContextValue.t
+    = "useRadioGroupContext"
   [@@mel.module "@kobalte/core/radio-group"]
 end
 
@@ -4463,7 +5011,8 @@ module Rating : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4471,13 +5020,15 @@ module Rating : sig
     [@@mel.module "@kobalte/core/rating"]
   end
 
-  (** The description that gives the user more information on the form control. *)
+  (** The description that gives the user more information on the form control.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4485,14 +5036,16 @@ module Rating : sig
     [@@mel.module "@kobalte/core/rating"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the form control. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the form control. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4504,7 +5057,8 @@ module Rating : sig
     module Props : sig
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4517,7 +5071,8 @@ module Rating : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4530,7 +5085,13 @@ module Rating : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:(Types.RatingItemState.t -> Solidtype.Jsx.element, [ `elements | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:
+           ( Types.RatingItemState.t -> Solidtype.Jsx.element,
+             [ `elements | `render ] )
+           Solidtype.Check.children ->
+        unit ->
+        unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4543,7 +5104,8 @@ module Rating : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4556,7 +5118,8 @@ module Rating : sig
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4569,7 +5132,8 @@ module Rating : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4587,13 +5151,14 @@ module Rating : sig
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?id:string Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4603,15 +5168,16 @@ module Rating : sig
 end
 
 module Search : sig
-  (** An optional arrow element to render alongside the popper content.
-      Must be rendered in the popper content. *)
+  (** An optional arrow element to render alongside the popper content. Must be
+      rendered in the popper content. *)
   module Arrow : sig
     module Props : sig
       external check :
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4629,7 +5195,8 @@ module Search : sig
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4643,7 +5210,13 @@ module Search : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('option Types.ComboboxControlState.t -> Solidtype.Jsx.element, [ `elements | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:
+           ( 'option Types.ComboboxControlState.t -> Solidtype.Jsx.element,
+             [ `elements | `render ] )
+           Solidtype.Check.children ->
+        unit ->
+        unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4651,13 +5224,15 @@ module Search : sig
     [@@mel.module "@kobalte/core/search"]
   end
 
-  (** The description that gives the user more information on the form control. *)
+  (** The description that gives the user more information on the form control.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4669,7 +5244,8 @@ module Search : sig
     module Props : sig
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Select.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Select.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4677,14 +5253,16 @@ module Search : sig
     [@@mel.module "@kobalte/core/search"]
   end
 
-  (** A small icon often displayed next to the value as a visual affordance for the fact it can be open.
-      It renders a `▼` by default, but you can use your own icon `children`. *)
+  (** A small icon often displayed next to the value as a visual affordance for
+      the fact it can be open. It renders a `▼` by default, but you can use your
+      own icon `children`. *)
   module Icon : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4698,7 +5276,8 @@ module Search : sig
         ?loading_component:Solidtype.Jsx.element Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4711,7 +5290,8 @@ module Search : sig
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4726,7 +5306,8 @@ module Search : sig
         item:_ Types.CollectionNode.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4734,14 +5315,16 @@ module Search : sig
     [@@mel.module "@kobalte/core/search"]
   end
 
-  (** An optional accessible description to be announced for the item.
-      Useful for items that have more complex content (e.g. icons, multiple lines of text, etc.) *)
+  (** An optional accessible description to be announced for the item. Useful
+      for items that have more complex content (e.g. icons, multiple lines of
+      text, etc.) *)
   module ItemDescription : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4749,14 +5332,15 @@ module Search : sig
     [@@mel.module "@kobalte/core/search"]
   end
 
-  (** An accessible label to be announced for the item.
-      Useful for items that have more complex content (e.g. icons, multiple lines of text, etc.) *)
+  (** An accessible label to be announced for the item. Useful for items that
+      have more complex content (e.g. icons, multiple lines of text, etc.) *)
   module ItemLabel : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4770,7 +5354,8 @@ module Search : sig
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4782,11 +5367,21 @@ module Search : sig
   module Listbox : sig
     module Props : sig
       external check :
-        ?scroll_ref:Dom.htmlElement option Solidtype.Solid.accessor Solidtype.Check.value ->
+        ?scroll_ref:
+          Dom.htmlElement option Solidtype.Solid.accessor Solidtype.Check.value ->
         ?scroll_to_item:(string -> unit) ->
         ?as_:(Solidtype.Html.Ul.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:(('option, 'opt_group) Types.Either.t Types.CollectionNode.t Types.Collection.t Solidtype.Solid.accessor -> Solidtype.Jsx.element, [ `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
+        (?children:
+           ( ('option, 'opt_group) Types.Either.t Types.CollectionNode.t
+             Types.Collection.t
+             Solidtype.Solid.accessor ->
+             Solidtype.Jsx.element,
+             [ `render ] )
+           Solidtype.Check.children ->
+        unit ->
+        unit)
+        Solidtype.Html.Ul.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4800,7 +5395,8 @@ module Search : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4817,7 +5413,9 @@ module Search : sig
         ?is_svg:bool Solidtype.Check.value ->
         ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4836,7 +5434,7 @@ module Search : sig
         ?disabled:bool Solidtype.Check.value ->
         ?translations:Types.Combobox_Root_Translations.t Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
@@ -4868,26 +5466,30 @@ module Search : sig
         ?keyboard_delegate:Types.KeyboardDelegate.t Solidtype.Check.value ->
         ?should_focus_wrap:bool Solidtype.Check.value ->
         ?allows_empty_collection:bool Solidtype.Check.value ->
-        ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+        ?selection_behavior:[ `replace | `toggle ] Solidtype.Check.value ->
         ?allow_duplicate_selection_events:bool Solidtype.Check.value ->
         ?disallow_empty_selection:bool Solidtype.Check.value ->
         ?close_on_selection:bool Solidtype.Check.value ->
         ?remove_on_backspace:bool Solidtype.Check.value ->
         ?virtualized:bool Solidtype.Check.value ->
-        ?item_component:('option Types.ComboboxBaseItemComponentProps.t -> Solidtype.Jsx.element) ->
-        ?section_component:('opt_group Types.ComboboxBaseSectionComponentProps.t -> Solidtype.Jsx.element) ->
+        ?item_component:
+          ('option Types.ComboboxBaseItemComponentProps.t ->
+          Solidtype.Jsx.element) ->
+        ?section_component:
+          ('opt_group Types.ComboboxBaseSectionComponentProps.t ->
+          Solidtype.Jsx.element) ->
         ?modal:bool Solidtype.Check.value ->
         ?prevent_scroll:bool Solidtype.Check.value ->
         ?force_mount:bool Solidtype.Check.value ->
         ?debounce_options_millisecond:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Solidtype.Jsx.component = "Root"
-    [@@mel.module "@kobalte/core/search"]
+    val component : unit Solidtype.Jsx.component
   end
 
   (** A search is a combobox where the filter is external. *)
@@ -4902,7 +5504,7 @@ module Search : sig
         ?disabled:bool Solidtype.Check.value ->
         ?translations:Types.Combobox_Root_Translations.t Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
@@ -4934,36 +5536,41 @@ module Search : sig
         ?keyboard_delegate:Types.KeyboardDelegate.t Solidtype.Check.value ->
         ?should_focus_wrap:bool Solidtype.Check.value ->
         ?allows_empty_collection:bool Solidtype.Check.value ->
-        ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+        ?selection_behavior:[ `replace | `toggle ] Solidtype.Check.value ->
         ?allow_duplicate_selection_events:bool Solidtype.Check.value ->
         ?disallow_empty_selection:bool Solidtype.Check.value ->
         ?close_on_selection:bool Solidtype.Check.value ->
         ?remove_on_backspace:bool Solidtype.Check.value ->
         ?virtualized:bool Solidtype.Check.value ->
-        ?item_component:('option Types.ComboboxBaseItemComponentProps.t -> Solidtype.Jsx.element) ->
-        ?section_component:('opt_group Types.ComboboxBaseSectionComponentProps.t -> Solidtype.Jsx.element) ->
+        ?item_component:
+          ('option Types.ComboboxBaseItemComponentProps.t ->
+          Solidtype.Jsx.element) ->
+        ?section_component:
+          ('opt_group Types.ComboboxBaseSectionComponentProps.t ->
+          Solidtype.Jsx.element) ->
         ?modal:bool Solidtype.Check.value ->
         ?prevent_scroll:bool Solidtype.Check.value ->
         ?force_mount:bool Solidtype.Check.value ->
         ?debounce_options_millisecond:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Solidtype.Jsx.component = "Root"
-    [@@mel.module "@kobalte/core/search"]
+    val component : unit Solidtype.Jsx.component
   end
 
-  (** A component used to render the label of a listbox option group.
-      It won't be focusable using arrow keys. *)
+  (** A component used to render the label of a listbox option group. It won't
+      be focusable using arrow keys. *)
   module Section : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4971,18 +5578,21 @@ module Search : sig
     [@@mel.module "@kobalte/core/search"]
   end
 
-  external use_search_context : unit -> Types.SearchContextValue.t = "useSearchContext"
+  external use_search_context : unit -> Types.SearchContextValue.t
+    = "useSearchContext"
   [@@mel.module "@kobalte/core/search"]
 end
 
 module SegmentedControl : sig
-  (** The description that gives the user more information on the form control. *)
+  (** The description that gives the user more information on the form control.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4990,14 +5600,16 @@ module SegmentedControl : sig
     [@@mel.module "@kobalte/core/segmented-control"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the form control. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the form control. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5010,7 +5622,8 @@ module SegmentedControl : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5025,7 +5638,8 @@ module SegmentedControl : sig
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5039,7 +5653,8 @@ module SegmentedControl : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5047,13 +5662,15 @@ module SegmentedControl : sig
     [@@mel.module "@kobalte/core/segmented-control"]
   end
 
-  (** The description that gives the user more information on the radio button. *)
+  (** The description that gives the user more information on the radio button.
+  *)
   module ItemDescription : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5062,14 +5679,16 @@ module SegmentedControl : sig
   end
 
   (** The visual indicator rendered when the radio item is in a checked state.
-      You can style this element directly, or you can use it as a wrapper to put an icon into, or both. *)
+      You can style this element directly, or you can use it as a wrapper to put
+      an icon into, or both. *)
   module ItemIndicator : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5082,7 +5701,8 @@ module SegmentedControl : sig
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5096,7 +5716,8 @@ module SegmentedControl : sig
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5110,7 +5731,8 @@ module SegmentedControl : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5127,14 +5749,15 @@ module SegmentedControl : sig
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?id:string Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?ref:(Dom.htmlElement -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5142,20 +5765,22 @@ module SegmentedControl : sig
     [@@mel.module "@kobalte/core/segmented-control"]
   end
 
-  external use_segmented_control_context : unit -> Types.SegmentedControlContextValue.t = "useSegmentedControlContext"
+  external use_segmented_control_context :
+    unit -> Types.SegmentedControlContextValue.t = "useSegmentedControlContext"
   [@@mel.module "@kobalte/core/segmented-control"]
 end
 
 module Select : sig
-  (** An optional arrow element to render alongside the popper content.
-      Must be rendered in the popper content. *)
+  (** An optional arrow element to render alongside the popper content. Must be
+      rendered in the popper content. *)
   module Arrow : sig
     module Props : sig
       external check :
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5173,7 +5798,8 @@ module Select : sig
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5181,13 +5807,15 @@ module Select : sig
     [@@mel.module "@kobalte/core/select"]
   end
 
-  (** The description that gives the user more information on the form control. *)
+  (** The description that gives the user more information on the form control.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5195,14 +5823,16 @@ module Select : sig
     [@@mel.module "@kobalte/core/select"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the form control. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the form control. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5214,7 +5844,8 @@ module Select : sig
     module Props : sig
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Select.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Select.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5222,14 +5853,16 @@ module Select : sig
     [@@mel.module "@kobalte/core/select"]
   end
 
-  (** A small icon often displayed next to the value as a visual affordance for the fact it can be open.
-      It renders a `▼` by default, but you can use your own icon `children`. *)
+  (** A small icon often displayed next to the value as a visual affordance for
+      the fact it can be open. It renders a `▼` by default, but you can use your
+      own icon `children`. *)
   module Icon : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5244,7 +5877,8 @@ module Select : sig
         item:_ Types.CollectionNode.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5252,14 +5886,16 @@ module Select : sig
     [@@mel.module "@kobalte/core/select"]
   end
 
-  (** An optional accessible description to be announced for the item.
-      Useful for items that have more complex content (e.g. icons, multiple lines of text, etc.) *)
+  (** An optional accessible description to be announced for the item. Useful
+      for items that have more complex content (e.g. icons, multiple lines of
+      text, etc.) *)
   module ItemDescription : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5267,15 +5903,17 @@ module Select : sig
     [@@mel.module "@kobalte/core/select"]
   end
 
-  (** The visual indicator rendered when the item is selected.
-      You can style this element directly, or you can use it as a wrapper to put an icon into, or both. *)
+  (** The visual indicator rendered when the item is selected. You can style
+      this element directly, or you can use it as a wrapper to put an icon into,
+      or both. *)
   module ItemIndicator : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5283,14 +5921,15 @@ module Select : sig
     [@@mel.module "@kobalte/core/select"]
   end
 
-  (** An accessible label to be announced for the item.
-      Useful for items that have more complex content (e.g. icons, multiple lines of text, etc.) *)
+  (** An accessible label to be announced for the item. Useful for items that
+      have more complex content (e.g. icons, multiple lines of text, etc.) *)
   module ItemLabel : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5304,7 +5943,8 @@ module Select : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5316,11 +5956,21 @@ module Select : sig
   module Listbox : sig
     module Props : sig
       external check :
-        ?scroll_ref:Dom.htmlElement option Solidtype.Solid.accessor Solidtype.Check.value ->
+        ?scroll_ref:
+          Dom.htmlElement option Solidtype.Solid.accessor Solidtype.Check.value ->
         ?scroll_to_item:(string -> unit) ->
         ?as_:(Solidtype.Html.Ul.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:(('option, 'opt_group) Types.Either.t Types.CollectionNode.t Types.Collection.t Solidtype.Solid.accessor -> Solidtype.Jsx.element, [ `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
+        (?children:
+           ( ('option, 'opt_group) Types.Either.t Types.CollectionNode.t
+             Types.Collection.t
+             Solidtype.Solid.accessor ->
+             Solidtype.Jsx.element,
+             [ `render ] )
+           Solidtype.Check.children ->
+        unit ->
+        unit)
+        Solidtype.Html.Ul.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5337,7 +5987,9 @@ module Select : sig
         ?is_svg:bool Solidtype.Check.value ->
         ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5345,7 +5997,8 @@ module Select : sig
     [@@mel.module "@kobalte/core/select"]
   end
 
-  (** Displays a list of options for the user to pick from — triggered by a button. *)
+  (** Displays a list of options for the user to pick from — triggered by a
+      button. *)
   module Root : sig
     module Props : sig
       external check :
@@ -5355,7 +6008,7 @@ module Select : sig
         ?id:string Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
@@ -5382,20 +6035,25 @@ module Select : sig
         ?option_group_children:string Solidtype.Check.value ->
         ?keyboard_delegate:Types.KeyboardDelegate.t Solidtype.Check.value ->
         ?should_focus_wrap:bool Solidtype.Check.value ->
-        ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+        ?selection_behavior:[ `replace | `toggle ] Solidtype.Check.value ->
         ?allow_duplicate_selection_events:bool Solidtype.Check.value ->
         ?disallow_empty_selection:bool Solidtype.Check.value ->
         ?close_on_selection:bool Solidtype.Check.value ->
         ?virtualized:bool Solidtype.Check.value ->
-        ?item_component:('option Types.SelectBaseItemComponentProps.t -> Solidtype.Jsx.element) ->
-        ?section_component:('opt_group Types.SelectBaseSectionComponentProps.t -> Solidtype.Jsx.element) ->
+        ?item_component:
+          ('option Types.SelectBaseItemComponentProps.t ->
+          Solidtype.Jsx.element) ->
+        ?section_component:
+          ('opt_group Types.SelectBaseSectionComponentProps.t ->
+          Solidtype.Jsx.element) ->
         ?modal:bool Solidtype.Check.value ->
         ?prevent_scroll:bool Solidtype.Check.value ->
         ?force_mount:bool Solidtype.Check.value ->
         ?disallow_type_ahead:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5403,7 +6061,8 @@ module Select : sig
     [@@mel.module "@kobalte/core/select"]
   end
 
-  (** Displays a list of options for the user to pick from — triggered by a button. *)
+  (** Displays a list of options for the user to pick from — triggered by a
+      button. *)
   module Root_multiple : sig
     module Props : sig
       external check :
@@ -5414,7 +6073,7 @@ module Select : sig
         ?id:string Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
@@ -5441,20 +6100,25 @@ module Select : sig
         ?option_group_children:string Solidtype.Check.value ->
         ?keyboard_delegate:Types.KeyboardDelegate.t Solidtype.Check.value ->
         ?should_focus_wrap:bool Solidtype.Check.value ->
-        ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+        ?selection_behavior:[ `replace | `toggle ] Solidtype.Check.value ->
         ?allow_duplicate_selection_events:bool Solidtype.Check.value ->
         ?disallow_empty_selection:bool Solidtype.Check.value ->
         ?close_on_selection:bool Solidtype.Check.value ->
         ?virtualized:bool Solidtype.Check.value ->
-        ?item_component:('option Types.SelectBaseItemComponentProps.t -> Solidtype.Jsx.element) ->
-        ?section_component:('opt_group Types.SelectBaseSectionComponentProps.t -> Solidtype.Jsx.element) ->
+        ?item_component:
+          ('option Types.SelectBaseItemComponentProps.t ->
+          Solidtype.Jsx.element) ->
+        ?section_component:
+          ('opt_group Types.SelectBaseSectionComponentProps.t ->
+          Solidtype.Jsx.element) ->
         ?modal:bool Solidtype.Check.value ->
         ?prevent_scroll:bool Solidtype.Check.value ->
         ?force_mount:bool Solidtype.Check.value ->
         ?disallow_type_ahead:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5462,14 +6126,15 @@ module Select : sig
     [@@mel.module "@kobalte/core/select"]
   end
 
-  (** A component used to render the label of a listbox option group.
-      It won't be focusable using arrow keys. *)
+  (** A component used to render the label of a listbox option group. It won't
+      be focusable using arrow keys. *)
   module Section : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5482,7 +6147,8 @@ module Select : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5496,7 +6162,13 @@ module Select : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('option Types.SelectValueState.t -> Solidtype.Jsx.element, [ `elements | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:
+           ( 'option Types.SelectValueState.t -> Solidtype.Jsx.element,
+             [ `elements | `render ] )
+           Solidtype.Check.children ->
+        unit ->
+        unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5504,7 +6176,8 @@ module Select : sig
     [@@mel.module "@kobalte/core/select"]
   end
 
-  external use_select_context : unit -> Types.SelectContextValue.t = "useSelectContext"
+  external use_select_context : unit -> Types.SelectContextValue.t
+    = "useSelectContext"
   [@@mel.module "@kobalte/core/select"]
 end
 
@@ -5516,7 +6189,8 @@ module Separator : sig
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Hr.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Hr.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5537,7 +6211,8 @@ module Skeleton : sig
         ?animate:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5547,13 +6222,15 @@ module Skeleton : sig
 end
 
 module Slider : sig
-  (** The description that gives the user more information on the form control. *)
+  (** The description that gives the user more information on the form control.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5561,14 +6238,16 @@ module Slider : sig
     [@@mel.module "@kobalte/core/slider"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the form control. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the form control. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5576,14 +6255,15 @@ module Slider : sig
     [@@mel.module "@kobalte/core/slider"]
   end
 
-  (** The component that visually represents the slider value.
-      Used to visually show the fill of `Slider.Track`. *)
+  (** The component that visually represents the slider value. Used to visually
+      show the fill of `Slider.Track`. *)
   module Fill : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5597,7 +6277,8 @@ module Slider : sig
       external check :
         ?style:string Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5611,7 +6292,8 @@ module Slider : sig
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5631,17 +6313,18 @@ module Slider : sig
         ?max_value:float Solidtype.Check.value ->
         ?step:float Solidtype.Check.value ->
         ?min_steps_between_thumbs:float Solidtype.Check.value ->
-        ?get_value_label:(Types.GetValueLabelParams2.t -> string) ->
+        ?get_value_label:(Types.Slider_GetValueLabelParams.t -> string) ->
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?id:string Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5654,7 +6337,8 @@ module Slider : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5662,14 +6346,15 @@ module Slider : sig
     [@@mel.module "@kobalte/core/slider"]
   end
 
-  (** The component that visually represents the slider track.
-      Act as a container for `Slider.Fill`. *)
+  (** The component that visually represents the slider track. Act as a
+      container for `Slider.Fill`. *)
   module Track : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5677,13 +6362,15 @@ module Slider : sig
     [@@mel.module "@kobalte/core/slider"]
   end
 
-  (** The accessible label text representing the current value in a human-readable format. *)
+  (** The accessible label text representing the current value in a
+      human-readable format. *)
   module ValueLabel : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5691,7 +6378,8 @@ module Slider : sig
     [@@mel.module "@kobalte/core/slider"]
   end
 
-  external use_slider_context : unit -> Types.SliderContextValue.t = "useSliderContext"
+  external use_slider_context : unit -> Types.SliderContextValue.t
+    = "useSliderContext"
   [@@mel.module "@kobalte/core/slider"]
 end
 
@@ -5699,12 +6387,13 @@ module SpinButton : sig
   module Root : sig
     module Props : sig
       external check :
-        ?translations:Types.ColorChannelField_Root_Translations.t Solidtype.Check.value ->
+        ?translations:
+          Types.ColorChannelField_Root_Translations.t Solidtype.Check.value ->
         ?value:(string, float) Types.Either.t Solidtype.Check.value ->
         ?text_value:string Solidtype.Check.value ->
         ?min_value:float Solidtype.Check.value ->
         ?max_value:float Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
@@ -5716,7 +6405,8 @@ module SpinButton : sig
         ?on_increment_to_max:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5732,7 +6422,8 @@ module Switch : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5746,7 +6437,8 @@ module Switch : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5754,14 +6446,16 @@ module Switch : sig
     [@@mel.module "@kobalte/core/switch"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the switch. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the switch. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5775,7 +6469,8 @@ module Switch : sig
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5789,7 +6484,8 @@ module Switch : sig
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5806,13 +6502,19 @@ module Switch : sig
         ?on_change:(bool -> unit) ->
         ?value:string Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:(Types.SwitchRootState.t -> Solidtype.Jsx.element, [ `elements | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:
+           ( Types.SwitchRootState.t -> Solidtype.Jsx.element,
+             [ `elements | `render ] )
+           Solidtype.Check.children ->
+        unit ->
+        unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5820,13 +6522,15 @@ module Switch : sig
     [@@mel.module "@kobalte/core/switch"]
   end
 
-  (** The thumb that is used to visually indicate whether the switch is on or off. *)
+  (** The thumb that is used to visually indicate whether the switch is on or
+      off. *)
   module Thumb : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5834,7 +6538,8 @@ module Switch : sig
     [@@mel.module "@kobalte/core/switch"]
   end
 
-  external use_switch_context : unit -> Types.SwitchContextValue.t = "useSwitchContext"
+  external use_switch_context : unit -> Types.SwitchContextValue.t
+    = "useSwitchContext"
   [@@mel.module "@kobalte/core/switch"]
 end
 
@@ -5847,7 +6552,8 @@ module Tabs : sig
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5855,14 +6561,16 @@ module Tabs : sig
     [@@mel.module "@kobalte/core/tabs"]
   end
 
-  (** The visual indicator displayed at the bottom of the tab list to indicate the selected tab.
-      It provides the base style needed to display a smooth transition to the new selected tab. *)
+  (** The visual indicator displayed at the bottom of the tab list to indicate
+      the selected tab. It provides the base style needed to display a smooth
+      transition to the new selected tab. *)
   module Indicator : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5870,13 +6578,15 @@ module Tabs : sig
     [@@mel.module "@kobalte/core/tabs"]
   end
 
-  (** Contains the tabs that are aligned along the edge of the active tab panel. *)
+  (** Contains the tabs that are aligned along the edge of the active tab panel.
+  *)
   module List : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5884,8 +6594,9 @@ module Tabs : sig
     [@@mel.module "@kobalte/core/tabs"]
   end
 
-  (** A set of layered sections of content, known as tab panels, that display one panel of content at a time.
-      `Tabs` contains all the parts of a tabs component and provide context for its children. *)
+  (** A set of layered sections of content, known as tab panels, that display
+      one panel of content at a time. `Tabs` contains all the parts of a tabs
+      component and provide context for its children. *)
   module Root : sig
     module Props : sig
       external check :
@@ -5893,11 +6604,12 @@ module Tabs : sig
         ?default_value:string Solidtype.Check.value ->
         ?on_change:(string -> unit) ->
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
-        ?activation_mode:[ `manual | `automatic ] Solidtype.Check.value ->
+        ?activation_mode:[ `automatic | `manual ] Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5913,7 +6625,8 @@ module Tabs : sig
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5921,18 +6634,21 @@ module Tabs : sig
     [@@mel.module "@kobalte/core/tabs"]
   end
 
-  external use_tabs_context : unit -> Types.TabsContextValue.t = "useTabsContext"
+  external use_tabs_context : unit -> Types.TabsContextValue.t
+    = "useTabsContext"
   [@@mel.module "@kobalte/core/tabs"]
 end
 
 module TextField : sig
-  (** The description that gives the user more information on the form control. *)
+  (** The description that gives the user more information on the form control.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5940,14 +6656,16 @@ module TextField : sig
     [@@mel.module "@kobalte/core/text-field"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the form control. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the form control. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5960,7 +6678,8 @@ module TextField : sig
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5974,7 +6693,8 @@ module TextField : sig
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5982,7 +6702,8 @@ module TextField : sig
     [@@mel.module "@kobalte/core/text-field"]
   end
 
-  (** A text input that allow users to input custom text entries with a keyboard. *)
+  (** A text input that allow users to input custom text entries with a
+      keyboard. *)
   module Root : sig
     module Props : sig
       external check :
@@ -5991,13 +6712,14 @@ module TextField : sig
         ?on_change:(string -> unit) ->
         ?id:string Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6013,7 +6735,8 @@ module TextField : sig
         ?submit_on_enter:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Textarea.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Textarea.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Textarea.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6021,18 +6744,21 @@ module TextField : sig
     [@@mel.module "@kobalte/core/text-field"]
   end
 
-  external use_text_field_context : unit -> Types.TextFieldContextValue.t = "useTextFieldContext"
+  external use_text_field_context : unit -> Types.TextFieldContextValue.t
+    = "useTextFieldContext"
   [@@mel.module "@kobalte/core/text-field"]
 end
 
 module TimeField : sig
-  (** The description that gives the user more information on the form control. *)
+  (** The description that gives the user more information on the form control.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6040,14 +6766,16 @@ module TimeField : sig
     [@@mel.module "@kobalte/core/time-field"]
   end
 
-  (** The error message that gives the user information about how to fix a validation error on the form control. *)
+  (** The error message that gives the user information about how to fix a
+      validation error on the form control. *)
   module ErrorMessage : sig
     module Props : sig
       external check :
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6059,7 +6787,8 @@ module TimeField : sig
     module Props : sig
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6072,7 +6801,14 @@ module TimeField : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:([ `hour | `minute | `second | `dayPeriod ] Solidtype.Solid.accessor -> Solidtype.Jsx.element, [ `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:
+           ( [ `dayPeriod | `hour | `minute | `second ] Solidtype.Solid.accessor ->
+             Solidtype.Jsx.element,
+             [ `render ] )
+           Solidtype.Check.children ->
+        unit ->
+        unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6085,7 +6821,8 @@ module TimeField : sig
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6100,21 +6837,26 @@ module TimeField : sig
         ?default_value:Types.Time.t Solidtype.Check.value ->
         ?on_change:(Types.Time.t -> unit) ->
         ?hour_cycle:float Solidtype.Check.value ->
-        ?granularity:([ `hour | `minute | `second ], Types.TimeField_Root_Granularity.t) Types.Either.t Solidtype.Check.value ->
+        ?granularity:
+          ( [ `hour | `minute | `second ],
+            Types.TimeField_Root_Granularity.t )
+          Types.Either.t
+          Solidtype.Check.value ->
         ?force_leading_zeros:bool Solidtype.Check.value ->
         ?placeholder:Types.Time.t Solidtype.Check.value ->
         ?min:Types.Time.t Solidtype.Check.value ->
         ?max:Types.Time.t Solidtype.Check.value ->
         ?id:string Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->
-        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?validation_state:[ `invalid | `valid ] Solidtype.Check.value ->
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         ?translations:Types.TimeField_Root_Translations.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6125,10 +6867,11 @@ module TimeField : sig
   module Segment : sig
     module Props : sig
       external check :
-        segment:[ `hour | `minute | `second | `dayPeriod ] Solidtype.Check.value ->
+        segment:[ `dayPeriod | `hour | `minute | `second ] Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6144,7 +6887,8 @@ module Toast : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6152,13 +6896,15 @@ module Toast : sig
     [@@mel.module "@kobalte/core/toast"]
   end
 
-  (** An optional accessible description to be announced when the toast is open. *)
+  (** An optional accessible description to be announced when the toast is open.
+  *)
   module Description : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6166,14 +6912,15 @@ module Toast : sig
     [@@mel.module "@kobalte/core/toast"]
   end
 
-  (** The list containing all rendered toasts.
-      Must be inside a `Toast.Region`. *)
+  (** The list containing all rendered toasts. Must be inside a `Toast.Region`.
+  *)
   module List : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Ol.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ol.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Ol.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6181,14 +6928,15 @@ module Toast : sig
     [@@mel.module "@kobalte/core/toast"]
   end
 
-  (** The component that visually represents the toast remaining lifetime.
-      Used to visually show the fill of `Toast.ProgressTrack`. *)
+  (** The component that visually represents the toast remaining lifetime. Used
+      to visually show the fill of `Toast.ProgressTrack`. *)
   module ProgressFill : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6196,14 +6944,15 @@ module Toast : sig
     [@@mel.module "@kobalte/core/toast"]
   end
 
-  (** The component that visually represents the toast lifetime.
-      Act as a container for `Toast.ProgressFill`. *)
+  (** The component that visually represents the toast lifetime. Act as a
+      container for `Toast.ProgressFill`. *)
   module ProgressTrack : sig
     module Props : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6211,8 +6960,9 @@ module Toast : sig
     [@@mel.module "@kobalte/core/toast"]
   end
 
-  (** The fixed area where toasts appear. Users can jump to by pressing a hotkey.
-      It is up to you to ensure the discoverability of the hotkey for keyboard users. *)
+  (** The fixed area where toasts appear. Users can jump to by pressing a
+      hotkey. It is up to you to ensure the discoverability of the hotkey for
+      keyboard users. *)
   module Region : sig
     module Props : sig
       external check :
@@ -6220,7 +6970,7 @@ module Toast : sig
         ?hotkey:string array Solidtype.Check.value ->
         ?duration:float Solidtype.Check.value ->
         ?limit:float Solidtype.Check.value ->
-        ?swipe_direction:[ `left | `right | `up | `down ] Solidtype.Check.value ->
+        ?swipe_direction:[ `down | `left | `right | `up ] Solidtype.Check.value ->
         ?swipe_threshold:float Solidtype.Check.value ->
         ?pause_on_interaction:bool Solidtype.Check.value ->
         ?pause_on_page_idle:bool Solidtype.Check.value ->
@@ -6228,7 +6978,8 @@ module Toast : sig
         ?region_id:string Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6253,7 +7004,8 @@ module Toast : sig
         ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6267,7 +7019,8 @@ module Toast : sig
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6278,13 +7031,15 @@ module Toast : sig
   external toaster : Types.Toast_Toaster.t = "toaster"
   [@@mel.module "@kobalte/core/toast"]
 
-  external use_toast_context : unit -> Types.ToastContextValue.t = "useToastContext"
+  external use_toast_context : unit -> Types.ToastContextValue.t
+    = "useToastContext"
   [@@mel.module "@kobalte/core/toast"]
 end
 
 module ToggleButton : sig
-  (** A two-state button that allow users to toggle a selection on or off.
-      This component is based on the \[WAI-ARIA Button Pattern\](https://www.w3.org/WAI/ARIA/apg/patterns/button/) *)
+  (** A two-state button that allow users to toggle a selection on or off. This
+      component is based on the \[WAI-ARIA Button
+      Pattern\](https://www.w3.org/WAI/ARIA/apg/patterns/button/) *)
   module Root : sig
     module Props : sig
       external check :
@@ -6293,7 +7048,13 @@ module ToggleButton : sig
         ?on_change:(bool -> unit) ->
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:(Types.ToggleButtonRootState.t -> Solidtype.Jsx.element, [ `elements | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:
+           ( Types.ToggleButtonRootState.t -> Solidtype.Jsx.element,
+             [ `elements | `render ] )
+           Solidtype.Check.children ->
+        unit ->
+        unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6309,7 +7070,13 @@ module ToggleGroup : sig
         value:string Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:(Types.ToggleButtonRootState.t -> Solidtype.Jsx.element, [ `elements | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:
+           ( Types.ToggleButtonRootState.t -> Solidtype.Jsx.element,
+             [ `elements | `render ] )
+           Solidtype.Check.children ->
+        unit ->
+        unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6327,7 +7094,8 @@ module ToggleGroup : sig
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6346,7 +7114,8 @@ module ToggleGroup : sig
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6354,20 +7123,22 @@ module ToggleGroup : sig
     [@@mel.module "@kobalte/core/toggle-group"]
   end
 
-  external use_toggle_group_context : unit -> Types.ToggleGroupContextValue.t = "useToggleGroupContext"
+  external use_toggle_group_context : unit -> Types.ToggleGroupContextValue.t
+    = "useToggleGroupContext"
   [@@mel.module "@kobalte/core/toggle-group"]
 end
 
 module Tooltip : sig
-  (** An optional arrow element to render alongside the popper content.
-      Must be rendered in the popper content. *)
+  (** An optional arrow element to render alongside the popper content. Must be
+      rendered in the popper content. *)
   module Arrow : sig
     module Props : sig
       external check :
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6383,7 +7154,8 @@ module Tooltip : sig
         ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6400,7 +7172,9 @@ module Tooltip : sig
         ?is_svg:bool Solidtype.Check.value ->
         ?ref:(Dom.element -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6408,8 +7182,8 @@ module Tooltip : sig
     [@@mel.module "@kobalte/core/tooltip"]
   end
 
-  (** A popup that displays information related to an element
-      when the element receives keyboard focus or the mouse hovers over it. *)
+  (** A popup that displays information related to an element when the element
+      receives keyboard focus or the mouse hovers over it. *)
   module Root : sig
     module Props : sig
       external check :
@@ -6439,7 +7213,9 @@ module Tooltip : sig
         ?arrow_padding:float Solidtype.Check.value ->
         ?overflow_padding:float Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6453,7 +7229,8 @@ module Tooltip : sig
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+        Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6461,29 +7238,46 @@ module Tooltip : sig
     [@@mel.module "@kobalte/core/tooltip"]
   end
 
-  external use_tooltip_context : unit -> Types.TooltipContextValue.t = "useTooltipContext"
+  external use_tooltip_context : unit -> Types.TooltipContextValue.t
+    = "useTooltipContext"
   [@@mel.module "@kobalte/core/tooltip"]
 end
 
 module Selection : sig
-  (** Provides state management for list-like components.
-      Handles building a collection of items from props, and manages multiple selection state. *)
-  external create_list_state : _ Types.CreateListStateProps.t -> Types.ListState.t = "createListState"
+  external create_list_state :
+    _ Types.CreateListStateProps.t -> Types.ListState.t = "createListState"
   [@@mel.module "@kobalte/core"]
+  (** Provides state management for list-like components. Handles building a
+      collection of items from props, and manages multiple selection state. *)
 
+  external create_selectable_collection :
+    Types.CreateSelectableCollectionProps.t ->
+    't Dom.element_like option Solidtype.Solid.accessor ->
+    ?scroll_ref:'u Dom.element_like option Solidtype.Solid.accessor ->
+    unit ->
+    Types.Selection_CreateSelectableCollection.t = "createSelectableCollection"
+  [@@mel.module "@kobalte/core"]
   (** Handles interactions with selectable collections. *)
-  external create_selectable_collection : Types.CreateSelectableCollectionProps.t -> 't Dom.element_like option Solidtype.Solid.accessor -> ?scroll_ref:'u Dom.element_like option Solidtype.Solid.accessor -> unit -> Types.Selection_CreateSelectableCollection.t = "createSelectableCollection"
-  [@@mel.module "@kobalte/core"]
 
+  external create_selectable_item :
+    Types.CreateSelectableItemProps.t ->
+    't Dom.element_like option Solidtype.Solid.accessor ->
+    Types.Selection_CreateSelectableItem.t = "createSelectableItem"
+  [@@mel.module "@kobalte/core"]
   (** Handles interactions with an item in a selectable collection. *)
-  external create_selectable_item : Types.CreateSelectableItemProps.t -> 't Dom.element_like option Solidtype.Solid.accessor -> Types.Selection_CreateSelectableItem.t = "createSelectableItem"
-  [@@mel.module "@kobalte/core"]
 
+  external create_selectable_list :
+    _ Types.CreateSelectableListProps.t ->
+    't Dom.element_like option Solidtype.Solid.accessor ->
+    ?scroll_ref:'u Dom.element_like option Solidtype.Solid.accessor ->
+    unit ->
+    Types.Selection_CreateSelectableList.t = "createSelectableList"
+  [@@mel.module "@kobalte/core"]
   (** Handles interactions with a selectable list. *)
-  external create_selectable_list : _ Types.CreateSelectableListProps.t -> 't Dom.element_like option Solidtype.Solid.accessor -> ?scroll_ref:'u Dom.element_like option Solidtype.Solid.accessor -> unit -> Types.Selection_CreateSelectableList.t = "createSelectableList"
-  [@@mel.module "@kobalte/core"]
 
-  (** Handles typeahead interactions with collections. *)
-  external create_type_select : Types.CreateTypeSelectProps.t -> Types.Selection_CreateTypeSelect.t = "createTypeSelect"
+  external create_type_select :
+    Types.CreateTypeSelectProps.t -> Types.Selection_CreateTypeSelect.t
+    = "createTypeSelect"
   [@@mel.module "@kobalte/core"]
+  (** Handles typeahead interactions with collections. *)
 end

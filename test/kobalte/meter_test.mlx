@@ -1,7 +1,7 @@
 module H = Harness
 module K = Solidtype_kobalte
 module Meter = K.Meter
-module Params = K.Types.GetValueLabelParams
+module Params = K.Types.Meter_GetValueLabelParams
 
 let island () =
   <Meter.Root

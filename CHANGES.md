@@ -1,5 +1,69 @@
 # Changes
 
+## 0.15.0 (2026-11-23)
+
+- Breaking: what Kobalte types `any` is no longer a type its reader
+  chooses. `Types.ListState.collection`,
+  `Types.SingleSelectListState.collection` and `selected_item` give nodes of
+  `Types.Unknown.t`, which nothing reads, where they gave `_`; and the node
+  a `render_item` or `render_section` given to `ComboboxContextValue.make`
+  or `SelectContextValue.make` takes is one too. A node's `key`,
+  `text_value` and the rest read as before; its `raw_value` is the caller's
+  own data only where the caller gave it, by `'data`.
+- Breaking: a `bigint` is `Js.Bigint.t`. `Types.NumberFormat.format_to_parts`
+  takes one where it took `Types.DateTimeFormat_FormatRange.t`, a module
+  that bound a bigint's methods under the name of where it was first met;
+  it and `Types.BigIntToLocaleStringOptions` are gone.
+- Breaking: a type's module in `Types` is never numbered. One with no name
+  in its library is named by the path of names to it: what a function
+  gives by the function, what it takes by the parameter's name after it.
+  rhp's `Types.Bins` is what `bins` gives, which was `Types.Bins2`, and its
+  options are `Types.Bins_Options`; `Types.Every`, `Types.Density` and
+  `Types.Animated` are `Types.Every_Options`, `Types.Density_Options` and
+  `Types.Animated_Settings`. @internationalized/date's
+  `Types.ZonedDateTime_Set` is `Types.ZonedDateTime_Set_Fields`. Kobalte's
+  `Types.GetValueLabelParams` and `Types.GetValueLabelParams2` are
+  `Types.Meter_GetValueLabelParams` and `Types.Slider_GetValueLabelParams`;
+  `Types.Pagination_Root_ItemComponent` and `Types.Context_Provider` end in
+  `_Props`, `Types.Color_GetColorSpaceAxes` in `_XyChannels`,
+  `Types.ColorAreaContextValue_OnDrag`, `Types.ColorWheelContextValue_OnDrag`
+  and `Types.SliderContextValue_OnSlideMove` in `_Deltas`, and
+  `Types.ColorAreaState_SetThumbPercent` and `_SetThumbValue` in `_Value`.
+  `Types.AlertDialog_Portal_Ref_element_` and its `2`, which nothing named,
+  are gone.
+- Fixed: in the reference of `solidtype-kobalte`, `solidtype-rhp` and
+  `solidtype-internationalized-date`, a field's or a function's
+  description is on it. It was written as a line above the declaration,
+  which OCaml read as the one before's, so 167 of Kobalte's types alone
+  showed the next field's description.
+- Fixed: a function a Kobalte object may not have --
+  `Types.KeyboardDelegate.get_first_key` and its kind, a
+  `Create...Props`'s `filter` and handlers -- is called with the arguments
+  it is given, whatever JavaScript's count of its parameters. Melange
+  called it by that count, so one with an optional parameter was applied
+  to too few arguments, and what it gave back called with the rest.
+- Fixed: a function of two or more arguments given in JSX runs, however
+  it takes them. `fun a b -> ...` and a function that takes `a`, works,
+  and gives a function of `b` are one type, and only the first reached
+  JavaScript as a function of two: the second, given to `For`, `Index`, a
+  component's function prop, or Kobalte's `on_open_change`, compiled and
+  was called wrong, or never. Whoever receives one now applies it as
+  OCaml applies a function; nothing changes in what is written. The same
+  holds of a function given to a generated constructor, a translations
+  object's `color_name`.
+- Breaking: `For.component` and `Index.component` are components of their
+  own over Solid's, `'a Props.t Jsx.component`, where they were Solid's,
+  `unit Jsx.component`; as a tag, `<For>`, they are written as before.
+- Breaking: `Types.Toast_Toaster.make` is gone: the toaster is Kobalte's
+  to make.
+- `Solidtype.Arity`, which a binding gives a JavaScript component's
+  function props of several arguments through.
+- `vite-plugin-solidtype` fails the build, where the marker is written, on
+  a marker it cannot read and on one left outside an element, which
+  reached the browser as a name not defined; and it leaves a function the
+  ppx bound where it is when moving it to its use would change a name it
+  reads.
+
 ## 0.14.0 (2026-11-22)
 
 - Breaking: a value that may be empty is given as `Js.Null.t`, never

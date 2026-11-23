@@ -4,37 +4,43 @@ solidtype is an OCaml library of Hypha Stack: Solid, typed, for OCaml front
 ends on SolidJS and Kobalte, compiled by Melange. A component is written in
 OCaml's JSX (`.mlx`), and reaches the browser as the code Solid's own
 compiler emits for the same JSX. `ppx_solidtype` lowers the JSX;
-`vite-plugin-solidtype` hands it to Solid's compiler. Each JavaScript
-library bound is an opam package of its own: `solidtype` binds Solid,
-`solidtype-kobalte` Kobalte, `solidtype-rhp` rhp's charts,
-`solidtype-internationalized-date` the dates HeroUI's date components take,
-`solidtype-gravity-icons` Gravity UI's icons, the set HeroUI's examples draw;
-`solidtype-headless` holds the components Kobalte lacks, made as Kobalte
-makes its own, of its hooks, with no style, and Kobalte's own where they
-need a fix; and `solidtype-heroui` is a
-maintained port of HeroUI's components onto Kobalte's and those, since
-HeroUI's are React's. This file is for anyone changing it, human or agent. Users start at [README.md](README.md).
+`vite-plugin-solidtype` hands it to Solid's compiler. This file is for anyone
+changing it, human or agent. Users start at [README.md](README.md).
+
+Each JavaScript library bound is an opam package of its own:
+
+- `solidtype` binds Solid, and types each element's attributes;
+- `solidtype-kobalte` binds Kobalte;
+- `solidtype-headless` holds the components Kobalte lacks, made as Kobalte
+  makes its own, of its hooks, with no style, and Kobalte's own where they
+  need a fix;
+- `solidtype-heroui` is a maintained port of HeroUI's components onto
+  Kobalte's and those, since HeroUI's are React's;
+- `solidtype-rhp` binds rhp's charts;
+- `solidtype-internationalized-date` binds the dates HeroUI's date
+  components take;
+- `solidtype-gravity-icons` holds Gravity UI's icons, the set HeroUI's
+  examples draw.
 
 ## Commands
 
 ```sh
-make setup          # once: the switch solidtype, all dependencies, and
-                    # Bun's
+make setup          # once: the switch solidtype, all dependencies, and Bun's
 make test           # the ppx's lowering, the plugin's rewrite, the
                     # libraries' tests and the example's
 make lint           # formatting, the plugin's and the generators' types,
-                    # litany, the release build and the generated bindings
+                    # litany, the release build, the generators' rules and
+                    # the generated bindings
 make fmt            # format in place
+make generate       # write the generated bindings
 make example        # the board, built by Vite into _build/example-dist, and
                     # its Astro page, into _build/example-astro
-make example-serve  # the board and its API, served on http://localhost:4420,
-                    # its tasks in BOARD_DB, example/board.db, migrated first
-make docs           # the documentation site, odoc's reference copied into
-                    # docs/public/reference, built by Astro into _build/docs,
-                    # as .github/workflows/docs.yml publishes it from main,
-                    # and agents/ from its pages
-make docs-serve     # the documentation site built, served on DOCS_PORT with
-                    # search
+make example-serve  # the board and its API on http://localhost:4420, its
+                    # tasks in BOARD_DB, example/board.db, migrated first
+make docs           # the documentation site, built by Astro into
+                    # _build/docs with odoc's reference, and agents/ from
+                    # its pages
+make docs-serve     # the site built, served on DOCS_PORT with search
 make release VERSION=1.2.3  # tag and release
 ```
 
@@ -43,700 +49,487 @@ builds and tests, and Bun installs, runs and tests it as one binary.
 
 ## Layout
 
+A module's `.mli` says what it is; this says where things are and what no
+file says of itself.
+
 ```
-src/                 solidtype, for Melange alone
-  jsx                the markers the ppx writes and the plugin rewrites
-  check              the types of a component's props check
-  solid              Solid's reactive core, solid-js
-  web                its renderer in the browser, solid-js/web
-  server             its rendering on the server, a module of its own so a
-                     browser build never names what Solid's browser build lacks
-  store              its stores, solid-js/store
-  for index show switch match suspense suspenseList errorBoundary
-  dynamic portal noHydration hydration hydrationScript assets
-                     Solid's components, one module each, named as Solid
-                     names them
-  context            a context, as a module made by a functor
-  html               each element's attributes, generated
-kobalte/             solidtype-kobalte: Kobalte's components part by part,
-                     its hooks, values and the types they name, generated
-headless/            solidtype-headless: the components Kobalte lacks, one
-                     module each, made of Kobalte's hooks: roles, keys and
-                     state, no style, every attribute of a part's element
-                     taken and passed on; and Kobalte's own where they need
-                     a fix, each fixed part Kobalte's beneath, the others
-                     Kobalte's as they are
-  data_grid          a data grid's model, whoever dresses it: its columns,
-                     its rows sorted, and reordered by a drop
-  table              a grid of rows and cells: Kobalte's list of rows,
-                     their selection, the keys through their cells, a row
-                     that loads more, columns laid out and resized as
-                     React Stately lays them out, columns pinned to a side
-                     and a header kept in view, rows reordered by a drag or
-                     the keys, and rows that hold rows,
-                     each row's cells and rows tokens it draws once read
-  calendar           a month's grid of days to choose one date, several or
-                     a range from, the locale's, moved through and paged
-                     as React Stately's calendar is
-  date_field         a date's segments, the locale's in its order and
-                     calendar, each Kobalte's spin button, typed and stepped
-                     as React Stately's date field edits them, of a date, a
-                     date with a time or one in a zone, or two of them, a
-                     range
-  date_picker        a date field whose group's trigger opens a popover
-                     of a calendar choosing its date or its range, a time
-                     kept, as React Stately's pickers keep them
-  command            a search that filters a menu of commands, the focus
-                     kept in the search while the keys move through those
-                     shown, as React Aria's autocomplete filters its menu
-  color_picker       one colour its parts share, as React Aria's: the colour
-                     components below read it, given no value of their own;
-                     it draws nothing
-  color_swatch_picker
-                     a listbox of colours, each option named by its
-                     swatch, walked as a grid by where each option is or
-                     as a stack
-  tag_group          a grid of tags: Kobalte's list of rows, chosen, walked
-                     with a wrap, removed by a button or the keys and the
-                     focus moved on
-  load_more_sentinel what asks a list for more as its end comes into view
-  top_layer          the browser's top layer: an overlay drawn above the
-                     page and every overlay opened before it, and one
-                     kept above those opened after
-  virtualizer        React Aria's Virtualizer: a collection draws the entries
-                     in view, each placed by a layout
-  color_swatch       Kobalte's, a colour less than opaque one a browser
-  color_area         reads, an area disabled whole, a slider paged by its
-  color_slider       colour's page and told only a change, a field of a hex
-  color_field        whose value is a colour, committed by Enter and
-  color_channel_field
-                     stepped by the keys and the wheel, and a channel's
-                     field that tells its number and only a change
-  number_field       Kobalte's, its wheel turned as React Aria's turns it
-  slider             Kobalte's, a track given a ref still its slider's
-rhp/                 solidtype-rhp: rhp's charts, generated where a rule maps
-                     rhp's declarations whole: solidtype_rhp, and the types
-                     it names, types
-  plot scale         what no rule maps, ported by hand, one module each, each
-  many_dots row      .mli saying why: a plot of typed rows and its slat, a
-  slat order         scale, many dots, a plot's order, the types of more
-  color ticks ease   JavaScript kinds than Either holds, and helpers, rhp's
-  shape helpers      functions of rows, which solidtype_rhp includes
-internationalized_date/
-                     solidtype-internationalized-date: @internationalized/date's
-                     functions, and its values in types, each a kind of one
-                     Value, generated
-gravity_icons/       solidtype-gravity-icons: every icon of @gravity-ui/icons,
-                     a module each, so a page bundles only those it draws,
-                     generated
-heroui/              solidtype-heroui: HeroUI's components ported onto
-                     Kobalte's, one module each
-  styles             HeroUI's variant functions, the classes of each look,
-                     generated
-  interaction        the state React Aria writes on an element and HeroUI's
-                     styles read, kept as React Aria keeps it
-  field              what a switch, a checkbox and a radio share: the state
-                     their content declares, a value controlled or kept, and
-                     the content, on a Kobalte component's label and input
-  panel              what a disclosure's content and an accordion's panel
-                     share: kept on the page, found by find in page, and
-                     sized as HeroUI's styles animate it
-  theme              HeroUI's useTheme: which theme <html> shows, kept across
-                     visits
-  overlay            what every overlay shares: on the page while it opens,
-                     is open, and closes, as HeroUI's styles animate it
-  dialog_frame       what a modal, an alert dialog and a drawer share on Kobalte's
-                     dialog: root, trigger, backdrop, container, dialog,
-                     heading and close trigger, each port's classes its own
-  status_icon        HeroUI's icon for each status, as an alert, a toast and
-                     an alert dialog draw it
+src/               solidtype, for Melange alone: jsx, the markers; check, a
+                   props check's types; arity, a JavaScript component's
+                   function props of several arguments, called as OCaml
+                   calls a function; solid, web, store and context;
+                   server, apart so a browser build never names what Solid's
+                   browser build lacks; Solid's components, a module each,
+                   named as Solid names them; html, generated
+kobalte/           solidtype-kobalte, generated: solidtype_kobalte, and
+                   types, a file of its own so Melange calls its functions
+                   directly from another library
+headless/          solidtype-headless, a module per component: one Kobalte
+                   lacks, or Kobalte's own under a fix
+heroui/            solidtype-heroui, a module per port
+  styles           HeroUI's variant functions, generated
+  interaction field panel theme overlay dialog_frame status_icon
   selection_indicator
-                     what a tab's and a segment's indicator share: drawn in
-                     the selected item, it starts where the last one was
-  segment trend_chip text_shimmer number_stepper command
-                     components HeroUI ships no stylesheet for, made as
-                     every port is: their look a stylesheet each
-  table.css          what HeroUI's table stylesheet does not draw: a column
-                     pinned, a header kept in view, where a dragged row
-                     would land
-  data_grid          a grid of rows given as data and columns as
-                     definitions, drawn on the Table port, its look
-                     data-grid.css
-  extras.css         those stylesheets in the components layer, which the
-                     plugin's tarball ships as heroui-extras.css
-docs/                the documentation, a Starlight site in Hypha's look,
-                     from starlight-theme-hypha: how the pieces work
-                     together and are set up, the Solid and Kobalte
-                     bindings, the charts, and each port's page, which
-                     shows it beside the same component in React, with its
-                     source, and each module's odoc reference; each tab
-                     opens at its section's root, an overview of what that
-                     part of solidtype is; built into _build/docs,
-                     which `dune clean` removes and nothing ignores, and a
-                     link to a page or heading that is not there fails it
-  package.json       the site's dependencies, a member of the root's Bun
-                     workspace, whose one bun.lock is at the root
-  islands/           the pages' OCaml: each example, compiled, and the
-                     comparison of a port's element with React's,
-                     attribute by attribute; every whole program a page
-                     shows is a file the repository builds -- here or
-                     example/ -- imported raw into Starlight's <Code>, a
-                     missing one failing the build; a page imports an
-                     island's source as @islands/<name>.mlx?raw and its
-                     compiled demo as @islands/<name>.jsx, aliases
-                     astro.config.mjs defines, never by a path up the tree
-  islands/react/     HeroUI's components in React, rendered into a host
-                     an island owns: the one place the documentation runs
-                     React
-  src/mlx.mjs        MLX's JSX highlighted: a grammar injected into Shiki's
-                     OCaml, which highlights no tag of its own
-  src/content/docs/reference.md
-                     the packages, and a link to each module's odoc page,
-                     which `make docs` copies into public/reference/,
-                     ignored, since Starlight serves public/ as it is
-  agents.md          what an agent knows before any page -- the packages
-                     and how solidtype is written -- which the theme puts
-                     at the head of llms.txt; each group's note is in
-                     astro.config.mjs
-  src/pages/demo/    the Astro page's demo, pages of Astro's own outside
-                     Starlight: a route per tea, its islands given props,
-                     under a basket the client router keeps; the page
-                     imports their sources as @demo/<path>?raw
-agents/              the documentation for a user's agent, generated by
-                     starlight-hypha-agents from the pages, `make docs`:
-                     llms.txt, the catalogue; pages/, each page as
-                     Markdown, its examples written in; installed by the
-                     root dune into $(opam var solidtype:doc), and llms.txt
-                     alone, its links to solidtype's pages, into every other
-                     package's doc/
-prds/               the PRDs of work being decided and built, and which
-                     document owns each kind of fact once it lands
-generate/            what writes the generated bindings from Solid's,
-                     Kobalte's, HeroUI's, rhp's and @internationalized/date's
-                     own types: `make generate`
-  names              the one spelling of a name, shared by both
-  program            the browser's library both read declarations under,
-                     with no ambient types: Bun's own would join it
-  melange            what both read of Melange and write for it: Dom's
-                     types, a type that admits any string, a literal a tag
-  output             a generator's files written, or checked by `--check`
-  ocaml              an OCaml type as a generator builds it, and its one
-                     printer
-  source             an OCaml file and its interface, written side by side
-  binding            the core of a binding of a TypeScript library of Solid
-                     components: its types mapped, its parts, functions and
-                     values bound, and the types they name, each a module;
-                     a library's generator says only what is its own
-  kobalte            Kobalte's: which entries, how its parts and options are
-                     named, its shared props, roots split by `multiple`
-  heroui             HeroUI's variant functions, from @heroui/styles
-  rhp                rhp's: its components' elements, the types and exports
-                     ported by hand, each port held to what rhp declares for
-                     it, and a failure on anything else no rule maps
-  gravity_icons      Gravity UI's icons, from the package's SVG files
-  internationalized_date
-                     @internationalized/date's: its numbers whole, its value
-                     classes kinds of one Value, what throws though no
-                     declaration says so, and what is left out
-ppx/                 ppx_solidtype: MLX's JSX lowered to the markers
-  html_names         the attributes and props whose JavaScript name the
-  kobalte_names      rule's inverse does not give, generated
-  rhp_names
-vite-plugin/         vite-plugin-solidtype, strict TypeScript over Babel
-  src/index          the plugin Vite runs: a .jsx module's markers rewritten
-  src/rewrite        the markers rewritten into Solid's JSX
-  src/markers        what a build without the plugin reaches: an error
-  heroui-extras.css  heroui/extras.css, which the workspace's export reaches
-                     through this file, since an export names no file
-                     outside its package
-  pack               the plugin compiled and packed, as a release ships it,
-                     with heroui/'s stylesheets
-  test/rewrite       what the plugin writes for a marker form
-  test/browser       every module of the libraries built for the browser,
-                     each import found in Solid's and Kobalte's browser build
-  test/npm           each package's x-npm-depends: what its library imports
-                     from npm, at the workspace's range
-  test/pack          the release's tarball installed in an application,
-                     whose one import puts heroui's extras in the
-                     components layer
-  test/astro         the example's Astro page built: it holds the board
-                     prerendered, to hydrate
-  test/docs          the documentation built, React's compiler beside
-                     Solid's: a port's page holds it prerendered, to hydrate
-vitest.config.ts     the OCaml tests, as three projects: the browser's in
-                     jsdom, the example's server started for them; the
-                     server's, and the date binding's, in Node; and
-                     hydration, compiled hydratable
-example/             a kanban board: a whole application on the
-                     stack -- Solid, Kobalte and HeroUI's ports over a
-                     Spindle server on SQLite -- its README the map
-  index.html         the page, built by Vite with vite.config.ts
-  pages/             the same board as an Astro page: wiring alone, built
-                     with astro.config.mjs, which lets Vite reach _build
-  src/               the board's islands in .mlx, and api.ml, its client
-                     printed from server/ as the build runs
-  migrations/        the tasks' table, which rowtype-migrate applies before
-                     the server starts
-  server/            a Spindle app: the tasks' store in SQLite, the routes
-                     over it, which the board is called against and `make
-                     example-serve` serves, their tests, and their command line,
-                     Spindle's, which prints the board's client
-  test/              the board's behaviour, in OCaml, run by vitest
-                     against the server server.ts starts, on a database of
-                     the run's own
-test/jsdom.ts        what jsdom lacks, stood in for in every vitest file
-test/browser/        Solid's bindings in a browser, in OCaml, run by vitest
-test/server/         Solid's rendering on the server, in OCaml, run by vitest
-                     in Node
-test/hydration/      an island, an rhp chart and a HeroUI select on Kobalte,
-                     rendered on the server and hydrated by Web.hydrate, in
-                     a vitest project of Solid's hydratable compile, Solid,
-                     rhp and Kobalte compiled with it; setup.ts renders them
-                     through Vite's server loading
-test/kobalte/        each Kobalte component in OCaml beside its TSX twin in
-                     twins/, the same checks and an axe scan on both
-test/headless/       each headless component as a caller meets it: its roles,
-                     keys and state, and an axe scan; each of Kobalte's
-                     fixed, failing on Kobalte's own
-test/rhp/            rhp's charts as a caller meets them: rows plotted by
-                     their slat, a scale's range and ticks, a changed row
-                     redrawn in place on the next frame
-test/heroui/         each HeroUI port's classes and behaviour, in OCaml, run
-                     by vitest, and its state beside the same component in
-                     React, its twin in twins/; and the variant functions,
-                     each against HeroUI's own call
-test/internationalized_date/
-                     the date binding as a caller meets it: a zone's daylight
-                     saving, values of several kinds, a throw as a value
-test/ppx/            what the ppx writes for each JSX form
-test/test_docs.ml    every island of docs/islands on some page, or a part of
-                     other islands, every rhp page linked to rhp's, every
-                     port's to HeroUI's before its usage, and the plugin a
-                     page installs the newest release's in CHANGES.md
-test/does_not_compile.t
-                     each mistake the types refuse, built against the
-                     installed library, with the error a user reads
+                   what several ports share
+  <name>.css       the look of a component HeroUI ships no stylesheet for;
+                   table.css, what HeroUI's table stylesheet does not draw
+  extras.css       those stylesheets in the components layer
+rhp/               solidtype-rhp: solidtype_rhp and types, generated, and a
+                   module per declaration no rule maps, ported by hand
+internationalized_date/ gravity_icons/
+                   their packages, generated
+generate/          the generators, `make generate`: a file per library
+                   bound, saying only what is that library's own
+  binding          what they share, which a generator binds a library by:
+                   in library, the library and what a run has met of it;
+                   in mapping, each rule that maps a type; in emit, a
+                   part, a function and a value written; in types_file,
+                   the types they name, each a module
+  names ocaml output package program melange opam
+                   the one spelling of a name; an OCaml type and a
+                   declaration, and the one printer of each; files laid
+                   out by ocamlformat, written or checked, and a run
+                   refused; a package's
+                   declarations and what they export; the browser's
+                   library with no ambient types; what is read of
+                   Melange; the switch
+  generator        a generator as far as every one is alike: a package
+                   read, its library bound, its files written or refused
+  solid_html       Solid's elements and their attributes, which html
+                   writes and a binding asks for an element's module
+  test             what the core writes for a declaration, a rule each
+ppx/               ppx_solidtype, and html_names, kobalte_names and
+                   rhp_names, generated: the names whose JavaScript
+                   spelling the rule's inverse does not give
+vite-plugin/       vite-plugin-solidtype, strict TypeScript over Babel
+  src/rewrite      the markers rewritten into Solid's JSX
+  src/markers      what a build without the plugin reaches: an error
+  heroui-extras.css  heroui/extras.css, reached through this file, since an
+                   export names no file outside its package
+  pack             the plugin compiled and packed, as a release ships it,
+                   with heroui/'s stylesheets
+docs/              the documentation, a Starlight site in Hypha's look, a
+                   member of the root's Bun workspace; built into
+                   _build/docs, where a link to a page or heading that is
+                   not there fails it
+  islands/         the pages' OCaml. Every whole program a page shows is a
+                   file the repository builds, here or in example/,
+                   imported as @islands/<name>.mlx?raw, its demo as
+                   @islands/<name>.jsx, never by a path up the tree
+  islands/react/   HeroUI's components in React, beside each port: the one
+                   place the documentation runs React
+  src/mlx.mjs      MLX's JSX highlighted, a grammar injected into Shiki's
+                   OCaml
+  src/pages/demo/  the Astro page's demo, outside Starlight
+  agents.md        what an agent knows before any page, the head of
+                   llms.txt
+agents/            the documentation for a user's agent, generated:
+                   llms.txt and pages/, installed into
+                   $(opam var solidtype:doc), llms.txt alone into every
+                   other package's doc/
+prds/              the PRDs of work being decided and built, and which
+                   document owns each kind of fact once it lands
+example/           a kanban board, a whole application on the stack: its
+                   islands in src/, a Spindle server on SQLite in server/,
+                   the same board as an Astro page in pages/; its README
+                   the map
+```
+
+The tests, each beside what it tests or in `test/`:
+
+```
+test/ppx/                what the ppx writes for each JSX form
+test/does_not_compile.t  each mistake the types refuse, built against the
+                         installed library, with the error a user reads
+test/browser/ server/ hydration/
+                         Solid's bindings in jsdom, in Node, and rendered
+                         on the server then hydrated, in three vitest
+                         projects; test/jsdom.ts stands in for what jsdom
+                         lacks
+test/kobalte/            each Kobalte component beside its TSX twin
+test/headless/           each headless component as a caller meets it
+test/heroui/             each port beside the same component in React, and
+                         the variant functions against HeroUI's own calls
+test/rhp/ internationalized_date/
+                         each binding as a caller meets it
+test/test_docs.ml        every island on a page, every rhp page linked to
+                         rhp's, every port's to HeroUI's, and the plugin a
+                         page installs the newest release's
+vite-plugin/test/        rewrite, what the plugin writes for a marker form;
+                         browser, every import found in the browser builds;
+                         npm, each package's x-npm-depends; pack, the
+                         release's tarball installed; astro and docs, the
+                         example's page and the documentation built
+example/test/            the board's behaviour against its own server
 ```
 
 ## The pipeline
 
-MLX parses `.mlx` into OCaml with each element marked `[@JSX]`.
-`ppx_solidtype` lowers each one to a call of `Solidtype.Jsx`, reading each
-value as Solid's compiler reads JSX: a literal, an element, a handler (`on_`
-and its event), a function or a name static, and any other expression a
-thunk the ppx writes, read again as what it reads changes, so a read in JSX
-is always in Solid's tracking scope; a handler an expression makes,
-`on_click=(remove id)`, and a spread are a thunk the ppx writes too, made
-once as their element is, since Melange evaluates an expression before the
-element it is written in, outside a branch Solid has not drawn, and never
-out of a function; an
-optional prop, `?name=`, an option read as a required prop's value is,
-`undefined` while it is `None`, and `?name:` in the check, so a required
-prop refuses it; a child, given by its name or an expression, is a
-`Jsx.element`, the one type of what JSX holds, as Solid's `JSX.Element` is:
-a node, text from `Jsx.string`, a number from `Jsx.int`; a
-name is given back its JavaScript spelling, and a value wrapped in one
-of Solid's namespaces, `Jsx.native` and the others, its namespace; a
-function is a function wherever it is given, refused by its type where a
-value belongs, so a function prop that takes no argument is `(fun () ->
-...)`, as OCaml writes it; a component's render
-function given by name, a slat rhp reads its layout from, is `render=f`, and
-only by name -- one written in place is the child, `<C>(fun ...)</C>` --
-its only child, checked and passed as a function child is, since
-ocamlformat cannot print an attribute named `children` beside MLX's own. A string literal, however
-quoted, becomes a JavaScript string, `{js|...|js}`, its backslashes
-doubled, since Melange reads any other as bytes and reads escapes in
-that one; one written `{js|...|js}` is left as it is. An element's attributes are
-annotated with their types; a component's element also applies the
-component's `Props.check` to its props under `if false`, which the
-compiler checks and Melange drops, and binds each prop that can hold JSX
-once, to name it in both. `let%component` writes a component's `Props`
-from its labelled parameters, and given the element it draws,
-`[@@element button]`, a check that ends in that element's,
-`Html.Button.check`, after its own props, which an application fills first,
-so an own prop takes the place of the element's of its name, as TSX's
-`Omit` types a part. The library's own components are `.mlx`
-too, lowered with `ppx_solidtype -internal`, which names the library's
-modules without `Solidtype.`, a name the library itself cannot use. Melange compiles the calls as
-calls, through one import of `vite-plugin-solidtype/markers`. The plugin
-rewrites each into JSX -- a function the ppx bound back where it is
-used, a thunk into what it returns, a return-only `if` into a
-conditional, a string into JSX's own text or quoted attribute only where
-JSX reads it back unchanged, else `{"..."}` -- and `vite-plugin-solid` compiles that JSX as
-it compiles TSX: for the browser, and under Astro's build for the server
-and hydratable too, so an island is prerendered and hydrates as the same
-JSX written in TSX would.
+1. **MLX** parses `.mlx` into OCaml, each element marked `[@JSX]`.
+2. **`ppx_solidtype`** lowers each element to a call of `Solidtype.Jsx`, a
+   marker, reading each value as Solid's compiler reads JSX:
+   - a literal, an element, a handler (`on_` and its event), a function or
+     a name is static; any other expression is a thunk the ppx writes;
+   - a handler an expression makes, `on_click=(remove id)`, and a spread
+     are a thunk too, made once as their element is, since Melange
+     evaluates an expression before the element it is written in;
+   - `?name=` is an option, `undefined` while it is `None`;
+   - a child is a `Jsx.element`: a node, `Jsx.string`, `Jsx.int`;
+   - a render function given by name is `render=f`, and one written in
+     place is the only child, `<C>(fun ...)</C>`, since ocamlformat cannot
+     print an attribute named `children` beside MLX's own;
+   - a string literal becomes `{js|...|js}`, its backslashes doubled, since
+     Melange reads any other as bytes; one written so is left as it is;
+   - a component's element also applies its `Props.check` under `if false`,
+     which the compiler checks and Melange drops.
+
+   `let%component` writes a component's `Props` from its labelled
+   parameters, and with `[@@element button]` a check that ends in
+   `Html.Button.check`, an own prop taking the place of the element's of
+   its name, as TSX's `Omit` types a part. The library's own `.mlx` is
+   lowered with `-internal`, which names its modules without `Solidtype.`.
+3. **Melange** compiles the markers as calls, through one import of
+   `vite-plugin-solidtype/markers`.
+4. **The plugin** rewrites each call into JSX: a function the ppx bound
+   goes back where it is used, a thunk becomes what it returns, a
+   return-only `if` a conditional, and a string JSX's own text or quoted
+   attribute only where JSX reads it back unchanged, else `{"..."}`.
+5. **`vite-plugin-solid`** compiles that JSX as it compiles TSX: for the
+   browser, and under Astro for the server and hydratable.
 
 ## Rules that must hold
 
 Each rule comes with why it exists and the test or search that catches a
 break.
 
+### JSX
+
 - **An island compiles as the same JSX in TSX does.** The plugin writes
   the JSX a TSX author would, and Solid's compiler compiles it the three
-  ways Astro's integration runs it: for the browser, hydratable, and for
-  the server. Why: the library promises Solid's own output, and a rewrite
-  that drifts is a slower or a wrong page nobody sees in a type. Test:
-  `vite-plugin/test/rewrite.test.ts`, what the plugin writes for each
-  marker form, and `test/hydration/`, islands prerendered and hydrated.
+  ways Astro runs it: for the browser, hydratable, and for the server.
+  Why: the library promises Solid's own output, and a rewrite that drifts
+  is a slower or a wrong page nobody sees in a type. Test:
+  `vite-plugin/test/rewrite.test.ts`, `test/hydration/`.
 - **An island mounts in an Astro page as any Solid island does**,
   `client:only` or prerendered `client:load`, imported by its namespace
-  from Melange's output, `<App.make client:load />`; the page holds
-  wiring alone. Why: an application on the stack may build its pages
-  with Astro, and the plugin must run under its server build as under its
-  client's. Test: `vite-plugin/test/astro.test.ts`, which builds the site.
+  from Melange's output, `<App.make client:load />`; the page holds wiring
+  alone. Why: the plugin must run under Astro's server build as under its
+  client's. Test: `vite-plugin/test/astro.test.ts`.
 - **In JSX a value is written as itself, and Solid keeps it current;
-  outside JSX a thunk is written.** A literal or a name is given as it is;
-  any other expression is a thunk the ppx writes, read again as what it reads
-  changes, as Solid's compiler makes an expression in JSX a getter, so
-  `title=(S.get note)` is `title={note()}`; a function is a function, never a
-  thunk. Outside JSX -- a memo, an effect, an accessor a part derives -- the
-  caller writes `fun () -> e`, as Solid's own API takes `() => e`. Why: a read
-  hoisted out of Solid's tracking scope stops updating without a sound, and a
-  value written as itself has one form in every position, evaluated as JSX's
-  form says, as `let%map`'s body is as its form says. Test:
-  `test/does_not_compile.t`, a thunk refused where a value belongs and every
-  form that compiles.
+  outside JSX a thunk is written.** `title=(S.get note)` is
+  `title={note()}`; a function is a function, never a thunk. Outside JSX
+  -- a memo, an effect, a function's parameter, a record a part gives
+  another -- the caller writes `fun () -> e`, as Solid's API takes
+  `() => e`. Why: a read hoisted out of Solid's tracking scope stops
+  updating without a sound. Test: `test/does_not_compile.t`, a thunk
+  refused where a value belongs and every form that compiles.
+- **What the library hands out is a `Solid.accessor`, read by `S.get`**: a
+  signal, a memo, a component's value prop, a field of a part's state or
+  context. A part that hands on what it derives writes
+  `S.accessor (fun () -> e)`, which Melange writes as a plain JavaScript
+  function. In a component's body `S.get name` is the read itself,
+  `props.name`. Why: a thunk read as a call, `label ()`, looks like
+  calling a string, and an accessor asked of a caller makes them build
+  Melange's uncurried function by hand. Test: `test/ppx`. Symptom:
+  `rg -n '^\s+\w+ : unit -> [a-tv-z]' heroui/*.mli headless/*.mli`, a
+  public field read as a call;
+  `rg -n '^\s+\??\w+:[^:]*accessor ->' heroui/*.mli headless/*.mli`, a
+  parameter that asks for an accessor.
+- **`[@u]` is a binding's alone.** Outside `src/`, which binds Solid
+  itself, it is written only in an `external`, or a `type` an external
+  names. Why: an uncurried function written by hand is Melange's calling
+  convention leaking into code that means something else. Symptom:
+  `rg -n --glob '*.{ml,mlx,mli}' '\[@u\]' heroui headless test docs example
+  | rg -v ':\s*(external|type) '`.
+- **Every thunk the ppx hands Solid is a function of no argument**: each
+  written uncurried, a function it gives bound apart. Why: Solid calls a
+  thunk with no argument, and Melange writes a curried
+  `fun () -> fun h -> e` as one function of two, which that call would run
+  at once. Test: `test/browser/flow_test.mlx`, `test/ppx`.
 - **A component's props are its `Props.check`**, a function with one
-  labelled argument per prop, optional where the prop is, ending in
-  `()`: a value prop as a `Check.value`, a function prop as the
-  function, children as `Check.children` of the kinds the component
-  takes -- elements, a function it calls, or either. The ppx applies it under
-  `if false`, so it writes nothing. Why: a prop left out, a prop the
-  component does not take, and two props of one type variable that
-  disagree are compile errors, as in TSX, and a function given where a
-  value belongs is refused. A `Check.value` is the value itself, what the
-  expression gives, and an optional prop, a value or a function alike, is
-  given as OCaml gives an optional argument: a value, `count=3`, or an
-  option, `?count=o`, left out while it is `None`.
-  Test: `test/does_not_compile.t`, `test/browser/optional_test.mlx`.
-- **Only the ppx writes a marker, and the plugin reads only markers.**
-  The plugin finds them by their import alone. It reads Melange's shapes
-  only to put a function back where it is used -- a thunk's returned
-  expression, a return-only `if`, a `const` bound to a function and used
-  once -- and calls any function it does not recognise, which is always
-  correct. Why: the rewrite keeps its meaning because it reads
-  one shape it owns. Symptom: `rg -n 'Jsx\.(el|c|s|d|spread|dynamic|render)\b'
-  example src` finds a call written by hand.
-- **What changes is read one way and given one way.** What the library
-  hands out -- a signal, a memo, a component's value prop, a field of a
-  part's state or context -- is a `Solid.accessor`, read by `S.get`; what a
-  caller gives in JSX, an attribute or a child, is the expression itself,
-  which the ppx reads again as it changes, and what it gives elsewhere -- a
-  function's parameter, a record a part builds to give another -- is a
-  thunk, `fun () -> e`, as Solid's own API takes `() => e`. A part that
-  hands on what it derives makes it an accessor by `S.accessor (fun () ->
-  e)`, which Melange writes as a plain JavaScript function, so no code but a
-  binding's writes `[@u]`. A value prop is
-  an accessor of Solid's props object, and the ppx writes `S.get name` in a
-  component's body as the read itself, `props.name`, Solid's own. Why: a
-  thunk read as a call, `label ()`, looks like calling a string, and an
-  accessor asked of a caller makes them build Melange's uncurried function
-  by hand. Test: `test/ppx`, a prop read whole and a shadowed one through
-  its accessor. Symptom: `rg -n '^\s+\w+ : unit -> [a-tv-z]' heroui/*.mli
-  headless/*.mli` finds a public field a caller reads as a call, and
-  `rg -n '^\s+\??\w+:[^:]*accessor ->' heroui/*.mli headless/*.mli` a
-  parameter that asks for an accessor, and `rg -n 'fun ?\[@u\] \(\)' heroui
-  headless test docs example` an accessor built by hand.
-- **Every thunk the ppx hands Solid is a function of no argument.** It writes
-  each thunk it makes uncurried, a function that thunk gives bound apart,
-  and `S.accessor (fun () -> e)` as that function itself. Why: Solid calls a
-  thunk with no argument, and Melange writes a curried `fun () -> fun h -> e`
-  as one function of two, which that call would run at once. Test:
-  `test/browser/flow_test.mlx`, an accessor whose value is a function, and
-  `test/ppx`, the function it gives bound apart.
-- **`[@u]` is a binding's alone.** Outside `src/`, which binds Solid itself,
-  it is written only in an `external`, or a `type` an external names, where
-  it says how JavaScript calls a function. Why: an uncurried function written
-  by hand is Melange's calling convention leaking into code that means
-  something else. Symptom: `rg -n --glob '*.{ml,mlx,mli}' '\[@u\]' heroui
-  headless test docs example | rg -v ':\s*(external|type) '` finds one.
-- **A reactive read is a plain call.** An accessor is an uncurried
-  JavaScript function and `Solid.get` is inlined, so `Solid.get count`
-  is `count()`, the call Solid's own JSX makes. Why: a curried read is
-  `Curry._1(count, undefined)`, an arity check on every read. Symptom:
-  `rg -n Curry _build/default/example/out/example/src` finds a read.
-- **The library has no private modules.** Why: Melange then loses what it
-  knows of a module across libraries, so a user's every call into the
-  library goes through `Curry` and `Solid.get` is no longer inlined. A
-  helper two modules need is public, or a copy in each. Symptom:
-  `rg -n Curry _build/default/example/out/example/src` finds a call into
-  `Solidtype__`.
-- **A test Solid reads for truth is a `bool`, never an OCaml value.**
-  `Show`, `Match` and a resource's source take a `bool` or an `option`
-  the binding boxes. Why: Melange writes `Some 0`, `Some ""` and a first
-  constant constructor as values JavaScript reads as false. Test:
-  `test/browser/flow_test.mlx`, `Show.Some` given `Some 0`.
-- **An attribute's type is generated from Solid's JSX types**, by
-  `generate/html.ts` into `src/html.mli`, which nothing else writes and
-  `ocamlformat` leaves alone. A TypeScript type that admits any string
-  is `string`; a closed set of literals OCaml can name is a polymorphic
-  variant, which Melange writes as those strings; a boolean, alone or as
-  `"true"` and `"false"`, is `bool`; a number alone is `int`; a handler
-  takes Melange's `Dom` event type, its generic one when Melange has
-  none, and one Solid also takes in lower case, `onclick`, is bound once,
-  `on_click`. Each element's signature also gives `'r check`, its attributes
-  as optional arguments before `'r`, the tail of a check for a
-  component that passes them on. Why: a hand-typed copy drifts from the
-  version it binds. Test: `make lint` runs the generator with `--check`.
+  labelled argument per prop, optional where the prop is, ending in `()`:
+  a value prop a `Check.value`, a function prop the function, children a
+  `Check.children` of the kinds the component takes -- elements, a
+  function it calls, or either. An optional prop is given as OCaml gives
+  an optional argument, `count=3` or `?count=o`. Why: a prop left out, a
+  prop the component does not take, two props of one type variable that
+  disagree and a function where a value belongs are compile errors, as in
+  TSX. Test: `test/does_not_compile.t`, `test/browser/optional_test.mlx`.
+- **A component is a value.** A binding's part is an `external` of type
+  `_ Jsx.component`, and an OCaml component is `Jsx.component make`. Why:
+  Melange wraps an external function used as a value in a closure, which
+  no JSX tag can name.
+- **A function of several arguments is applied by whoever receives it.**
+  A JavaScript component that takes one is bound through `Solidtype.Arity`,
+  and a function JavaScript hands to OCaml is wrapped at its binding; the
+  generator and the ppx do both, so only a binding written by hand has it
+  to keep. Why: `fun a b -> e` and a function that takes `a`, then gives a
+  function of `b`, are one type and two JavaScript functions, and a caller
+  cannot be asked which it wrote. Test: `test/browser/flow_test.mlx`,
+  `test/kobalte/combobox_test.mlx`, `generate/test/rules.test.ts`.
+- **Only the ppx writes a marker, and the plugin reads only markers**,
+  found by their import alone. It reads Melange's shapes only to put a
+  function back where it is used -- a thunk's returned expression, a
+  return-only `if`, a `const` bound to a function and used once -- and
+  calls any function it does not recognise, which is always correct. It
+  moves a bound function only where every name it reads means the same at
+  its use, and a marker it cannot read, or one left outside an element,
+  fails the build where it is written. Why: the rewrite keeps its meaning
+  because it reads one shape it owns. Test:
+  `vite-plugin/test/rewrite.test.ts`. Symptom:
+  `rg -n 'Jsx\.(el|c|s|d|spread|dynamic|render)\b' example src`.
 - **Every name a user writes is snake case, made by one rule** from the
-  name in Solid's or Kobalte's documentation: a capital is an underscore
-  and the lower case, a run of capitals one word, a hyphen an
-  underscore, and a keyword takes a trailing underscore. The ppx gives a
-  name back by the rule's inverse -- a capital after each underscore,
-  but a hyphen after `aria_` and `data_` -- and by the tables the
-  generators write of the names the inverse does not give,
-  `stroke_width` and `is_svg`; a hand-written check names its props so
-  too. Why: one convention reads as OCaml, and one rule lets the
-  documentation read across. Test: the generators fail on a name two
-  JavaScript names share, and `test/ppx` holds what each is given back.
+  name in the library's documentation: a capital is an underscore and the
+  lower case, a run of capitals one word, a hyphen an underscore, and a
+  keyword takes a trailing underscore. The ppx gives a name back by the
+  rule's inverse -- a capital after each underscore, a hyphen after
+  `aria_` and `data_` -- and by the tables the generators write of the
+  names the inverse does not give, `stroke_width` and `is_svg`. Why: one
+  convention reads as OCaml, and one rule lets the documentation read
+  across. Test: the generators fail on a name two JavaScript names share;
+  `test/ppx`.
 - **A namespace of Solid's wraps the value, never the name**:
-  `on_click=(Jsx.native f)` is `on:click={f}`, read by the ppx where it
-  is written, in an element's attribute; each wrapper types its value. A
-  component takes an attribute's, `Jsx.attr`, `Jsx.bool` and `Jsx.named`,
-  outside its check, and passes it on to its element, as a `data_`
-  attribute: `?hidden=(Jsx.attr o)` is the one way to write
-  `hidden="until-found"` that Solid's server keeps, where a plain `hidden`
-  is a boolean. A handler's and a property's stay an element's, since a
-  component's props name its own. Why: a wrapper left out is Solid's
+  `on_click=(Jsx.native f)` is `on:click={f}`. A component takes an
+  attribute's, `Jsx.attr`, `Jsx.bool` and `Jsx.named`, outside its check
+  and passes it on to its element: `?hidden=(Jsx.attr o)` is the one way
+  to write `hidden="until-found"` that Solid's server keeps. A handler's
+  and a property's stay an element's. Why: a wrapper left out is Solid's
   default, never another namespace, and a label that spelt the namespace
   would let a slip change it unseen. Test: `test/does_not_compile.t`,
   `test/server/panels_test.mlx`.
 - **A `data-` attribute is declared, never written by hand.** Its value is
-  a `Jsx.data`, a string or JavaScript's `undefined`, which Solid leaves
-  out: `Jsx.flag b` is `"true"` or nothing, React Aria's convention. The
-  ppx takes `data_*` on an element and on a component, which passes it on
-  to its element, outside the component's check, as TSX leaves a
-  hyphenated attribute unchecked: a component spreads `Props.others
-  props`, the props it does not name, on its element, after its own
-  attributes, as HeroUI's React components spread theirs. A port's state
-  -- `data-hovered`, `data-selected` -- is so declared, and
-  `heroui/interaction` only listens. Why: an attribute Solid writes is in the HTML a page is
-  prerendered with and never races one the component writes itself; one
-  set from a `ref` is neither. Test: `test/server/data_attributes_test.mlx`,
-  `test/does_not_compile.t`, `test/heroui/attributes_test.mlx`, which
-  gives one to every part of every port, and each port's test against its
-  React twin.
-- **A spread is `props=p`, and no prop is named `props`.** MLX has no
-  syntax for TSX's `{...p}` and writes every attribute as an OCaml label,
-  so a spread takes one name: the ppx reads it as a spread on an element
-  or a component, each check takes it beside the props -- a component's
-  as a rest of its own props, `Props.omit`, or the rest any component
-  passes on, `Props.others`, and a Kobalte part's as any rest -- `Dynamic`
-  is given its component's props by it, and a component's parameter may
-  not take it. Why: one name kept from props, as JSX keeps `key` and `ref`,
-  lets a spread read as JSX; a prop of the same name would be a duplicate
-  label, reported far from its cause. Test: `test/does_not_compile.t`.
-- **Kobalte's binding is generated from its declarations**, by
-  `generate/kobalte.ts` into `kobalte/solidtype_kobalte.ml` and the types it
-  names into `kobalte/types.ml`, a file of their own so Melange calls their
-  functions directly from another library, each with its `.mli`, which
-  leaves out the raw external under a wrapper, read with TypeScript's
-  checker from Kobalte's real path, so a package manager that keeps
-  dependencies beside each package resolves them. A part is a module of
-  its component and its check: its own options, then its children by
-  kind, then its element's attributes' `check`, an `external` nothing
-  calls. Its options map as an element's attributes do, and further: a
-  number is a `float`, since a slider's value is fractional; `T | null`
-  given to Kobalte -- an option, an argument, what a callback returns -- is
-  `Js.Null.t`, since Kobalte reads `undefined` as uncontrolled and `null`
-  as controlled and empty, and `Js.Null.t` cannot hold `undefined`, so an
-  `option` becomes one only by `Js.Null.fromOption`, whose `None` is
-  `null`; read from Kobalte, or `T | null | undefined` given, it is
-  `Js.Nullable.t`, which takes whatever JavaScript holds; `undefined` is
-  absence for an optional prop, an optional argument, `?name`, then `()`,
-  for a function the user calls, and an `option` anywhere else; members
-  of different JavaScript kinds are `Types.Either.t`, built by `left` and
-  `right`, which is each value as it is; an option accessor that takes a
-  key or a function takes the function, and one that takes only a key,
-  `optionGroupChildren`, a `string`; a root whose value turns on
-  `multiple` is two modules, `Root` and `Root_multiple`; a named object
-  type is a module of `Types`, with a getter per field, a curried
-  wrapper per function it holds and a constructor where it has neither
-  methods nor a class, and two declarations of one name that TypeScript
-  takes for each other, Intl's `NumberFormatOptions` and
-  `@internationalized/number`'s, are one module; a class is each interface
-  it declares it implements, by a `to_` conversion; Solid's handler
-  argument, an event with its targets named, is the event; and a type
-  parameter bound by an element, the element a hook is given, is any
-  element, `'t Dom.element_like`. A member typed `any` is not bound, nor one
-  whose value would be a type its caller chooses, an unchecked cast, but
-  for the caller's own data: in the props a `create` function takes, `any`
-  is the props' type variable `'data`, given in and handed only to the
-  caller's functions, and a string beside such a function, a field's name,
-  is left for the function; and what a callback gives back as `any`, which
-  JavaScript ignores, is `unit`. Kobalte's building blocks, menu, popper,
-  dismissable-layer and polymorphic, are not bound as components, though a part
-  it draws by polymorphic takes `as`, `as_`, a function of its element's props; the
-  hooks its lists are made of are, from its root, as `Selection`. Why:
-  Kobalte's parts are hundreds, and a binding by hand would be a second
-  copy of its types; a component Kobalte lacks is made of its hooks. Test:
-  `make lint` runs the generator with `--check`,
-  `test/kobalte/selection_test.mlx` makes a list of them, and
-  `test/does_not_compile.t` refuses `Js.Nullable.fromOption` where
-  `T | null` is given.
+  a `Jsx.data`, a string or `undefined`, which Solid leaves out:
+  `Jsx.flag b` is `"true"` or nothing, React Aria's convention. An element
+  and a component take `data_*`, a component outside its check: it spreads
+  `Props.others props`, the props it does not name, on its element after
+  its own attributes. A port's state -- `data-hovered`, `data-selected` --
+  is so declared, and `heroui/interaction` only listens. Why: an attribute
+  Solid writes is in the HTML a page is prerendered with and never races
+  one the component writes itself; one set from a `ref` is neither. Test:
+  `test/server/data_attributes_test.mlx`, `test/does_not_compile.t`,
+  `test/heroui/attributes_test.mlx`.
+- **A spread is `props=p`, and no prop is named `props`.** The ppx reads
+  it as a spread on an element or a component; each check takes it beside
+  the props -- a component's as a rest of its own props, `Props.omit`, or
+  the rest any component passes on, `Props.others`, a Kobalte part's as
+  any rest -- and `Dynamic` is given its component's props by it. Why: MLX
+  has no syntax for `{...p}`, and a prop of the same name would be a
+  duplicate label, reported far from its cause. Test:
+  `test/does_not_compile.t`.
+
+### Melange's output
+
+- **A reactive read is a plain call.** An accessor is an uncurried
+  JavaScript function and `Solid.get` is inlined, so `Solid.get count` is
+  `count()`. Why: a curried read is `Curry._1(count, undefined)`, an arity
+  check on every read. Symptom:
+  `rg -n Curry _build/default/example/out/example/src`.
+- **The library has no private modules.** Why: Melange then loses what it
+  knows of a module across libraries, so a user's every call into the
+  library goes through `Curry`. A helper two modules need is public, or a
+  copy in each. Symptom: the search above finds a call into `Solidtype__`.
+- **A test Solid reads for truth is a `bool`, never an OCaml value.**
+  `Show`, `Match` and a resource's source take a `bool` or an `option` the
+  binding boxes. Why: Melange writes `Some 0`, `Some ""` and a first
+  constant constructor as values JavaScript reads as false. Test:
+  `test/browser/flow_test.mlx`.
+
+### Generated bindings
+
+A binding of more than a few TypeScript declarations is written by its
+generator, `generate/<library>.ts`, checked by `make lint` with `--check`,
+and never edited by hand. A generator says what a file declares, each
+declaration with its comment, and one printer writes the file and its
+interface from that; ocamlformat lays both out, so `dune fmt` holds them
+as it holds any file. A variant's tags are written in the order of
+their names, since TypeScript lists a union's members in the order it first
+met each. Why: a hand-typed copy drifts from the version it binds.
+
+- **A generated binding is whole, or says what it lacks.** A declaration
+  no rule maps fails its generator, unless the generator names it as left
+  out, by where the core meets it, with why, `leftOut`; and a name left out
+  that is bound, or no longer declared, fails it too. Why: a prop dropped
+  without a word is one a user cannot reach and nobody knows is missing,
+  and a reason nothing checks outlives what it excused. Test:
+  `generate/test/rules.test.ts`.
+- **A module of `Types` is named by one rule, and never numbered.** A type
+  its library names keeps the name; one it does not is named by the path
+  of names to where it is met -- a part's prop,
+  `Combobox_Root_Translations`; what a function gives, `Bins`; what it
+  takes, the parameter after it, `Bins_Options`. Two types of one name
+  fail the generator until it names each, `named`. Why: a number is the
+  order two types were met in, which the next version changes under a
+  user's code. Test: `generate/test/rules.test.ts`.
+- **An attribute's type is generated from Solid's JSX types**, into
+  `src/html.mli`. A type that admits any string is `string`; a closed set
+  of literals OCaml can name is a polymorphic variant; a boolean, alone or
+  as `"true"` and `"false"`, is `bool`; a number alone is `int`; a handler
+  takes Melange's `Dom` event type, its generic one when Melange has none,
+  and one Solid also takes in lower case, `onclick`, is bound once,
+  `on_click`. Each element also gives `'r check`, its attributes as
+  optional arguments before `'r`: the tail of a check for a component that
+  passes them on.
+- **Kobalte's binding is generated from its declarations**, read from
+  Kobalte's real path, into `kobalte/solidtype_kobalte.ml` and
+  `kobalte/types.ml`, each `.mli` leaving out the raw external under a
+  wrapper. A part is a module of its component and its check: its own
+  options, then its children by kind, then its element's `check`. Its
+  options map as an element's attributes do, and further:
+  - a number is a `float`, since a slider's value is fractional;
+  - `T | null` given to Kobalte is `Js.Null.t`, made of an `option` only
+    by `Js.Null.fromOption`, since Kobalte reads `undefined` as
+    uncontrolled and `null` as controlled and empty; read from Kobalte, or
+    given as `T | null | undefined`, it is `Js.Nullable.t`;
+  - `undefined` is absence for an optional prop, `?name` then `()` for a
+    function the user calls, and an `option` anywhere else;
+  - members of different JavaScript kinds are `Types.Either.t`, built by
+    `left` and `right`, each the value as it is;
+  - an option accessor that takes a key or a function takes the function;
+    one that takes only a key, a `string`;
+  - a root whose value turns on `multiple` is two modules, `Root` and
+    `Root_multiple`;
+  - a named object type is a module of `Types`: a getter per field, a
+    curried wrapper per function it holds, a constructor where it has
+    neither methods nor a class; two declarations of one name TypeScript
+    takes for each other are one module; a class is each interface it
+    implements, by a `to_` conversion;
+  - Solid's handler argument, an event with its targets named, is the
+    event; a type parameter bound by an element is `'t Dom.element_like`;
+  - a type argument typed `any` is whatever the caller has where it is
+    given, `_`, and `Types.Unknown.t`, which nothing reads, where it is
+    read; a `bigint` is `Js.Bigint.t`; a function of several signatures is
+    its first where OCaml calls it, and not bound where it is given;
+  - a member typed `any` is not bound, nor one whose value would be a type
+    its caller chooses; but in the props a `create` function takes, `any`
+    is the caller's own data, `'data`, and a string beside a function of
+    it is left for the function; what a callback gives back as `any` is
+    `unit`;
+  - menu, popper, dismissable-layer and polymorphic are not bound as
+    components, though a part drawn by polymorphic takes `as_`; the hooks
+    Kobalte's lists are made of are bound from its root, as `Selection`.
+
+  Test: `test/kobalte/selection_test.mlx`; `test/does_not_compile.t`
+  refuses `Js.Nullable.fromOption` where `T | null` is given.
 - **HeroUI's variant functions are generated from @heroui/styles'
-  declarations**, by `generate/heroui.ts` into `heroui/styles.ml` and its
-  `.mli`, on the same core as Kobalte's: a module per function,
+  declarations**, into `heroui/styles.ml`: a module per function,
   `buttonVariants` is `Styles.Button`, with `options`, its variants as
-  optional arguments and `class_`, and `classes`, its class string, or for
-  a component of several parts `slots` and a string per part. A variant
-  whose keys are `true` and `false` is a `bool`; any other is its keys as
-  tags by the one spelling rule, a space taken as a hyphen, each named by
-  `[@mel.as]`, since Melange writes `undefined` for a tag left unnamed where
-  others are. HeroUI's components are React's and are ported, written
-  in OCaml; only their classes are bound. Why: a port's look is HeroUI's own
-  classes, never a copy of them. Test: `make lint` runs the generator with
-  `--check`, and `test/heroui/styles_test.ml` checks calls against
-  HeroUI's own.
+  optional arguments and `class_`, and `classes`, or for a component of
+  several parts `slots` and a string per part. A variant of `true` and
+  `false` is a `bool`; any other is its keys as tags, a space taken as a
+  hyphen, each named by `[@mel.as]`, since Melange writes `undefined` for
+  a tag left unnamed where others are. Only HeroUI's classes are bound;
+  its components are ported. Why: a port's look is HeroUI's own classes,
+  never a copy. Test: `test/heroui/styles_test.ml`.
 - **@internationalized/date's binding is generated from its
-  declarations**, by `generate/internationalized_date.ts` into
-  `internationalized_date/`, on the same core: a function an external, a
-  class a module of `Types`. A date's numbers are small whole ones, an
-  `int`, but the milliseconds since 1970 `fromAbsolute` takes and what
-  `compare` gives, a `float`. Its value classes, `CalendarDate`,
-  `CalendarDateTime`, `Time` and `ZonedDateTime`, are each a kind of one
-  `Types.Value.t`, and a union of them, or an interface they satisfy,
-  `AnyTime`, is the kinds TypeScript takes for it, an open set, so a value
-  of any is passed as it is. A parser, and whatever takes a time zone or a
+  declarations**: a function an external, a class a module of `Types`. A
+  date's numbers are `int`, but the milliseconds `fromAbsolute` takes and
+  what `compare` gives are `float`. `CalendarDate`, `CalendarDateTime`,
+  `Time` and `ZonedDateTime` are each a kind of one `Types.Value.t`, and a
+  union of them, or an interface they satisfy, is the kinds TypeScript
+  takes for it, an open set. A parser, and whatever takes a time zone or a
   disambiguation, throws though no declaration says so: it raises
-  `Invalid_argument`, with an `_opt` beside it. Why: HeroUI's date
-  components take that library's values, and a binding by hand would be
-  a second copy of its types. Test: `make lint` runs the generator with
-  `--check`, and `test/internationalized_date` runs it in Node.
-- **Gravity UI's icons are generated from @gravity-ui/icons' SVG files**, by
-  `generate/gravity_icons.ts` into `gravity_icons/`, a module per icon named
-  by the one spelling rule from its React component's name, `ChevronDown` is
-  `Chevron_down`: an svg of the file's elements and attributes, which takes
-  every attribute an svg does, a caller's after its own. An attribute Solid's
-  JSX types leave off its element is written in Solid's `attr:` namespace,
-  and the package's clip id, `a` in every icon, is one the icon makes,
-  `Solid.create_unique_id`, so two icons on a page never share it; an element,
-  id or reference the generator does not know fails it. The paths are the
-  library's own, so it imports nothing from npm. Why: HeroUI's examples draw
-  these icons, and an example copies into an application only if each icon it
-  draws is there. Test: `make lint` runs the generator with `--check`.
-- **A component Kobalte lacks is made headless first, in
-  `solidtype-headless`, and a design system dresses it.** It is made as
-  Kobalte makes its own: of Kobalte's hooks, `Solidtype_kobalte.Selection`
-  first, its parts the elements they name, their roles, keys and state as
-  attributes, Kobalte's convention for state, present and empty, and its
-  state a context a style reads, `Table.Context.use`. A part takes every
-  attribute its element does, its `Props` written by hand, and passes them on
-  after its own, so a style's attribute wins, and a caller's `ref` and
-  handlers are called beside its own. Its HeroUI port adds only HeroUI's
-  classes, `data-slot`, React Aria's state, `"true"`, and HeroUI's own parts.
-  Why: behaviour and accessibility are the component's whoever dresses it,
-  tested once, and a port that mixes them with a style cannot be read for
-  either. A bug of Kobalte's own component is fixed so too, in a module of
-  `solidtype-headless` named for it, never in a port: its fixed parts wrap
-  Kobalte's and take Kobalte's props, `include` its `Props`, and its other
-  parts are Kobalte's own, so a style names one module. A port's own
-  difference from Kobalte -- HeroUI's literals beside a time field's segments
-  -- stays the port's. Test: `test/headless/`, each component as a caller
-  meets it, a fix failing on Kobalte's own, and its port's test against
-  React's.
-- **A port's part takes every attribute of its element.** Its check ends in
-  its element's `Html` check, given by `[@@element]`, and it spreads
-  `Props.others` on that element, or on the Kobalte part or port that draws
-  it, after its own attributes, so a caller's attribute wins, as React Aria's
-  `mergeProps` lets it. A handler, `ref` or `style` the part sets there is
-  its own prop, `?ref:(given_ref : ...)`, the caller's called or written
-  beside its own; what the part's behaviour rests on -- a Kobalte option, an
-  id another part names, a fix of Kobalte's -- is written after the spread,
-  since Solid merges props in the order they are written. A part that draws
-  no element, a root that only gives context, takes none. Why: HeroUI's
-  parts take every DOM prop, and an attribute a port refuses, or one a
-  caller's spread replaces, is one an application cannot set without
-  breaking the port. Test: `test/heroui/attributes_test.mlx`, every part
-  given a style, a title, a handler and a `ref`; each composition in its
-  port's test.
-- **A part that draws an element takes `as_`**, HeroUI's `render`: a function of
-  `Html.X.props`, which it spreads on what it draws, and of the part's state
-  where the part has one, which the part's parameter then names, `?(as_ :
-  Html.Button.props -> state -> Jsx.element)`. `[@@element]` gives it: a plain element a part
-  spreads `Props.others props` on stays Solid's template until a part is given
-  one, then is `Dynamic` given the function, never a tag, which throws on an
-  element only the browser draws as a page hydrates; a rest spread on a component
-  carries it to that component. What hands its rest
-  on to a function rather than an element passes `as_` itself, or reads it,
-  `Solid.drawn_as` and `Solid.undrawn`. Why: an animated element in a part's
-  place, typed so that what it draws checks its own props. Test:
-  `test/heroui/attributes_test.mlx`, every part drawn by an `as_`, its attributes
-  found on what it drew; `test/ppx`, the template and the function it chooses
-  between; `test/does_not_compile.t`.
-- **A component HeroUI ships no stylesheet for has one of its own.** It is
-  made as every port is, from scratch on Solid and Kobalte with HeroUI's
-  look and feel as the reference -- a segmented control, a trend chip, a
-  text shimmer, widgets most kits have -- its props named as HeroUI names
-  its own; its look is Tailwind on HeroUI's tokens in a stylesheet of its own,
-  `heroui/<name>.css`, rules for its BEM classes, as HeroUI writes its
-  components' CSS, and `heroui/extras.css` imports them into the
-  `components` layer. The plugin's tarball ships them, so an application
-  imports them by one line, `@import
-  "vite-plugin-solidtype/heroui-extras.css"`, as `docs/src/styles/heroui.css`
-  does: it installs the plugin at the libraries' version, and nothing
-  resolves a path into `_build`. Its parts carry their classes alone,
-  a caller's class after them. It has no twin: its test is a caller's, its
-  classes pinned, with axe. Nothing of a licensed kit is installed, imported
-  or copied. Why: every component is restyled alike, by a rule for its
-  class, which a utility on the element would beat; and this repository,
-  its CI and its site are public. Symptom: a utility in a part's class
-  string, or `rg -n heroui-pro` finding anything. Test:
-  `vite-plugin/test/pack.test.ts`.
-- **Each Kobalte component is tested against its TSX twin.** Its test
-  renders the OCaml island and the twin and runs one check on both --
-  roles, names, state attributes, the pattern's keys -- and axe on both;
-  a twin imports Kobalte's namespace, `import * as Switch`, whose
-  members are the parts. Why: the library promises Kobalte's behaviour
-  and accessibility, which only a running component shows. Symptom: a
-  component of `kobalte/solidtype_kobalte.ml` with no
-  `test/kobalte/*_test.mlx`.
-- **rhp's binding is generated from its declarations where a rule maps
-  them whole, and ported by hand where none does**, by `generate/rhp.ts`
-  on the core Kobalte's shares: a type or an export no rule maps is a
-  module of `rhp/`, named in the generator, its `.mli` saying why, and the
-  generator fails on any other declaration it cannot bind, so no part is
-  bound by halves; and a hand port is held to the declaration it ports, so
-  a prop, setting, field or key rhp declares there is bound in its `.mli`
-  or named in the generator as left out, with the reason. A rule is made general only where it would bind the
-  next version the same way; a rule written for one declaration is a hand
-  port instead. Why: a binding half generated leaves out what a user then
-  cannot reach, and a rule for one declaration breaks on the next version.
-  Test: `make lint` runs `generate/rhp.ts --check`.
-- **Each rhp page links to the page of rhp's documentation it follows.**
-  Why: rhp's documentation is the reference for what a prop does, and a
-  copy of it would drift. Test: `test/test_docs.ml`.
+  `Invalid_argument`, with an `_opt` beside it. Test:
+  `test/internationalized_date`.
+- **Gravity UI's icons are generated from @gravity-ui/icons' SVG files**,
+  a module per icon, `ChevronDown` is `Chevron_down`: an svg that takes
+  every attribute an svg does, a caller's after its own. An attribute
+  Solid's JSX types leave off its element is written in `attr:`, the
+  package's clip id is one the icon makes, `Solid.create_unique_id`, and
+  an element, id or reference the generator does not know fails it. Why:
+  an example copies into an application only if each icon it draws is
+  there.
+- **rhp's binding is generated where a rule maps a declaration whole, and
+  ported by hand where none does.** A hand port is a module of `rhp/`,
+  named in the generator, its `.mli` saying why, and held to what rhp
+  declares for it: each prop, setting, field or key is bound there or
+  named in the generator as left out, with the reason. The generator fails
+  on anything else it cannot bind. A rule is made general only where it
+  would bind the next version the same way; a rule for one declaration is
+  a hand port. Why: a binding by halves leaves out what a user then cannot
+  reach, and a rule for one declaration breaks on the next version.
 - **Each opam package declares what its library imports from npm**, in
-  `x-npm-depends`, written by its `.opam.template` -- `"@bezda/rhp@~2.2.0"`,
-  npm's own spelling, at the range the root `package.json` builds and tests
-  it against -- and nothing else: Kobalte is `solidtype-kobalte`'s, and
-  `solidtype-heroui` reaches it through that package, never by naming it
-  again. Why: an application installs a JavaScript library only where it
-  uses the package that binds it, any of them or none, and reads the list
-  from the opam package at the version opam resolved
-  (`opam show solidtype-rhp --field x-npm-depends`), so it is never a copy
-  kept elsewhere. Test: `vite-plugin/test/npm.test.ts`, against each
-  library's `mel.module` imports.
-- **A component is a value.** A binding's part is an `external` of type
-  `_ Jsx.component`, never a function type, and an OCaml component is
-  `Jsx.component make`. Why: Melange wraps an external function used as
-  a value in a closure, which no JSX tag can name.
-- **`agents/` is generated, never edited.** starlight-hypha-agents writes it
-  from the documentation's pages, `docs/agents.md` and its options in
-  `docs/astro.config.mjs`: a page changed is `make docs` run in the
-  same commit. A module with a page of its own names the page's installed
-  path, `$(opam var solidtype:doc)/pages/<page>.md`, in its `.mli`'s opening
-  comment, and `generate/rhp.ts` writes it for rhp's generated components.
-  Why: a user's agent reads what the release installs, offline, and a page
-  it reads must be the release's. Test: the docs workflow builds the
-  pages on every pull request and fails if `agents/` then differs.
-- **Tests of what runs in a browser are OCaml, run by vitest.** Alcotest
-  does not build for Melange; `melange-jest` reaches the globals vitest
-  shares with Jest. The ppx, native, is tested by its expectations. Why:
-  a test in TypeScript would reach a component through the names Melange
+  `x-npm-depends`, written by its `.opam.template` at the range the root
+  `package.json` builds and tests against, `"@bezda/rhp@~2.2.0"`, and
+  nothing else: `solidtype-heroui` reaches Kobalte through
+  `solidtype-kobalte`, never by naming it again. Why: an application
+  installs a JavaScript library only where it uses the package that binds
+  it, and reads the list from opam at the version it resolved. Test:
+  `vite-plugin/test/npm.test.ts`.
+
+### Components and ports
+
+- **A component Kobalte lacks is made headless first, in
+  `solidtype-headless`, and a design system dresses it.** It is made of
+  Kobalte's hooks, `Solidtype_kobalte.Selection` first: its parts the
+  elements they name, their roles, keys and state as attributes, Kobalte's
+  convention for state, present and empty, and its state a context a style
+  reads. Its HeroUI port adds only HeroUI's classes, `data-slot`, React
+  Aria's state, `"true"`, and HeroUI's own parts. A bug of Kobalte's own
+  component is fixed so too, in a module of `solidtype-headless` named for
+  it, never in a port: its fixed parts wrap Kobalte's and `include` its
+  `Props`, its other parts Kobalte's own. A port's own difference from
+  Kobalte stays the port's. Why: behaviour and accessibility are the
+  component's whoever dresses it, tested once. Test: `test/headless/`, a
+  fix failing on Kobalte's own; its port's test against React's.
+- **A part takes every attribute of its element.** Its check ends in its
+  element's `Html` check, by `[@@element]` or written by hand, and it
+  spreads `Props.others` on that element, or on the part that draws it,
+  after its own attributes, so a caller's attribute wins, as React Aria's
+  `mergeProps` lets it. A handler, `ref` or `style` the part sets is its
+  own prop, `?ref:(given_ref : ...)`, the caller's called or written
+  beside its own; what its behaviour rests on -- a Kobalte option, an id
+  another part names, a fix -- is written after the spread, since Solid
+  merges props in order. A part that draws no element takes none. Why: an
+  attribute a port refuses, or one a caller's spread replaces, is one an
+  application cannot set without breaking the port. Test:
+  `test/heroui/attributes_test.mlx`, every part given a style, a title, a
+  handler and a `ref`.
+- **A part that draws an element takes `as_`**, HeroUI's `render`: a
+  function of `Html.X.props`, which it spreads on what it draws, and of
+  the part's state where it has one. `[@@element]` gives it: a plain
+  element stays Solid's template until a part is given one, then is
+  `Dynamic` given the function, never a tag, which throws as a page
+  hydrates. What hands its rest on to a function passes `as_` itself, or
+  reads it, `Solid.drawn_as` and `Solid.undrawn`. Why: an animated element
+  in a part's place, typed so that what it draws checks its own props.
+  Test: `test/heroui/attributes_test.mlx`, `test/ppx`,
+  `test/does_not_compile.t`.
+- **A component HeroUI ships no stylesheet for has one of its own**,
+  `heroui/<name>.css`: Tailwind on HeroUI's tokens, rules for its BEM
+  classes, imported by `heroui/extras.css` into the `components` layer.
+  The component is made as every port is, its props named as HeroUI names
+  its own; its parts carry their classes alone, a caller's after them. The
+  plugin's tarball ships the stylesheets, so an application imports them
+  by one line, `@import "vite-plugin-solidtype/heroui-extras.css"`. It has
+  no twin: its test is a caller's, its classes pinned, with axe. Nothing
+  of a licensed kit is installed, imported or copied. Why: every component
+  is restyled alike, by a rule for its class, which a utility on the
+  element would beat; and this repository, its CI and its site are public.
+  Symptom: a utility in a part's class string, or `rg -n heroui-pro .`
+  finding anything. Test: `vite-plugin/test/pack.test.ts`.
+
+### Tests and documents
+
+- **Tests of what runs in a browser are OCaml, run by vitest** through
+  `melange-jest`; the ppx, native, is tested by its expectations. Why: a
+  test in TypeScript would reach a component through the names Melange
   emits. Symptom: a `.test.ts` or `.test.tsx` that imports an OCaml
   module.
+- **Each Kobalte component is tested against its TSX twin**, in
+  `test/kobalte/twins/`: one check on both -- roles, names, state
+  attributes, the pattern's keys -- and axe on both. Why: the library
+  promises Kobalte's behaviour and accessibility, which only a running
+  component shows. Symptom: a component of
+  `kobalte/solidtype_kobalte.ml` with no `test/kobalte/*_test.mlx`.
+- **Each rhp page links to the page of rhp's documentation it follows.**
+  Why: a copy of what a prop does would drift. Test: `test/test_docs.ml`.
+- **`agents/` is generated, never edited**: starlight-hypha-agents writes
+  it from the documentation's pages, `docs/agents.md` and its options in
+  `docs/astro.config.mjs`, so a page changed is `make docs` run in the
+  same commit. A module with a page of its own names the page's installed
+  path, `$(opam var solidtype:doc)/pages/<page>.md`, in its `.mli`'s
+  opening comment. Why: a user's agent reads what the release installs,
+  offline. Test: the docs workflow fails if `agents/` differs from what
+  the pages give.
 
 ## Changes and releases
 

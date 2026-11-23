@@ -718,8 +718,8 @@ module Root_zoned = struct
                 | None -> Props.placeholder_value_given props
               in
               Dt.ZonedDateTime.set t
-                (Dt.ZonedDateTime_Set.make ~era:(C.era d) ~year:(C.year d)
-                   ~month:(C.month d) ~day:(C.day d) ())
+                (Dt.ZonedDateTime_Set_Fields.make ~era:(C.era d)
+                   ~year:(C.year d) ~month:(C.month d) ~day:(C.day d) ())
                 ());
           timed =
             S.accessor (fun () ->
@@ -1267,8 +1267,8 @@ module Root_range_zoned = struct
                 | None -> Props.placeholder_value_given props
               in
               Dt.ZonedDateTime.set t
-                (Dt.ZonedDateTime_Set.make ~era:(C.era d) ~year:(C.year d)
-                   ~month:(C.month d) ~day:(C.day d) ())
+                (Dt.ZonedDateTime_Set_Fields.make ~era:(C.era d)
+                   ~year:(C.year d) ~month:(C.month d) ~day:(C.day d) ())
                 ());
           timed =
             S.accessor (fun () ->

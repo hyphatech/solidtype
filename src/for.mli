@@ -3,13 +3,17 @@
     [<For each=(items ())>(fun item _ -> ...)</For>]. *)
 
 module Props : sig
+  type 'a t
+
   val check :
     each:'a array Check.value ->
     ?fallback:Jsx.element Check.value ->
     children:
       ('a -> int Solid.accessor -> Jsx.element, [ `render ]) Check.children ->
+    ?props:'a t Solid.rest ->
     unit ->
     unit
 end
 
-val component : unit Jsx.component
+val make : 'a Props.t -> Jsx.element
+val component : 'a Props.t Jsx.component

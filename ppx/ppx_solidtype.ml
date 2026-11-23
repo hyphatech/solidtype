@@ -1041,7 +1041,10 @@ let is_nodes p =
 
 (* The props module: an abstract type, one getter per prop -- a live read of
    Solid's props object, so Solid tracks it -- and the check. A function prop
-   is read uncurried, the call Solid's JSX makes. *)
+   of one argument is read uncurried, the call Solid's JSX makes; one of more
+   is read as OCaml gave it, since its type does not say whether it takes
+   them at once or one at a time, and is applied as OCaml applies a function
+   it did not make. *)
 let props_module ~loc ~element ~drawn props =
   let vars =
     List.fold_left
@@ -1065,9 +1068,13 @@ let props_module ~loc ~element ~drawn props =
       ]
   in
   let getter p =
+    (* Under [Check.value], which is the value itself, a function of several
+       arguments is one type to Melange, which else counts its arrows as the
+       getter's own. *)
     let field =
-      if p.arity > 0 then
+      if p.arity = 1 then
         { p.typ with ptyp_attributes = [ attribute ~loc "u" ] }
+      else if p.arity > 1 then [%type: [%t p.typ] Solidtype.Check.value]
       else p.typ
     in
     let field =
@@ -1418,7 +1425,7 @@ let reader ~loc p =
       let call f =
         {
           (B.pexp_apply ~loc f (List.map (fun x -> (P.Nolabel, arg x)) xs)) with
-          pexp_attributes = [ attribute ~loc "u" ];
+          pexp_attributes = (if p.arity = 1 then [ attribute ~loc "u" ] else []);
         }
       in
       let body =

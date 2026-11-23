@@ -15,7 +15,11 @@ const isMarker = (name: string): name is Marker =>
   name === "el" || name === "c" || name === "s" || name === "d" ||
   name === "spread" || name === "dynamic";
 
-export class MarkerError extends Error {}
+export class MarkerError extends Error {
+  constructor(message: string, readonly node?: t.Node) {
+    super(message);
+  }
+}
 
 function markerOf(node: t.Node, namespace: string): Marker | null {
   if (!t.isCallExpression(node)) return null;
@@ -34,16 +38,16 @@ function markerOf(node: t.Node, namespace: string): Marker | null {
 
 function argsOf(node: t.Node, count: number): t.Expression[] {
   if (!t.isCallExpression(node) || node.arguments.length !== count) {
-    throw new MarkerError(`a marker takes ${count} arguments`);
+    throw new MarkerError(`a marker takes ${count} arguments`, node);
   }
   return node.arguments.map((a) => {
-    if (!t.isExpression(a)) throw new MarkerError("a marker's argument is an expression");
+    if (!t.isExpression(a)) throw new MarkerError("a marker's argument is an expression", a);
     return a;
   });
 }
 
 function stringOf(node: t.Expression): string {
-  if (!t.isStringLiteral(node)) throw new MarkerError("a marker's name is a string literal");
+  if (!t.isStringLiteral(node)) throw new MarkerError("a marker's name is a string literal", node);
   return node.value;
 }
 
@@ -104,7 +108,7 @@ function jsxName(component: t.Expression, alias: (name: string) => string): t.JS
       return t.jsxMemberExpression(inner, t.jsxIdentifier(component.property.name));
     }
   }
-  throw new MarkerError("a component is a name or a module's member");
+  throw new MarkerError("a component is a name or a module's member", component);
 }
 
 // A string is written as JSX's own only where JSX reads it back unchanged,
@@ -155,7 +159,7 @@ function attribute(node: t.Expression, namespace: string): t.JSXAttribute | t.JS
       return t.jsxSpreadAttribute(unwrap(thunk));
     }
     default:
-      throw new MarkerError("a prop is written by Jsx.s, Jsx.d or Jsx.spread");
+      throw new MarkerError("a prop is written by Jsx.s, Jsx.d or Jsx.spread", node);
   }
 }
 
@@ -174,18 +178,18 @@ function child(node: t.Expression, namespace: string, alias: (name: string) => s
 
 export function element(node: t.Expression, namespace: string, alias: (name: string) => string): t.JSXElement {
   const marker = markerOf(node, namespace);
-  if (marker !== "el" && marker !== "c") throw new MarkerError("an element is written by Jsx.el or Jsx.c");
+  if (marker !== "el" && marker !== "c") throw new MarkerError("an element is written by Jsx.el or Jsx.c", node);
   const [tag, props, children] = argsOf(node, 3) as [t.Expression, t.Expression, t.Expression];
   if (!t.isArrayExpression(props) || !t.isArrayExpression(children)) {
-    throw new MarkerError("an element's props and children are arrays");
+    throw new MarkerError("an element's props and children are arrays", node);
   }
   const name = marker === "el" ? t.jsxIdentifier(stringOf(tag)) : jsxName(tag, alias);
   const attributes = props.elements.map((p) => {
-    if (!t.isExpression(p)) throw new MarkerError("a prop is an expression");
+    if (!t.isExpression(p)) throw new MarkerError("a prop is an expression", p ?? node);
     return attribute(p, namespace);
   });
   const kids = children.elements.map((c) => {
-    if (!t.isExpression(c)) throw new MarkerError("a child is an expression");
+    if (!t.isExpression(c)) throw new MarkerError("a child is an expression", c ?? node);
     return child(c, namespace, alias);
   });
   const selfClosing = kids.length === 0;
@@ -197,11 +201,30 @@ export function element(node: t.Expression, namespace: string, alias: (name: str
   );
 }
 
+// An arrow's [this] is its function's, so it moves only within that function.
+function readsTheSame(fn: NodePath<t.FunctionExpression | t.ArrowFunctionExpression>, use: NodePath): boolean {
+  if (fn.isArrowFunctionExpression() && fn.getFunctionParent() !== use.getFunctionParent()) return false;
+  let same = true;
+  fn.traverse({
+    Identifier(id) {
+      if (!id.isReferencedIdentifier()) return;
+      const here = id.scope.getBinding(id.node.name);
+      const own = here !== undefined && (here.path === fn || here.path.isDescendant(fn));
+      if (!own && use.scope.getBinding(id.node.name) !== here) {
+        same = false;
+        id.stop();
+      }
+    },
+  });
+  return same;
+}
+
 // A prop or a child the ppx bound once, to name it in its component's check
 // too, goes back where it is used, so Solid's compiler sees the function as
 // TSX would write it. Only a const bound to a function and used once moves: a
 // function expression does nothing until it is called, so writing it later in
-// the same scope changes nothing. Any other binding stays, and is called.
+// the same scope changes nothing, while every name it reads means there what
+// it meant where it was bound. Any other binding stays, and is called.
 function inlineBound(value: NodePath<t.Node | null | undefined>): void {
   if (!value.isIdentifier()) return;
   const binding = value.scope.getBinding(value.node.name);
@@ -210,6 +233,7 @@ function inlineBound(value: NodePath<t.Node | null | undefined>): void {
   if (!declarator.isVariableDeclarator()) return;
   const init = declarator.get("init");
   if (!init.isFunctionExpression() && !init.isArrowFunctionExpression()) return;
+  if (!readsTheSame(init, value)) return;
   value.replaceWith(init.node);
   declarator.remove();
 }
@@ -281,7 +305,24 @@ function markersPlugin(): PluginObj {
             // The new element is traversed in turn: an element given as a
             // prop's value, or returned from a thunk, is a marker still.
             scope = call.scope;
-            call.replaceWith(element(call.node, namespace, alias));
+            try {
+              call.replaceWith(element(call.node, namespace, alias));
+            } catch (e) {
+              if (e instanceof MarkerError && e.node) throw call.hub.buildError(e.node, e.message, Error);
+              throw e;
+            }
+          },
+        });
+        // A marker that is still named would name an import that is gone: one
+        // held as a value, which only a hand writes. A props check stays
+        // named where Melange keeps a module's as a value, and never runs.
+        program.traverse({
+          MemberExpression(member) {
+            const { object, property } = member.node;
+            if (!t.isIdentifier(object) || !namespaces.includes(object.name)) return;
+            if (member.scope.getBinding(object.name)?.kind !== "module") return;
+            if (member.node.computed || !t.isIdentifier(property) || !isMarker(property.name)) return;
+            throw member.buildCodeFrameError(`${object.name}.${property.name} is no marker's call`);
           },
         });
         for (const i of imports) i.remove();
@@ -304,6 +345,7 @@ export async function rewrite(code: string, filename: string): Promise<{ code: s
     babelrc: false,
     configFile: false,
     sourceMaps: true,
+    highlightCode: false,
     plugins: [markersPlugin],
   });
   if (!result?.code) return null;

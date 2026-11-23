@@ -1,7 +1,7 @@
 module H = Harness
 open Harness.Syntax
 module Pagination = Solidtype_kobalte.Pagination
-module Item_props = Solidtype_kobalte.Types.Pagination_Root_ItemComponent
+module Item_props = Solidtype_kobalte.Types.Pagination_Root_ItemComponent_Props
 module Jsx = Solidtype.Jsx
 
 (* [ellipsisComponent] takes no argument, yet is written [fun _ ->]: the ppx

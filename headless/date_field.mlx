@@ -289,7 +289,7 @@ let date_kind : Dt.CalendarDate.t kind =
   }
 
 let time_fields w =
-  Dt.ZonedDateTime_Set.make ~era:w.w_era ~year:w.w_year ~month:w.w_month
+  Dt.ZonedDateTime_Set_Fields.make ~era:w.w_era ~year:w.w_year ~month:w.w_month
     ~day:w.w_day ~hour:w.w_hour ~minute:w.w_minute ~second:w.w_second
     ~millisecond:w.w_millisecond ()
 

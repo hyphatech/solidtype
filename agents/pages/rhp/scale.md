@@ -17,7 +17,7 @@ one saying the unit.
 module Bar = Solidtype_rhp.Bar
 module Chart = Solidtype_rhp.Chart
 module Either = Solidtype_rhp.Types.Either
-module Every = Solidtype_rhp.Types.Every
+module Every = Solidtype_rhp.Types.Every_Options
 module Jsx = Solidtype.Jsx
 module Label = Solidtype_rhp.Label
 module Plot = Solidtype_rhp.Plot

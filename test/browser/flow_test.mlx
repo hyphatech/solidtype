@@ -53,6 +53,26 @@ module Shows_user = struct
     <p>(Jsx.string (Option.value user ~default:"nobody"))</p>
 end
 
+(* Functions of two arguments that take the first, work, and give a function
+   of the second: OCaml types them as it types [fun a b -> ...], and Melange
+   writes them as a function of one argument. *)
+let staged_row item =
+  let shouted = String.uppercase_ascii item in
+  fun i -> <li>(Jsx.string (shouted ^ string_of_int (S.get i)))</li>
+
+let staged_cell item =
+  let doubled = S.accessor (fun () -> 2 * S.get item) in
+  fun (i : int) -> <li>(Jsx.int (S.get doubled + i))</li>
+
+let staged_join a =
+  let dashed = a ^ "-" in
+  fun b -> dashed ^ b
+
+module Joins = struct
+  let%component make ~(join : string -> string -> string) () =
+    <p>(Jsx.string (join "a" "b"))</p>
+end
+
 module Greeting = struct
   let%component make ~(name : string) ?(greeting : string = "Hello") () =
     <p>(Jsx.string (S.get greeting ^ ", " ^ S.get name))</p>
@@ -99,6 +119,21 @@ let () =
           E.(expect (T.page ()) |> toBe "34")));
   Jest.describe "conditions" (fun () ->
       Jest.afterEach T.cleanup;
+      Jest.test "For calls a function that takes its arguments one at a time"
+        (fun () ->
+          T.render (fun () ->
+              <ul><For each=[| "a"; "b" |] render=staged_row /></ul>);
+          E.(expect (T.page ()) |> toBe "A0B1"));
+      Jest.test "Index calls a function that takes its arguments one at a time"
+        (fun () ->
+          T.render (fun () ->
+              <ul><Index each=[| 1; 2 |] render=staged_cell /></ul>);
+          E.(expect (T.page ()) |> toBe "25"));
+      Jest.test
+        "a component calls a function prop that takes its arguments one at a \
+         time" (fun () ->
+          T.render (fun () -> <Joins join=staged_join />);
+          E.(expect (T.page ()) |> toBe "a-b"));
       Jest.test "Show shows its children while its condition holds" (fun () ->
           let on, set_on = S.create_signal false in
           T.render (fun () ->
