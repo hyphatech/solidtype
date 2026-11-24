@@ -1,0 +1,12 @@
+module Description = Solidtype_heroui.Description
+module Switch = Solidtype_heroui.Switch
+
+let make () =
+  <div class_="max-w-sm">
+    <Switch>
+      <Switch.Content>
+        <Switch.Control><Switch.Thumb /></Switch.Control> "Public profile"
+      </Switch.Content>
+      <Description>"Allow others to see your profile information"</Description>
+    </Switch>
+  </div>

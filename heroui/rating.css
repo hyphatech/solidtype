@@ -1,0 +1,98 @@
+/* Rating, in HeroUI's look, which ships no stylesheet for it: Tailwind on
+   HeroUI's tokens, written as HeroUI writes its components' CSS, so an
+   application restyles a part by a rule for its class. */
+
+.rating {
+  --rating-active-color: var(--color-warning);
+  --rating-inactive-color: var(--color-surface-tertiary);
+  @apply flex items-center outline-none;
+
+  &[data-focus-visible="true"] {
+    @apply status-focused;
+  }
+
+  &[data-disabled="true"] {
+    @apply status-disabled;
+  }
+
+  &[data-readonly="true"] {
+    @apply pointer-events-none;
+  }
+}
+
+/* Kobalte's control around the items lays nothing out itself. */
+.rating__control {
+  @apply contents;
+}
+
+.rating--sm {
+  gap: 4px;
+}
+
+.rating--md {
+  gap: 5px;
+}
+
+.rating--lg {
+  gap: 8px;
+}
+
+.rating__item {
+  @apply relative flex cursor-(--cursor-interactive) items-center justify-center outline-none transition-transform duration-150 motion-reduce:transition-none;
+  -webkit-tap-highlight-color: transparent;
+
+  &[data-focus-visible="true"] {
+    @apply status-focused rounded-[calc(var(--radius)*0.5)];
+  }
+
+  &[aria-disabled="true"] {
+    @apply status-disabled;
+  }
+
+  &[data-pressed="true"]:not([data-readonly="true"]) {
+    @apply scale-80;
+  }
+
+  &[data-readonly="true"] {
+    @apply pointer-events-none cursor-default;
+  }
+}
+
+.rating__icon {
+  @apply relative flex items-center justify-center transition-colors duration-100 ease-out motion-reduce:transition-none;
+  color: var(--rating-inactive-color);
+
+  & svg {
+    @apply size-full;
+  }
+
+  &[data-active="true"] {
+    color: var(--rating-active-color);
+  }
+}
+
+/* An item a fractional value fills in part, as far as the fraction goes. */
+.rating__icon-partial {
+  @apply absolute inset-y-0 start-0 flex items-center overflow-hidden;
+  width: var(--rating-partial);
+  color: var(--rating-active-color);
+
+  & svg {
+    @apply shrink-0;
+  }
+}
+
+.rating__item--sm .rating__icon,
+.rating__item--sm .rating__icon-partial svg {
+  @apply size-4;
+}
+
+.rating__item--md .rating__icon,
+.rating__item--md .rating__icon-partial svg {
+  @apply size-5;
+}
+
+.rating__item--lg .rating__icon,
+.rating__item--lg .rating__icon-partial svg {
+  @apply size-7;
+}

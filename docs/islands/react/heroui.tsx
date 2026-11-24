@@ -4,7 +4,7 @@
 
 import { CalendarDate } from "@internationalized/date";
 import { I18nProvider } from "react-aria-components";
-import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Calendar, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorField, ColorPicker, ColorSlider, ColorSwatch, ColorSwatchPicker, ComboBox, DateField, DatePicker, DateRangePicker, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RangeCalendar, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Table, Tabs, Tag, TagGroup, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
+import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Calendar, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorField, ColorPicker, ColorSlider, ColorSwatch, ColorSwatchPicker, ComboBox, DateField, DatePicker, DateRangePicker, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RangeCalendar, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Table, Tabs, Tag, TagGroup, TextField, TimeField, ToggleButton, ToggleButtonGroup, Toolbar, Tooltip, Typography, useFilter } from "@heroui/react";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -1436,4 +1436,33 @@ function TagGroupDemo(props: TagGroupProps) {
 
 export function tagGroup(host: HTMLElement, props: TagGroupProps): void {
   flushSync(() => rootOf(host).render(<TagGroupDemo {...props} />));
+}
+
+type ToolbarProps = { orientation: "horizontal" | "vertical"; isAttached: boolean };
+
+// A text style group and two buttons, as the port's demo draws them.
+export function toolbar(host: HTMLElement, props: ToolbarProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Toolbar aria-label="Text formatting" {...props}>
+        <ToggleButtonGroup aria-label="Text style" selectionMode="multiple">
+          <ToggleButton isIconOnly aria-label="Bold" id="bold">
+            B
+          </ToggleButton>
+          <ToggleButton isIconOnly aria-label="Italic" id="italic">
+            <ToggleButtonGroup.Separator />I
+          </ToggleButton>
+        </ToggleButtonGroup>
+        <Separator />
+        <ButtonGroup variant="tertiary">
+          <Button isIconOnly aria-label="Copy">
+            C
+          </Button>
+          <Button isIconOnly aria-label="Cut">
+            <ButtonGroup.Separator />X
+          </Button>
+        </ButtonGroup>
+      </Toolbar>,
+    ),
+  );
 }

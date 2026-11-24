@@ -1,0 +1,82 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+let tags =
+  [|
+    ("react", "React");
+    ("typescript", "TypeScript");
+    ("javascript", "JavaScript");
+    ("nodejs", "Node.js");
+    ("python", "Python");
+    ("vue", "Vue");
+    ("angular", "Angular");
+    ("nextjs", "Next.js");
+  |]
+
+let name_of id =
+  match Array.find_opt (fun (k, _) -> String.equal k id) tags with
+  | Some (_, name) -> name
+  | None -> id
+
+let make () =
+  let chosen, set_chosen = S.create_signal [||] in
+  let remove keys =
+    S.set set_chosen
+      (Js.Array.filter (S.get chosen) ~f:(fun k ->
+           not (Array.exists (String.equal k) keys)))
+  in
+  <Autocomplete
+    class_="w-[256px]"
+    placeholder="Select tags"
+    selection_mode=`multiple
+    value=(S.get chosen)
+    on_change=(fun keys -> S.set set_chosen keys)>
+    <Label>"Tags"</Label>
+    <Autocomplete.Trigger>
+      <Autocomplete.Value>
+        (fun value ->
+          <Tag_group size=`sm on_remove=remove>
+            <Tag_group.List>
+              <For each=(S.get value.selected_keys)>
+                (fun id _ ->
+                  <Tag id text_value=(name_of id)>
+                    (Jsx.string (name_of id))
+                  </Tag>)
+              </For>
+            </Tag_group.List>
+          </Tag_group>)
+      </Autocomplete.Value>
+      <Autocomplete.Clear_button />
+      <Autocomplete.Indicator />
+    </Autocomplete.Trigger>
+    <Autocomplete.Popover>
+      <Autocomplete.Filter>
+        <Search_field aria_label="Search tags" name="search" variant=`secondary>
+          <Search_field.Group>
+            <Search_field.Search_icon />
+            <Search_field.Input placeholder="Search tags..." />
+            <Search_field.Clear_button />
+          </Search_field.Group>
+        </Search_field>
+        <List_box
+          render_empty_state=(fun _ ->
+                               <Empty_state>"No tags found"</Empty_state>)
+          selection_mode=`multiple>
+          <For each=tags>
+            (fun (id, name) _ ->
+              <List_box.Item id text_value=name>
+                (Jsx.string name) <List_box.Item_indicator />
+              </List_box.Item>)
+          </For>
+        </List_box>
+      </Autocomplete.Filter>
+    </Autocomplete.Popover>
+  </Autocomplete>

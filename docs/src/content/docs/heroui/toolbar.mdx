@@ -1,0 +1,103 @@
+---
+title: Toolbar
+description: A container for interactive controls with arrow key navigation.
+---
+
+import Example from "@components/Example.astro";
+import * as Usage from "@islands/toolbar_usage.jsx";
+import UsageCode from "@islands/toolbar_usage.mlx?raw";
+import * as Vertical from "@islands/toolbar_vertical.jsx";
+import VerticalCode from "@islands/toolbar_vertical.mlx?raw";
+import * as Attached from "@islands/toolbar_attached.jsx";
+import AttachedCode from "@islands/toolbar_attached.mlx?raw";
+import * as WithButtonGroup from "@islands/toolbar_with_button_group.jsx";
+import WithButtonGroupCode from "@islands/toolbar_with_button_group.mlx?raw";
+import * as Tailwind from "@islands/toolbar_tailwind.jsx";
+import TailwindCode from "@islands/toolbar_tailwind.mlx?raw";
+import * as Demo from "@islands/toolbar_demo.jsx";
+
+Original HeroUI documentation: [Toolbar](https://heroui.com/en/docs/react/components/toolbar).
+
+## Usage
+
+<Example code={UsageCode} title="toolbar_usage.mlx"><Usage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI Toolbar twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two toolbars: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Keys
+
+The arrows of its orientation move the focus between its stops, what Tab
+reaches inside it, the page's direction read for the horizontal ones, never
+past either end. A toggle group is one stop, whose own arrows move among its
+buttons. A `Separator` inside the toolbar runs across it, and a
+`Button_group` or `Toggle_button_group` along it, unless either gives its
+own orientation.
+
+## Examples
+
+### Vertical
+
+<Example code={VerticalCode} title="toolbar_vertical.mlx"><Vertical.make client:visible /></Example>
+
+### Attached
+
+<Example code={AttachedCode} title="toolbar_attached.mlx"><Attached.make client:visible /></Example>
+
+### With ButtonGroup
+
+<Example code={WithButtonGroupCode} title="toolbar_with_button_group.mlx"><WithButtonGroup.make client:visible /></Example>
+
+## Customization
+
+### Tailwind CSS
+
+<Example code={TailwindCode} title="toolbar_tailwind.mlx"><Tailwind.make client:visible /></Example>
+
+### Global CSS
+
+```css
+@layer components {
+  .toolbar {
+    @apply gap-4 rounded-lg bg-surface p-3;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+- `.toolbar` - Base container
+- `.toolbar--horizontal` - Horizontal orientation (default)
+- `.toolbar--vertical` - Vertical orientation
+- `.toolbar--attached` - Attached variant with surface background and full rounding
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Toolbar
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `isAttached` | `is_attached` | `bool` | `false` | Whether the toolbar has a surface background with full rounding |
+| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `horizontal `` | The orientation of the toolbar |
+| `aria-label` | `aria_label` | `string` | | An accessible label for the toolbar |
+| `aria-labelledby` | `aria_labelledby` | `string` | | The id of an element that labels the toolbar |
+| `children` | `children` | elements, or a function of its state | | Its controls |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+
+### Render Props
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] S.accessor `` | The current orientation of the toolbar |

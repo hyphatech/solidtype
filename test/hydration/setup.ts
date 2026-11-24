@@ -1,9 +1,9 @@
 // The island, a chart, and a HeroUI Select, TimeField, DateField and
-// CheckboxGroup,
+// CheckboxGroup, and a virtualized Table and List_view,
 // rendered on the server, through Vite's server-side loading, so the same
 // plugin and Solid's compiler for the server make the HTML, handed to each
 // test as "html", "chart", "select", "timeField", "dateField",
-// "checkboxGroup" and "theme".
+// "checkboxGroup", "theme", "table" and "listView".
 import type { TestProject } from "vitest/node";
 
 export default async function setup(project: TestProject) {
@@ -18,6 +18,8 @@ export default async function setup(project: TestProject) {
   project.provide("dateField", rendered.date_field());
   project.provide("checkboxGroup", rendered.checkbox_group());
   project.provide("theme", rendered.theme());
+  project.provide("table", rendered.table());
+  project.provide("listView", rendered.list_view());
 }
 
 declare module "vitest" {
@@ -30,5 +32,7 @@ declare module "vitest" {
     dateField: string;
     checkboxGroup: string;
     theme: string;
+    table: string;
+    listView: string;
   }
 }

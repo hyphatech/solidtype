@@ -1,0 +1,124 @@
+/* List_view, in HeroUI's look, which ships no stylesheet for it: Tailwind on
+   HeroUI's tokens, written as HeroUI writes its components' CSS, so an
+   application restyles a part by a rule for its class. */
+
+.list-view {
+  @apply relative min-h-0 w-full outline-none;
+}
+
+/* A grey card of white rows. */
+.list-view--primary {
+  @apply rounded-[calc(var(--radius)*2.5)] bg-surface-secondary p-1;
+}
+
+.list-view__item {
+  @apply flex cursor-(--cursor-interactive) items-center gap-3 px-4 py-3 text-sm outline-none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus-visible,
+  &[data-focus-visible="true"] {
+    box-shadow: inset 0 0 0 2px var(--color-focus);
+  }
+
+  &[aria-disabled="true"] {
+    @apply status-disabled;
+  }
+
+  &[data-dragging="true"] {
+    @apply opacity-50;
+  }
+}
+
+/* A virtualized list scrolls its own rows, as high as a caller makes it,
+   each as high as the frame its row_height gives it. */
+.list-view[data-virtualized="true"] {
+  @apply overflow-y-auto;
+
+  & .list-view__item {
+    @apply h-full;
+  }
+}
+
+.list-view--primary .list-view__item {
+  @apply border-b bg-surface;
+  border-color: color-mix(in oklab, var(--separator-tertiary) 50%, transparent);
+
+  @media (hover: hover) {
+    &:hover,
+    &[data-hovered="true"] {
+      @apply bg-surface/40;
+    }
+  }
+
+  &[data-selected="true"] {
+    @apply bg-surface/10;
+  }
+}
+
+/* The first and last rows of a list that draws them all, siblings; a
+   virtualized list draws each in a frame of its own. */
+.list-view--primary:not([data-virtualized="true"]) .list-view__item {
+  &:first-child {
+    @apply rounded-t-[calc(var(--radius)*2)];
+  }
+
+  &:last-child {
+    @apply rounded-b-[calc(var(--radius)*2)] border-b-0;
+  }
+}
+
+/* Rows on the page's background, a line between each. */
+.list-view--secondary .list-view__item {
+  @apply border-b bg-transparent;
+  border-color: color-mix(in oklab, var(--separator-tertiary) 50%, transparent);
+
+  @media (hover: hover) {
+    &:hover,
+    &[data-hovered="true"] {
+      @apply bg-default/50;
+    }
+  }
+
+  &[data-selected="true"] {
+    @apply bg-accent-soft;
+
+    @media (hover: hover) {
+      &:hover,
+      &[data-hovered="true"] {
+        background-color: var(--accent-soft-hover);
+      }
+    }
+  }
+}
+
+.list-view--secondary:not([data-virtualized="true"]) .list-view__item:last-child {
+  @apply border-b-0;
+}
+
+.list-view__selection-cell {
+  @apply flex shrink-0 items-center;
+}
+
+.list-view__item-content {
+  @apply flex min-w-0 flex-1 items-center gap-3;
+
+  & svg {
+    @apply size-4 shrink-0 text-muted;
+  }
+}
+
+.list-view__title {
+  @apply truncate text-sm font-medium text-foreground;
+}
+
+.list-view__description {
+  @apply mt-0.5 truncate text-xs text-muted;
+}
+
+.list-view__item-action {
+  @apply ms-auto shrink-0 ps-2;
+}
+
+.list-view__empty-state {
+  @apply flex items-center justify-center px-4 py-8;
+}

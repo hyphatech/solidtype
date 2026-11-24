@@ -10,6 +10,7 @@ module Fieldset = Solidtype_heroui.Fieldset
 module Label = Solidtype_heroui.Label
 module Form = Solidtype_heroui.Form
 module E = Jest.Expect
+module Field_error = Solidtype_heroui.Field_error
 module T = Testing
 open Testing.Syntax
 
@@ -328,6 +329,51 @@ let () =
 let () =
   Jest.describe "Checkbox_group, left" (fun () ->
       Jest.afterEach T.cleanup;
+      Jest.test
+        "shows its error while invalid, which describes it after its \
+         description" (fun () ->
+          let invalid, set_invalid = Solidtype.Solid.create_signal false in
+          T.render (fun () ->
+              <Checkbox_group
+                is_invalid=(Solidtype.Solid.get invalid) name="interests">
+                <Label>"Interests"</Label>
+                <Description>"Pick any."</Description>
+                <Checkbox value="coding">
+                  <Checkbox.Content>
+                    <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+                    "Coding"
+                  </Checkbox.Content>
+                </Checkbox>
+                <Field_error>"Choose one at least"</Field_error>
+              </Checkbox_group>);
+          let errors () =
+            Js.Array.from (query_all T.body "[data-slot=field-error]")
+            |> Array.map T.text_content
+          in
+          let before = errors () in
+          Solidtype.Solid.set set_invalid true;
+          let described e =
+            match T.attribute e "aria-describedby" with
+            | Some ids ->
+                String.split_on_char ' ' ids
+                |> List.filter_map (fun id ->
+                    Option.map T.text_content (T.query ("#" ^ id)))
+            | None -> []
+          in
+          E.(
+            expect
+              ( before,
+                errors (),
+                described
+                  (Option.value
+                     (T.query "[data-slot=checkbox-group]")
+                     ~default:T.body),
+                described (T.by_role "checkbox") )
+            |> toEqual
+                 ( [||],
+                   [| "Choose one at least" |],
+                   [ "Pick any."; "Choose one at least" ],
+                   [ "Pick any."; "Choose one at least" ] )));
       Jest.test "tells it is left once focus leaves it, as React's does"
         (fun () ->
           let solidtype =

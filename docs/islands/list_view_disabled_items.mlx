@@ -1,0 +1,37 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module List_view = Solidtype_heroui.List_view
+module Gravity = Solidtype_gravity_icons
+
+let files =
+  [|
+    ("documents", "Documents", true);
+    ("budget", "Budget.xlsx", false);
+    ("archived", "Archived.zip", false);
+    ("photos", "Photos", true);
+    ("backup", "Old backup.tar", false);
+    ("readme", "README.md", false);
+  |]
+
+let locked = [| "archived"; "backup" |]
+
+let make () =
+  <div class_="w-full max-w-md">
+    <List_view aria_label="Files" selection_mode=`multiple disabled_keys=locked>
+      <For each=files>
+        (fun (id, name, folder) _ ->
+          <List_view.Item id text_value=name>
+            <List_view.Item_content>
+              (if folder then <Gravity.Folder /> else <Gravity.File />)
+              <List_view.Title>(Jsx.string name)</List_view.Title>
+            </List_view.Item_content>
+            (if Array.exists (String.equal id) locked then
+               <List_view.Item_action>
+                 <Gravity.Lock class_="size-4 text-muted" />
+               </List_view.Item_action>
+             else Jsx.string "")
+          </List_view.Item>)
+      </For>
+    </List_view>
+  </div>

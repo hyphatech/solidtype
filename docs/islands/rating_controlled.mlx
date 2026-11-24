@@ -1,0 +1,21 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Rating = Solidtype_heroui.Rating
+
+let make () =
+  let value, set_value = S.create_signal 3. in
+  <div class_="flex flex-col items-center gap-3">
+    <Rating
+      aria_label="Rating"
+      value=(S.get value)
+      on_value_change=(fun v -> S.set set_value v)>
+      <Rating.Item value=1. />
+      <Rating.Item value=2. />
+      <Rating.Item value=3. />
+      <Rating.Item value=4. />
+      <Rating.Item value=5. />
+    </Rating>
+    <span class_="text-sm text-muted">
+      (Jsx.string (Js.Float.toString (S.get value) ^ " stars"))
+    </span>
+  </div>

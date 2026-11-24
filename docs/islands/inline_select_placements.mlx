@@ -1,0 +1,53 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Inline_select = Solidtype_heroui.Inline_select
+module List_box = Solidtype_heroui.List_box
+
+let placements =
+  [|
+    ("bottom", `bottom, "bottom");
+    ("bottom-start", `bottom_start, "bottom start");
+    ("bottom-end", `bottom_end, "bottom end (default)");
+    ("top", `top, "top");
+    ("top-start", `top_start, "top start");
+    ("top-end", `top_end, "top end");
+    ("left", `left, "left");
+    ("left-top", `left_top, "left top");
+    ("left-bottom", `left_bottom, "left bottom");
+    ("right", `right, "right");
+    ("right-top", `right_top, "right top");
+    ("right-bottom", `right_bottom, "right bottom");
+  |]
+
+let make () =
+  let chosen, set_chosen = S.create_signal "bottom-end" in
+  let placement () =
+    match
+      Array.find_opt
+        (fun (id, _, _) -> String.equal id (S.get chosen))
+        placements
+    with
+    | Some (_, p, _) -> p
+    | None -> `bottom_end
+  in
+  <div class_="flex items-center justify-center px-10">
+    <Inline_select
+      value=[| S.get chosen |]
+      on_change=(fun keys ->
+                  match keys with [| k |] -> S.set set_chosen k | _ -> ())>
+      <Inline_select.Trigger aria_label="Placement">
+        <Inline_select.Value /> <Inline_select.Indicator />
+      </Inline_select.Trigger>
+      <Inline_select.Popover placement=(placement ())>
+        <List_box>
+          <For each=placements>
+            (fun (id, _, name) _ ->
+              <List_box.Item id text_value=name>
+                (Jsx.string name) <List_box.Item_indicator />
+              </List_box.Item>)
+          </For>
+        </List_box>
+      </Inline_select.Popover>
+    </Inline_select>
+  </div>

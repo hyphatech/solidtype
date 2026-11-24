@@ -6,22 +6,62 @@ Original HeroUI documentation: [Autocomplete](https://heroui.com/en/docs/react/c
 
 ## Usage
 
-HeroUI's example draws the states chosen as tags, with a TagGroup, which is
-not ported yet; here they are listed as the value draws them.
-
 ```ocaml title="autocomplete_usage.mlx"
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
 module Autocomplete = Solidtype_heroui.Autocomplete
 module Empty_state = Solidtype_heroui.Empty_state
 module Label = Solidtype_heroui.Label
 module List_box = Solidtype_heroui.List_box
 module Search_field = Solidtype_heroui.Search_field
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+let states =
+  [|
+    ("florida", "Florida");
+    ("delaware", "Delaware");
+    ("california", "California");
+    ("texas", "Texas");
+    ("new-york", "New York");
+    ("washington", "Washington");
+  |]
+
+let name_of id =
+  match Array.find_opt (fun (k, _) -> String.equal k id) states with
+  | Some (_, name) -> name
+  | None -> id
 
 let make () =
+  let chosen, set_chosen = S.create_signal [||] in
+  let remove keys =
+    S.set set_chosen
+      (Js.Array.filter (S.get chosen) ~f:(fun k ->
+           not (Array.exists (String.equal k) keys)))
+  in
   <Autocomplete
-    class_="w-[256px]" placeholder="Select states" selection_mode=`multiple>
+    class_="w-[256px]"
+    placeholder="Select states"
+    selection_mode=`multiple
+    value=(S.get chosen)
+    on_change=(fun keys -> S.set set_chosen keys)>
     <Label>"States to Visit"</Label>
     <Autocomplete.Trigger>
-      <Autocomplete.Value /> <Autocomplete.Indicator />
+      <Autocomplete.Value>
+        (fun value ->
+          <Tag_group size=`sm on_remove=remove>
+            <Tag_group.List>
+              <For each=(S.get value.selected_keys)>
+                (fun id _ ->
+                  <Tag id text_value=(name_of id)>
+                    (Jsx.string (name_of id))
+                  </Tag>)
+              </For>
+            </Tag_group.List>
+          </Tag_group>)
+      </Autocomplete.Value>
+      <Autocomplete.Indicator />
     </Autocomplete.Trigger>
     <Autocomplete.Popover>
       <Autocomplete.Filter>
@@ -37,24 +77,12 @@ let make () =
           render_empty_state=(fun _ ->
                                <Empty_state>"No results found"</Empty_state>)
           selection_mode=`multiple>
-          <List_box.Item id="florida" text_value="Florida">
-            "Florida" <List_box.Item_indicator />
-          </List_box.Item>
-          <List_box.Item id="delaware" text_value="Delaware">
-            "Delaware" <List_box.Item_indicator />
-          </List_box.Item>
-          <List_box.Item id="california" text_value="California">
-            "California" <List_box.Item_indicator />
-          </List_box.Item>
-          <List_box.Item id="texas" text_value="Texas">
-            "Texas" <List_box.Item_indicator />
-          </List_box.Item>
-          <List_box.Item id="new-york" text_value="New York">
-            "New York" <List_box.Item_indicator />
-          </List_box.Item>
-          <List_box.Item id="washington" text_value="Washington">
-            "Washington" <List_box.Item_indicator />
-          </List_box.Item>
+          <For each=states>
+            (fun (id, name) _ ->
+              <List_box.Item id text_value=name>
+                (Jsx.string name) <List_box.Item_indicator />
+              </List_box.Item>)
+          </For>
         </List_box>
       </Autocomplete.Filter>
     </Autocomplete.Popover>
@@ -1434,6 +1462,150 @@ let make () =
   </Autocomplete>
 ```
 
+### User Selection Multiple
+
+```ocaml title="autocomplete_user_selection_multiple.mlx"
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Avatar = Solidtype_heroui.Avatar
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Empty_state = Solidtype_heroui.Empty_state
+module Search_field = Solidtype_heroui.Search_field
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+type user = {
+  avatar_url : string;
+  email : string;
+  fallback : string;
+  id : string;
+  name : string;
+}
+
+let users =
+  [|
+    {
+      avatar_url =
+        "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg";
+      email = "bob@heroui.com";
+      fallback = "B";
+      id = "1";
+      name = "Bob";
+    };
+    {
+      avatar_url =
+        "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/green.jpg";
+      email = "fred@heroui.com";
+      fallback = "F";
+      id = "2";
+      name = "Fred";
+    };
+    {
+      avatar_url =
+        "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/purple.jpg";
+      email = "martha@heroui.com";
+      fallback = "M";
+      id = "3";
+      name = "Martha";
+    };
+    {
+      avatar_url =
+        "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/red.jpg";
+      email = "john@heroui.com";
+      fallback = "J";
+      id = "4";
+      name = "John";
+    };
+    {
+      avatar_url =
+        "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/orange.jpg";
+      email = "jane@heroui.com";
+      fallback = "J";
+      id = "5";
+      name = "Jane";
+    };
+  |]
+
+let make () =
+  let chosen, set_chosen = S.create_signal [||] in
+  let remove keys =
+    S.set set_chosen
+      (Js.Array.filter (S.get chosen) ~f:(fun k ->
+           not (Array.exists (String.equal k) keys)))
+  in
+  let user_of id =
+    Array.find_opt (fun (u : user) -> String.equal u.id id) users
+  in
+  <Autocomplete
+    class_="w-[256px]"
+    placeholder="Select your teammates"
+    selection_mode=`multiple
+    value=(S.get chosen)
+    on_change=(fun keys -> S.set set_chosen keys)>
+    <Label>"Users"</Label>
+    <Autocomplete.Trigger>
+      <Autocomplete.Value>
+        (fun value ->
+          <Tag_group size=`sm on_remove=remove>
+            <Tag_group.List>
+              <Solidtype.For each=(S.get value.selected_keys)>
+                (fun id _ ->
+                  match user_of id with
+                  | Some user ->
+                      <Tag id text_value=user.name>
+                        <Avatar class_="size-4" size=`sm>
+                          <Avatar.Image src=user.avatar_url />
+                          <Avatar.Fallback>
+                            (Jsx.string user.fallback)
+                          </Avatar.Fallback>
+                        </Avatar>
+                        <span>(Jsx.string user.name)</span>
+                      </Tag>
+                  | None -> Jsx.nothing)
+              </Solidtype.For>
+            </Tag_group.List>
+          </Tag_group>)
+      </Autocomplete.Value>
+      <Autocomplete.Clear_button />
+      <Autocomplete.Indicator />
+    </Autocomplete.Trigger>
+    <Autocomplete.Popover>
+      <Autocomplete.Filter>
+        <Search_field
+          aria_label="Search users" name="search" variant=`secondary>
+          <Search_field.Group>
+            <Search_field.Search_icon />
+            <Search_field.Input placeholder="Search users..." />
+            <Search_field.Clear_button />
+          </Search_field.Group>
+        </Search_field>
+        <List_box
+          render_empty_state=(fun _ ->
+                               <Empty_state>"No results found"</Empty_state>)
+          selection_mode=`multiple>
+          <Solidtype.For each=users>
+            (fun (user : user) _ ->
+              <List_box.Item id=user.id text_value=user.name>
+                <Avatar size=`sm>
+                  <Avatar.Image src=user.avatar_url />
+                  <Avatar.Fallback>(Jsx.string user.fallback)</Avatar.Fallback>
+                </Avatar>
+                <div class_="flex flex-col">
+                  <Label>(Jsx.string user.name)</Label>
+                  <Description>(Jsx.string user.email)</Description>
+                </div>
+                <List_box.Item_indicator />
+              </List_box.Item>)
+          </Solidtype.For>
+        </List_box>
+      </Autocomplete.Filter>
+    </Autocomplete.Popover>
+  </Autocomplete>
+```
+
 ### Location Search
 
 ```ocaml title="autocomplete_location_search.mlx"
@@ -1533,18 +1705,298 @@ let make () =
   </Autocomplete>
 ```
 
-### User Selection Multiple, Tag Group Selection, Email Recipients
+### Tag Group Selection
 
-These draw the options chosen as tags, with HeroUI's TagGroup, which is not
-ported yet.
+```ocaml title="autocomplete_tag_group_selection.mlx"
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+let tags =
+  [|
+    ("react", "React");
+    ("typescript", "TypeScript");
+    ("javascript", "JavaScript");
+    ("nodejs", "Node.js");
+    ("python", "Python");
+    ("vue", "Vue");
+    ("angular", "Angular");
+    ("nextjs", "Next.js");
+  |]
+
+let name_of id =
+  match Array.find_opt (fun (k, _) -> String.equal k id) tags with
+  | Some (_, name) -> name
+  | None -> id
+
+let make () =
+  let chosen, set_chosen = S.create_signal [||] in
+  let remove keys =
+    S.set set_chosen
+      (Js.Array.filter (S.get chosen) ~f:(fun k ->
+           not (Array.exists (String.equal k) keys)))
+  in
+  <Autocomplete
+    class_="w-[256px]"
+    placeholder="Select tags"
+    selection_mode=`multiple
+    value=(S.get chosen)
+    on_change=(fun keys -> S.set set_chosen keys)>
+    <Label>"Tags"</Label>
+    <Autocomplete.Trigger>
+      <Autocomplete.Value>
+        (fun value ->
+          <Tag_group size=`sm on_remove=remove>
+            <Tag_group.List>
+              <For each=(S.get value.selected_keys)>
+                (fun id _ ->
+                  <Tag id text_value=(name_of id)>
+                    (Jsx.string (name_of id))
+                  </Tag>)
+              </For>
+            </Tag_group.List>
+          </Tag_group>)
+      </Autocomplete.Value>
+      <Autocomplete.Clear_button />
+      <Autocomplete.Indicator />
+    </Autocomplete.Trigger>
+    <Autocomplete.Popover>
+      <Autocomplete.Filter>
+        <Search_field aria_label="Search tags" name="search" variant=`secondary>
+          <Search_field.Group>
+            <Search_field.Search_icon />
+            <Search_field.Input placeholder="Search tags..." />
+            <Search_field.Clear_button />
+          </Search_field.Group>
+        </Search_field>
+        <List_box
+          render_empty_state=(fun _ ->
+                               <Empty_state>"No tags found"</Empty_state>)
+          selection_mode=`multiple>
+          <For each=tags>
+            (fun (id, name) _ ->
+              <List_box.Item id text_value=name>
+                (Jsx.string name) <List_box.Item_indicator />
+              </List_box.Item>)
+          </For>
+        </List_box>
+      </Autocomplete.Filter>
+    </Autocomplete.Popover>
+  </Autocomplete>
+```
+
+### Email Recipients
+
+```ocaml title="autocomplete_email_recipients.mlx"
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Description = Solidtype_heroui.Description
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+let people =
+  [|
+    ("alice@example.com", "Alice Johnson");
+    ("bob@example.com", "Bob Smith");
+    ("charlie@example.com", "Charlie Brown");
+    ("diana@example.com", "Diana Prince");
+    ("eve@example.com", "Eve Wilson");
+  |]
+
+let make () =
+  let chosen, set_chosen = S.create_signal [||] in
+  let remove keys =
+    S.set set_chosen
+      (Js.Array.filter (S.get chosen) ~f:(fun k ->
+           not (Array.exists (String.equal k) keys)))
+  in
+  <Autocomplete
+    class_="w-[256px]"
+    placeholder="Add recipients"
+    selection_mode=`multiple
+    value=(S.get chosen)
+    on_change=(fun keys -> S.set set_chosen keys)>
+    <Label>"To"</Label>
+    <Autocomplete.Trigger>
+      <Autocomplete.Value>
+        (fun value ->
+          <Tag_group size=`sm on_remove=remove>
+            <Tag_group.List>
+              <For each=(S.get value.selected_keys)>
+                (fun email _ ->
+                  <Tag id=email text_value=email>(Jsx.string email)</Tag>)
+              </For>
+            </Tag_group.List>
+          </Tag_group>)
+      </Autocomplete.Value>
+      <Autocomplete.Clear_button />
+      <Autocomplete.Indicator />
+    </Autocomplete.Trigger>
+    <Autocomplete.Popover>
+      <Autocomplete.Filter>
+        <Search_field
+          aria_label="Search emails" name="search" variant=`secondary>
+          <Search_field.Group>
+            <Search_field.Search_icon />
+            <Search_field.Input placeholder="Search emails..." />
+            <Search_field.Clear_button />
+          </Search_field.Group>
+        </Search_field>
+        <List_box
+          render_empty_state=(fun _ ->
+                               <Empty_state>"No recipients found"</Empty_state>)
+          selection_mode=`multiple>
+          <For each=people>
+            (fun (email, name) _ ->
+              <List_box.Item id=email text_value=email>
+                <div class_="flex flex-col">
+                  <Label>(Jsx.string name)</Label>
+                  <Description>(Jsx.string email)</Description>
+                </div>
+                <List_box.Item_indicator />
+              </List_box.Item>)
+          </For>
+        </List_box>
+      </Autocomplete.Filter>
+    </Autocomplete.Popover>
+  </Autocomplete>
+```
 
 ## Customization
 
 ### Tailwind CSS
 
-HeroUI's Tailwind example draws the people chosen as tags, with a TagGroup,
-which is not ported yet; `class_` is added after HeroUI's classes on every
-part, as the examples above show.
+`class_` is added after HeroUI's classes on every part.
+
+```ocaml title="autocomplete_custom_styles.mlx"
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Description = Solidtype_heroui.Description
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+let teammates =
+  [|
+    ("sarah", "Sarah Chen", "Product Design");
+    ("marcus", "Marcus Lee", "Engineering");
+    ("priya", "Priya Patel", "Data Science");
+    ("jordan", "Jordan Kim", "Customer Success");
+    ("alex", "Alex Rivera", "Marketing");
+  |]
+
+let name_of id =
+  match Array.find_opt (fun (k, _, _) -> String.equal k id) teammates with
+  | Some (_, name, _) -> name
+  | None -> id
+
+let make () =
+  let chosen, set_chosen = S.create_signal [||] in
+  let remove keys =
+    S.set set_chosen
+      (Js.Array.filter (S.get chosen) ~f:(fun k ->
+           not (Array.exists (String.equal k) keys)))
+  in
+  <div class_="w-full max-w-sm pt-6">
+    <Autocomplete
+      class_="w-full gap-1.5"
+      placeholder="Search teammates..."
+      selection_mode=`multiple
+      value=(S.get chosen)
+      on_change=(fun keys -> S.set set_chosen keys)>
+      <Label class_="font-medium text-foreground">"Assignees"</Label>
+      <Description>
+        "People who will be notified when this task updates."
+      </Description>
+      <Autocomplete.Trigger
+        class_="rounded-xl border border-border/80 bg-surface shadow-sm ring-1 \
+                ring-accent/5 transition-[box-shadow,border-color] \
+                focus-within:border-accent/25 focus-within:ring-2 \
+                focus-within:ring-accent/15 dark:border-border/90 \
+                dark:bg-surface dark:ring-accent/10 \
+                dark:focus-within:border-accent/35">
+        <Autocomplete.Value>
+          (fun value ->
+            <Tag_group size=`sm on_remove=remove>
+              <Tag_group.List>
+                <For each=(S.get value.selected_keys)>
+                  (fun id _ ->
+                    <Tag
+                      id
+                      text_value=(name_of id)
+                      class_="border border-accent/15 bg-accent/8 \
+                              text-foreground dark:border-accent/25 \
+                              dark:bg-accent/12">
+                      (Jsx.string (name_of id))
+                    </Tag>)
+                </For>
+              </Tag_group.List>
+            </Tag_group>)
+        </Autocomplete.Value>
+        <Autocomplete.Clear_button />
+        <Autocomplete.Indicator />
+      </Autocomplete.Trigger>
+      <Autocomplete.Popover
+        class_="overflow-hidden rounded-xl border border-border/80 bg-surface \
+                shadow-xl ring-1 ring-black/3 dark:border-border/90 \
+                dark:bg-surface dark:ring-white/5">
+        <Autocomplete.Filter>
+          <Search_field
+            aria_label="Search by name or role" name="search" variant=`secondary>
+            <Search_field.Group
+              class_="border-b border-separator bg-surface-secondary/50">
+              <Search_field.Search_icon class_="text-muted" />
+              <Search_field.Input placeholder="Search by name or role..." />
+              <Search_field.Clear_button />
+            </Search_field.Group>
+          </Search_field>
+          <List_box
+            class_="p-1.5"
+            render_empty_state=(fun _ ->
+                                 <Empty_state>"No teammates found"</Empty_state>)
+            selection_mode=`multiple>
+            <For each=teammates>
+              (fun (id, name, role) _ ->
+                <List_box.Item
+                  id
+                  text_value=(name ^ " " ^ role)
+                  class_="rounded-lg data-[focused=true]:bg-accent/10 \
+                          data-[selected=true]:bg-accent/5 \
+                          dark:data-[focused=true]:bg-accent/15 \
+                          dark:data-[selected=true]:bg-accent/8">
+                  <div class_="flex flex-col gap-0.5">
+                    <span class_="text-sm font-medium text-foreground">
+                      (Jsx.string name)
+                    </span>
+                    <span class_="text-xs text-muted">(Jsx.string role)</span>
+                  </div>
+                  <List_box.Item_indicator />
+                </List_box.Item>)
+            </For>
+          </List_box>
+        </Autocomplete.Filter>
+      </Autocomplete.Popover>
+    </Autocomplete>
+  </div>
+```
 
 ### Global CSS
 

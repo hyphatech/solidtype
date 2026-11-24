@@ -50,14 +50,28 @@ external event_target : _ Dom.event_like -> Dom.element = "target" [@@mel.get]
 external prevent_default : Dom.keyboardEvent -> unit = "preventDefault"
 [@@mel.send]
 
-(* Whether an event began in a control inside a row, whose press is its own,
-   as a pressable element inside React Aria's row keeps its press. *)
+(* What takes a press of its own: an element that is a control, one whose
+   role is a widget's, and a group of controls, as a field's group and an
+   autocomplete's trigger are, whose press anywhere is the field's. *)
+let control =
+  "input, button, select, textarea, a[href], label, [contenteditable], \
+   [role=button], [role=checkbox], [role=radio], [role=switch], [role=slider], \
+   [role=spinbutton], [role=textbox], [role=searchbox], [role=combobox], \
+   [role=link], [role=tab], [role=option], [role=menuitem], \
+   [role=menuitemcheckbox], [role=menuitemradio], [role=group]"
+
+(* Whether an event began in a control inside a cell, whose press is its
+   own, as a pressable element inside React Aria's row keeps its press: never
+   one around the table, which holds every cell. *)
 let in_control e =
-  Js.Null.toOption
-    (closest (event_target e)
-       "input, button, select, textarea, a[href], label, [role=checkbox], \
-        [role=button]")
-  <> None
+  let target = event_target e in
+  match
+    ( Js.Null.toOption
+        (closest target "[role=gridcell], [role=rowheader], [role=columnheader]"),
+      Js.Null.toOption (closest target control) )
+  with
+  | Some cell, Some c -> c != cell && contains cell c
+  | Some _, None | None, _ -> false
 
 external prevent : _ Dom.event_like -> unit = "preventDefault" [@@mel.send]
 external pointer_type : Dom.pointerEvent -> string = "pointerType" [@@mel.get]
@@ -2103,6 +2117,12 @@ module Root = struct
             (Props.children props)
           </div>
     in
+    (* Its header and body are made before the grid, so the columns and rows
+       they hold are known as the grid's counts are written: the server
+       writes them once, and hydration keeps what it wrote. *)
+    let drawn =
+      <Table_context.Provider value=t>(content ())</Table_context.Provider>
+    in
     <Table_context.Provider value=t>
       <Dynamic.Drawn
         component=(Solidtype.Jsx.drawn_as (S.drawn_as props)
@@ -2187,7 +2207,7 @@ module Root = struct
                        Jsx.call (Props.on_focus_out props) e;
                        Selectable_list.on_focus_out list e)
         props=(S.undrawn (S.omit props own))>
-        (content ())
+        drawn
       </Dynamic.Drawn>
     </Table_context.Provider>
 

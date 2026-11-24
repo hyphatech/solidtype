@@ -1,0 +1,26 @@
+(* A HeroUI List_view of a thousand rows, virtualized: rendered on the server
+   and hydrated, as an application's is. *)
+
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module List_view = Solidtype_heroui.List_view
+
+let files = Array.init 1000 (fun i -> string_of_int (i + 1))
+
+let make () =
+  <List_view
+    aria_label="Files"
+    selection_mode=`multiple
+    virtualized=true
+    row_height=48.
+    style="height: 400px; overflow-y: auto"
+    data_client_height="400">
+    <For each=files>
+      (fun id _ ->
+        <List_view.Item id text_value=("File " ^ id)>
+          <List_view.Item_content>
+            <List_view.Title>(Jsx.string ("File " ^ id))</List_view.Title>
+          </List_view.Item_content>
+        </List_view.Item>)
+    </For>
+  </List_view>

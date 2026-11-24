@@ -111,10 +111,31 @@ let on_surface () =
   match surface with Some variant -> S.get variant | None -> `default
 ```
 
-### Not yet
+### With Form Components
 
-HeroUI's With Form Components example needs Input and TextArea, which are not
-ported yet.
+A field on a surface takes `variant=` `` `secondary ``, the quieter look
+meant for a surface's background.
+
+```ocaml title="surface_with_form_components.mlx"
+module Input = Solidtype_heroui.Input
+module Surface = Solidtype_heroui.Surface
+module Text_area = Solidtype_heroui.Text_area
+
+let make () =
+  <Surface
+    class_="flex min-w-[320px] flex-col gap-4 rounded-3xl p-6" variant=`default>
+    <Input
+      aria_label="Input"
+      placeholder="Input with secondary variant"
+      variant=`secondary
+    />
+    <Text_area
+      aria_label="TextArea"
+      placeholder="TextArea with secondary variant"
+      variant=`secondary
+    />
+  </Surface>
+```
 
 ## Customization
 

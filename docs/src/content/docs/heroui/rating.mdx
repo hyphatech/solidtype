@@ -1,0 +1,154 @@
+---
+title: Rating
+description: A star rating, chosen by a press or the arrow keys, or shown read only as a fraction.
+---
+
+import Example from "@components/Example.astro";
+import * as Usage from "@islands/rating_usage.jsx";
+import UsageCode from "@islands/rating_usage.mlx?raw";
+import * as Controlled from "@islands/rating_controlled.jsx";
+import ControlledCode from "@islands/rating_controlled.mlx?raw";
+import * as CustomColor from "@islands/rating_custom_color.jsx";
+import CustomColorCode from "@islands/rating_custom_color.mlx?raw";
+import * as CustomIconHeart from "@islands/rating_custom_icon_heart.jsx";
+import CustomIconHeartCode from "@islands/rating_custom_icon_heart.mlx?raw";
+import * as CustomIconPerItem from "@islands/rating_custom_icon_per_item.jsx";
+import CustomIconPerItemCode from "@islands/rating_custom_icon_per_item.mlx?raw";
+import * as Disabled from "@islands/rating_disabled.jsx";
+import DisabledCode from "@islands/rating_disabled.mlx?raw";
+import * as ProductReview from "@islands/rating_product_review.jsx";
+import ProductReviewCode from "@islands/rating_product_review.mlx?raw";
+import * as ReadOnly from "@islands/rating_read_only.jsx";
+import ReadOnlyCode from "@islands/rating_read_only.mlx?raw";
+import * as ReadOnlyFractional from "@islands/rating_read_only_fractional.jsx";
+import ReadOnlyFractionalCode from "@islands/rating_read_only_fractional.mlx?raw";
+import * as RenderFunction from "@islands/rating_render_function.jsx";
+import RenderFunctionCode from "@islands/rating_render_function.mlx?raw";
+import * as Sizes from "@islands/rating_sizes.jsx";
+import SizesCode from "@islands/rating_sizes.mlx?raw";
+import * as WithLabel from "@islands/rating_with_label.jsx";
+import WithLabelCode from "@islands/rating_with_label.mlx?raw";
+
+Kobalte's rating, a radio group of stars, in HeroUI's look: chosen by a press
+or the arrow keys, the stars under the pointer previewed as it moves. Read
+only, its value may be a fraction. Its look is a stylesheet the library ships,
+imported as [Theming](/solidtype/heroui/theming/#setup) shows.
+
+## Usage
+
+<Example code={UsageCode} title="rating_usage.mlx"><Usage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Rating aria_label="Rating">
+  <Rating.Item value=1. /> <Rating.Item value=2. /> <Rating.Item value=3. />
+</Rating>
+```
+
+## Controlled
+
+<Example code={ControlledCode} title="rating_controlled.mlx"><Controlled.make client:visible /></Example>
+
+## Custom Color
+
+`--rating-active-color` colours the active stars.
+
+<Example code={CustomColorCode} title="rating_custom_color.mlx"><CustomColor.make client:visible /></Example>
+
+## Custom Icon Heart
+
+`icon` is every item's icon.
+
+<Example code={CustomIconHeartCode} title="rating_custom_icon_heart.mlx"><CustomIconHeart.make client:visible /></Example>
+
+## Custom Icon Per Item
+
+An item's children are its own icon.
+
+<Example code={CustomIconPerItemCode} title="rating_custom_icon_per_item.mlx"><CustomIconPerItem.make client:visible /></Example>
+
+## Disabled
+
+<Example code={DisabledCode} title="rating_disabled.mlx"><Disabled.make client:visible /></Example>
+
+## Product Review
+
+<Example code={ProductReviewCode} title="rating_product_review.mlx"><ProductReview.make client:visible /></Example>
+
+## Read Only
+
+<Example code={ReadOnlyCode} title="rating_read_only.mlx"><ReadOnly.make client:visible /></Example>
+
+## Read Only Fractional
+
+A value read only may be a fraction: the stars up to its whole part are active, and the next filled as far as the fraction goes.
+
+<Example code={ReadOnlyFractionalCode} title="rating_read_only_fractional.mlx"><ReadOnlyFractional.make client:visible /></Example>
+
+## Render Function
+
+A function child draws the whole item of its state: `is_active`, `is_partial` and `partial_percent`.
+
+<Example code={RenderFunctionCode} title="rating_render_function.mlx"><RenderFunction.make client:visible /></Example>
+
+## Sizes
+
+<Example code={SizesCode} title="rating_sizes.mlx"><Sizes.make client:visible /></Example>
+
+## With Label
+
+<Example code={WithLabelCode} title="rating_with_label.mlx"><WithLabel.make client:visible /></Example>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.rating`, and its sizes `.rating--sm`, `.rating--md`, `.rating--lg`
+- `.rating__item`, and `.rating__item--sm`, `--md`, `--lg`
+- `.rating__icon` - An item's icon
+- `.rating__icon-partial` - The part of an icon a fraction fills
+
+### Interactive States
+
+- **Active**: `[data-active="true"]` on `.rating__icon`
+- **Read only**: `[data-readonly="true"]` on `.rating` and `.rating__item`
+- **Focus visible**: `[data-focus-visible="true"]` on `.rating__item`
+- **Pressed**: `[data-pressed="true"]` on `.rating__item`
+- **Disabled**: `[data-disabled="true"]` on `.rating`
+
+### CSS Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `--rating-active-color` | `var(--color-warning)` | The active stars' colour |
+| `--rating-inactive-color` | `var(--color-surface-tertiary)` | The other stars' colour |
+| `--rating-partial` | | How far a fraction fills its star, written by the rating |
+
+## API Reference
+
+Each prop beside its name in React's convention.
+
+### Rating
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Its size |
+| `value` | `value` | `float` | | The value (controlled) |
+| `defaultValue` | `default_value` | `float` | `0.` | The value at first (uncontrolled) |
+| `onValueChange` | `on_value_change` | `float -> unit` | | Called with each value chosen |
+| `icon` | `icon` | element | a star | Every item's icon |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
+| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether it only shows its value |
+| `isRequired` | `is_required` | `bool` | `false` | Whether a form requires a value |
+| `name` | `name` | `string` | | Its name in a form |
+| `aria-label` | `aria_label` | `string` | | Its name |
+| `className` | `class_` | `string` | | Added after its own classes |
+
+### Rating.Item
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `value` | `value` | `float` | Its place, from 1 |
+| `children` | `children` | elements, or a function of its state | Its icon, or the whole item |
+| `className` | `class_` | `string` | Added after its own classes |

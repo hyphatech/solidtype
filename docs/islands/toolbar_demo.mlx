@@ -1,0 +1,61 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Button_group = Solidtype_heroui.Button_group
+module Separator = Solidtype_heroui.Separator
+module Toggle_button = Solidtype_heroui.Toggle_button
+module Toggle_button_group = Solidtype_heroui.Toggle_button_group
+module Toolbar = Solidtype_heroui.Toolbar
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let orientations = [| (`horizontal, "horizontal"); (`vertical, "vertical") |]
+
+let make () =
+  let orientation, set_orientation =
+    S.create_signal (`horizontal, "horizontal")
+  in
+  let attached, set_attached = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="orientation"
+        choices=orientations
+        picked=(S.get orientation)
+        on_pick=(Controls.choose orientations set_orientation)
+      />
+      <Toggle
+        label="attached" on=(S.get attached) on_toggle=(S.set set_attached)
+      />
+    </div>
+    <Side_by_side
+      solidtype=(<Toolbar
+                   aria_label="Text formatting"
+                   orientation=(fst (S.get orientation))
+                   is_attached=(S.get attached)>
+                   <Toggle_button_group
+                     aria_label="Text style" selection_mode=`multiple>
+                     <Toggle_button
+                       is_icon_only=true aria_label="Bold" id="bold">
+                       "B"
+                     </Toggle_button>
+                     <Toggle_button
+                       is_icon_only=true aria_label="Italic" id="italic">
+                       <Toggle_button_group.Separator /> "I"
+                     </Toggle_button>
+                   </Toggle_button_group>
+                   <Separator />
+                   <Button_group variant=`tertiary>
+                     <Button is_icon_only=true aria_label="Copy">"C"</Button>
+                     <Button is_icon_only=true aria_label="Cut">
+                       <Button_group.Separator /> "X"
+                     </Button>
+                   </Button_group>
+                 </Toolbar>)
+      react=(fun host ->
+              Heroui_react.toolbar host
+                (Heroui_react.toolbar_props
+                   ~orientation:(snd (S.get orientation))
+                   ~is_attached:(S.get attached) ()))
+    />
+  </section>

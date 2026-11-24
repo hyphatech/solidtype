@@ -15,6 +15,13 @@ module Slot = Solidtype.Context.Make_optional (struct
   type t = (unit -> Solidtype.Jsx.element) -> Solidtype.Jsx.element
 end)
 
+(* The orientation a part above gives the separators inside it, where they
+   give none, as React Aria's SeparatorContext does: a toolbar's run across
+   it. *)
+module Orientation = Solidtype.Context.Make_optional (struct
+  type t = [ `horizontal | `vertical ] Solidtype.Solid.accessor
+end)
+
 (* Kobalte's separator as another element, as React Aria's draws one. *)
 module As = struct
   module Props = struct
@@ -30,10 +37,18 @@ module As = struct
   let component = Kobalte.Root.component
 end
 
-let%component make ?(orientation : [ `horizontal | `vertical ] = `horizontal)
+let%component make ?(orientation : [ `horizontal | `vertical ] option)
     ?(variant : [ `default | `secondary | `tertiary ] = `default)
     ?(class_ : string option) () =
   let element = Element.use () in
+  let around = Orientation.use () in
+  let orientation =
+    S.accessor (fun () ->
+        match (S.get orientation, around) with
+        | Some o, _ -> o
+        | None, Some o -> S.get o
+        | None, None -> `horizontal)
+  in
   let drawn () =
     <As
       as_=(* An [<hr>] is a horizontal line, so React Aria draws a vertical

@@ -1,0 +1,55 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Inline_select = Solidtype_heroui.Inline_select
+module List_box = Solidtype_heroui.List_box
+module Gravity = Solidtype_gravity_icons
+
+type team = { id : string; name : string; color : string }
+
+let teams =
+  [|
+    { id = "northwind"; name = "Northwind Labs"; color = "bg-violet-700" };
+    { id = "acme"; name = "Acme Corp"; color = "bg-blue-600" };
+    { id = "maple"; name = "Maple Studio"; color = "bg-amber-600" };
+  |]
+
+let mark team =
+  <div
+    class_=("flex size-5 shrink-0 items-center justify-center rounded "
+          ^ team.color)>
+    <span class_="text-[10px] font-bold text-white">
+      (Jsx.string (String.sub team.name 0 1))
+    </span>
+  </div>
+
+let make () =
+  let chosen, set_chosen = S.create_signal teams.(0) in
+  <div class_="flex items-center gap-2.5">
+    <Gravity.Cubes3 class_="size-6" />
+    <span class_="text-lg font-light text-border">"/"</span>
+    <Inline_select
+      value=[| (S.get chosen).id |]
+      on_change=(fun keys ->
+                  match Array.find_opt (fun t -> Array.mem t.id keys) teams with
+                  | Some t -> S.set set_chosen t
+                  | None -> ())>
+      <Inline_select.Trigger aria_label="Team" class_="gap-2">
+        (mark (S.get chosen))
+        <span class_="text-sm font-medium">
+          (Jsx.string (S.get chosen).name)
+        </span>
+        <Inline_select.Indicator />
+      </Inline_select.Trigger>
+      <Inline_select.Popover class_="w-[200px]">
+        <List_box>
+          <For each=teams>
+            (fun team _ ->
+              <List_box.Item id=team.id text_value=team.name>
+                (mark team) (Jsx.string team.name) <List_box.Item_indicator />
+              </List_box.Item>)
+          </For>
+        </List_box>
+      </Inline_select.Popover>
+    </Inline_select>
+  </div>

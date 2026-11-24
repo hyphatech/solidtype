@@ -1,0 +1,77 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Action_bar = Solidtype_heroui.Action_bar
+module Button = Solidtype_heroui.Button
+module Chip = Solidtype_heroui.Chip
+module List_view = Solidtype_heroui.List_view
+module Separator = Solidtype_heroui.Separator
+module Gravity = Solidtype_gravity_icons
+
+let files =
+  [|
+    ("proposal", "Project proposal.pdf");
+    ("report", "Q4 financial report.xlsx");
+    ("brand", "Brand guidelines.fig");
+    ("photo", "Team photo.jpg");
+    ("notes", "Meeting notes.md");
+    ("api", "API documentation.pdf");
+  |]
+
+let make () =
+  let chosen, set_chosen = S.create_signal [||] in
+  <div class_="w-full max-w-lg p-4">
+    <List_view
+      aria_label="Files"
+      selection_mode=`multiple
+      selected_keys=(S.get chosen)
+      on_selection_change=(fun keys -> S.set set_chosen keys)>
+      <For each=files>
+        (fun (id, name) _ ->
+          <List_view.Item id text_value=name>
+            <List_view.Item_content>
+              <List_view.Title>(Jsx.string name)</List_view.Title>
+            </List_view.Item_content>
+          </List_view.Item>)
+      </For>
+    </List_view>
+    <Action_bar is_open=(Array.length (S.get chosen) > 0)>
+      <Action_bar.Prefix>
+        <Chip size=`sm class_="shrink-0 tabular-nums">
+          (Jsx.int (Array.length (S.get chosen)))
+        </Chip>
+      </Action_bar.Prefix>
+      <Separator />
+      <Action_bar.Content>
+        <Button size=`sm variant=`ghost aria_label="Edit">
+          <Gravity.Pencil /> <span class_="action-bar__label">"Edit"</span>
+        </Button>
+        <Button size=`sm variant=`ghost aria_label="Export">
+          <Gravity.Arrow_down_to_line />
+          <span class_="action-bar__label">"Export"</span>
+        </Button>
+        <Button size=`sm variant=`ghost aria_label="Archive">
+          <Gravity.Archive /> <span class_="action-bar__label">"Archive"</span>
+        </Button>
+        <Separator />
+        <Button
+          size=`sm
+          variant=`ghost
+          aria_label="Delete"
+          class_="bg-danger/10 text-danger">
+          <Gravity.Trash_bin /> <span class_="action-bar__label">"Delete"</span>
+        </Button>
+      </Action_bar.Content>
+      <Separator />
+      <Action_bar.Suffix>
+        <Button
+          is_icon_only=true
+          size=`sm
+          variant=`ghost
+          aria_label="Clear selection"
+          on_click=(fun _ -> S.set set_chosen [||])>
+          <Gravity.Xmark />
+        </Button>
+      </Action_bar.Suffix>
+    </Action_bar>
+  </div>

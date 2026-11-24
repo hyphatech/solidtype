@@ -69,8 +69,8 @@ let make () =
 
 ## How far it goes
 
-65 of HeroUI 3.2's components are ported;
-[Coverage](heroui/coverage.md) lists each, what it does, and the 9
+66 of HeroUI 3.2's components are ported;
+[Coverage](heroui/coverage.md) lists each, what it does, and the one
 still to come. Every component has its page in this section, with HeroUI's
 own examples written in OCaml.
 

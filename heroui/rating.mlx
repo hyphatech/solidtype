@@ -1,0 +1,179 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Kobalte = Solidtype_kobalte.Rating
+module Types = Solidtype_kobalte.Types
+
+let after own = function Some c -> own ^ " " ^ c | None -> own
+
+type size = [ `sm | `md | `lg ]
+
+let size_name = function `sm -> "sm" | `md -> "md" | `lg -> "lg"
+
+type group = {
+  size : size S.accessor;
+  value : float S.accessor;
+  read_only : bool S.accessor;
+  icon : Jsx.element option S.accessor;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = group
+end)
+
+let within part =
+  match Context.use () with
+  | Some g -> g
+  | None -> invalid_arg (part ^ " is used inside a Rating")
+
+(* The star the items draw unless given another. *)
+let star () =
+  <svg aria_hidden=true fill="currentColor" view_box="0 0 16 16">
+    <path
+      fill_rule="evenodd"
+      clip_rule="evenodd"
+      d="M6.886.773C7.29-.231 8.71-.231 9.114.773l1.48 3.684 \
+         3.958.268c1.078.073 1.517 1.424.69 2.118L12.2 9.388l.97 3.847c.264 \
+         1.048-.885 1.883-1.8 1.308L8 12.43l-3.36 \
+         2.112c-.915.575-2.064-.26-1.8-1.308l.97-3.847L.769 6.843C-.06 \
+         6.149.379 4.798 1.457 4.725l3.958-.268z"
+    />
+  </svg>
+
+module Item = struct
+  type state = {
+    is_active : bool S.accessor;
+    is_partial : bool S.accessor;
+    partial_percent : float S.accessor;
+  }
+
+  let%component make ~(value : float) ?(class_ : string option)
+      ?(children : state Jsx.children option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option) () =
+    let g = within "Rating.Item" in
+    let i = Interaction.create ~disabled:(fun () -> S.get g.read_only) () in
+    (* A value read only may be a fraction, 3.7: the items up to its whole
+       part are active, and the next filled as far as the fraction goes. *)
+    let fraction () =
+      let v = S.get g.value in
+      v -. Float.of_int (int_of_float v)
+    in
+    let partial () =
+      S.get g.read_only
+      && fraction () > 0.
+      && Float.equal (S.get value)
+           (Float.of_int (int_of_float (S.get g.value)) +. 1.)
+    in
+    (* Kobalte learns an item's place once it is mounted: until then, on the
+       server and as the page hydrates, the value alone says which are
+       active. *)
+    let mounted, set_mounted = S.create_signal false in
+    S.on_mount (fun () -> S.set set_mounted true);
+    let active_by_value () =
+      S.get value <= Float.of_int (int_of_float (S.get g.value))
+    in
+    <Kobalte.Item
+      class_=(after
+                ("rating__item rating__item--" ^ size_name (S.get g.size))
+                (S.get class_))
+      data_slot="rating-item"
+      aria_label=(Js.Float.toString (S.get value)
+                 ^ if Float.equal (S.get value) 1. then " star" else " stars")
+      data_readonly=(Jsx.flag (S.get g.read_only))
+      data_pressed=(Jsx.flag (Interaction.pressed i))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
+      props=(Props.others props)>
+      <Kobalte.ItemControl>
+        (fun (k : Types.RatingItemState.t) ->
+          let active () =
+            if S.get g.read_only || not (S.get mounted) then active_by_value ()
+            else S.get (Types.RatingItemState.highlighted k)
+          in
+          let state =
+            {
+              is_active = S.accessor active;
+              is_partial = S.accessor partial;
+              partial_percent =
+                S.accessor (fun () ->
+                    if partial () then Float.round (fraction () *. 100.) else 0.);
+            }
+          in
+          match S.get children with
+          | Some c when Jsx.is_function c -> Jsx.draw c state
+          | given ->
+              let icon () =
+                match given with
+                | Some c -> Jsx.draw c state
+                | None -> (
+                    match S.get g.icon with Some i -> i | None -> star ())
+              in
+              <span
+                class_="rating__icon"
+                data_slot="rating-icon"
+                data_active=(Jsx.flag (active ()))>
+                (icon ())
+                (if partial () then
+                   <span
+                     class_="rating__icon-partial"
+                     style=("--rating-partial: "
+                           ^ Js.Float.toString (S.get state.partial_percent)
+                           ^ "%")>
+                     (icon ())
+                   </span>
+                 else Jsx.string "")
+              </span>)
+      </Kobalte.ItemControl>
+    </Kobalte.Item>
+  [@@element div]
+end
+
+let%component make ?(size : size = `md) ?(value : float option)
+    ?(default_value : float option) ?(on_value_change : (float -> unit) option)
+    ?(icon : Jsx.element option) ?(is_disabled : bool = false)
+    ?(is_read_only : bool = false) ?(is_required : bool = false)
+    ?(name : string option) ?(class_ : string option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ~(children : Jsx.element) () =
+  let kept, set_kept =
+    S.create_signal
+      (Option.value (S.untrack (fun () -> S.get default_value)) ~default:0.)
+  in
+  let shown () = match S.get value with Some v -> v | None -> S.get kept in
+  let g =
+    {
+      size = S.accessor (fun () -> S.get size);
+      value = S.accessor shown;
+      read_only = S.accessor (fun () -> S.get is_read_only);
+      icon = S.accessor (fun () -> S.get icon);
+    }
+  in
+  let i = Interaction.create ~disabled:(fun () -> S.get is_disabled) () in
+  <Context.Provider value=g>
+    <Kobalte.Root
+      value=(shown ())
+      on_change=(fun v ->
+                  S.set set_kept v;
+                  ignore (on_value_change v : unit option))
+      disabled=(S.get is_disabled)
+      read_only=(S.get is_read_only)
+      required=(S.get is_required)
+      ?name=(S.get name)
+      class_=(after ("rating rating--" ^ size_name (S.get size)) (S.get class_))
+      data_slot="rating"
+      data_disabled=(Jsx.flag (S.get is_disabled))
+      data_readonly=(Jsx.flag (S.get is_read_only))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
+      props=(Props.others props)>
+      <Kobalte.Control class_="rating__control">
+        (S.get children)
+      </Kobalte.Control>
+      <Kobalte.HiddenInput aria_hidden=true tabindex="-1" />
+    </Kobalte.Root>
+  </Context.Provider>
+[@@element div]

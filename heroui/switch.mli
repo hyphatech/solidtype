@@ -95,7 +95,7 @@ module Control : sig
   val component : Props.t Jsx.component
 end
 
-(** The thumb.
+(** The thumb, and what it is given to hold, an {!Icon}.
 
     Raises [Invalid_argument] outside a [Switch]. *)
 module Thumb : sig
@@ -104,6 +104,26 @@ module Thumb : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
+      ?children:(_, [ `elements ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
+      ?props:t S.rest ->
+      (unit -> unit) Solidtype.Html.Span.check
+  end
+
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
+end
+
+(** An icon in the thumb, sized and coloured as HeroUI's.
+
+    Raises [Invalid_argument] outside a [Switch]. *)
+module Icon : sig
+  module Props : sig
+    type t
+
+    val check :
+      ?class_:string Solidtype.Check.value ->
+      ?children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check

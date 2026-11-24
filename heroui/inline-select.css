@@ -1,0 +1,63 @@
+/* Inline_select, in HeroUI's look, which ships no stylesheet for it: a
+   select drawn as text, with no field around it, written as HeroUI writes its
+   components' CSS over its select's, so an application restyles a part by a
+   rule for its class. */
+
+.inline-select {
+  --inline-select-value-max-width: 12rem;
+  --inline-select-indicator-size: 0.75rem;
+  @apply shrink-0;
+}
+
+/* Over the select's field: no border, background or shadow, only the text
+   and its chevron, which hover brings forward. */
+.inline-select .inline-select__trigger {
+  @apply min-h-0 items-center gap-2 rounded-[calc(var(--radius)*0.75)] border-0 bg-transparent px-1 py-0.5 text-sm text-muted shadow-none transition-colors;
+
+  &:has(.select__indicator) {
+    @apply pe-1;
+  }
+
+  @media (hover: hover) {
+    &:hover:not(:has(.select__clear-button:hover)),
+    &[data-hovered="true"]:not(:has(.select__clear-button:hover)) {
+      @apply bg-transparent text-foreground;
+    }
+  }
+
+  &:focus-visible:not([data-focused]),
+  &[data-focus-visible="true"] {
+    @apply status-focused bg-transparent;
+  }
+
+  &:disabled,
+  &[data-disabled="true"],
+  &[aria-disabled="true"] {
+    @apply status-disabled;
+  }
+}
+
+.inline-select .inline-select__value {
+  @apply truncate;
+  max-width: var(--inline-select-value-max-width);
+}
+
+/* Beside the value rather than over the field's end, and never turned: its
+   chevrons already point both ways. */
+.inline-select .inline-select__indicator {
+  @apply static my-0 text-muted;
+  width: var(--inline-select-indicator-size);
+  height: var(--inline-select-indicator-size);
+
+  &[data-open="true"] {
+    @apply rotate-0;
+  }
+
+  & svg {
+    @apply size-full;
+  }
+}
+
+.inline-select__popover {
+  @apply min-w-48;
+}

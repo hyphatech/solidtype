@@ -51,6 +51,24 @@ module Slot : sig
   val use : unit -> ((unit -> Jsx.element) -> Jsx.element) option
 end
 
+(** The orientation a part above gives the separators inside it that give none,
+    as a {!Toolbar} gives its own one across it. *)
+module Orientation : sig
+  module Provider : sig
+    module Props : sig
+      val check :
+        value:[ `horizontal | `vertical ] S.accessor Solidtype.Check.value ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
+        unit ->
+        unit
+    end
+
+    val component : unit Jsx.component
+  end
+
+  val use : unit -> [ `horizontal | `vertical ] S.accessor option
+end
+
 module Props : sig
   type t
 

@@ -1,0 +1,78 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Description = Solidtype_heroui.Description
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+let people =
+  [|
+    ("alice@example.com", "Alice Johnson");
+    ("bob@example.com", "Bob Smith");
+    ("charlie@example.com", "Charlie Brown");
+    ("diana@example.com", "Diana Prince");
+    ("eve@example.com", "Eve Wilson");
+  |]
+
+let make () =
+  let chosen, set_chosen = S.create_signal [||] in
+  let remove keys =
+    S.set set_chosen
+      (Js.Array.filter (S.get chosen) ~f:(fun k ->
+           not (Array.exists (String.equal k) keys)))
+  in
+  <Autocomplete
+    class_="w-[256px]"
+    placeholder="Add recipients"
+    selection_mode=`multiple
+    value=(S.get chosen)
+    on_change=(fun keys -> S.set set_chosen keys)>
+    <Label>"To"</Label>
+    <Autocomplete.Trigger>
+      <Autocomplete.Value>
+        (fun value ->
+          <Tag_group size=`sm on_remove=remove>
+            <Tag_group.List>
+              <For each=(S.get value.selected_keys)>
+                (fun email _ ->
+                  <Tag id=email text_value=email>(Jsx.string email)</Tag>)
+              </For>
+            </Tag_group.List>
+          </Tag_group>)
+      </Autocomplete.Value>
+      <Autocomplete.Clear_button />
+      <Autocomplete.Indicator />
+    </Autocomplete.Trigger>
+    <Autocomplete.Popover>
+      <Autocomplete.Filter>
+        <Search_field
+          aria_label="Search emails" name="search" variant=`secondary>
+          <Search_field.Group>
+            <Search_field.Search_icon />
+            <Search_field.Input placeholder="Search emails..." />
+            <Search_field.Clear_button />
+          </Search_field.Group>
+        </Search_field>
+        <List_box
+          render_empty_state=(fun _ ->
+                               <Empty_state>"No recipients found"</Empty_state>)
+          selection_mode=`multiple>
+          <For each=people>
+            (fun (email, name) _ ->
+              <List_box.Item id=email text_value=email>
+                <div class_="flex flex-col">
+                  <Label>(Jsx.string name)</Label>
+                  <Description>(Jsx.string email)</Description>
+                </div>
+                <List_box.Item_indicator />
+              </List_box.Item>)
+          </For>
+        </List_box>
+      </Autocomplete.Filter>
+    </Autocomplete.Popover>
+  </Autocomplete>

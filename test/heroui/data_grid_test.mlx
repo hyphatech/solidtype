@@ -11,6 +11,8 @@ module Data_grid = Solidtype_heroui.Data_grid
 module Table = Solidtype_heroui.Table
 module Button = Solidtype_heroui.Button
 module Dropdown = Solidtype_heroui.Dropdown
+module Autocomplete = Solidtype_heroui.Autocomplete
+module List_box = Solidtype_heroui.List_box
 module E = Jest.Expect
 module T = Testing
 open Testing.Syntax
@@ -41,6 +43,9 @@ external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
 [@@mel.send]
 
 let all selector = Js.Array.from (query_all T.body selector)
+
+external parent : Dom.element -> Dom.element Js.Nullable.t = "parentElement"
+[@@mel.get]
 
 external active : Dom.element = "activeElement" [@@mel.scope "document"]
 external target_value : Dom.element -> string = "value" [@@mel.get]
@@ -285,6 +290,79 @@ let () =
                     (fun b -> T.attribute b "aria-expanded"),
                   all "[aria-selected=true]" |> Array.length )
               |> toEqual (1, Some "true", 0)));
+      Jest.testPromise
+        "keeps a press on a group of controls in a cell, the row's action not \
+         run" (fun () ->
+          let acted = ref [||] in
+          T.render (fun () ->
+              <Data_grid
+                aria_label="Payments"
+                rows=payments
+                row_id=(fun p -> p.id)
+                on_row_action=(fun key ->
+                                acted := Array.append !acted [| key |])
+                columns=[|
+                          Data_grid.column ~id:"customer"
+                            ~header:(Text "Customer") ~is_row_header:true
+                            (fun p -> Jsx.string (S.get p).customer);
+                          Data_grid.column ~id:"tags" ~header:(Text "Tags")
+                            (fun p ->
+                              <Autocomplete
+                                selection_mode=`multiple
+                                default_value=[| "vip" |]
+                                aria_label=("Tags of " ^ (S.get p).id)>
+                                <Autocomplete.Trigger>
+                                  <Autocomplete.Value />
+                                  <Autocomplete.Indicator />
+                                </Autocomplete.Trigger>
+                                <Autocomplete.Popover>
+                                  <List_box selection_mode=`multiple>
+                                    <List_box.Item id="vip" text_value="VIP">
+                                      "VIP"
+                                    </List_box.Item>
+                                    <List_box.Item id="new" text_value="New">
+                                      "New"
+                                    </List_box.Item>
+                                  </List_box>
+                                </Autocomplete.Popover>
+                              </Autocomplete>);
+                        |]
+              />);
+          let user = T.setup () in
+          let value =
+            match all "[data-slot=autocomplete-value]" with
+            | [||] -> Js.Exn.raiseError "no value"
+            | values -> values.(1)
+          in
+          let* () = T.click user value in
+          let* () = T.wait 50 in
+          Js.Promise.resolve
+            E.(
+              expect (!acted, Array.length (all "[role=listbox]"))
+              |> toEqual ([||], 1)));
+      Jest.testPromise
+        "runs a row's action on a press in its cell, inside a group of its own"
+        (fun () ->
+          let acted = ref [||] in
+          T.render (fun () ->
+              <div role=`group aria_label="Billing">
+                <Data_grid
+                  aria_label="Payments"
+                  rows=payments
+                  row_id=(fun p -> p.id)
+                  on_row_action=(fun key ->
+                                  acted := Array.append !acted [| key |])
+                  columns=(columns ())
+                />
+              </div>);
+          let user = T.setup () in
+          let* () =
+            T.click user
+              (match all "[role=rowheader]" with
+              | [||] -> Js.Exn.raiseError "no row header"
+              | cells -> cells.(1))
+          in
+          Js.Promise.resolve E.(expect !acted |> toEqual [| "p2" |]));
       Jest.test "draws its empty state, and its footer below" (fun () ->
           T.render (fun () ->
               <Data_grid
@@ -304,6 +382,40 @@ let () =
             |> toEqual
                  ( [| "No payments" |],
                    [| ("table__footer data-grid__footer", "0 payments") |] )));
+      Jest.test
+        "lays out its checkbox and handle columns at their widths, virtualized"
+        (fun () ->
+          T.render (fun () ->
+              <Data_grid
+                aria_label="Payments"
+                rows=payments
+                row_id=(fun p -> p.id)
+                columns=(columns ())
+                selection_mode=`multiple
+                show_selection_checkboxes=true
+                on_reorder=(fun _ -> ())
+                virtualized=true
+              />);
+          let width selector =
+            all selector
+            |> Array.map (fun e ->
+                match Js.Nullable.toOption (parent e) with
+                | Some place -> (
+                    match T.attribute place "style" with
+                    | Some style ->
+                        Js.String.match_ ~regexp:[%re "/width: ([0-9.]+px)/"]
+                          style
+                        |> Fun.flip Option.bind (fun m -> m.(1))
+                    | None -> None)
+                | None -> None)
+          in
+          (* jsdom measures the table as no height, so no row is drawn;
+             a row's cells take the places its header's columns do. *)
+          E.(
+            expect
+              ( width ".data-grid__selection-column",
+                width ".data-grid__drag-handle-column" )
+            |> toEqual ([| Some "40px" |], [| Some "32px" |])));
       Jest.testPromise "has no violation axe finds" (fun () ->
           T.render (fun () ->
               <Data_grid

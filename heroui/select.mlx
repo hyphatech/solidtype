@@ -3,9 +3,10 @@ module S = Solidtype.Solid
 module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.Select
 module Types = Solidtype_kobalte.Types
+module I18n = Solidtype_kobalte.I18n
 module Gravity = Solidtype_gravity_icons
 
-type placement = [ `top | `bottom | `left | `right ]
+type placement = Overlay.placement
 
 (* What a select's parts read of it: its classes, its list box once one has
    joined it, the options selected, whether it is open, and how it clears. *)
@@ -243,7 +244,9 @@ module Popover = struct
         s.set_placement (Option.value (S.get placement) ~default:`bottom));
     let o = Overlay.create ~is_open:(fun () -> S.get s.is_open) () in
     let side, watch_side =
-      Overlay.placed_side ~placement:(fun () -> S.get s.placement) ()
+      Overlay.placed_side
+        ~placement:(fun () -> Overlay.side_of (S.get s.placement))
+        ()
     in
     Jsx.fragment
       [|
@@ -379,6 +382,7 @@ let%component make ?(placeholder : string = "Select an item")
     ignore (on_open_change o : unit option)
   in
   let placement, set_placement = S.create_signal `bottom in
+  let locale = I18n.use_locale () in
   let disabled_key key =
     Array.exists (String.equal key)
       (Option.value (S.get disabled_keys) ~default:[||])
@@ -396,11 +400,9 @@ let%component make ?(placeholder : string = "Select an item")
       set_placement = S.set set_placement;
       placement =
         S.accessor (fun () ->
-            match S.get placement with
-            | `top -> "top"
-            | `bottom -> "bottom"
-            | `left -> "left"
-            | `right -> "right");
+            Overlay.kobalte_placement
+              (Types.I18n_UseLocale.direction locale ())
+              (S.get placement));
       is_empty = S.accessor (fun () -> Array.length (keys ()) = 0);
       clear =
         (fun () ->

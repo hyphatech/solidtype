@@ -1,40 +1,223 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
+module Chip = Solidtype_heroui.Chip
 module Data_grid = Solidtype_heroui.Data_grid
+module Search_field = Solidtype_heroui.Search_field
+module Rating = Solidtype_heroui.Rating
+module Segment = Solidtype_heroui.Segment
+module Gravity = Solidtype_gravity_icons
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
 
-type entry = { id : string; name : string; email : string; city : string }
+type stock = In_stock | Low_stock | Out_of_stock
 
-let cities = [| "Berlin"; "Lisbon"; "Oslo"; "Tokyo"; "Toronto"; "Nairobi" |]
+type product = {
+  id : string;
+  name : string;
+  sku : string;
+  units : int;
+  price : float;
+  cost : float;
+  rating : float;
+  sales : int;
+}
 
-let entries =
+let brands =
+  [|
+    "ZenCore";
+    "EchoLink";
+    "TechFlow";
+    "PrimeByte";
+    "NovaPeak";
+    "PixelForge";
+    "SwiftEdge";
+  |]
+
+let grades =
+  [|
+    "Turbo";
+    "Advanced";
+    "Deluxe";
+    "Ultra";
+    "Slim";
+    "Elite";
+    "Eco";
+    "Compact";
+    "Portable";
+    "Wireless";
+  |]
+
+let kinds =
+  [|
+    "Sensor";
+    "Mouse";
+    "Drive";
+    "Tablet";
+    "Cable";
+    "Headphones";
+    "Controller";
+    "Charger";
+    "Speaker";
+    "Keyboard";
+    "Monitor";
+  |]
+
+let lines = [| "LGT"; "AUD"; "KEY"; "SPK"; "MON"; "FRN"; "CAM"; "ACC" |]
+
+(* The same thousand products on every visit: each field a number drawn from
+   the product's index, never from a random source. *)
+let drawn i salt n = (((i + 1) * 7919) + (salt * 104729)) mod n
+let one_of i salt names = names.(drawn i salt (Array.length names))
+
+let products =
   Array.init 1000 (fun i ->
+      let price = float_of_int (50 + drawn i 4 1950) in
       {
         id = string_of_int (i + 1);
-        name = "Person " ^ string_of_int (i + 1);
-        email = "person" ^ string_of_int (i + 1) ^ "@example.com";
-        city = cities.(i mod Array.length cities);
+        name =
+          one_of i 1 brands ^ " " ^ one_of i 2 grades ^ " " ^ one_of i 3 kinds;
+        sku = one_of i 5 lines ^ "-" ^ string_of_int (1000 + drawn i 6 9000);
+        units =
+          (match drawn i 7 10 with
+          | 0 | 1 -> 0
+          | 2 | 3 -> 1 + drawn i 8 5
+          | _ -> 6 + drawn i 8 195);
+        price;
+        cost = Float.round (price *. float_of_int (30 + drawn i 9 40) /. 100.);
+        rating = 3. +. (float_of_int (drawn i 10 5) /. 2.);
+        sales = drawn i 11 1000;
       })
 
-let columns =
+let stock p =
+  if p.units = 0 then Out_of_stock
+  else if p.units <= 5 then Low_stock
+  else In_stock
+
+let stock_key = function
+  | In_stock -> "in-stock"
+  | Low_stock -> "low-stock"
+  | Out_of_stock -> "out-of-stock"
+
+let stock_chip p =
+  match stock p with
+  | In_stock ->
+      <Chip color=`success size=`sm variant=`soft class_="whitespace-nowrap">
+        <Gravity.Circle_check_fill class_="size-3.5" /> "In Stock"
+      </Chip>
+  | Low_stock ->
+      <Chip color=`warning size=`sm variant=`soft class_="whitespace-nowrap">
+        <Gravity.Clock class_="size-3.5" /> "Low Stock"
+      </Chip>
+  | Out_of_stock ->
+      <Chip color=`danger size=`sm variant=`soft class_="whitespace-nowrap">
+        <Gravity.Circle_xmark_fill class_="size-3.5" /> "Out of Stock"
+      </Chip>
+
+let stars rating =
+  <Rating
+    aria_label=(Js.Float.toString rating ^ " stars")
+    size=`sm
+    value=rating
+    is_read_only=true>
+    <Rating.Item value=1. />
+    <Rating.Item value=2. />
+    <Rating.Item value=3. />
+    <Rating.Item value=4. />
+    <Rating.Item value=5. />
+  </Rating>
+
+let columns money =
+  let price ~class_ value =
+    <span class_>
+      (Jsx.string (Types.NumberFormat.format (S.get money) value))
+    </span>
+  in
   [|
-    Data_grid.column ~id:"name" ~header:(Text "Name") ~is_row_header:true
-      ~sort:(By_text (fun e -> e.name))
-      (fun e -> Jsx.string (S.get e).name);
-    Data_grid.column ~id:"email" ~header:(Text "Email") (fun e ->
-        Jsx.string (S.get e).email);
-    Data_grid.column ~id:"city" ~header:(Text "City")
-      ~sort:(By_text (fun e -> e.city))
-      (fun e -> Jsx.string (S.get e).city);
+    Data_grid.column ~id:"name" ~header:(Text "Product") ~is_row_header:true
+      ~width:(Pixels 280.) (fun p ->
+        <div class_="flex items-center gap-3">
+          <img
+            alt=(S.get p).name
+            class_="size-10 shrink-0 rounded-lg bg-surface-secondary \
+                    object-cover"
+            loading="lazy"
+            src=("https://img.heroui.chat/image/dashboard?w=80&h=80&u="
+               ^ (S.get p).id)
+          />
+          <span class_="text-sm font-medium">(Jsx.string (S.get p).name)</span>
+        </div>);
+    Data_grid.column ~id:"sku" ~header:(Text "SKU") ~min_width:100.
+      ~cell_class:"font-mono text-xs text-muted" (fun p ->
+        Jsx.string (S.get p).sku);
+    Data_grid.column ~id:"status" ~header:(Text "Status") ~width:(Pixels 140.)
+      (fun p -> stock_chip (S.get p));
+    Data_grid.column ~id:"stock" ~header:(Text "Stock") ~align:`center (fun p ->
+        Jsx.int (S.get p).units);
+    Data_grid.column ~id:"price" ~header:(Text "Price") ~align:`end_ (fun p ->
+        price ~class_:"tabular-nums" (S.get p).price);
+    Data_grid.column ~id:"cost" ~header:(Text "Cost") ~align:`end_
+      ~cell_class:"text-muted" (fun p ->
+        price ~class_:"tabular-nums" (S.get p).cost);
+    Data_grid.column ~id:"rating" ~header:(Text "Rating") (fun p ->
+        stars (S.get p).rating);
+    Data_grid.column ~id:"sales" ~header:(Text "Sales") ~align:`end_ (fun p ->
+        <span class_="tabular-nums">(Jsx.int (S.get p).sales)</span>);
   |]
 
 let make () =
-  <Data_grid
-    aria_label="A thousand people"
-    rows=entries
-    row_id=(fun e -> e.id)
-    columns
-    virtualized=true
-    row_height=48.
-    heading_height=36.
-    content_class="h-[400px] min-w-[640px] overflow-auto"
-  />
+  let money =
+    I18n.create_number_formatter
+      (Types.Either.left
+         (Types.NumberFormatOptions.make ~style:`currency ~currency:"USD"
+            ~maximum_fraction_digits:0. ()))
+  in
+  let shown, set_shown = S.create_signal "all" in
+  let query, set_query = S.create_signal "" in
+  let rows =
+    S.create_memo (fun () ->
+        let shown = S.get shown in
+        let query = String.lowercase_ascii (String.trim (S.get query)) in
+        let matches text =
+          Js.String.includes ~search:query (String.lowercase_ascii text)
+        in
+        Js.Array.filter products ~f:(fun p ->
+            (String.equal shown "all"
+            || String.equal shown (stock_key (stock p)))
+            && (String.equal query "" || matches p.name || matches p.sku)))
+  in
+  <div class_="flex w-full flex-col gap-4">
+    <div class_="flex flex-wrap items-center justify-between gap-3">
+      <Segment
+        aria_label="Stock"
+        selected_key=(S.get shown)
+        on_selection_change=(fun key -> S.set set_shown key)>
+        <Segment.Item id="all">"All"</Segment.Item>
+        <Segment.Item id="in-stock">"In Stock"</Segment.Item>
+        <Segment.Item id="out-of-stock">"Out of Stock"</Segment.Item>
+        <Segment.Item id="low-stock">"Low Stock"</Segment.Item>
+      </Segment>
+      <Search_field
+        aria_label="Search products"
+        class_="w-80"
+        value=(S.get query)
+        on_change=(fun text -> S.set set_query text)>
+        <Search_field.Group>
+          <Search_field.Search_icon />
+          <Search_field.Input placeholder="Search..." />
+          <Search_field.Clear_button />
+        </Search_field.Group>
+      </Search_field>
+    </div>
+    <Data_grid
+      aria_label="Products"
+      rows=(S.get rows)
+      row_id=(fun p -> p.id)
+      columns=(columns money)
+      selection_mode=`multiple
+      show_selection_checkboxes=true
+      virtualized=true
+      row_height=58.
+      heading_height=37.
+      content_class="h-[600px] min-w-[900px] overflow-auto"
+    />
+  </div>

@@ -30,6 +30,11 @@ type payment = {
   email : string;
   status : status;
   amount : float;
+  fee : float;
+  method_ : string;
+  region : string;
+  description : string;
+  date : string;
 }
 
 let payments =
@@ -40,20 +45,35 @@ let payments =
       email = "emma@example.com";
       status = Succeeded;
       amount = 2450.;
+      fee = 73.5;
+      method_ = {js|Visa •••• 4242|js};
+      region = "North America";
+      description = {js|Annual subscription — Enterprise plan|js};
+      date = "2025-12-07";
     };
     {
       id = "pay_1N3x9M";
       customer = "Isabella Nguyen";
       email = "isabella@example.com";
       status = Succeeded;
-      amount = 899.;
+      amount = 299.;
+      fee = 8.97;
+      method_ = {js|Visa •••• 1234|js};
+      region = "Asia Pacific";
+      description = {js|Quarterly subscription — Team plan|js};
+      date = "2025-12-03";
     };
     {
       id = "pay_1N3x8L";
       customer = "Jackson Lee";
       email = "jackson@example.com";
       status = Processing;
-      amount = 320.;
+      amount = 39.;
+      fee = 1.43;
+      method_ = {js|Mastercard •••• 5555|js};
+      region = "North America";
+      description = {js|Monthly add-on — Extra seats|js};
+      date = "2025-12-02";
     };
     {
       id = "pay_1N3xCQ";
@@ -61,6 +81,11 @@ let payments =
       email = "liam@example.com";
       status = Refunded;
       amount = 150.;
+      fee = 4.5;
+      method_ = {js|Mastercard •••• 6789|js};
+      region = "Europe";
+      description = {js|Monthly subscription — Pro plan|js};
+      date = "2025-12-06";
     };
     {
       id = "pay_1N3x7K";
@@ -68,6 +93,23 @@ let payments =
       email = "olivia@example.com";
       status = Succeeded;
       amount = 1999.;
+      fee = 59.97;
+      method_ = {js|Visa •••• 4242|js};
+      region = "North America";
+      description = {js|Annual subscription — Pro plan|js};
+      date = "2025-12-01";
+    };
+    {
+      id = "pay_1N3xBP";
+      customer = "Sofia Davis";
+      email = "sofia@example.com";
+      status = Succeeded;
+      amount = 450.;
+      fee = 13.5;
+      method_ = {js|Visa •••• 9012|js};
+      region = "Europe";
+      description = {js|One-time purchase — Enterprise setup|js};
+      date = "2025-12-05";
     };
     {
       id = "pay_1N3xAN";
@@ -75,6 +117,11 @@ let payments =
       email = "will@example.com";
       status = Failed;
       amount = 99.;
+      fee = 3.17;
+      method_ = {js|Amex •••• 3782|js};
+      region = "Asia Pacific";
+      description = {js|Monthly subscription — Starter plan|js};
+      date = "2025-12-04";
     };
   |]
 
@@ -121,20 +168,29 @@ let actions p =
     </Dropdown.Popover>
   </Dropdown>
 
-let columns money =
+let columns ~money ~day =
+  let amount ~class_ value =
+    <span class_>
+      (Jsx.string (Types.NumberFormat.format (S.get money) value))
+    </span>
+  in
   [|
     Data_grid.column ~id:"customer" ~header:(Text "Customer")
-      ~is_row_header:true
+      ~is_row_header:true ~default_width:(Pixels 240.) ~allows_resizing:true
       ~sort:(By_text (fun p -> p.customer))
       (fun p ->
         <div class_="flex flex-col">
-          <span class_="font-medium">(Jsx.string (S.get p).customer)</span>
+          <span class_="text-sm font-medium">
+            (Jsx.string (S.get p).customer)
+          </span>
           <span class_="text-xs text-muted">(Jsx.string (S.get p).email)</span>
         </div>);
     Data_grid.column ~id:"id" ~header:(Text "Transaction ID")
+      ~default_width:(Pixels 130.) ~allows_resizing:true
       ~cell_class:"font-mono text-xs text-muted" (fun p ->
         Jsx.string (S.get p).id);
     Data_grid.column ~id:"status" ~header:(Text "Status")
+      ~default_width:(Pixels 120.) ~allows_resizing:true
       ~sort:(By_text (fun p -> status_name p.status))
       (fun p ->
         <Chip
@@ -146,10 +202,40 @@ let columns money =
           (Jsx.string (status_name (S.get p).status))
         </Chip>);
     Data_grid.column ~id:"amount" ~header:(Text "Amount") ~align:`end_
+      ~default_width:(Pixels 110.) ~allows_resizing:true
       ~sort:(By (fun a b -> Float.compare a.amount b.amount))
-      ~cell_class:"tabular-nums"
+      (fun p -> amount ~class_:"font-medium tabular-nums" (S.get p).amount);
+    Data_grid.column ~id:"fee" ~header:(Text "Fee") ~align:`end_
+      ~default_width:(Pixels 90.) ~allows_resizing:true
+      ~sort:(By (fun a b -> Float.compare a.fee b.fee))
+      (fun p -> amount ~class_:"text-muted tabular-nums" (S.get p).fee);
+    Data_grid.column ~id:"net" ~header:(Text "Net") ~align:`end_
+      ~default_width:(Pixels 110.) ~allows_resizing:true
+      ~sort:
+        (By (fun a b -> Float.compare (a.amount -. a.fee) (b.amount -. b.fee)))
       (fun p ->
-        Jsx.string (Types.NumberFormat.format (S.get money) (S.get p).amount));
+        amount ~class_:"font-medium tabular-nums"
+          ((S.get p).amount -. (S.get p).fee));
+    Data_grid.column ~id:"method" ~header:(Text "Payment Method")
+      ~default_width:(Pixels 170.) ~allows_resizing:true (fun p ->
+        Jsx.string (S.get p).method_);
+    Data_grid.column ~id:"region" ~header:(Text "Region")
+      ~default_width:(Pixels 130.) ~allows_resizing:true
+      ~sort:(By_text (fun p -> p.region))
+      (fun p -> Jsx.string (S.get p).region);
+    Data_grid.column ~id:"description" ~header:(Text "Description")
+      ~default_width:(Pixels 240.) ~allows_resizing:true
+      ~cell_class:"text-muted" (fun p -> Jsx.string (S.get p).description);
+    Data_grid.column ~id:"date" ~header:(Text "Date")
+      ~default_width:(Pixels 120.) ~allows_resizing:true
+      ~sort:(By (fun a b -> String.compare a.date b.date))
+      (fun p ->
+        <span class_="text-muted tabular-nums">
+          (Jsx.string
+             (Types.DateTimeFormat.format (S.get day)
+                ~date:(Types.Either.right (Js.Date.fromString (S.get p).date))
+                ()))
+        </span>);
     Data_grid.column ~id:"actions"
       ~header:(Element (fun () -> <span class_="sr-only">"Actions"</span>))
       ~align:`end_ ~pinned:`end_ ~width:(Pixels 72.) actions;
@@ -161,15 +247,22 @@ let make () =
       (Types.Either.left
          (Types.NumberFormatOptions.make ~style:`currency ~currency:"USD" ()))
   in
+  let day =
+    I18n.create_date_formatter
+      (Types.Either.left
+         (Types.DateTimeFormatOptions.make ~year:"numeric" ~month:"short"
+            ~day:"numeric" ~time_zone:"UTC" ()))
+  in
   <Data_grid
     aria_label="Payments"
     rows=payments
     row_id=(fun p -> p.id)
-    columns=(columns money)
+    columns=(columns ~money ~day)
     selection_mode=`multiple
     show_selection_checkboxes=true
     default_sort_descriptor={ column = "customer"; direction = `ascending }
-    content_class="min-w-[720px]"
+    allows_column_resize=true
+    content_class="min-w-[1400px]"
   />
 ```
 
@@ -611,21 +704,34 @@ let make () =
 
 ## Editable Cells
 
-A cell draws any control: a `Select`, a
+A cell draws any control: an input, an
+[`Inline_select`](inline-select.md), a
 [`Number_stepper`](number-stepper.md), a `Switch`. Every key
 of a field is its own, and the arrows from a button move between cells.
 
 ```ocaml title="data_grid_editable_cells.mlx"
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Show = Solidtype.Show
+module Button = Solidtype_heroui.Button
 module Chip = Solidtype_heroui.Chip
 module Data_grid = Solidtype_heroui.Data_grid
+module Inline_select = Solidtype_heroui.Inline_select
+module Input = Solidtype_heroui.Input
 module List_box = Solidtype_heroui.List_box
 module Number_stepper = Solidtype_heroui.Number_stepper
-module Select = Solidtype_heroui.Select
 module Switch = Solidtype_heroui.Switch
+module Gravity = Solidtype_gravity_icons
 
-type priority = Low | Medium | High
+external target : Dom.inputEvent -> Dom.htmlInputElement = "target" [@@mel.get]
+external value_of : Dom.htmlInputElement -> string = "value" [@@mel.get]
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external focus : Dom.htmlInputElement -> unit = "focus" [@@mel.send]
+external focus_button : Dom.htmlButtonElement -> unit = "focus" [@@mel.send]
+external select_text : Dom.htmlInputElement -> unit = "select" [@@mel.send]
+
+type priority = High | Medium | Low
 
 type flag = {
   id : string;
@@ -635,64 +741,126 @@ type flag = {
   enabled : bool;
 }
 
+let flag id feature priority points enabled =
+  { id; feature; priority; points; enabled }
+
 let flags =
   [|
-    {
-      id = "1";
-      feature = "Dark mode";
-      priority = High;
-      points = 8.;
-      enabled = true;
-    };
-    {
-      id = "2";
-      feature = "CSV export";
-      priority = Medium;
-      points = 6.;
-      enabled = true;
-    };
-    {
-      id = "3";
-      feature = "Keyboard shortcuts";
-      priority = Low;
-      points = 5.;
-      enabled = false;
-    };
-    {
-      id = "4";
-      feature = "Two-factor auth";
-      priority = Medium;
-      points = 16.;
-      enabled = true;
-    };
-    {
-      id = "5";
-      feature = "Bulk import";
-      priority = Medium;
-      points = 8.;
-      enabled = false;
-    };
-    {
-      id = "6";
-      feature = "Audit log";
-      priority = High;
-      points = 5.;
-      enabled = true;
-    };
+    flag "1" "Dark mode" High 8. true;
+    flag "2" "CSV export" Medium 3. true;
+    flag "3" "Keyboard shortcuts" Low 5. false;
+    flag "4" "Two-factor auth" High 13. true;
+    flag "5" "Bulk import" Medium 8. false;
+    flag "6" "Audit log" High 5. true;
+    flag "7" "Webhooks" Low 3. false;
+    flag "8" "Custom branding" Medium 8. true;
   |]
 
-let priority_key = function Low -> "low" | Medium -> "medium" | High -> "high"
-let priority_of = function "high" -> High | "medium" -> Medium | _ -> Low
+let priorities = [| High; Medium; Low |]
+let priority_key = function High -> "high" | Medium -> "medium" | Low -> "low"
 
 let priority_name = function
-  | Low -> "Low"
-  | Medium -> "Medium"
   | High -> "High"
+  | Medium -> "Medium"
+  | Low -> "Low"
 
 let priority_color = function
-  | Low -> `default
-  | Medium -> `warning
   | High -> `danger
+  | Medium -> `warning
+  | Low -> `default
+
+let priority_chip p =
+  <Chip color=(priority_color p) size=`sm variant=`soft>
+    (Jsx.string (priority_name p))
+  </Chip>
+
+(* The title as an input, its text chosen as it opens: Enter or Save keeps
+   it, Escape or Cancel leaves the title as it was. *)
+let title_editor ~title ~save ~cancel =
+  let draft, set_draft = S.create_signal title in
+  let field = ref None in
+  S.on_mount (fun () ->
+      Option.iter
+        (fun e ->
+          focus e;
+          select_text e)
+        !field);
+  let keep () =
+    match String.trim (S.get draft) with "" -> cancel () | t -> save t
+  in
+  <div class_="flex items-center gap-1">
+    <Input
+      aria_label="Edit title"
+      class_="h-7 w-[180px] text-sm"
+      value=(S.get draft)
+      ref=(fun e -> field := Some e)
+      on_input=(fun e -> S.set set_draft (value_of (target e)))
+      on_key_down=(fun e ->
+                    match key e with
+                    | "Enter" -> keep ()
+                    | "Escape" -> cancel ()
+                    | _ -> ())
+    />
+    <Button
+      is_icon_only=true
+      size=`sm
+      variant=`ghost
+      aria_label="Save"
+      on_click=(fun _ -> keep ())>
+      <Gravity.Check class_="size-3" />
+    </Button>
+    <Button
+      is_icon_only=true
+      size=`sm
+      variant=`ghost
+      aria_label="Cancel"
+      on_click=(fun _ -> cancel ())>
+      <Gravity.Xmark class_="size-3" />
+    </Button>
+  </div>
+
+(* Shown while its row is hovered, or reached by the keys. *)
+let edit_button ~ref ~on_click =
+  <Button
+    is_icon_only=true
+    size=`sm
+    variant=`ghost
+    aria_label="Edit title"
+    class_="opacity-0 group-hover/edit:opacity-100 focus-visible:opacity-100"
+    ref
+    on_click=(fun _ -> on_click ())>
+    <Gravity.Pencil class_="size-3" />
+  </Button>
+
+(* The title, and its button, which takes the focus back as editing ends,
+   since the input that had it is gone. *)
+let title_cell ~title ~rename =
+  let editing, set_editing = S.create_signal false in
+  let button = ref None in
+  let finish () =
+    S.set set_editing false;
+    Option.iter focus_button !button
+  in
+  <Show
+    when_=(S.get editing)
+    fallback=(<div class_="group/edit flex items-center gap-1.5">
+                <span class_="text-sm font-medium">
+                  (Jsx.string (S.get title))
+                </span>
+                (edit_button
+                   ~ref:(fun b -> button := Some b)
+                   ~on_click:(fun () -> S.set set_editing true))
+              </div>)>
+    (title_editor ~title:(S.get title)
+       ~save:(fun t ->
+         rename t;
+         finish ())
+       ~cancel:finish)
+  </Show>
+
+let summary =
+  "Edit titles, change priorities, adjust story points, and toggle features \
+   inline."
 
 let make () =
   let rows, set_rows = S.create_signal flags in
@@ -705,50 +873,46 @@ let make () =
   let columns =
     [|
       Data_grid.column ~id:"feature" ~header:(Text "Feature")
-        ~is_row_header:true ~cell_class:"font-medium" (fun row ->
-          Jsx.string (S.get row).feature);
+        ~is_row_header:true ~width:(Pixels 300.) (fun row ->
+          title_cell
+            ~title:(S.accessor (fun () -> (S.get row).feature))
+            ~rename:(fun feature ->
+              change (S.get row).id (fun r -> { r with feature })));
       Data_grid.column ~id:"priority" ~header:(Text "Priority")
-        ~width:(Pixels 200.) (fun row ->
-          <Select
-            aria_label=("Priority of " ^ (S.get row).feature)
-            variant=`secondary
-            class_="w-36"
+        ~width:(Pixels 176.) (fun row ->
+          <Inline_select
             value=[| priority_key (S.get row).priority |]
             on_change=(fun keys ->
-                        match keys with
-                        | [| k |] ->
-                            change (S.get row).id (fun r ->
-                                { r with priority = priority_of k })
-                        | _ -> ())>
-            <Select.Trigger>
-              <Select.Value>
-                <Chip
-                  color=(priority_color (S.get row).priority)
-                  size=`sm
-                  variant=`soft>
-                  (Jsx.string (priority_name (S.get row).priority))
-                </Chip>
-              </Select.Value>
-              <Select.Indicator />
-            </Select.Trigger>
-            <Select.Popover>
+                        match
+                          Array.find_opt
+                            (fun p -> Array.mem (priority_key p) keys)
+                            priorities
+                        with
+                        | Some priority ->
+                            change (S.get row).id (fun r -> { r with priority })
+                        | None -> ())>
+            <Inline_select.Trigger aria_label="Priority">
+              <Inline_select.Value>
+                (priority_chip (S.get row).priority)
+              </Inline_select.Value>
+              <Inline_select.Indicator />
+            </Inline_select.Trigger>
+            <Inline_select.Popover>
               <List_box>
-                <List_box.Item id="high" text_value="High">
-                  "High" <List_box.Item_indicator />
-                </List_box.Item>
-                <List_box.Item id="medium" text_value="Medium">
-                  "Medium" <List_box.Item_indicator />
-                </List_box.Item>
-                <List_box.Item id="low" text_value="Low">
-                  "Low" <List_box.Item_indicator />
-                </List_box.Item>
+                <For each=priorities>
+                  (fun p _ ->
+                    <List_box.Item
+                      id=(priority_key p) text_value=(priority_name p)>
+                      (priority_chip p) <List_box.Item_indicator />
+                    </List_box.Item>)
+                </For>
               </List_box>
-            </Select.Popover>
-          </Select>);
-      Data_grid.column ~id:"points" ~header:(Text "Story points") ~align:`center
-        ~width:(Pixels 160.) (fun row ->
+            </Inline_select.Popover>
+          </Inline_select>);
+      Data_grid.column ~id:"points" ~header:(Text "Story Points") ~align:`center
+        ~width:(Pixels 167.) (fun row ->
           <Number_stepper
-            aria_label=("Story points of " ^ (S.get row).feature)
+            aria_label="Story points"
             size=`sm
             class_="justify-center"
             value=(S.get row).points
@@ -762,9 +926,9 @@ let make () =
             </Number_stepper.Group>
           </Number_stepper>);
       Data_grid.column ~id:"enabled" ~header:(Text "Enabled") ~align:`center
-        ~width:(Pixels 100.) (fun row ->
+        ~width:(Pixels 117.) (fun row ->
           <Switch
-            aria_label=("Enable " ^ (S.get row).feature)
+            aria_label="Enabled"
             is_selected=(S.get row).enabled
             on_change=(fun enabled ->
                         change (S.get row).id (fun r -> { r with enabled }))>
@@ -780,26 +944,31 @@ let make () =
   let effort () =
     Array.fold_left (fun sum r -> sum +. r.points) 0. (S.get rows)
   in
-  <Data_grid
-    aria_label="Feature flags"
-    rows=(S.get rows)
-    row_id=(fun r -> r.id)
-    columns
-    content_class="min-w-[640px]"
-    footer=(<span class_="flex gap-6 text-sm text-muted">
-              <span>
-                (Jsx.string
-                   (string_of_int (enabled ())
-                   ^ " of "
-                   ^ string_of_int (Array.length (S.get rows))
-                   ^ " enabled"))
-              </span>
-              <span>
-                (Jsx.string
-                   ("Total effort: " ^ Js.Float.toString (effort ()) ^ " pts"))
-              </span>
-            </span>)
-  />
+  <div class_="flex w-full max-w-3xl flex-col gap-3">
+    <div class_="flex flex-col gap-1">
+      <h3 class_="text-lg font-semibold">"Feature Flags"</h3>
+      <p class_="text-sm text-muted">(Jsx.string summary)</p>
+    </div>
+    <Data_grid
+      aria_label="Feature flags"
+      rows=(S.get rows)
+      row_id=(fun r -> r.id)
+      columns
+      content_class="min-w-[640px]"
+    />
+    <div class_="flex items-center gap-4 text-sm text-muted">
+      <span>
+        (Jsx.string
+           (string_of_int (enabled ())
+           ^ " of "
+           ^ string_of_int (Array.length (S.get rows))
+           ^ " enabled"))
+      </span>
+      <span>
+        (Jsx.string ("Total effort: " ^ Js.Float.toString (effort ()) ^ " pts"))
+      </span>
+    </div>
+  </div>
 ```
 
 ## Empty State
@@ -916,56 +1085,732 @@ let make () =
 ## Sticky Header
 
 `sticky_header` keeps the header at the top of the scroll container, which
-`scroll_container_class` gives a height or a maximum height; the grid above
-keeps its header so.
+`scroll_container_class` gives a height or a maximum height. Rows keep their
+own heights, and selection, sorting, pinned columns and resizing work as in any
+grid.
+
+```ocaml title="data_grid_sticky_header.mlx"
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Chip = Solidtype_heroui.Chip
+module Data_grid = Solidtype_heroui.Data_grid
+module Dropdown = Solidtype_heroui.Dropdown
+module Label = Solidtype_heroui.Label
+module Gravity = Solidtype_gravity_icons
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
+
+type status = Succeeded | Processing | Refunded | Failed
+
+type payment = {
+  id : string;
+  customer : string;
+  email : string;
+  status : status;
+  amount : float;
+  fee : float;
+  method_ : string;
+  region : string;
+  description : string;
+  date : string;
+}
+
+let payments =
+  [|
+    {
+      id = "pay_1N3xDR";
+      customer = "Emma Wilson";
+      email = "emma@example.com";
+      status = Succeeded;
+      amount = 2450.;
+      fee = 73.5;
+      method_ = {js|Visa •••• 4242|js};
+      region = "North America";
+      description = {js|Annual subscription — Enterprise plan|js};
+      date = "2025-12-07";
+    };
+    {
+      id = "pay_1N3x9M";
+      customer = "Isabella Nguyen";
+      email = "isabella@example.com";
+      status = Succeeded;
+      amount = 299.;
+      fee = 8.97;
+      method_ = {js|Visa •••• 1234|js};
+      region = "Asia Pacific";
+      description = {js|Quarterly subscription — Team plan|js};
+      date = "2025-12-03";
+    };
+    {
+      id = "pay_1N3x8L";
+      customer = "Jackson Lee";
+      email = "jackson@example.com";
+      status = Processing;
+      amount = 39.;
+      fee = 1.43;
+      method_ = {js|Mastercard •••• 5555|js};
+      region = "North America";
+      description = {js|Monthly add-on — Extra seats|js};
+      date = "2025-12-02";
+    };
+    {
+      id = "pay_1N3xCQ";
+      customer = "Liam Johnson";
+      email = "liam@example.com";
+      status = Refunded;
+      amount = 150.;
+      fee = 4.5;
+      method_ = {js|Mastercard •••• 6789|js};
+      region = "Europe";
+      description = {js|Monthly subscription — Pro plan|js};
+      date = "2025-12-06";
+    };
+    {
+      id = "pay_1N3x7K";
+      customer = "Olivia Martin";
+      email = "olivia@example.com";
+      status = Succeeded;
+      amount = 1999.;
+      fee = 59.97;
+      method_ = {js|Visa •••• 4242|js};
+      region = "North America";
+      description = {js|Annual subscription — Pro plan|js};
+      date = "2025-12-01";
+    };
+    {
+      id = "pay_1N3xBP";
+      customer = "Sofia Davis";
+      email = "sofia@example.com";
+      status = Succeeded;
+      amount = 450.;
+      fee = 13.5;
+      method_ = {js|Visa •••• 9012|js};
+      region = "Europe";
+      description = {js|One-time purchase — Enterprise setup|js};
+      date = "2025-12-05";
+    };
+    {
+      id = "pay_1N3xAN";
+      customer = "William Kim";
+      email = "will@example.com";
+      status = Failed;
+      amount = 99.;
+      fee = 3.17;
+      method_ = {js|Amex •••• 3782|js};
+      region = "Asia Pacific";
+      description = {js|Monthly subscription — Starter plan|js};
+      date = "2025-12-04";
+    };
+  |]
+
+let status_name = function
+  | Succeeded -> "Succeeded"
+  | Processing -> "Processing"
+  | Refunded -> "Refunded"
+  | Failed -> "Failed"
+
+let status_color = function
+  | Succeeded -> `success
+  | Processing -> `warning
+  | Refunded -> `default
+  | Failed -> `danger
+
+let actions p =
+  <Dropdown>
+    <Button
+      is_icon_only=true
+      aria_label=("Actions for " ^ (S.get p).customer)
+      size=`sm
+      variant=`tertiary>
+      <Gravity.Ellipsis_vertical class_="size-4" />
+    </Button>
+    <Dropdown.Popover>
+      <Dropdown.Menu on_action=(fun (_ : string) -> ())>
+        <Dropdown.Item id="copy" text_value="Copy payment ID">
+          <Gravity.Copy class_="size-4 shrink-0 text-muted" />
+          <Label>"Copy payment ID"</Label>
+        </Dropdown.Item>
+        <Dropdown.Item id="view" text_value="View details">
+          <Gravity.Eye class_="size-4 shrink-0 text-muted" />
+          <Label>"View details"</Label>
+        </Dropdown.Item>
+        <Dropdown.Item id="edit" text_value="Edit payment">
+          <Gravity.Pencil class_="size-4 shrink-0 text-muted" />
+          <Label>"Edit payment"</Label>
+        </Dropdown.Item>
+        <Dropdown.Item id="delete" text_value="Delete" variant=`danger>
+          <Gravity.Trash_bin class_="size-4 shrink-0 text-danger" />
+          <Label>"Delete"</Label>
+        </Dropdown.Item>
+      </Dropdown.Menu>
+    </Dropdown.Popover>
+  </Dropdown>
+
+let columns ~money ~day =
+  let amount ~class_ value =
+    <span class_>
+      (Jsx.string (Types.NumberFormat.format (S.get money) value))
+    </span>
+  in
+  [|
+    Data_grid.column ~id:"customer" ~header:(Text "Customer")
+      ~is_row_header:true ~default_width:(Pixels 240.) ~allows_resizing:true
+      ~sort:(By_text (fun p -> p.customer))
+      (fun p ->
+        <div class_="flex flex-col">
+          <span class_="text-sm font-medium">
+            (Jsx.string (S.get p).customer)
+          </span>
+          <span class_="text-xs text-muted">(Jsx.string (S.get p).email)</span>
+        </div>);
+    Data_grid.column ~id:"id" ~header:(Text "Transaction ID")
+      ~default_width:(Pixels 130.) ~allows_resizing:true
+      ~cell_class:"font-mono text-xs text-muted" (fun p ->
+        Jsx.string (S.get p).id);
+    Data_grid.column ~id:"status" ~header:(Text "Status")
+      ~default_width:(Pixels 120.) ~allows_resizing:true
+      ~sort:(By_text (fun p -> status_name p.status))
+      (fun p ->
+        <Chip
+          color=(status_color (S.get p).status)
+          size=`sm
+          variant=`soft
+          class_="gap-1">
+          <span class_="size-1.5 rounded-full bg-current" />
+          (Jsx.string (status_name (S.get p).status))
+        </Chip>);
+    Data_grid.column ~id:"amount" ~header:(Text "Amount") ~align:`end_
+      ~default_width:(Pixels 110.) ~allows_resizing:true
+      ~sort:(By (fun a b -> Float.compare a.amount b.amount))
+      (fun p -> amount ~class_:"font-medium tabular-nums" (S.get p).amount);
+    Data_grid.column ~id:"fee" ~header:(Text "Fee") ~align:`end_
+      ~default_width:(Pixels 90.) ~allows_resizing:true
+      ~sort:(By (fun a b -> Float.compare a.fee b.fee))
+      (fun p -> amount ~class_:"text-muted tabular-nums" (S.get p).fee);
+    Data_grid.column ~id:"net" ~header:(Text "Net") ~align:`end_
+      ~default_width:(Pixels 110.) ~allows_resizing:true
+      ~sort:
+        (By (fun a b -> Float.compare (a.amount -. a.fee) (b.amount -. b.fee)))
+      (fun p ->
+        amount ~class_:"font-medium tabular-nums"
+          ((S.get p).amount -. (S.get p).fee));
+    Data_grid.column ~id:"method" ~header:(Text "Payment Method")
+      ~default_width:(Pixels 170.) ~allows_resizing:true (fun p ->
+        Jsx.string (S.get p).method_);
+    Data_grid.column ~id:"region" ~header:(Text "Region")
+      ~default_width:(Pixels 130.) ~allows_resizing:true
+      ~sort:(By_text (fun p -> p.region))
+      (fun p -> Jsx.string (S.get p).region);
+    Data_grid.column ~id:"description" ~header:(Text "Description")
+      ~default_width:(Pixels 240.) ~allows_resizing:true
+      ~cell_class:"text-muted" (fun p -> Jsx.string (S.get p).description);
+    Data_grid.column ~id:"date" ~header:(Text "Date")
+      ~default_width:(Pixels 120.) ~allows_resizing:true
+      ~sort:(By (fun a b -> String.compare a.date b.date))
+      (fun p ->
+        <span class_="text-muted tabular-nums">
+          (Jsx.string
+             (Types.DateTimeFormat.format (S.get day)
+                ~date:(Types.Either.right (Js.Date.fromString (S.get p).date))
+                ()))
+        </span>);
+    Data_grid.column ~id:"actions"
+      ~header:(Element (fun () -> <span class_="sr-only">"Actions"</span>))
+      ~align:`end_ ~pinned:`end_ ~width:(Pixels 72.) actions;
+  |]
+
+let make () =
+  let money =
+    I18n.create_number_formatter
+      (Types.Either.left
+         (Types.NumberFormatOptions.make ~style:`currency ~currency:"USD" ()))
+  in
+  let day =
+    I18n.create_date_formatter
+      (Types.Either.left
+         (Types.DateTimeFormatOptions.make ~year:"numeric" ~month:"short"
+            ~day:"numeric" ~time_zone:"UTC" ()))
+  in
+  <Data_grid
+    aria_label="Payments"
+    rows=payments
+    row_id=(fun p -> p.id)
+    columns=(columns ~money ~day)
+    selection_mode=`multiple
+    show_selection_checkboxes=true
+    default_sort_descriptor={ column = "customer"; direction = `ascending }
+    allows_column_resize=true
+    sticky_header=true
+    scroll_container_class="max-h-[320px]"
+    content_class="min-w-[1400px]"
+  />
+```
 
 ## Virtualization
 
 `virtualized` draws only the rows in view, each `row_height` high below a
-header `heading_height` high. The table is what scrolls: give it a height by
-`content_class`. The keys reach every row.
+header `heading_height` high, for a thousand rows or more. The table is what
+scrolls: give it a height by `content_class`. The keys reach every row.
 
 ```ocaml title="data_grid_virtualization.mlx"
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
+module Chip = Solidtype_heroui.Chip
 module Data_grid = Solidtype_heroui.Data_grid
+module Search_field = Solidtype_heroui.Search_field
+module Rating = Solidtype_heroui.Rating
+module Segment = Solidtype_heroui.Segment
+module Gravity = Solidtype_gravity_icons
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
 
-type entry = { id : string; name : string; email : string; city : string }
+type stock = In_stock | Low_stock | Out_of_stock
 
-let cities = [| "Berlin"; "Lisbon"; "Oslo"; "Tokyo"; "Toronto"; "Nairobi" |]
+type product = {
+  id : string;
+  name : string;
+  sku : string;
+  units : int;
+  price : float;
+  cost : float;
+  rating : float;
+  sales : int;
+}
 
-let entries =
+let brands =
+  [|
+    "ZenCore";
+    "EchoLink";
+    "TechFlow";
+    "PrimeByte";
+    "NovaPeak";
+    "PixelForge";
+    "SwiftEdge";
+  |]
+
+let grades =
+  [|
+    "Turbo";
+    "Advanced";
+    "Deluxe";
+    "Ultra";
+    "Slim";
+    "Elite";
+    "Eco";
+    "Compact";
+    "Portable";
+    "Wireless";
+  |]
+
+let kinds =
+  [|
+    "Sensor";
+    "Mouse";
+    "Drive";
+    "Tablet";
+    "Cable";
+    "Headphones";
+    "Controller";
+    "Charger";
+    "Speaker";
+    "Keyboard";
+    "Monitor";
+  |]
+
+let lines = [| "LGT"; "AUD"; "KEY"; "SPK"; "MON"; "FRN"; "CAM"; "ACC" |]
+
+(* The same thousand products on every visit: each field a number drawn from
+   the product's index, never from a random source. *)
+let drawn i salt n = (((i + 1) * 7919) + (salt * 104729)) mod n
+let one_of i salt names = names.(drawn i salt (Array.length names))
+
+let products =
   Array.init 1000 (fun i ->
+      let price = float_of_int (50 + drawn i 4 1950) in
       {
         id = string_of_int (i + 1);
-        name = "Person " ^ string_of_int (i + 1);
-        email = "person" ^ string_of_int (i + 1) ^ "@example.com";
-        city = cities.(i mod Array.length cities);
+        name =
+          one_of i 1 brands ^ " " ^ one_of i 2 grades ^ " " ^ one_of i 3 kinds;
+        sku = one_of i 5 lines ^ "-" ^ string_of_int (1000 + drawn i 6 9000);
+        units =
+          (match drawn i 7 10 with
+          | 0 | 1 -> 0
+          | 2 | 3 -> 1 + drawn i 8 5
+          | _ -> 6 + drawn i 8 195);
+        price;
+        cost = Float.round (price *. float_of_int (30 + drawn i 9 40) /. 100.);
+        rating = 3. +. (float_of_int (drawn i 10 5) /. 2.);
+        sales = drawn i 11 1000;
       })
+
+let stock p =
+  if p.units = 0 then Out_of_stock
+  else if p.units <= 5 then Low_stock
+  else In_stock
+
+let stock_key = function
+  | In_stock -> "in-stock"
+  | Low_stock -> "low-stock"
+  | Out_of_stock -> "out-of-stock"
+
+let stock_chip p =
+  match stock p with
+  | In_stock ->
+      <Chip color=`success size=`sm variant=`soft class_="whitespace-nowrap">
+        <Gravity.Circle_check_fill class_="size-3.5" /> "In Stock"
+      </Chip>
+  | Low_stock ->
+      <Chip color=`warning size=`sm variant=`soft class_="whitespace-nowrap">
+        <Gravity.Clock class_="size-3.5" /> "Low Stock"
+      </Chip>
+  | Out_of_stock ->
+      <Chip color=`danger size=`sm variant=`soft class_="whitespace-nowrap">
+        <Gravity.Circle_xmark_fill class_="size-3.5" /> "Out of Stock"
+      </Chip>
+
+let stars rating =
+  <Rating
+    aria_label=(Js.Float.toString rating ^ " stars")
+    size=`sm
+    value=rating
+    is_read_only=true>
+    <Rating.Item value=1. />
+    <Rating.Item value=2. />
+    <Rating.Item value=3. />
+    <Rating.Item value=4. />
+    <Rating.Item value=5. />
+  </Rating>
+
+let columns money =
+  let price ~class_ value =
+    <span class_>
+      (Jsx.string (Types.NumberFormat.format (S.get money) value))
+    </span>
+  in
+  [|
+    Data_grid.column ~id:"name" ~header:(Text "Product") ~is_row_header:true
+      ~width:(Pixels 280.) (fun p ->
+        <div class_="flex items-center gap-3">
+          <img
+            alt=(S.get p).name
+            class_="size-10 shrink-0 rounded-lg bg-surface-secondary \
+                    object-cover"
+            loading="lazy"
+            src=("https://img.heroui.chat/image/dashboard?w=80&h=80&u="
+               ^ (S.get p).id)
+          />
+          <span class_="text-sm font-medium">(Jsx.string (S.get p).name)</span>
+        </div>);
+    Data_grid.column ~id:"sku" ~header:(Text "SKU") ~min_width:100.
+      ~cell_class:"font-mono text-xs text-muted" (fun p ->
+        Jsx.string (S.get p).sku);
+    Data_grid.column ~id:"status" ~header:(Text "Status") ~width:(Pixels 140.)
+      (fun p -> stock_chip (S.get p));
+    Data_grid.column ~id:"stock" ~header:(Text "Stock") ~align:`center (fun p ->
+        Jsx.int (S.get p).units);
+    Data_grid.column ~id:"price" ~header:(Text "Price") ~align:`end_ (fun p ->
+        price ~class_:"tabular-nums" (S.get p).price);
+    Data_grid.column ~id:"cost" ~header:(Text "Cost") ~align:`end_
+      ~cell_class:"text-muted" (fun p ->
+        price ~class_:"tabular-nums" (S.get p).cost);
+    Data_grid.column ~id:"rating" ~header:(Text "Rating") (fun p ->
+        stars (S.get p).rating);
+    Data_grid.column ~id:"sales" ~header:(Text "Sales") ~align:`end_ (fun p ->
+        <span class_="tabular-nums">(Jsx.int (S.get p).sales)</span>);
+  |]
+
+let make () =
+  let money =
+    I18n.create_number_formatter
+      (Types.Either.left
+         (Types.NumberFormatOptions.make ~style:`currency ~currency:"USD"
+            ~maximum_fraction_digits:0. ()))
+  in
+  let shown, set_shown = S.create_signal "all" in
+  let query, set_query = S.create_signal "" in
+  let rows =
+    S.create_memo (fun () ->
+        let shown = S.get shown in
+        let query = String.lowercase_ascii (String.trim (S.get query)) in
+        let matches text =
+          Js.String.includes ~search:query (String.lowercase_ascii text)
+        in
+        Js.Array.filter products ~f:(fun p ->
+            (String.equal shown "all"
+            || String.equal shown (stock_key (stock p)))
+            && (String.equal query "" || matches p.name || matches p.sku)))
+  in
+  <div class_="flex w-full flex-col gap-4">
+    <div class_="flex flex-wrap items-center justify-between gap-3">
+      <Segment
+        aria_label="Stock"
+        selected_key=(S.get shown)
+        on_selection_change=(fun key -> S.set set_shown key)>
+        <Segment.Item id="all">"All"</Segment.Item>
+        <Segment.Item id="in-stock">"In Stock"</Segment.Item>
+        <Segment.Item id="out-of-stock">"Out of Stock"</Segment.Item>
+        <Segment.Item id="low-stock">"Low Stock"</Segment.Item>
+      </Segment>
+      <Search_field
+        aria_label="Search products"
+        class_="w-80"
+        value=(S.get query)
+        on_change=(fun text -> S.set set_query text)>
+        <Search_field.Group>
+          <Search_field.Search_icon />
+          <Search_field.Input placeholder="Search..." />
+          <Search_field.Clear_button />
+        </Search_field.Group>
+      </Search_field>
+    </div>
+    <Data_grid
+      aria_label="Products"
+      rows=(S.get rows)
+      row_id=(fun p -> p.id)
+      columns=(columns money)
+      selection_mode=`multiple
+      show_selection_checkboxes=true
+      virtualized=true
+      row_height=58.
+      heading_height=37.
+      content_class="h-[600px] min-w-[900px] overflow-auto"
+    />
+  </div>
+```
+
+## Bulk Actions
+
+An [Action Bar](action-bar.md) for the rows chosen.
+
+```ocaml title="data_grid_bulk_actions.mlx"
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Action_bar = Solidtype_heroui.Action_bar
+module Avatar = Solidtype_heroui.Avatar
+module Button = Solidtype_heroui.Button
+module Chip = Solidtype_heroui.Chip
+module Data_grid = Solidtype_heroui.Data_grid
+module Separator = Solidtype_heroui.Separator
+module Gravity = Solidtype_gravity_icons
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
+
+type status = Active | Pending | Inactive
+
+type employee = {
+  id : string;
+  name : string;
+  email : string;
+  department : string;
+  status : status;
+  joined : string;
+  avatar : int;
+}
+
+let employee id name email department status joined avatar =
+  { id; name; email; department; status; joined; avatar }
+
+let employees =
+  [|
+    employee "1" "Amara Okafor" "amara.okafor@company.com" "Support" Pending
+      "2024-06-27" 25;
+    employee "2" "Elena Rodriguez" "elena.rodriguez@company.com" "HR" Active
+      "2024-01-28" 20;
+    employee "3" "James O'Brien" "james.o.brien@company.com" "Finance" Active
+      "2024-04-14" 23;
+    employee "4" "Luca Bianchi" "luca.bianchi@company.com" "Engineering" Active
+      "2024-07-25" 21;
+    employee "5" "Marcus Chen" "marcus.chen@company.com" "Design" Pending
+      "2024-02-03" 22;
+    employee "6" "Priya Patel" "priya.patel@company.com" "HR" Active
+      "2024-03-04" 24;
+    employee "7" "Yuki Tanaka" "yuki.tanaka@company.com" "Product" Inactive
+      "2024-05-08" 26;
+  |]
+
+let status_name = function
+  | Active -> "Active"
+  | Pending -> "Pending"
+  | Inactive -> "Inactive"
+
+let status_color = function
+  | Active -> `success
+  | Pending -> `warning
+  | Inactive -> `danger
+
+let columns day =
+  [|
+    Data_grid.column ~id:"name" ~header:(Text "Employee") ~is_row_header:true
+      ~sort:(By_text (fun e -> e.name))
+      (fun e ->
+        <div class_="flex items-center gap-3">
+          <Avatar size=`sm>
+            <Avatar.Image
+              src=("https://img.heroui.chat/image/avatar?w=200&h=200&u="
+                  ^ string_of_int (S.get e).avatar)
+            />
+          </Avatar>
+          <div class_="flex flex-col">
+            <span class_="text-sm font-medium">
+              (Jsx.string (S.get e).name)
+            </span>
+            <span class_="text-xs text-muted">
+              (Jsx.string (S.get e).email)
+            </span>
+          </div>
+        </div>);
+    Data_grid.column ~id:"department" ~header:(Text "Department")
+      ~sort:(By_text (fun e -> e.department))
+      (fun e -> Jsx.string (S.get e).department);
+    Data_grid.column ~id:"status" ~header:(Text "Status")
+      ~sort:(By_text (fun e -> status_name e.status))
+      (fun e ->
+        <Chip
+          color=(status_color (S.get e).status)
+          size=`sm
+          variant=`soft
+          class_="gap-1">
+          <span class_="size-1.5 rounded-full bg-current" />
+          (Jsx.string (status_name (S.get e).status))
+        </Chip>);
+    Data_grid.column ~id:"joined" ~header:(Text "Joined")
+      ~sort:(By (fun a b -> String.compare a.joined b.joined))
+      (fun e ->
+        <span class_="text-sm text-muted tabular-nums">
+          (Jsx.string
+             (Types.DateTimeFormat.format (S.get day)
+                ~date:(Types.Either.right (Js.Date.fromString (S.get e).joined))
+                ()))
+        </span>);
+  |]
+
+let make () =
+  let chosen, set_chosen = S.create_signal [||] in
+  let day =
+    I18n.create_date_formatter
+      (Types.Either.left
+         (Types.DateTimeFormatOptions.make ~year:"numeric" ~month:"short"
+            ~day:"numeric" ~time_zone:"UTC" ()))
+  in
+  <div class_="w-full">
+    <Data_grid
+      aria_label="Employees"
+      rows=employees
+      row_id=(fun e -> e.id)
+      columns=(columns day)
+      selection_mode=`multiple
+      show_selection_checkboxes=true
+      selected_keys=(S.get chosen)
+      on_selection_change=(fun keys -> S.set set_chosen keys)
+      default_sort_descriptor={ column = "name"; direction = `ascending }
+      content_class="min-w-[640px]"
+    />
+    <Action_bar
+      is_open=(Array.length (S.get chosen) > 0) aria_label="Bulk actions">
+      <Action_bar.Prefix>
+        <Chip size=`sm class_="size-5 shrink-0 tabular-nums">
+          (Jsx.int (Array.length (S.get chosen)))
+        </Chip>
+      </Action_bar.Prefix>
+      <Separator />
+      <Action_bar.Content>
+        <Button size=`sm variant=`ghost aria_label="Edit">
+          <Gravity.Pencil /> <span class_="action-bar__label">"Edit"</span>
+        </Button>
+        <Button size=`sm variant=`ghost aria_label="Export">
+          <Gravity.Arrow_down_to_line />
+          <span class_="action-bar__label">"Export"</span>
+        </Button>
+        <Button size=`sm variant=`ghost aria_label="Archive">
+          <Gravity.Archive /> <span class_="action-bar__label">"Archive"</span>
+        </Button>
+        <Button
+          size=`sm
+          variant=`ghost
+          aria_label="Delete"
+          class_="bg-danger/10 text-danger">
+          <Gravity.Trash_bin /> <span class_="action-bar__label">"Delete"</span>
+        </Button>
+      </Action_bar.Content>
+      <Separator />
+      <Action_bar.Suffix>
+        <Button
+          is_icon_only=true
+          size=`sm
+          variant=`ghost
+          aria_label="Clear selection"
+          on_click=(fun _ -> S.set set_chosen [||])>
+          <Gravity.Xmark />
+        </Button>
+      </Action_bar.Suffix>
+    </Action_bar>
+  </div>
+```
+
+## Users
+
+```ocaml title="data_grid_users.mlx"
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Data_grid = Solidtype_heroui.Data_grid
+module Link = Solidtype_heroui.Link
+
+type user = { name : string; title : string; email : string; role : string }
+
+let user name title email role = { name; title; email; role }
+
+let users =
+  [|
+    user "Lindsay Walton" "Front-end Developer" "lindsay.walton@example.com"
+      "Member";
+    user "Courtney Henry" "Designer" "courtney.henry@example.com" "Admin";
+    user "Tom Cook" "Director of Product" "tom.cook@example.com" "Member";
+    user "Whitney Francis" "Copywriter" "whitney.francis@example.com" "Admin";
+    user "Leonard Krasner" "Senior Designer" "leonard.krasner@example.com"
+      "Owner";
+    user "Floyd Miles" "Principal Designer" "floyd.miles@example.com" "Member";
+  |]
 
 let columns =
   [|
     Data_grid.column ~id:"name" ~header:(Text "Name") ~is_row_header:true
-      ~sort:(By_text (fun e -> e.name))
-      (fun e -> Jsx.string (S.get e).name);
-    Data_grid.column ~id:"email" ~header:(Text "Email") (fun e ->
-        Jsx.string (S.get e).email);
-    Data_grid.column ~id:"city" ~header:(Text "City")
-      ~sort:(By_text (fun e -> e.city))
-      (fun e -> Jsx.string (S.get e).city);
+      ~cell_class:"font-medium" (fun u -> Jsx.string (S.get u).name);
+    Data_grid.column ~id:"title" ~header:(Text "Title") (fun u ->
+        Jsx.string (S.get u).title);
+    Data_grid.column ~id:"email" ~header:(Text "Email") (fun u ->
+        Jsx.string (S.get u).email);
+    Data_grid.column ~id:"role" ~header:(Text "Role") (fun u ->
+        Jsx.string (S.get u).role);
+    Data_grid.column ~id:"actions"
+      ~header:(Element (fun () -> <span class_="sr-only">"Actions"</span>))
+      ~align:`end_
+      (fun u ->
+        <Link class_="text-sm" href=("#" ^ (S.get u).email)>"Edit"</Link>);
   |]
 
 let make () =
-  <Data_grid
-    aria_label="A thousand people"
-    rows=entries
-    row_id=(fun e -> e.id)
-    columns
-    virtualized=true
-    row_height=48.
-    heading_height=36.
-    content_class="h-[400px] min-w-[640px] overflow-auto"
-  />
+  <div class_="flex w-full flex-col gap-4">
+    <div class_="flex items-center justify-between">
+      <div class_="flex flex-col gap-1">
+        <h2 class_="text-xl font-bold">"Users"</h2>
+        <p class_="text-sm text-muted">
+          "A list of all the users in your account including their name, \
+           title, email and role."
+        </p>
+      </div>
+      <Button size=`sm variant=`secondary>"Add user"</Button>
+    </div>
+    <Data_grid
+      aria_label="Users"
+      variant=`secondary
+      rows=users
+      row_id=(fun u -> u.email)
+      columns
+      content_class="min-w-[640px]"
+    />
+  </div>
 ```
 
 ## Team Members
@@ -1450,6 +2295,126 @@ let make () =
   />
 ```
 
+## Footer
+
+`footer` is drawn below the grid, here a [Pagination](pagination.md).
+
+```ocaml title="data_grid_footer.mlx"
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Chip = Solidtype_heroui.Chip
+module Data_grid = Solidtype_heroui.Data_grid
+module Pagination = Solidtype_heroui.Pagination
+
+type status = Paid | Pending | Overdue
+
+type invoice = {
+  id : string;
+  customer : string;
+  date : string;
+  status : status;
+  amount : string;
+}
+
+let invoice id customer date status amount =
+  { id; customer; date; status; amount }
+
+let invoices =
+  [|
+    invoice "INV-001" "Acme Corp" "2024-03-01" Paid "$1,250";
+    invoice "INV-002" "Globex" "2024-03-04" Paid "$890";
+    invoice "INV-003" "Initech" "2024-03-07" Pending "$2,340";
+    invoice "INV-004" "Umbrella Co" "2024-03-09" Overdue "$560";
+    invoice "INV-005" "Stark Industries" "2024-03-12" Paid "$1,780";
+    invoice "INV-006" "Wayne Enterprises" "2024-03-15" Pending "$430";
+    invoice "INV-007" "Cyberdyne" "2024-03-18" Paid "$3,120";
+    invoice "INV-008" "Soylent Corp" "2024-03-21" Overdue "$975";
+    invoice "INV-009" "Massive Dynamic" "2024-03-24" Paid "$1,640";
+    invoice "INV-010" "Hooli" "2024-03-27" Pending "$720";
+    invoice "INV-011" "Vehement Capital" "2024-03-29" Paid "$2,050";
+    invoice "INV-012" "Bluth Company" "2024-03-31" Overdue "$385";
+  |]
+
+let per_page = 4
+let pages = (Array.length invoices + per_page - 1) / per_page
+
+let status_name = function
+  | Paid -> "paid"
+  | Pending -> "pending"
+  | Overdue -> "overdue"
+
+let status_color = function
+  | Paid -> `success
+  | Pending -> `warning
+  | Overdue -> `danger
+
+let columns =
+  [|
+    Data_grid.column ~id:"id" ~header:(Text "Invoice") ~is_row_header:true
+      ~cell_class:"font-medium" (fun i -> Jsx.string (S.get i).id);
+    Data_grid.column ~id:"customer" ~header:(Text "Customer") (fun i ->
+        Jsx.string (S.get i).customer);
+    Data_grid.column ~id:"date" ~header:(Text "Date") (fun i ->
+        Jsx.string (S.get i).date);
+    Data_grid.column ~id:"status" ~header:(Text "Status") (fun i ->
+        <Chip color=(status_color (S.get i).status) size=`sm variant=`soft>
+          (Jsx.string (status_name (S.get i).status))
+        </Chip>);
+    Data_grid.column ~id:"amount" ~header:(Text "Amount") ~align:`end_ (fun i ->
+        <span class_="tabular-nums">(Jsx.string (S.get i).amount)</span>);
+  |]
+
+let make () =
+  let page, set_page = S.create_signal 1 in
+  let shown () = Array.sub invoices ((S.get page - 1) * per_page) per_page in
+  <Data_grid
+    aria_label="Invoices"
+    rows=(shown ())
+    row_id=(fun i -> i.id)
+    columns
+    content_class="min-w-[640px]"
+    footer=(<Pagination size=`sm>
+              <Pagination.Summary>
+                (Jsx.string
+                   (string_of_int (((S.get page - 1) * per_page) + 1)
+                   ^ " to "
+                   ^ string_of_int
+                       (min (S.get page * per_page) (Array.length invoices))
+                   ^ " of "
+                   ^ string_of_int (Array.length invoices)
+                   ^ " invoices"))
+              </Pagination.Summary>
+              <Pagination.Content>
+                <Pagination.Item>
+                  <Pagination.Previous
+                    is_disabled=(S.get page = 1)
+                    on_press=(fun () -> S.update set_page pred)>
+                    <Pagination.Previous_icon />
+                  </Pagination.Previous>
+                </Pagination.Item>
+                <For each=(Array.init pages succ)>
+                  (fun p _ ->
+                    <Pagination.Item>
+                      <Pagination.Link
+                        is_active=(p = S.get page)
+                        on_press=(fun () -> S.set set_page p)>
+                        (Jsx.int p)
+                      </Pagination.Link>
+                    </Pagination.Item>)
+                </For>
+                <Pagination.Item>
+                  <Pagination.Next
+                    is_disabled=(S.get page = pages)
+                    on_press=(fun () -> S.update set_page succ)>
+                    <Pagination.Next_icon />
+                  </Pagination.Next>
+                </Pagination.Item>
+              </Pagination.Content>
+            </Pagination>)
+  />
+```
+
 ## Styling Reference
 
 ### CSS Classes
@@ -1463,6 +2428,9 @@ let make () =
 - `.data-grid__sort-icon` - A sorted column's chevron, turned for descending
 - `.data-grid__empty-state` - What is drawn with no rows
 - `.data-grid__footer` - The footer, with HeroUI's `.table__footer`
+
+A virtualized or resizable grid places its own two columns itself, at 40px
+and 32px, whatever the variables say.
 
 ### Interactive States
 

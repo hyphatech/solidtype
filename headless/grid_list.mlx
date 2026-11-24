@@ -1,0 +1,828 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Selection = Solidtype_kobalte.Selection
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
+module Either = Types.Either
+module Delegate = Types.KeyboardDelegate
+module List_state = Types.ListState
+module Manager = Types.MultipleSelectionManager
+module Selectable_list = Types.Selection_CreateSelectableList
+module Selectable_item = Types.Selection_CreateSelectableItem
+module For = Solidtype.For
+
+external as_element : _ Dom.element_like -> Dom.element = "%identity"
+(* A part's element, of whichever kind it is drawn as, is an element. *)
+
+external contains : _ Dom.element_like -> Dom.element -> bool = "contains"
+[@@mel.send]
+
+external focus : _ Dom.element_like -> unit = "focus" [@@mel.send]
+
+external query_all :
+  _ Dom.element_like -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external key_target : Dom.keyboardEvent -> Dom.element = "target" [@@mel.get]
+
+external key_current : Dom.keyboardEvent -> Dom.element = "currentTarget"
+[@@mel.get]
+
+external pressed : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external stop : Dom.keyboardEvent -> unit = "stopPropagation" [@@mel.send]
+external prevent : Dom.keyboardEvent -> unit = "preventDefault" [@@mel.send]
+
+external focus_current : Dom.focusEvent -> Dom.element = "currentTarget"
+[@@mel.get]
+
+external focus_target : Dom.focusEvent -> Dom.element = "target" [@@mel.get]
+
+external closest : Dom.element -> string -> Dom.element Js.null = "closest"
+[@@mel.send]
+
+external pointer_target : Dom.pointerEvent -> Dom.element = "target" [@@mel.get]
+
+external pointer_current : Dom.pointerEvent -> Dom.element = "currentTarget"
+[@@mel.get]
+
+external pointer_type : Dom.pointerEvent -> string = "pointerType" [@@mel.get]
+external mouse_target : Dom.mouseEvent -> Dom.element = "target" [@@mel.get]
+
+external mouse_current : Dom.mouseEvent -> Dom.element = "currentTarget"
+[@@mel.get]
+
+external meta_held : _ Dom.event_like -> bool = "metaKey" [@@mel.get]
+external ctrl_held : _ Dom.event_like -> bool = "ctrlKey" [@@mel.get]
+external alt_held : _ Dom.event_like -> bool = "altKey" [@@mel.get]
+external shift_held : _ Dom.event_like -> bool = "shiftKey" [@@mel.get]
+
+external create_element : string -> Dom.element = "createElement"
+[@@mel.scope "document"]
+
+external set_attribute : Dom.element -> string -> string -> unit
+  = "setAttribute"
+[@@mel.send]
+
+external append_child : _ Dom.element_like -> Dom.element -> Dom.element
+  = "appendChild"
+[@@mel.send]
+
+external remove_element : Dom.element -> unit = "remove" [@@mel.send]
+
+type click_init
+
+external click_init :
+  meta_key:(bool[@mel.as "metaKey"]) ->
+  ctrl_key:(bool[@mel.as "ctrlKey"]) ->
+  alt_key:(bool[@mel.as "altKey"]) ->
+  shift_key:(bool[@mel.as "shiftKey"]) ->
+  click_init = ""
+[@@mel.obj]
+
+external mouse_event : string -> click_init -> Dom.mouseEvent = "MouseEvent"
+[@@mel.new]
+
+external dispatch : Dom.element -> Dom.mouseEvent -> bool = "dispatchEvent"
+[@@mel.send]
+
+(* An item's link opened as a click on a link would open it, the keys held
+   with the press kept, as React Aria's router opens one. *)
+let open_link row href e =
+  let link = create_element "a" in
+  set_attribute link "href" href;
+  ignore (append_child row link : Dom.element);
+  ignore
+    (dispatch link
+       (mouse_event "click"
+          (click_init ~meta_key:(meta_held e) ~ctrl_key:(ctrl_held e)
+             ~alt_key:(alt_held e) ~shift_key:(shift_held e)))
+      : bool);
+  remove_element link
+
+(* Kobalte's state, an attribute present and empty, or none. *)
+let marked on = if on then Jsx.data "" else Jsx.flag false
+
+(* What the arrows reach inside an item, in the page's order. *)
+let focusable =
+  "button:not([disabled]), a[href], input:not([disabled]), \
+   select:not([disabled]), textarea:not([disabled]), [tabindex]"
+
+(* What a press inside an item is a control's: a focusable element, a label,
+   which passes its press to its input, or an element of a widget's role. *)
+let control =
+  focusable
+  ^ ", label, [contenteditable], [role=button], [role=checkbox], [role=radio], \
+     [role=switch], [role=slider], [role=spinbutton], [role=textbox], \
+     [role=searchbox], [role=combobox], [role=link], [role=tab], \
+     [role=option], [role=menuitem], [role=menuitemcheckbox], \
+     [role=menuitemradio], [role=group]"
+
+(* Whether a press began in a control inside an item, whose press is its own:
+   never the item itself. *)
+let in_control row target =
+  match Js.Null.toOption (closest target control) with
+  | Some c -> c != row && contains row c
+  | None -> false
+
+type item_state = {
+  key : string S.accessor;
+  is_selected : bool S.accessor;
+  is_disabled : bool S.accessor;
+  allows_selection : bool S.accessor;
+  selection_mode : [ `none | `single | `multiple ] S.accessor;
+  toggle_selection : unit -> unit;
+}
+
+(* An item as the list keeps it: its key, its name, and how its row is drawn.
+   Each stands in its place among the list's children, so the list reads them
+   in order and draws the rows itself, all of them, or those in view. *)
+type listed = {
+  key : string S.accessor;
+  disabled : bool S.accessor;
+  text : string S.accessor;
+  draw : unit -> Jsx.element;
+}
+
+module Entry = Jsx.Token (struct
+  type t = listed
+end)
+
+type list_state = {
+  selection_mode : [ `none | `single | `multiple ] S.accessor;
+  is_empty : bool S.accessor;
+  is_selected : string -> bool;
+  is_disabled : string -> bool;
+  toggle_selection : string -> unit;
+}
+
+type group = {
+  manager : Manager.t S.accessor;
+  selection_mode : [ `none | `single | `multiple ] S.accessor;
+  disabled_key : string -> bool;
+  on_action : (string -> unit) option S.accessor;
+  is_empty : bool S.accessor;
+}
+
+module Group_context = Solidtype.Context.Make_optional (struct
+  type t = group
+end)
+
+module Item_context = Solidtype.Context.Make_optional (struct
+  type t = item_state
+end)
+
+let in_group part =
+  match Group_context.use () with
+  | Some g -> g
+  | None -> invalid_arg (part ^ " is used inside a Grid_list")
+
+module Context = struct
+  let use () =
+    let g = in_group "Grid_list.Context.use" in
+    {
+      selection_mode = g.selection_mode;
+      is_empty = g.is_empty;
+      is_selected = (fun k -> Manager.is_selected (S.get g.manager) k);
+      is_disabled = g.disabled_key;
+      toggle_selection =
+        (fun k ->
+          match S.get g.selection_mode with
+          | `none -> ()
+          | `single | `multiple ->
+              if not (g.disabled_key k) then
+                Manager.toggle_selection (S.get g.manager) k);
+    }
+end
+
+(* Where the keys move among the items: up and down in order, a disabled one
+   passed over, never past either end, as React Aria's grid list moves. *)
+let delegate ~(items : listed array S.accessor) ~collator =
+  let index k =
+    let all = S.get items in
+    let rec find i =
+      if i >= Array.length all then None
+      else if String.equal (S.get all.(i).key) k then Some i
+      else find (i + 1)
+    in
+    find 0
+  in
+  let rec usable i step =
+    let all = S.get items in
+    if i < 0 || i >= Array.length all then None
+    else if S.get all.(i).disabled then usable (i + step) step
+    else Some (S.get all.(i).key)
+  in
+  let first () = usable 0 1 in
+  let last () = usable (Array.length (S.get items) - 1) (-1) in
+  let next k = Option.bind (index k) (fun i -> usable (i + 1) 1) in
+  let previous k = Option.bind (index k) (fun i -> usable (i - 1) (-1)) in
+  let search typed from =
+    let n = String.length typed in
+    let matches k =
+      match index k with
+      | Some i ->
+          let text = S.get (S.get items).(i).text in
+          String.length text >= n
+          && Float.equal
+               (Types.Collator.compare (S.get collator)
+                  (Js.String.slice ~start:0 ~end_:n text)
+                  typed)
+               0.
+      | None -> false
+    in
+    let rec go = function
+      | None -> None
+      | Some k when matches k -> Some k
+      | Some k -> go (next k)
+    in
+    go (match from with Some k -> Some k | None -> first ())
+  in
+  Delegate.make ~get_key_below:next ~get_key_above:previous
+    ~get_key_page_below:(fun _ -> last ())
+    ~get_key_page_above:(fun _ -> first ())
+    ~get_first_key:(fun _ _ -> first ())
+    ~get_last_key:(fun _ _ -> last ())
+    ~get_key_for_search:search ()
+
+module Props = struct
+  type t
+
+  external check :
+    ?selection_mode:[ `none | `single | `multiple ] Solidtype.Check.value ->
+    ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+    ?selected_keys:string array Solidtype.Check.value ->
+    ?default_selected_keys:string array Solidtype.Check.value ->
+    ?on_selection_change:(string array -> unit) ->
+    ?disabled_keys:string array Solidtype.Check.value ->
+    ?disallow_empty_selection:bool Solidtype.Check.value ->
+    ?on_action:(string -> unit) ->
+    ?render_empty_state:(unit -> Solidtype.Jsx.element) ->
+    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+    ?props:'spread Solidtype.Solid.rest ->
+    (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+    Solidtype.Html.Div.check = "check"
+  [@@mel.module "vite-plugin-solidtype/markers"]
+
+  external selection_mode : t -> [ `none | `single | `multiple ] option
+    = "selectionMode"
+  [@@mel.get]
+
+  external selection_behavior : t -> [ `toggle | `replace ] option
+    = "selectionBehavior"
+  [@@mel.get]
+
+  external selected_keys : t -> string array option = "selectedKeys" [@@mel.get]
+
+  external default_selected_keys : t -> string array option
+    = "defaultSelectedKeys"
+  [@@mel.get]
+
+  external on_selection_change : t -> ((string array -> unit)[@u]) option
+    = "onSelectionChange"
+  [@@mel.get]
+
+  external disabled_keys : t -> string array option = "disabledKeys" [@@mel.get]
+
+  external disallow_empty_selection : t -> bool option
+    = "disallowEmptySelection"
+  [@@mel.get]
+
+  external on_action : t -> ((string -> unit)[@u]) option = "onAction"
+  [@@mel.get]
+
+  external render_empty_state : t -> Jsx.element S.accessor option
+    = "renderEmptyState"
+  [@@mel.get]
+
+  external children : t -> Jsx.element = "children" [@@mel.get]
+
+  external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+  [@@mel.get]
+
+  external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+    = "onKeyDown"
+  [@@mel.get]
+
+  external on_mouse_down : t -> ((Dom.mouseEvent -> unit)[@u]) option
+    = "onMouseDown"
+  [@@mel.get]
+
+  external on_focus_in : t -> ((Dom.focusEvent -> unit)[@u]) option
+    = "onFocusIn"
+  [@@mel.get]
+
+  external on_focus_out : t -> ((Dom.focusEvent -> unit)[@u]) option
+    = "onFocusOut"
+  [@@mel.get]
+end
+
+(* The props the list takes for itself; the rest it passes on. *)
+let own =
+  [|
+    "selectionMode";
+    "selectionBehavior";
+    "selectedKeys";
+    "defaultSelectedKeys";
+    "onSelectionChange";
+    "disabledKeys";
+    "disallowEmptySelection";
+    "onAction";
+    "renderEmptyState";
+    "children";
+    "ref";
+    "onKeyDown";
+    "onMouseDown";
+    "onFocusIn";
+    "onFocusOut";
+  |]
+
+let make (props : Props.t) =
+  let selection_mode =
+    S.accessor (fun () ->
+        Option.value (Props.selection_mode props) ~default:`none)
+  in
+  let disabled_key k =
+    match Props.disabled_keys props with
+    | Some keys -> Array.exists (String.equal k) keys
+    | None -> false
+  in
+  (* Its items, read off its children in order once they are made. *)
+  let items, set_items = S.create_signal [||] in
+  let keys =
+    S.create_memo (fun () -> Array.map (fun t -> S.get t.key) (S.get items))
+  in
+  let find k =
+    Array.find_opt (fun t -> String.equal (S.get t.key) k) (S.get items)
+  in
+  let state =
+    Selection.create_list_state
+      (Types.CreateListStateProps.make ~data_source:(Either.right keys)
+         ~get_key:(Either.left Fun.id)
+         ~get_text_value:
+           (Either.left (fun k ->
+                match find k with Some t -> S.get t.text | None -> ""))
+         ~get_disabled:
+           (Either.left (fun k ->
+                disabled_key k
+                ||
+                match find k with
+                | Some t -> S.get t.disabled
+                | None -> false))
+         ~selection_mode:
+           (Either.right
+              (S.create_memo (fun () -> Some (S.get selection_mode))))
+         ~selection_behavior:
+           (Either.right
+              (S.create_memo (fun () ->
+                   Some
+                     (Option.value
+                        (Props.selection_behavior props)
+                        ~default:`toggle))))
+         ~disallow_empty_selection:
+           (Either.right
+              (S.create_memo (fun () -> Props.disallow_empty_selection props)))
+         ~selected_keys:
+           (Either.right (S.create_memo (fun () -> Props.selected_keys props)))
+         ?default_selected_keys:
+           (Option.map Either.left
+              (S.untrack (fun () -> Props.default_selected_keys props)))
+         ~on_selection_change:(fun keys ->
+           Jsx.call (Props.on_selection_change props) (Js.Set.toArray keys))
+         ())
+  in
+  let manager =
+    S.create_memo (fun () ->
+        Types.SelectionManager.to_multiple_selection_manager
+          (S.get (List_state.selection_manager state)))
+  in
+  let collator =
+    I18n.create_collator
+      ~options:(Types.CollatorOptions.make ~usage:`search ~sensitivity:`base ())
+      ()
+  in
+  let keyboard = S.create_memo (fun () -> Some (delegate ~items ~collator)) in
+  let list_element, set_list = S.create_signal None in
+  let list =
+    Selection.create_selectable_list
+      (Types.CreateSelectableListProps.make
+         ~collection:(List_state.collection state)
+         ~selection_manager:(Either.right manager)
+         ~keyboard_delegate:(Either.right keyboard) ())
+      list_element ()
+  in
+  let g =
+    {
+      manager;
+      selection_mode;
+      disabled_key;
+      on_action =
+        S.accessor (fun () ->
+            Option.map (fun f k -> (f k [@u])) (Props.on_action props));
+      is_empty = S.accessor (fun () -> Array.length (S.get items) = 0);
+    }
+  in
+  (* Its rows: every item's, or, inside a virtualizer, those in view of what
+     scrolls the list and the focused one wherever it is. *)
+  let rows () =
+    match Virtualizer.Context.use () with
+    | Some (List l) ->
+        let size = Option.value l.row_size ~default:48. in
+        let w =
+          Virtualizer.window l
+            ~rows:(fun () -> S.get items)
+            ~fixed:(fun _ -> Some size)
+            ~estimate:(fun _ -> size)
+            ~keep:(fun (e : listed) ->
+              match S.get (Manager.focused_key (S.get manager)) with
+              | Some k -> String.equal k (S.get e.key)
+              | None -> false)
+        in
+        <div
+          role=`presentation
+          ref=(fun e -> w.watch (as_element e))
+          style=(S.get w.block)>
+          <For each=(S.get w.drawn)>
+            (fun (e : listed) _ ->
+              <div
+                role=`presentation
+                style=(w.place e)
+                ref=(fun d -> w.frame e (as_element d))>
+                (e.draw ())
+              </div>)
+          </For>
+        </div>
+    | Some (Table _) | None ->
+        <For each=(S.get items)>(fun (e : listed) _ -> e.draw ())</For>
+  in
+  <Group_context.Provider value=g>
+    ((* Its items are read before its element is made, so it is drawn
+        holding them, on the server as in the browser. *)
+     let resolved = S.children (fun () -> Props.children props) in
+     S.create_computed (fun () ->
+         S.set set_items (Entry.read (S.to_array (S.get resolved))));
+     <div
+       role=`grid
+       ref=(fun e ->
+             S.set set_list (Some e);
+             Jsx.call (Props.ref props) e)
+       ?aria_multiselectable=(match S.get selection_mode with
+                             | `multiple -> Some true
+                             | `single | `none -> None)
+       tabindex=(match S.get (Selectable_list.tab_index list) with
+                | Some i -> Js.Float.toString i
+                | None -> "-1")
+       data_empty=(marked (S.get g.is_empty))
+       on_key_down=(fun e ->
+                     Jsx.call (Props.on_key_down props) e;
+                     Selectable_list.on_key_down list e)
+       on_mouse_down=(fun e ->
+                       Jsx.call (Props.on_mouse_down props) e;
+                       Selectable_list.on_mouse_down list e)
+       on_focus_in=(fun e ->
+                     Jsx.call (Props.on_focus_in props) e;
+                     Selectable_list.on_focus_in list e)
+       on_focus_out=(fun e ->
+                      Jsx.call (Props.on_focus_out props) e;
+                      Selectable_list.on_focus_out list e)
+       ?as_=(S.drawn_as props)
+       props=(S.undrawn (S.omit props own))>
+       (rows ())
+       (match Props.render_empty_state props with
+       | Some draw when S.get g.is_empty ->
+           <div role=`row>
+             <div role=`gridcell aria_colindex="1">(S.get draw)</div>
+           </div>
+       | Some _ | None -> Jsx.string "")
+     </div>)
+  </Group_context.Provider>
+
+let component = Jsx.component make
+
+module Item = struct
+  module Context = struct
+    let use () =
+      match Item_context.use () with
+      | Some i -> i
+      | None ->
+          invalid_arg
+            "Grid_list.Item.Context.use is used inside a Grid_list.Item"
+  end
+
+  module Props = struct
+    type t
+
+    external check :
+      ?id:string Solidtype.Check.value ->
+      ?text_value:string Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?href:string Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external id : t -> string option = "id" [@@mel.get]
+    external text_value : t -> string option = "textValue" [@@mel.get]
+    external is_disabled : t -> bool option = "isDisabled" [@@mel.get]
+    external href : t -> string option = "href" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
+    external on_pointer_down : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerDown"
+    [@@mel.get]
+
+    external on_pointer_up : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerUp"
+    [@@mel.get]
+
+    external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
+    [@@mel.get]
+
+    external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyDown"
+    [@@mel.get]
+
+    external on_key_up : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyUp"
+    [@@mel.get]
+
+    external on_mouse_down : t -> ((Dom.mouseEvent -> unit)[@u]) option
+      = "onMouseDown"
+    [@@mel.get]
+
+    external on_focus : t -> ((Dom.focusEvent -> unit)[@u]) option = "onFocus"
+    [@@mel.get]
+
+    external on_focus_in : t -> ((Dom.focusEvent -> unit)[@u]) option
+      = "onFocusIn"
+    [@@mel.get]
+  end
+
+  let own =
+    [|
+      "id";
+      "textValue";
+      "isDisabled";
+      "href";
+      "children";
+      "ref";
+      "onPointerDown";
+      "onPointerUp";
+      "onClick";
+      "onKeyDown";
+      "onKeyUp";
+      "onMouseDown";
+      "onFocus";
+      "onFocusIn";
+    |]
+
+  (* What a reader is told an item is where it is given no name: the first
+     text among its children. *)
+  let first_text children =
+    Array.fold_left
+      (fun found child ->
+        match found with
+        | Some _ -> found
+        | None -> (
+            match Js.Types.classify child with
+            | JSString s when String.length (String.trim s) > 0 -> Some s
+            | _ -> None))
+      None children
+
+  let make (props : Props.t) =
+    let g = in_group "Grid_list.Item" in
+    let given_key = S.create_unique_id () in
+    let key =
+      S.create_memo (fun () -> Option.value (Props.id props) ~default:given_key)
+    in
+    let disabled =
+      S.accessor (fun () ->
+          Option.value (Props.is_disabled props) ~default:false
+          || g.disabled_key (S.get key))
+    in
+    let m () = S.get g.manager in
+    let selected =
+      S.accessor (fun () -> Manager.is_selected (m ()) (S.get key))
+    in
+    let allows_selection =
+      S.accessor (fun () ->
+          (match S.get g.selection_mode with
+            | `none -> false
+            | `single | `multiple -> true)
+          && not (S.get disabled))
+    in
+    let s =
+      {
+        key;
+        is_selected = selected;
+        is_disabled = disabled;
+        allows_selection;
+        selection_mode = g.selection_mode;
+        toggle_selection =
+          (fun () ->
+            if S.get allows_selection then
+              Manager.toggle_selection (m ()) (S.get key));
+      }
+    in
+    (* Its name: [text_value], or the first text among its children once its
+       row is drawn. *)
+    let drawn_text, set_drawn_text = S.create_signal None in
+    let text =
+      S.accessor (fun () ->
+          match Props.text_value props with
+          | Some t -> t
+          | None -> Option.value (S.get drawn_text) ~default:"")
+    in
+    (* Its row, drawn where the list draws it, with Kobalte's item hooks of
+       its own each time. Its children are made only then, inside it, so a
+       part among them reads the item it is in, and a row a virtualizer never
+       draws makes none, on the server or as the page hydrates. *)
+    let draw () =
+      let resolved =
+        S.children (fun () ->
+            <Item_context.Provider value=s>
+              (Props.children props)
+            </Item_context.Provider>)
+      in
+      S.create_computed (fun () ->
+          S.set set_drawn_text (first_text (S.to_array (S.get resolved))));
+      let element, set_element = S.create_signal None in
+      let item =
+        Selection.create_selectable_item
+          (Types.CreateSelectableItemProps.make
+             ~selection_manager:(Either.right g.manager) ~key:(Either.right key)
+             ~disabled:
+               (Either.right (S.create_memo (fun () -> Some (S.get disabled))))
+             ())
+          element
+      in
+      (* An item's action: the list's, or its link; which a press runs and
+       which selection gives way to, as React Aria's grid list decides. *)
+      let allows_actions () =
+        (Option.is_some (S.get g.on_action) || Option.is_some (Props.href props))
+        && not (S.get disabled)
+      in
+      let replaces () =
+        match S.get (Manager.selection_behavior (m ())) with
+        | `replace -> true
+        | `toggle -> false
+      in
+      let primary () =
+        allows_actions ()
+        &&
+        if replaces () then not (S.get allows_selection)
+        else (not (S.get allows_selection)) || S.get (Manager.is_empty (m ()))
+      in
+      let secondary () =
+        allows_actions () && S.get allows_selection && replaces ()
+      in
+      let act e =
+        Option.iter (fun f -> f (S.get key)) (S.get g.on_action);
+        match (Props.href props, S.get element) with
+        | Some href, Some row -> open_link row href e
+        | Some _, None | None, (Some _ | None) -> ()
+      in
+      let pointer = ref "mouse" in
+      let primary_at_down = ref false in
+      let enter_down = ref false in
+      let own_press row target = not (in_control row target) in
+      <Item_context.Provider value=s>
+        <div
+          role=`row
+          ref=(fun e ->
+                S.set set_element (Some e);
+                Jsx.call (Props.ref props) e)
+          tabindex=(if S.get disabled then "-1"
+                    else
+                      match S.get (Manager.focused_key (m ())) with
+                      | Some k when String.equal k (S.get key) -> "0"
+                      | Some _ | None -> "-1")
+          aria_label=(S.get text)
+          ?aria_selected=(if S.get allows_selection then Some (S.get selected)
+                          else None)
+          ?aria_disabled=(if S.get disabled then Some true else None)
+          data_key=(Jsx.data (S.get key))
+          data_selected=(marked (S.get selected))
+          data_disabled=(marked (S.get disabled))
+          on_pointer_down=(fun e ->
+                            Jsx.call (Props.on_pointer_down props) e;
+                            if own_press (pointer_current e) (pointer_target e)
+                            then begin
+                              pointer := pointer_type e;
+                              primary_at_down := primary ();
+                              if
+                                not
+                                  (String.equal !pointer "mouse"
+                                  && !primary_at_down)
+                              then Selectable_item.on_pointer_down item e
+                            end)
+          on_pointer_up=(fun e ->
+                          Jsx.call (Props.on_pointer_up props) e;
+                          if own_press (pointer_current e) (pointer_target e)
+                          then Selectable_item.on_pointer_up item e)
+          on_click=(fun e ->
+                     Jsx.call (Props.on_click props) e;
+                     if own_press (mouse_current e) (mouse_target e) then
+                       if String.equal !pointer "mouse" then
+                         if !primary_at_down then act e
+                         else Selectable_item.on_click item e
+                       else if primary () || secondary () then act e
+                       else Selectable_item.on_click item e)
+          on_key_down=(fun e ->
+                        Jsx.call (Props.on_key_down props) e;
+                        let row = key_current e in
+                        if key_target e != row then
+                          (* A key in a control inside the item is the
+                           control's, the arrows across it moving back to the
+                           item from its first. *)
+                          begin match pressed e with
+                          | "ArrowLeft" -> (
+                              let inside =
+                                Js.Array.from (query_all row focusable)
+                              in
+                              match
+                                Js.Array.findIndex
+                                  ~f:(fun c -> c == key_target e)
+                                  inside
+                              with
+                              | 0 ->
+                                  prevent e;
+                                  stop e;
+                                  focus row
+                              | -1 -> stop e
+                              | at ->
+                                  prevent e;
+                                  stop e;
+                                  focus inside.(at - 1))
+                          | "ArrowRight" -> (
+                              let inside =
+                                Js.Array.from (query_all row focusable)
+                              in
+                              match
+                                Js.Array.findIndex
+                                  ~f:(fun c -> c == key_target e)
+                                  inside
+                              with
+                              | at when at >= 0 && at + 1 < Array.length inside
+                                ->
+                                  prevent e;
+                                  stop e;
+                                  focus inside.(at + 1)
+                              | _ -> stop e)
+                          | "ArrowUp" | "ArrowDown" -> ()
+                          | _ -> stop e
+                          end
+                        else
+                          match pressed e with
+                          | "ArrowRight" -> (
+                              prevent e;
+                              stop e;
+                              match Js.Array.from (query_all row focusable) with
+                              | [||] -> ()
+                              | inside -> focus inside.(0))
+                          | "ArrowLeft" ->
+                              prevent e;
+                              stop e
+                          | "Enter" when allows_actions () ->
+                              prevent e;
+                              enter_down := primary () || secondary ();
+                              if not !enter_down then
+                                Selectable_item.on_key_down item e
+                          | _ -> Selectable_item.on_key_down item e)
+          on_key_up=(fun e ->
+                      Jsx.call (Props.on_key_up props) e;
+                      if String.equal (pressed e) "Enter" && !enter_down then begin
+                        enter_down := false;
+                        act e
+                      end)
+          on_mouse_down=(fun e ->
+                          Jsx.call (Props.on_mouse_down props) e;
+                          Selectable_item.on_mouse_down item e)
+          on_focus=(fun e ->
+                     Jsx.call (Props.on_focus props) e;
+                     Selectable_item.on_focus item e)
+          on_focus_in=(fun e ->
+                        Jsx.call (Props.on_focus_in props) e;
+                        (* The focus on a control inside an item is the item's,
+                         so the keys start from it. *)
+                        if
+                          focus_target e != focus_current e
+                          && not (S.get disabled)
+                        then Manager.set_focused_key (m ()) ~key:(S.get key) ())
+          ?as_=(S.drawn_as props)
+          props=(S.undrawn (S.omit props own))>
+          <div role=`gridcell aria_colindex="1" style="display: contents">
+            (Jsx.fragment (S.to_array (S.get resolved)))
+          </div>
+        </div>
+      </Item_context.Provider>
+    in
+    Entry.element { key; disabled; text; draw }
+
+  let component = Jsx.component make
+end

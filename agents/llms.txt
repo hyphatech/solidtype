@@ -102,9 +102,11 @@ Each component's page gives HeroUI's own examples in OCaml, and a table of its p
 - [ColorSwatchPicker](pages/heroui/color-swatch-picker.md): A list of color swatches that allows users to select a color from a predefined palette.
 - [Slider](pages/heroui/slider.md): A slider allows a user to select one or more values within a range.
 - [Switch](pages/heroui/switch.md): A toggle switch component for boolean states.
+- [Action Bar](pages/heroui/action-bar.md): A floating toolbar for what can be done with what is chosen.
 - [Badge](pages/heroui/badge.md): Displays a small indicator positioned relative to another element, commonly used for notification counts, status dots, and labels.
 - [Chip](pages/heroui/chip.md): Small informational badges for displaying labels, statuses, and categories.
 - [Data Grid](pages/heroui/data-grid.md): A grid of records given as data, with sorting, selection, column resizing, pinned columns, drag and drop, virtualization and loading more, on HeroUI's Table.
+- [List View](pages/heroui/list-view.md): A one-column list of rows, chosen and acted on by the keys and the pointer.
 - [Table](pages/heroui/table.md): Tables display structured data in rows and columns with support for sorting, selection, column resizing, and infinite scrolling.
 - [TrendChip](pages/heroui/trend-chip.md): A chip that shows a change, its arrow and colour from its trend.
 - [Calendar](pages/heroui/calendar.md): Composable date picker with month grid, navigation, and year picker support.
@@ -133,12 +135,14 @@ Each component's page gives HeroUI's own examples in OCaml, and a table of its p
 - [NumberField](pages/heroui/number-field.md): Number input fields with increment/decrement buttons, validation, and internationalized formatting.
 - [NumberStepper](pages/heroui/number-stepper.md): A number between two round buttons, which rolls to each new value.
 - [Radio Group](pages/heroui/radio-group.md): Radio group for selecting a single option from a list.
+- [Rating](pages/heroui/rating.md): A star rating, chosen by a press or the arrow keys, or shown read only as a fraction.
 - [SearchField](pages/heroui/search-field.md): Search input field with clear button and search icon.
 - [TextArea](pages/heroui/text-area.md): Primitive multiline text input component that accepts standard HTML attributes.
 - [TextField](pages/heroui/text-field.md): Composition-friendly text fields with labels, descriptions, and inline validation.
 - [Card](pages/heroui/card.md): Flexible container component for grouping related content and actions.
 - [Separator](pages/heroui/separator.md): Visually divide content sections.
 - [Surface](pages/heroui/surface.md): Container component that provides surface-level styling and context for child components.
+- [Toolbar](pages/heroui/toolbar.md): A container for interactive controls with arrow key navigation.
 - [Avatar](pages/heroui/avatar.md): Display user profile images with customizable fallback content.
 - [AvatarGroup](pages/heroui/avatar-group.md): Display a stacked or grid group of avatars with overflow counting.
 - [Accordion](pages/heroui/accordion.md): A collapsible content panel for organizing information in a compact space.
@@ -157,6 +161,7 @@ Each component's page gives HeroUI's own examples in OCaml, and a table of its p
 - [Tooltip](pages/heroui/tooltip.md): Displays informative text when users hover over or focus on an element.
 - [Autocomplete](pages/heroui/autocomplete.md): An autocomplete combines a select with filtering, allowing users to search and select from a list of options.
 - [ComboBox](pages/heroui/combo-box.md): A combo box combines a text input with a listbox, allowing users to filter a list of options to items matching a query.
+- [Inline Select](pages/heroui/inline-select.md): A select drawn as text, for a choice made in a sentence, a toolbar or a cell.
 - [Select](pages/heroui/select.md): A select displays a collapsible list of options and allows a user to select one of them.
 - [Kbd](pages/heroui/kbd.md): Display keyboard shortcuts and key combinations.
 - [Typography](pages/heroui/typography.md): A semantic typography primitive for headings, body copy, and inline code.

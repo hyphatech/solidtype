@@ -1,0 +1,79 @@
+(* An action bar as a caller meets it, since it has no twin: nothing on the
+   page while it is closed; open, a toolbar of its name, attached, its parts
+   in their classes; gone again once it closes; and no violation axe
+   finds. *)
+
+module S = Solidtype.Solid
+module Action_bar = Solidtype_heroui.Action_bar
+module Button = Solidtype_heroui.Button
+module Chip = Solidtype_heroui.Chip
+module Separator = Solidtype_heroui.Separator
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+let all selector = Js.Array.from (query_all T.body selector)
+
+let bar is_open =
+  T.render (fun () ->
+      <Action_bar is_open=(S.get is_open) aria_label="Bulk actions">
+        <Action_bar.Prefix><Chip size=`sm>"2"</Chip></Action_bar.Prefix>
+        <Separator />
+        <Action_bar.Content>
+          <Button size=`sm variant=`ghost aria_label="Edit">
+            <span class_="action-bar__label">"Edit"</span>
+          </Button>
+        </Action_bar.Content>
+        <Separator />
+        <Action_bar.Suffix>
+          <Button is_icon_only=true size=`sm variant=`ghost aria_label="Clear">
+            "x"
+          </Button>
+        </Action_bar.Suffix>
+      </Action_bar>)
+
+let shown () =
+  all "[data-slot^=action-bar], [data-slot=toolbar]"
+  |> Array.map (fun e ->
+      (Option.value (T.attribute e "data-slot") ~default:"", T.class_name e))
+
+let () =
+  Jest.describe "Action_bar" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "is a toolbar while open, and nothing while closed"
+        (fun () ->
+          let is_open, set_open = S.create_signal false in
+          bar is_open;
+          let closed = shown () in
+          S.set set_open true;
+          let* () = T.wait 20 in
+          let opened = shown () in
+          let toolbar = T.by_role "toolbar" in
+          let named = T.attribute toolbar "aria-label" in
+          S.set set_open false;
+          let* () = T.wait 20 in
+          Js.Promise.resolve
+            E.(
+              expect (closed, opened, named, shown ())
+              |> toEqual
+                   ( [||],
+                     [|
+                       ("action-bar", "action-bar");
+                       ( "toolbar",
+                         "toolbar toolbar--attached toolbar--horizontal \
+                          action-bar__wrapper" );
+                       ("action-bar-prefix", "action-bar__prefix");
+                       ("action-bar-content", "action-bar__content");
+                       ("action-bar-suffix", "action-bar__suffix");
+                     |],
+                     Some "Bulk actions",
+                     [||] )));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          let is_open, _ = S.create_signal true in
+          bar is_open;
+          let* found = T.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))

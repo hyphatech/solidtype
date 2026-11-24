@@ -1,0 +1,153 @@
+---
+title: List View
+description: A one-column list of rows, chosen and acted on by the keys and the pointer.
+---
+
+import Example from "@components/Example.astro";
+import * as Usage from "@islands/list_view_usage.jsx";
+import UsageCode from "@islands/list_view_usage.mlx?raw";
+import * as SelectionModes from "@islands/list_view_selection_modes.jsx";
+import SelectionModesCode from "@islands/list_view_selection_modes.mlx?raw";
+import * as Secondary from "@islands/list_view_secondary.jsx";
+import SecondaryCode from "@islands/list_view_secondary.mlx?raw";
+import * as DisabledItems from "@islands/list_view_disabled_items.jsx";
+import DisabledItemsCode from "@islands/list_view_disabled_items.mlx?raw";
+import * as WithActionBar from "@islands/list_view_with_action_bar.jsx";
+import WithActionBarCode from "@islands/list_view_with_action_bar.mlx?raw";
+import * as Virtualization from "@islands/list_view_virtualization.jsx";
+import VirtualizationCode from "@islands/list_view_virtualization.mlx?raw";
+
+A list of rows, each its content and an action, chosen by a checkbox where the
+list chooses. Its look is a stylesheet the library ships, imported as
+[Theming](/solidtype/heroui/theming/#setup) shows.
+
+## Usage
+
+<Example code={UsageCode} title="list_view_usage.mlx"><Usage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<List_view aria_label="Files" selection_mode=`multiple>
+  <List_view.Item id="readme" text_value="README.md">
+    <List_view.Item_content>
+      <List_view.Title>"README.md"</List_view.Title>
+      <List_view.Description>"Updated 3 hours ago"</List_view.Description>
+    </List_view.Item_content>
+    <List_view.Item_action>...</List_view.Item_action>
+  </List_view.Item>
+</List_view>
+```
+
+## Keys
+
+Up and Down move between rows, never past either end, a disabled row passed
+over; Home and End reach the first and the last, and typing the start of a
+row's name the next row of that name. Space chooses a row. Right moves into
+the controls of a row, and Left back out. Where the list has an `on_action`, a
+press or Enter runs it while nothing is chosen.
+
+## Selection Modes
+
+`` `none ``, `` `single `` or `` `multiple ``; a list that chooses draws a
+checkbox in each row.
+
+<Example code={SelectionModesCode} title="list_view_selection_modes.mlx"><SelectionModes.make client:visible /></Example>
+
+## Variants
+
+### Primary
+
+A grey card of white rows, the default.
+
+<Example code={UsageCode} title="list_view_usage.mlx"><Usage.make client:visible /></Example>
+
+### Secondary
+
+Rows on the page's own background, a line between each.
+
+<Example code={SecondaryCode} title="list_view_secondary.mlx"><Secondary.make client:visible /></Example>
+
+## Disabled Items
+
+`disabled_keys` names rows that cannot be chosen, focused or acted on.
+
+<Example code={DisabledItemsCode} title="list_view_disabled_items.mlx"><DisabledItems.make client:visible /></Example>
+
+## With Action Bar
+
+An [Action Bar](/solidtype/heroui/action-bar/) for what is chosen.
+
+<Example code={WithActionBarCode} title="list_view_with_action_bar.mlx"><WithActionBar.make client:visible /></Example>
+
+## Virtualization
+
+`virtualized` draws only the rows in view, each `row_height` high, of a list
+given a height, which scrolls them.
+
+<Example code={VirtualizationCode} title="list_view_virtualization.mlx"><Virtualization.make client:visible /></Example>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.list-view` - The list
+- `.list-view--primary`, `.list-view--secondary` - Its variants
+- `.list-view__item` - A row
+- `.list-view__selection-cell` - A row's checkbox
+- `.list-view__item-content` - A row's icon and text
+- `.list-view__title` - A row's name
+- `.list-view__description` - The line under it
+- `.list-view__item-action` - What a row ends with
+- `.list-view__empty-state` - What a list with no rows draws
+
+### Interactive States
+
+On `.list-view__item`:
+
+- **Selected**: `[data-selected="true"]`
+- **Hovered**: `[data-hovered="true"]`
+- **Pressed**: `[data-pressed="true"]`
+- **Focus visible**: `[data-focus-visible="true"]`
+- **Disabled**: `[aria-disabled="true"]`
+
+## API Reference
+
+Each prop beside its name in React's convention.
+
+### List_view
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `aria-label` | `aria_label` | `string` | | Its name |
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Its look |
+| `selectionMode` | `selection_mode` | `` [ `none \| `single \| `multiple ] `` | `` `none `` | How many rows it chooses |
+| `selectionBehavior` | `selection_behavior` | `` [ `toggle \| `replace ] `` | `` `toggle `` | Whether a press adds to the choice or replaces it |
+| `selectedKeys` | `selected_keys` | `string array` | | The rows chosen (controlled) |
+| `defaultSelectedKeys` | `default_selected_keys` | `string array` | | The rows chosen at first |
+| `onSelectionChange` | `on_selection_change` | `string array -> unit` | | Called with the rows chosen |
+| `disabledKeys` | `disabled_keys` | `string array` | | Rows that cannot be chosen or acted on |
+| `disallowEmptySelection` | `disallow_empty_selection` | `bool` | | Whether the last row chosen stays chosen |
+| `onAction` | `on_action` | `string -> unit` | | Called with a row's key as it is acted on |
+| `renderEmptyState` | `render_empty_state` | `unit -> element` | | Drawn while it has no row |
+| `virtualized` | `virtualized` | `bool` | `false` | Whether it draws only the rows in view |
+| `rowHeight` | `row_height` | `float` | `48.` | Each row's height while virtualized |
+| `className` | `class_` | `string` | | Added after its own classes |
+
+### List_view.Item
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `id` | `id` | `string` | Its key |
+| `textValue` | `text_value` | `string` | Its name, which typing finds |
+| `isDisabled` | `is_disabled` | `bool` | Whether it is disabled |
+| `href` | `href` | `string` | The page its action opens |
+| `className` | `class_` | `string` | Added after its own classes |
+| `children` | `children` | elements, or a function of its state | Its content and action |
+
+### List_view.Item_content, Title, Description, Item_action
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `className` | `class_` | `string` | Added after its own class |
+| `children` | `children` | elements | What it holds |

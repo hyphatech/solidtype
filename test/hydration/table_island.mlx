@@ -1,0 +1,35 @@
+(* A HeroUI Table of a hundred rows, virtualized: rendered on the server and
+   hydrated, as an application's is. *)
+
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Table = Solidtype_heroui.Table
+module Virtualizer = Solidtype_heroui.Virtualizer
+
+let people = Array.init 100 (fun i -> string_of_int (i + 1))
+
+let make () =
+  <Virtualizer
+    layout=(Virtualizer.table_layout ~heading_size:36. ~row_size:42. ())>
+    <Table>
+      <Table.Scroll_container>
+        <Table.Content aria_label="People" class_="h-[300px] overflow-auto">
+          <Table.Header>
+            <Table.Column is_row_header=true id="name">"Name"</Table.Column>
+            <Table.Column id="role">"Role"</Table.Column>
+            <Table.Column id="email">"Email"</Table.Column>
+          </Table.Header>
+          <Table.Body>
+            <For each=people>
+              (fun id _ ->
+                <Table.Row id>
+                  <Table.Cell>(Jsx.string ("Person " ^ id))</Table.Cell>
+                  <Table.Cell>"Engineer"</Table.Cell>
+                  <Table.Cell>(Jsx.string (id ^ "@acme.com"))</Table.Cell>
+                </Table.Row>)
+            </For>
+          </Table.Body>
+        </Table.Content>
+      </Table.Scroll_container>
+    </Table>
+  </Virtualizer>

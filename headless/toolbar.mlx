@@ -1,0 +1,134 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
+
+external closest : Dom.element -> string -> Dom.element Js.null = "closest"
+[@@mel.send]
+
+external parent : Dom.element -> Dom.element Js.null = "parentElement"
+[@@mel.get]
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external contains : Dom.element -> Dom.element -> bool = "contains" [@@mel.send]
+external focus : Dom.element -> unit = "focus" [@@mel.send]
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external key_target : Dom.keyboardEvent -> Dom.element = "target" [@@mel.get]
+external handled : Dom.keyboardEvent -> bool = "defaultPrevented" [@@mel.get]
+
+external prevent_default : Dom.keyboardEvent -> unit = "preventDefault"
+[@@mel.send]
+
+type style
+
+external computed : Dom.element -> style = "getComputedStyle"
+[@@mel.scope "window"]
+
+external display : style -> string = "display" [@@mel.get]
+external visibility : style -> string = "visibility" [@@mel.get]
+external as_element : _ Dom.element_like -> Dom.element = "%identity"
+(* A toolbar's element, of whichever kind it is drawn as, is an element. *)
+
+(* A stop of the toolbar: what Tab reaches inside it. A group of its own
+   keys, Kobalte's toggle group, is one stop, as it gives Tab one. *)
+let stop =
+  "input:not([disabled]):not([type=hidden]):not([tabindex=\"-1\"]), \
+   select:not([disabled]):not([tabindex=\"-1\"]), \
+   textarea:not([disabled]):not([tabindex=\"-1\"]), \
+   button:not([disabled]):not([tabindex=\"-1\"]), \
+   a[href]:not([tabindex=\"-1\"]), [tabindex]:not([tabindex=\"-1\"])"
+
+(* Whether an element and everything between it and the toolbar is drawn. *)
+let shown root e =
+  let rec up e =
+    let s = computed e in
+    (not (String.equal (display s) "none"))
+    && (not (String.equal (visibility s) "hidden"))
+    && (e == root
+       || match Js.Null.toOption (parent e) with Some p -> up p | None -> true)
+  in
+  up e
+
+type state = { orientation : [ `horizontal | `vertical ] S.accessor }
+
+let%component make ?(orientation : [ `horizontal | `vertical ] = `horizontal)
+    ?(aria_label : string option) ?(aria_labelledby : string option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ?(on_key_down : (Dom.keyboardEvent -> unit) option)
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
+  let element = ref None in
+  let nested, set_nested = S.create_signal false in
+  let locale = I18n.use_locale () in
+  S.on_mount (fun () ->
+      Option.iter
+        (fun e ->
+          S.set set_nested
+            (match Js.Null.toOption (parent e) with
+            | Some p ->
+                Option.is_some (Js.Null.toOption (closest p "[role=toolbar]"))
+            | None -> false))
+        !element);
+  (* The arrows of its orientation move between its stops, never past either
+     end; an arrow a control inside has handled, a group moving among its own
+     items, is that control's. *)
+  let move root e =
+    let forward, backward =
+      match S.get orientation with
+      | `horizontal -> (
+          match Types.I18n_UseLocale.direction locale () with
+          | `rtl -> ("ArrowLeft", "ArrowRight")
+          | `ltr -> ("ArrowRight", "ArrowLeft"))
+      | `vertical -> ("ArrowDown", "ArrowUp")
+    in
+    let step =
+      let k = key e in
+      if String.equal k forward then Some 1
+      else if String.equal k backward then Some (-1)
+      else None
+    in
+    match step with
+    | Some step when not (handled e) -> (
+        let all =
+          Js.Array.from (query_all root stop) |> Js.Array.filter ~f:(shown root)
+        in
+        let target = key_target e in
+        match
+          Js.Array.findIndex ~f:(fun c -> c == target || contains c target) all
+        with
+        | -1 -> ()
+        | at ->
+            let next = at + step in
+            if next >= 0 && next < Array.length all then begin
+              prevent_default e;
+              focus all.(next)
+            end)
+    | Some _ | None -> ()
+  in
+  let state = { orientation } in
+  <div
+    role=(if S.get nested then `group else `toolbar)
+    aria_orientation=(S.get orientation)
+    ?aria_label=(S.get aria_label)
+    ?aria_labelledby=(S.get aria_labelledby)
+    data_orientation=(Jsx.data
+                        (match S.get orientation with
+                        | `horizontal -> "horizontal"
+                        | `vertical -> "vertical"))
+    ref=(fun e ->
+          element := Some (as_element e);
+          ignore (given_ref e : unit option))
+    on_key_down=(fun e ->
+                  ignore (on_key_down e : unit option);
+                  match !element with
+                  | Some root when not (S.get nested) -> move root e
+                  | Some _ | None -> ())
+    ?as_=(Option.map (fun f p -> f p state) (S.get as_))
+    props=(Props.others props)>
+    (Jsx.draw (S.get children) state)
+  </div>
+[@@element div]

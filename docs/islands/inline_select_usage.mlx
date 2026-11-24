@@ -1,0 +1,25 @@
+module Inline_select = Solidtype_heroui.Inline_select
+module List_box = Solidtype_heroui.List_box
+
+let make () =
+  <Inline_select default_value=[| "en" |]>
+    <Inline_select.Trigger aria_label="Language">
+      <Inline_select.Value /> <Inline_select.Indicator />
+    </Inline_select.Trigger>
+    <Inline_select.Popover class_="w-[140px]">
+      <List_box>
+        <List_box.Item id="en" text_value="English">
+          "English" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="es" text_value="Spanish">
+          "Spanish" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="fr" text_value="French">
+          "French" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="ja" text_value="Japanese">
+          "Japanese" <List_box.Item_indicator />
+        </List_box.Item>
+      </List_box>
+    </Inline_select.Popover>
+  </Inline_select>

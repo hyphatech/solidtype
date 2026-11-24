@@ -10,6 +10,7 @@ module Label = Solidtype_heroui.Label
 module Description = Solidtype_heroui.Description
 module Form = Solidtype_heroui.Form
 module E = Jest.Expect
+module Field_error = Solidtype_heroui.Field_error
 module T = Testing
 open Testing.Syntax
 
@@ -328,6 +329,36 @@ let () =
 let () =
   Jest.describe "Radio_group, left" (fun () ->
       Jest.afterEach T.cleanup;
+      Jest.test "shows its error while invalid, which describes the group"
+        (fun () ->
+          let invalid, set_invalid = Solidtype.Solid.create_signal false in
+          T.render (fun () ->
+              <Radio_group is_invalid=(Solidtype.Solid.get invalid) name="plan">
+                <Label>"Plan"</Label>
+                <Radio value="pro">
+                  <Radio.Content>
+                    <Radio.Control><Radio.Indicator /></Radio.Control> "Pro"
+                  </Radio.Content>
+                </Radio>
+                <Field_error>"Choose a plan"</Field_error>
+              </Radio_group>);
+          let errors () =
+            all "[data-slot=field-error]" |> Array.map T.text_content
+          in
+          let before = errors () in
+          Solidtype.Solid.set set_invalid true;
+          let group = T.by_role "radiogroup" in
+          let described =
+            match T.attribute group "aria-describedby" with
+            | Some ids ->
+                String.split_on_char ' ' ids
+                |> List.filter_map (fun id ->
+                    Option.map T.text_content (Js.Null.toOption (by_id id)))
+            | None -> []
+          in
+          E.(
+            expect (before, errors (), described)
+            |> toEqual ([||], [| "Choose a plan" |], [ "Choose a plan" ])));
       Jest.test "tells it is left once focus leaves it, as React's does"
         (fun () ->
           let solidtype =

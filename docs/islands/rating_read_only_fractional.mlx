@@ -1,0 +1,27 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Rating = Solidtype_heroui.Rating
+
+let values = [| 1.5; 2.3; 3.7; 4.2; 4.8 |]
+
+let make () =
+  <div class_="flex flex-col gap-3">
+    <For each=values>
+      (fun value _ ->
+        <div class_="flex items-center gap-3">
+          <Rating
+            aria_label=(Js.Float.toString value ^ " out of 5 stars")
+            value
+            is_read_only=true>
+            <Rating.Item value=1. />
+            <Rating.Item value=2. />
+            <Rating.Item value=3. />
+            <Rating.Item value=4. />
+            <Rating.Item value=5. />
+          </Rating>
+          <span class_="text-sm text-muted">
+            (Jsx.string (Js.Float.toString value))
+          </span>
+        </div>)
+    </For>
+  </div>

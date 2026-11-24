@@ -140,6 +140,13 @@
   @apply z-4;
 }
 
+/* A virtualized table's header is a <div> whose columns its layout places
+   apart from it: it fills the place that stays over the rows, so its
+   background hides them as they scroll beneath. */
+div.table__header {
+  @apply h-full w-full;
+}
+
 /* A dragged row would land on the side of a row marked: a line in the accent
    there, as React Aria's drop indicator is drawn between two rows. */
 .table__row[data-drop-position="before"] .table__cell {

@@ -1,0 +1,124 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Gravity = Solidtype_gravity_icons
+
+let after own = function Some c -> own ^ " " ^ c | None -> own
+
+module Trigger = struct
+  let%component make ?(class_ : string option)
+      ?(on_key_down : (Dom.keyboardEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
+      ~(children : Select.Trigger.state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Button.props ->
+         Select.Trigger.state ->
+         Solidtype.Jsx.element)
+         option) () =
+    <Select.Trigger
+      class_=(after "inline-select__trigger" (S.get class_))
+      data_slot="inline-select-trigger"
+      on_key_down=(fun e -> ignore (on_key_down e : unit option))
+      ref=(fun e -> ignore (given_ref e : unit option))
+      ?as_=(S.get as_)
+      props=(Props.others props)>
+      (fun state -> Jsx.draw (S.get children) state)
+    </Select.Trigger>
+  [@@element button]
+end
+
+module Value = struct
+  let%component make ?(class_ : string option)
+      ?(children : Select.Value.state Jsx.children option)
+      ?(as_ :
+         (Solidtype.Html.Span.props ->
+         Select.Value.state ->
+         Solidtype.Jsx.element)
+         option) () =
+    match S.untrack (fun () -> S.get children) with
+    | Some _ ->
+        <Select.Value
+          class_=(after "inline-select__value" (S.get class_))
+          data_slot="inline-select-value"
+          ?as_=(S.get as_)
+          props=(Props.others props)>
+          (fun state ->
+            match S.get children with
+            | Some c -> Jsx.draw c state
+            | None -> Jsx.nothing)
+        </Select.Value>
+    | None ->
+        <Select.Value
+          class_=(after "inline-select__value" (S.get class_))
+          data_slot="inline-select-value"
+          ?as_=(S.get as_)
+          props=(Props.others props)
+        />
+  [@@element span]
+end
+
+module Indicator = struct
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
+      () =
+    <Select.Indicator
+      class_=(after "inline-select__indicator" (S.get class_))
+      props=(Props.others props)>
+      (match S.get children with
+      | Some c -> c
+      | None -> <Gravity.Chevrons_expand_vertical />)
+    </Select.Indicator>
+  [@@element svg]
+end
+
+module Popover = struct
+  let%component make ?(placement : Select.placement = `bottom_end)
+      ?(class_ : string option) ?(style : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : Jsx.element) () =
+    <Select.Popover
+      placement=(S.get placement)
+      class_=(after "inline-select__popover" (S.get class_))
+      ?style=(S.get style)
+      ref=(fun e -> ignore (given_ref e : unit option))
+      props=(Props.others props)>
+      (S.get children)
+    </Select.Popover>
+  [@@element div]
+end
+
+let%component make ?(placeholder : string option)
+    ?(selection_mode : [ `single | `multiple ] option)
+    ?(value : string array option) ?(default_value : string array option)
+    ?(on_change : (string array -> unit) option)
+    ?(disabled_keys : string array option) ?(is_open : bool option)
+    ?(default_open : bool option) ?(on_open_change : (bool -> unit) option)
+    ?(is_disabled : bool option) ?(is_required : bool option)
+    ?(is_invalid : bool option) ?(name : string option)
+    ?(class_ : string option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ?(on_focus_out : (Dom.focusEvent -> unit) option) ~(children : Jsx.element)
+    ?(as_ :
+       (Solidtype.Html.Div.props -> Select.state -> Solidtype.Jsx.element)
+       option) () =
+  <Select
+    ?placeholder=(S.get placeholder)
+    ?selection_mode=(S.get selection_mode)
+    ?value=(S.get value)
+    ?default_value=(S.get default_value)
+    on_change=(fun keys -> ignore (on_change keys : unit option))
+    ?disabled_keys=(S.get disabled_keys)
+    ?is_open=(S.get is_open)
+    ?default_open=(S.get default_open)
+    on_open_change=(fun o -> ignore (on_open_change o : unit option))
+    ?is_disabled=(S.get is_disabled)
+    ?is_required=(S.get is_required)
+    ?is_invalid=(S.get is_invalid)
+    ?name=(S.get name)
+    class_=(after "inline-select" (S.get class_))
+    data_slot="inline-select"
+    ref=(fun e -> ignore (given_ref e : unit option))
+    on_focus_out=(fun e -> ignore (on_focus_out e : unit option))
+    ?as_=(S.get as_)
+    props=(Props.others props)>
+    (S.get children)
+  </Select>
+[@@element div]

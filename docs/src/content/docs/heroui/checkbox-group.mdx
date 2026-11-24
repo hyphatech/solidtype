@@ -10,6 +10,8 @@ import * as Surface from "@islands/checkbox_group_surface.jsx";
 import SurfaceCode from "@islands/checkbox_group_surface.mlx?raw";
 import * as Disabled from "@islands/checkbox_group_disabled.jsx";
 import DisabledCode from "@islands/checkbox_group_disabled.mlx?raw";
+import * as Validation from "@islands/checkbox_group_validation.jsx";
+import ValidationCode from "@islands/checkbox_group_validation.mlx?raw";
 import * as Controlled from "@islands/checkbox_group_controlled.jsx";
 import ControlledCode from "@islands/checkbox_group_controlled.mlx?raw";
 import * as Demo from "@islands/checkbox_group_demo.jsx";
@@ -67,10 +69,13 @@ surface backgrounds. Each checkbox takes it.
 
 <Example code={ControlledCode} title="checkbox_group_controlled.mlx"><Controlled.make client:visible /></Example>
 
-### Not yet
+### Validation
 
-HeroUI's Validation example validates the group as its form is submitted,
-which is not ported yet; `is_invalid` marks it invalid.
+A group validates nothing itself, as no field here does: it is invalid as
+`is_invalid` says, here once a submit finds nothing chosen, and its
+`Field_error` shows while it is.
+
+<Example code={ValidationCode} title="checkbox_group_validation.mlx"><Validation.make client:visible /></Example>
 
 ## Styling Reference
 

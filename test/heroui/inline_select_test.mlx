@@ -1,0 +1,128 @@
+(* An inline select as a caller meets it, since it has no twin: a select
+   whose button names its choice, opens its list, chooses and tells; its parts
+   named by the select's classes and their own, a caller's after them, its
+   look its stylesheet's; its list placed at the trigger's bottom end unless
+   told otherwise; and no violation axe finds. *)
+
+module S = Solidtype.Solid
+module Inline_select = Solidtype_heroui.Inline_select
+module List_box = Solidtype_heroui.List_box
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+external query_all_js : string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.scope "document"]
+
+type options
+
+external options :
+  pointer_events_check:(int[@mel.as "pointerEventsCheck"]) -> unit -> options
+  = ""
+[@@mel.obj]
+
+(* Kobalte hides the page outside an open list from the pointer, which
+   user-event would refuse to press through. *)
+external setup : options -> T.user = "setup"
+[@@mel.module "@testing-library/user-event"] [@@mel.scope "default"]
+
+let all selector = Js.Array.from (query_all_js selector)
+let settle () = T.wait 20
+
+let option named =
+  match
+    all "[data-slot=list-box-item]"
+    |> Array.to_list
+    |> List.find_opt (fun e -> String.equal (String.trim (text e)) named)
+  with
+  | Some e -> e
+  | None -> invalid_arg ("no option " ^ named ^ " is on the page")
+
+let language ?(told = ref [||]) ?placement ?class_ () =
+  T.render (fun () ->
+      <Inline_select
+        default_value=[| "en" |]
+        ?class_
+        on_change=(fun keys -> told := Array.append !told keys)>
+        <Inline_select.Trigger aria_label="Language" ?class_>
+          <Inline_select.Value ?class_ /> <Inline_select.Indicator ?class_ />
+        </Inline_select.Trigger>
+        <Inline_select.Popover ?placement ?class_>
+          <List_box aria_label="Languages">
+            <List_box.Item id="en" text_value="English">
+              "English" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="es" text_value="Spanish">
+              "Spanish" <List_box.Item_indicator />
+            </List_box.Item>
+          </List_box>
+        </Inline_select.Popover>
+      </Inline_select>)
+
+let open_list () =
+  let user = setup (options ~pointer_events_check:0 ()) in
+  let* () = T.click user (T.slot "inline-select-trigger") in
+  let* () = settle () in
+  Js.Promise.resolve user
+
+let () =
+  Jest.describe "Inline_select" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "chooses an option, tells it and shows it" (fun () ->
+          let told = ref [||] in
+          language ~told ();
+          let* user = open_list () in
+          let* () = T.click user (option "Spanish") in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( !told,
+                  String.trim (text (T.slot "inline-select-value")),
+                  T.query "[data-slot=select-popover]" )
+              |> toEqual ([| "es" |], "Spanish", None)));
+      Jest.testPromise
+        "names each part by the select's classes and its own, a caller's after"
+        (fun () ->
+          language ~class_:"mine" ();
+          let* _ = open_list () in
+          Js.Promise.resolve
+            E.(
+              expect
+                (Array.map T.class_name
+                   [|
+                     T.slot "inline-select";
+                     T.slot "inline-select-trigger";
+                     T.slot "inline-select-value";
+                     T.slot "select-indicator";
+                     T.slot "select-popover";
+                   |])
+              |> toEqual
+                   [|
+                     "select select--primary inline-select mine";
+                     "select__trigger inline-select__trigger mine";
+                     "select__value inline-select__value mine";
+                     "select__indicator inline-select__indicator mine";
+                     "select__popover inline-select__popover mine";
+                   |]));
+      Jest.testPromise "places its list at the trigger's bottom end" (fun () ->
+          language ();
+          let* _ = open_list () in
+          Js.Promise.resolve
+            E.(
+              expect (T.attribute (T.slot "select-popover") "data-placement")
+              |> toEqual (Some "bottom")));
+      Jest.testPromise "places its list where it is told" (fun () ->
+          language ~placement:`top_start ();
+          let* _ = open_list () in
+          Js.Promise.resolve
+            E.(
+              expect (T.attribute (T.slot "select-popover") "data-placement")
+              |> toEqual (Some "top")));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          language ();
+          let* found = T.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))

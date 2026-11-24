@@ -1,0 +1,41 @@
+module Button = Solidtype_heroui.Button
+module Button_group = Solidtype_heroui.Button_group
+module Separator = Solidtype_heroui.Separator
+module Toggle_button = Solidtype_heroui.Toggle_button
+module Toggle_button_group = Solidtype_heroui.Toggle_button_group
+module Toolbar = Solidtype_heroui.Toolbar
+module Gravity = Solidtype_gravity_icons
+
+let make () =
+  <Toolbar aria_label="Editor toolbar">
+    <Button_group variant=`tertiary>
+      <Button><Gravity.Arrow_uturn_ccw_left /> "Undo"</Button>
+      <Button>
+        <Button_group.Separator /> <Gravity.Arrow_uturn_cw_right /> "Redo"
+      </Button>
+    </Button_group>
+    <Separator />
+    <Toggle_button_group aria_label="Text style" selection_mode=`multiple>
+      <Toggle_button is_icon_only=true aria_label="Bold" id="bold">
+        <Gravity.Bold />
+      </Toggle_button>
+      <Toggle_button is_icon_only=true aria_label="Italic" id="italic">
+        <Toggle_button_group.Separator /> <Gravity.Italic />
+      </Toggle_button>
+      <Toggle_button is_icon_only=true aria_label="Underline" id="underline">
+        <Toggle_button_group.Separator /> <Gravity.Underline />
+      </Toggle_button>
+    </Toggle_button_group>
+    <Separator />
+    <Button_group variant=`tertiary>
+      <Button is_icon_only=true aria_label="Align left">
+        <Gravity.Text_align_left />
+      </Button>
+      <Button is_icon_only=true aria_label="Align center">
+        <Button_group.Separator /> <Gravity.Text_align_center />
+      </Button>
+      <Button is_icon_only=true aria_label="Align right">
+        <Button_group.Separator /> <Gravity.Text_align_right />
+      </Button>
+    </Button_group>
+  </Toolbar>

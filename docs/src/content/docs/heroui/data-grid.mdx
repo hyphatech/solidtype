@@ -20,8 +20,16 @@ import * as ExEmptyState from "@islands/data_grid_empty_state.jsx";
 import ExEmptyStateCode from "@islands/data_grid_empty_state.mlx?raw";
 import * as ExAsyncLoading from "@islands/data_grid_async_loading.jsx";
 import ExAsyncLoadingCode from "@islands/data_grid_async_loading.mlx?raw";
+import * as ExStickyHeader from "@islands/data_grid_sticky_header.jsx";
+import ExStickyHeaderCode from "@islands/data_grid_sticky_header.mlx?raw";
 import * as ExVirtualization from "@islands/data_grid_virtualization.jsx";
 import ExVirtualizationCode from "@islands/data_grid_virtualization.mlx?raw";
+import * as ExBulkActions from "@islands/data_grid_bulk_actions.jsx";
+import ExBulkActionsCode from "@islands/data_grid_bulk_actions.mlx?raw";
+import * as ExUsers from "@islands/data_grid_users.jsx";
+import ExUsersCode from "@islands/data_grid_users.mlx?raw";
+import * as ExFooter from "@islands/data_grid_footer.jsx";
+import ExFooterCode from "@islands/data_grid_footer.mlx?raw";
 import * as ExTeamMembers from "@islands/data_grid_team_members.jsx";
 import ExTeamMembersCode from "@islands/data_grid_team_members.mlx?raw";
 import * as ExServers from "@islands/data_grid_servers.jsx";
@@ -98,7 +106,8 @@ in its new order. Selected rows are dragged together.
 
 ## Editable Cells
 
-A cell draws any control: a `Select`, a
+A cell draws any control: an input, an
+[`Inline_select`](/solidtype/heroui/inline-select/), a
 [`Number_stepper`](/solidtype/heroui/number-stepper/), a `Switch`. Every key
 of a field is its own, and the arrows from a button move between cells.
 
@@ -121,16 +130,29 @@ a height by `scroll_container_class`.
 ## Sticky Header
 
 `sticky_header` keeps the header at the top of the scroll container, which
-`scroll_container_class` gives a height or a maximum height; the grid above
-keeps its header so.
+`scroll_container_class` gives a height or a maximum height. Rows keep their
+own heights, and selection, sorting, pinned columns and resizing work as in any
+grid.
+
+<Example code={ExStickyHeaderCode} title="data_grid_sticky_header.mlx" fill><ExStickyHeader.make client:visible /></Example>
 
 ## Virtualization
 
 `virtualized` draws only the rows in view, each `row_height` high below a
-header `heading_height` high. The table is what scrolls: give it a height by
-`content_class`. The keys reach every row.
+header `heading_height` high, for a thousand rows or more. The table is what
+scrolls: give it a height by `content_class`. The keys reach every row.
 
 <Example code={ExVirtualizationCode} title="data_grid_virtualization.mlx" fill><ExVirtualization.make client:visible /></Example>
+
+## Bulk Actions
+
+An [Action Bar](/solidtype/heroui/action-bar/) for the rows chosen.
+
+<Example code={ExBulkActionsCode} title="data_grid_bulk_actions.mlx" fill><ExBulkActions.make client:visible /></Example>
+
+## Users
+
+<Example code={ExUsersCode} title="data_grid_users.mlx" fill><ExUsers.make client:visible /></Example>
 
 ## Team Members
 
@@ -147,6 +169,12 @@ one row; a capacity a `Progress_circle`.
 
 <Example code={ExServersCode} title="data_grid_servers.mlx" fill><ExServers.make client:visible /></Example>
 
+## Footer
+
+`footer` is drawn below the grid, here a [Pagination](/solidtype/heroui/pagination/).
+
+<Example code={ExFooterCode} title="data_grid_footer.mlx" fill><ExFooter.make client:visible /></Example>
+
 ## Styling Reference
 
 ### CSS Classes
@@ -160,6 +188,9 @@ one row; a capacity a `Progress_circle`.
 - `.data-grid__sort-icon` - A sorted column's chevron, turned for descending
 - `.data-grid__empty-state` - What is drawn with no rows
 - `.data-grid__footer` - The footer, with HeroUI's `.table__footer`
+
+A virtualized or resizable grid places its own two columns itself, at 40px
+and 32px, whatever the variables say.
 
 ### Interactive States
 

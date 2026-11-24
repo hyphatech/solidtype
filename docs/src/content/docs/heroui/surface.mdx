@@ -10,6 +10,8 @@ import * as Variants from "@islands/surface_variants.jsx";
 import VariantsCode from "@islands/surface_variants.mlx?raw";
 import * as Tailwind from "@islands/surface_tailwind.jsx";
 import TailwindCode from "@islands/surface_tailwind.mlx?raw";
+import * as WithFormComponents from "@islands/surface_with_form_components.jsx";
+import WithFormComponentsCode from "@islands/surface_with_form_components.mlx?raw";
 import * as Demo from "@islands/surface_demo.jsx";
 
 Original HeroUI documentation: [Surface](https://heroui.com/en/docs/react/components/surface).
@@ -53,10 +55,12 @@ let on_surface () =
   match surface with Some variant -> S.get variant | None -> `default
 ```
 
-### Not yet
+### With Form Components
 
-HeroUI's With Form Components example needs Input and TextArea, which are not
-ported yet.
+A field on a surface takes `variant=` `` `secondary ``, the quieter look
+meant for a surface's background.
+
+<Example code={WithFormComponentsCode} title="surface_with_form_components.mlx"><WithFormComponents.make client:visible /></Example>
 
 ## Customization
 

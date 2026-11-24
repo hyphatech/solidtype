@@ -1,0 +1,26 @@
+module Inline_select = Solidtype_heroui.Inline_select
+module List_box = Solidtype_heroui.List_box
+module Gravity = Solidtype_gravity_icons
+
+let make () =
+  <Inline_select default_value=[| "editor" |]>
+    <Inline_select.Trigger aria_label="Role">
+      <Inline_select.Value />
+      <Inline_select.Indicator>
+        <Gravity.Chevron_right />
+      </Inline_select.Indicator>
+    </Inline_select.Trigger>
+    <Inline_select.Popover class_="w-[124px]">
+      <List_box>
+        <List_box.Item id="viewer" text_value="Viewer">
+          "Viewer" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="editor" text_value="Editor">
+          "Editor" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="admin" text_value="Admin">
+          "Admin" <List_box.Item_indicator />
+        </List_box.Item>
+      </List_box>
+    </Inline_select.Popover>
+  </Inline_select>
